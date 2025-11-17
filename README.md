@@ -3,8 +3,7 @@
 This is my personal portfolio website built with **HTML, CSS and JavaScript**, showcasing my research background, publications, projects, skills, and contact information.
 
 🔗 **Live Demo:**  
-[https://matuzale.github.io  
-(or your custom domain once configured)](https://matuzale.github.io/html-css-js-portfolio/)
+[https://matuzale.github.io](https://matuzale.github.io/html-css-js-portfolio/)
 
 ---
 
