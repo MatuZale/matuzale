@@ -101,3 +101,20 @@
     text-align: justify;
   }
 }
+
+@media (max-width: 768px) {
+  #profile {
+    flex-direction: column;
+    gap: 2rem;
+    height: auto;
+  }
+
+  .section__text {
+    text-align: center;
+    margin-top: 2rem;
+  }
+
+  section {
+    margin: 0 2rem;
+  }
+}

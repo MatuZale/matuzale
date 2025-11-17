@@ -177,9 +177,80 @@ section {
 }
 
 .section__text {
+  /* position: absolute;  <-- REMOVE this line */
   align-self: center;
   text-align: left;
+  max-width: 700px;   /* optional: keeps text nicely narrow */
+  margin-top: 0rem; /* adjust as needed */
 }
+
+#desktop-nav,
+#hamburger-nav {
+  position: relative;
+  z-index: 1000;
+}
+
+/* -------------------------------------- */
+/* MOBILE (hamburger visible)             */
+/* -------------------------------------- */
+@media (max-width: 700px) {
+  .section__text {
+    margin-top: 0;        /* mobile is already correct */
+  }
+
+  #profile {
+    height: auto;
+    padding-top: 1rem;
+  }
+}
+
+/* -------------------------------------- */
+/* MID SCREENS (prevent text being hidden) */
+/* -------------------------------------- */
+@media (min-width: 701px) and (max-width: 1199px) {
+  .section__text {
+    margin-top: 0rem !important;   /* reset negative margin */
+  }
+
+  #profile {
+    height: 70vh;
+    padding-top: 2rem;
+  }
+}
+
+/* -------------------------------------- */
+/* WIDE DESKTOP (apply lift)               */
+/* -------------------------------------- */
+@media (min-width: 1200px) {
+  .section__text {
+    margin-top: -15rem;    /* adjust as desired */
+  }
+
+  #profile {
+    height: 72vh;
+    padding-top: 1rem;
+  }
+}
+
+/* -------------------------------------- */
+/* MID SCREENS (reduce space under profile) */
+/* -------------------------------------- */
+@media (min-width: 701px) and (max-width: 1199px) {
+  .section__text {
+    margin-top: 0rem !important;
+  }
+
+  #profile {
+    height: 30vh;          /* was 70vh → reduces gap below */
+    padding-top: 2rem;
+  }
+
+  /* optional: tighten spacing between sections */
+  #about {
+    padding-top: 2vh;      /* reduce top spacing before About section */
+  }
+}
+
 
 .section__text p {
   font-weight: 600;
@@ -560,4 +631,45 @@ body.dark-mode .details-container ul li {
 
 #publications {
   position: relative;
+}
+
+.text-container {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;  /* spacing between icon and text */
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+}
+
+/* Icon styling */
+.scholar-icon {
+  height: 2rem;
+  width: 2rem;
+  cursor: pointer;
+}
+
+/* Remove underline on hover */
+.scholar-link {
+  text-decoration: none;
+}
+
+
+#projects .btn-container .btn {
+  width: 90%;  /* or 100% */
+}
+
+/* Make each project card a vertical flexbox */
+#projects .details-container {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Let the image + title take the free space */
+#projects .article-container {
+  flex-grow: 1;
+}
+
+/* Push the GitHub button area to the bottom of the card */
+#projects .btn-container {
+  margin-top: auto;
 }

@@ -55,13 +55,11 @@ if (mobileToggle) {
 // ---------- HAMBURGER MENU ----------
 
 function toggleMenu() {
-  const menu = document.querySelector("#hamburger-nav .menu-links");
-  const icon = document.querySelector("#hamburger-nav .hamburger-icon");
-
-  if (!menu || !icon) return;
-
-  menu.classList.toggle("open");
-  icon.classList.toggle("open");
+  const menuLinks = document.querySelector(".menu-links");
+  const hamburgerIcon = document.querySelector(".hamburger-icon");
+  
+  menuLinks.classList.toggle("open");
+  hamburgerIcon.classList.toggle("open");
 }
 
 // make toggleMenu available to inline onclick in HTML
