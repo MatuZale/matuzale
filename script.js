@@ -65,3 +65,26 @@ function toggleMenu() {
 // make toggleMenu available to inline onclick in HTML
 window.toggleMenu = toggleMenu;
 
+// ---------- SCROLL REVEAL ANIMATION (ENTER + LEAVE) ----------
+
+const sections = document.querySelectorAll("section");
+
+// Add base class to all sections
+sections.forEach(sec => sec.classList.add("reveal"));
+
+const revealObserver = new IntersectionObserver(
+  (entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("visible");   // show animation
+      } else {
+        entry.target.classList.remove("visible"); // hide animation
+      }
+    });
+  },
+  {
+    threshold: 0.3   // how much must be visible for "active" state
+  }
+);
+
+sections.forEach(sec => revealObserver.observe(sec));

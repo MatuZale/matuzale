@@ -350,7 +350,7 @@ section {
 }
 
 .about-details-container {
-  justify-content: center;
+  justify-content:center;
   flex-direction: column;
 }
 
@@ -424,21 +424,21 @@ section {
   color: rgb(85, 85, 85);
 }
 
+/* Skills / Experience items container */
 .article-container {
-  display: flex;
-  text-align: initial;
-  flex-wrap: wrap;
-  flex-direction: row;
-  gap: 2.5rem;
-  justify-content: space-around;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.5rem;
+  text-align: left;
 }
 
+/* Single skill box */
 article {
   display: flex;
-  width: 10rem;
-  justify-content: space-around;
+  align-items: center;
   gap: 0.5rem;
 }
+
 
 article .icon {
   cursor: default;
@@ -664,12 +664,39 @@ body.dark-mode .details-container ul li {
   flex-direction: column;
 }
 
-/* Let the image + title take the free space */
-#projects .article-container {
-  flex-grow: 1;
+/* Make all project cards equal height */
+#projects .details-container {
+  max-width: 340px;            /* same width */
+  min-height: 480px;           /* adjust if needed */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
 }
+
 
 /* Push the GitHub button area to the bottom of the card */
 #projects .btn-container {
   margin-top: auto;
+}
+#projects .btn-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+
+
+/* ==== SCROLL REVEAL ANIMATION ==== */
+
+/* Start slightly lower and transparent */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
