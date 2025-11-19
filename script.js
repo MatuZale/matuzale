@@ -66,7 +66,7 @@ function toggleMenu() {
 window.toggleMenu = toggleMenu;
 
 // ---------- SCROLL REVEAL ANIMATION (ENTER + LEAVE) ----------
-
+/*
 const sections = document.querySelectorAll("section");
 
 // Add base class to all sections
@@ -88,3 +88,26 @@ const revealObserver = new IntersectionObserver(
 );
 
 sections.forEach(sec => revealObserver.observe(sec));
+*/
+
+// ---------- PROJECT "READ MORE" TOGGLE ----------
+
+const projectToggles = document.querySelectorAll(".project-toggle");
+
+projectToggles.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const card = btn.closest(".details-container");
+    const moreBlock = card.querySelector(".project-more");
+    const isExpanded = card.classList.toggle("project-expanded");
+
+    if (isExpanded) {
+      // expand: set max-height to scrollHeight so it smoothly opens
+      moreBlock.style.maxHeight = moreBlock.scrollHeight + "px";
+      btn.textContent = "Show less";
+    } else {
+      // collapse
+      moreBlock.style.maxHeight = "0";
+      btn.textContent = "Read more";
+    }
+  });
+});

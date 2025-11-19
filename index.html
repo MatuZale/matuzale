@@ -290,92 +290,320 @@
       <h1 class="title">Projects</h1>
       <div class="experience-details-container">
         <div class="about-containers">
-          <div class="details-container color-container">
-            <div class="article-container">
-              <img
-                src="./assets/project1.png"
-                alt="Project 1"
-                class="project-img"
-              />
-            </div>
-            <h2 class="experience-sub-title project-title">Test of Decomposition</h2>
-            <h13 class="project-description">
-              A repository containing test on the decomposability of positive maps in finite-dimensional matrix algebras.
-            </h13>
-              <div class="btn-container">
-              <button
-                class="btn btn-color-2 project-btn"
-                onclick="location.href='https://github.com/MatuZale/Test-decomposability-of-positive-maps'"
-              >
-                Github
-              </button>
-            </div>
-          </div>
-          <div class="details-container color-container">
-            <div class="article-container">
-              <img
-                src="./assets/project2.png"
-                alt="Project 2"
-                class="project-img"
-              />
-            </div>
-            <h2 class="experience-sub-title project-title">Y-Y Basis in matrix algebra</h2>
-            <h13 class="project-description">
-              A repository containing research on the Young-Yamanouchi basis and its applications in quantum information theory.
-            </h13>
-              <div class="btn-container">
-              <button
-                class="btn btn-color-2 project-btn"
-                onclick="location.href='https://github.com/MatuZale/Young-Yamanouchi-basis'"
-              >
-                Github
-              </button>
-            </div>
-          </div>
-          <div class="details-container color-container">
-            <div class="article-container">
-              <img
-                src="./assets/project3.png"
-                alt="Project 3"
-                class="project-img"
-              />
-            </div>
-            <h2 class="experience-sub-title project-title">Strange Attractors</h2>
-            <h13 class="project-description">
-              A repository containing a generator on color recursive maps/fractals.
-            </h13>
-            <div class="btn-container">
-              <button
-                class="btn btn-color-2 project-btn"
-                onclick="location.href='https://github.com/MatuZale/color_recursive_maps'"
-              >
-                Github
-              </button>
-            </div>
-          </div>
 
 <div class="details-container color-container">
   <div class="article-container">
-    <img
-      src="./assets/in_progress.jpg"
-      alt="Project 4 – In progress"
-      class="project-img"
-    />
+    <img src="./assets/project1.png" alt="Project 1" class="project-img" />
   </div>
 
-  <h2 class="experience-sub-title project-title">E-mail automatisation</h2>
+  <h2 class="experience-sub-title project-title">Project One</h2>
 
-  <h13 class="project-description">
-    Project aimed at automating email responses and organization using Python scripts.
-  </h13>
+  <!-- Short always-visible description -->
+  <p class="project-description">
+    A repository containing test on the decomposability of positive maps in finite-dimensional matrix algebras.
+  </p>
+
+  <!-- Hidden detailed description -->
+  <div class="project-more">
+   <p>
+  This project contains two semidefinite-programming based tools written in MATLAB/CVX 
+  for the analysis of positive maps and entanglement properties of quantum states.
+</p>
+
+<ul>
+  <li>
+    <strong>Choi matrix SDP decomposition (<code>sdp_decomp.m</code>)</strong><br>
+    Given a Choi matrix of a linear map, this routine sets up and solves a 
+    <strong>semidefinite program</strong> to decompose it into positive parts:
+    it searches for positive semidefinite matrices <code>P</code> and <code>Q</code> such that
+    the difference between the given Choi matrix and the combination
+    <code>P + PartialTranspose(Q)</code> is minimized in trace norm (via auxiliary PSD slack variables
+    <code>Ptt</code> and <code>Qtt</code>). The optimal objective value
+    <code>dec = trace(Ptt + Qtt)</code> quantifies how well the Choi matrix can be represented in this
+    structured form and can be used as a numerical indicator of (non-)decomposability of the underlying map.
+  </li>
+
+  <li>
+    <strong>PPT entangled state construction via SDP (<code>SDP_PPT.m</code>)</strong><br>
+    Based on the method from <a href="https://arxiv.org/abs/1708.06595" target="_blank">arXiv:1708.06595</a>,
+    this function implements an SDP-based procedure to identify 
+    <strong>PPT entangled states</strong> using the antisymmetric subspace:
+    <ul>
+      <li>Constructs the antisymmetric and symmetric projectors <code>P<sub>A</sub></code>, <code>P<sub>S</sub></code> 
+          on a bipartite <code>d × d</code> system.</li>
+      <li>Generates a random density matrix and normalizes its projection onto the antisymmetric subspace 
+          to obtain an antisymmetric state <code>ρ<sub>A</sub></code>.</li>
+      <li>Solves an SDP over states <code>σ</code> that are positive, normalized, and 
+          <strong>PPT</strong> (positive under partial transpose), maximizing the overlap 
+          <code>Tr(P<sub>A</sub> σ)</code> under the constraint
+          <code>P<sub>A</sub> σ P<sub>A</sub> = Tr(P<sub>A</sub> σ) · ρ<sub>A</sub></code>.</li>
+      <li>Returns the optimal overlap <code>pPPT</code>, the optimal PPT state <code>σ*</code>, and 
+          the value of the <strong>realignment criterion</strong> 
+          <code>∑ svd(Realignment(σ*))</code>, which helps assess whether <code>σ*</code> is entangled.</li>
+    </ul>
+    If <code>pPPT(ρ<sub>A</sub>) &lt; 1/2</code>, the resulting optimal PPT state <code>σ*</code> is a 
+    <strong>PPT entangled state</strong>, providing an explicit numerical example of bound entanglement.
+  </li>
+</ul>
+
+<p>
+  Together, these tools illustrate how <strong>convex optimization and representation theory</strong> 
+  can be used to study positive maps, decomposability, and PPT entanglement in finite-dimensional 
+  quantum information theory.
+</p>
+
+  </div>
 
   <div class="btn-container">
-    <button class="btn btn-color-2 project-btn project-btn-disabled" disabled>
-      In progress
+    <!-- TOGGLE BUTTON -->
+    <button class="btn btn-color-2 project-btn project-toggle">
+      Read more
+    </button>
+
+    <!-- EXISTING GITHUB BUTTON -->
+    <button
+      class="btn btn-color-2 project-btn"
+      onclick="location.href='https://github.com/MatuZale/Test-decomposability-of-positive-maps"
+    >
+      Github
     </button>
   </div>
 </div>
 
+          <div class="details-container color-container">
+  <div class="article-container">
+    <img src="./assets/project2.png" alt="Project 1" class="project-img" />
+  </div>
+
+  <h2 class="experience-sub-title project-title">Y-Y Basis in matrix algebra</h2>
+
+  <!-- Short always-visible description -->
+  <p class="project-description">
+    A repository containing research on the Young-Yamanouchi basis and its applications in quantum information theory.
+  </p>
+
+  <!-- Hidden detailed description -->
+  <div class="project-more">
+    <p>
+  This program builds the <strong>representation-theoretic block structure</strong> of the permutation action
+  on a tensor power of a finite-dimensional quantum system.
+  For a fixed local dimension <code>d</code> and number of parties <code>N</code>, it:
+</p>
+
+<ul>
+  <li>
+    Generates all <strong>Young diagrams (partitions)</strong> of <code>N - 1</code> with at most <code>d</code> rows.
+  </li>
+  <li>
+    Uses <strong>Sage</strong> to compute the dimension of the corresponding irreducible
+    <code>S<sub>N-1</sub></code> representations (via standard tableaux) and their
+    <strong>multiplicities</strong> in the tensor space (via semistandard tableaux).
+  </li>
+  <li>
+    Constructs the <strong>orthogonal representation matrices</strong> of the symmetric group and the associated
+    <strong>permutation operators</strong> on <code>(ℂ<sup>d</sup>)<sup>⊗(N-1)</sup></code>.
+  </li>
+  <li>
+    Assembles operator blocks <code>E<sub>ij</sub><sup>(μ)</sup></code> that encode the projectors and intertwiners
+    onto each irreducible subspace.
+  </li>
+</ul>
+
+<p>
+  The output is a dictionary of operators that explicitly realizes the
+  <strong>Young diagram / Schur–Weyl decomposition</strong> of the permutation representation on the tensor product
+  space, together with the associated dimensions and multiplicities. This structure is useful in
+  <strong>representation-theoretic approaches to quantum information</strong>, for example in port-based teleportation
+  and symmetric channel analysis.
+</p>
+
+  </div>
+
+  <div class="btn-container">
+    <!-- TOGGLE BUTTON -->
+    <button class="btn btn-color-2 project-btn project-toggle">
+      Read more
+    </button>
+
+    <!-- EXISTING GITHUB BUTTON -->
+    <button
+      class="btn btn-color-2 project-btn"
+      onclick="location.href='https://github.com/MatuZale/Young-Yamanouchi-basis'"
+    >
+      Github
+    </button>
+  </div>
+</div>
+
+
+<div class="details-container color-container">
+  <div class="article-container">
+    <img src="./assets/project3.png" alt="Project 1" class="project-img" />
+  </div>
+
+  <h2 class="experience-sub-title project-title">Strange Attractors</h2>
+
+  <!-- Short always-visible description -->
+  <p class="project-description">
+    A repository containing a generator on color recursive maps/fractals.
+  </p>
+
+  <!-- Hidden detailed description -->
+  <div class="project-more">
+    <p>
+  This program generates high-resolution animations of the 
+  <strong>Clifford attractor</strong>, a nonlinear chaotic system known for producing 
+  intricate geometric structures. The animation evolves smoothly over time by 
+  dynamically varying one of the attractor parameters.
+</p>
+
+<ul>
+  <li>
+    Uses <strong>Numba-optimized</strong> Clifford map iteration to compute tens of thousands 
+    of chaotic trajectories efficiently.
+  </li>
+
+  <li>
+    Accumulates points into a <strong>2D density histogram</strong> instead of plotting them 
+    directly, producing smooth, high-detail structures.
+  </li>
+
+  <li>
+    Applies <strong>logarithmic density scaling</strong> and a custom neon colormap to 
+    reveal fine fractal features and achieve a glowing visual effect.
+  </li>
+
+  <li>
+    Animates parameter <code>a(t)</code> over time, causing the attractor to 
+    <strong>morph between different chaotic geometries</strong>, creating 
+    fluid, organic motion.
+  </li>
+
+  <li>
+    Uses <strong>Matplotlib FuncAnimation</strong> to render each frame and 
+    <strong>FFmpeg</strong> to export the final animation as a high-quality MP4 video.
+  </li>
+
+  <li>
+    Includes a quick <code>test_single_frame()</code> function to preview the attractor 
+    before generating the full animation.
+  </li>
+</ul>
+
+<p>
+  The result is a smooth, neon-styled visualization of chaotic dynamics,
+  suitable for artistic animations, mathematical demonstrations, or 
+  generative-art experiments.
+</p>
+
+  </div>
+
+  <div class="btn-container">
+    <!-- TOGGLE BUTTON -->
+    <button class="btn btn-color-2 project-btn project-toggle">
+      Read more
+    </button>
+
+    <!-- EXISTING GITHUB BUTTON -->
+    <button
+      class="btn btn-color-2 project-btn"
+      onclick="location.href='https://github.com/MatuZale/color_recursive_maps'"
+    >
+      Github
+    </button>
+  </div>
+</div>
+
+
+<div class="details-container color-container">
+  <div class="article-container">
+    <img src="./assets/in_progress.jpg" alt="Project 1" class="project-img" />
+  </div>
+
+  <h2 class="experience-sub-title project-title">Email automatisation</h2>
+
+  <!-- Short always-visible description -->
+  <p class="project-description">
+    An automation system that processes incoming emails with invoices and payment confirmations,
+  extracts structured data from PDF attachments, and updates property accounting sheets.
+  </p>
+
+  <!-- Hidden detailed description -->
+  <div class="project-more">
+     <p>
+    This project implements a fully automated pipeline for handling property-related accounting
+    via email. It continuously monitors an inbox, extracts data from received invoices,
+    detects payment confirmations, and synchronizes everything with Google Sheets.
+  </p>
+
+  <ul>
+    <li>
+      <strong>Automated email processing</strong><br>
+      The system scans incoming messages, identifies relevant ones (invoices, settlements,
+      statements, confirmations), downloads their attachments, and extracts all text content
+      usable for bookkeeping.
+    </li>
+
+    <li>
+      <strong>Robust PDF analysis</strong><br>
+      Attached invoices and settlement documents are analyzed to extract:
+      <ul>
+        <li>property address,</li>
+        <li>amount due or outstanding balance,</li>
+        <li>payment deadline,</li>
+        <li>invoice/statement identifiers,</li>
+        <li>document type (invoice, settlement, statement, notice).</li>
+      </ul>
+      The parser supports many real-world formats and uses multiple pattern layers to
+      reliably detect information across heterogeneous documents.
+    </li>
+
+    <li>
+      <strong>Google Sheets synchronization</strong><br>
+      Each invoice is automatically assigned to the proper sheet tab based on the address.
+      A rolling summary row keeps track of totals and outstanding balances.
+    </li>
+
+    <li>
+      <strong>Automatic payment confirmation</strong><br>
+      The system detects confirmation emails (plain text, HTML, or forwarded),
+      extracts the relevant amount or referenced invoice,
+      and marks the corresponding entry in Google Sheets as paid.
+      This works even when multiple invoices exist for the same property in one month.
+    </li>
+
+    <li>
+      <strong>Web control panel</strong><br>
+      A lightweight web interface provides:
+      <ul>
+        <li>manual “check emails now” trigger,</li>
+        <li>real-time logs of the automation,</li>
+        <li>a preview of recent data pulled from Google Sheets,</li>
+        <li>basic filtering for easier debugging.</li>
+      </ul>
+    </li>
+  </ul>
+
+  <p>
+    The project integrates email parsing, PDF text extraction, data normalization,
+    and spreadsheet automation to create a fully hands-off accounting assistant
+    for managing multiple rental properties.
+  </p>
+  </div>
+
+  <div class="btn-container">
+    <!-- TOGGLE BUTTON -->
+    <button class="btn btn-color-2 project-btn project-toggle">
+      Read more
+    </button>
+
+    <!-- EXISTING GITHUB BUTTON -->
+<button class="btn btn-color-2 project-btn" disabled>
+  In Progress
+</button>
+
+  </div>
+</div>
 
         </div>
       </div>

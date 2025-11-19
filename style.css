@@ -685,6 +685,31 @@ body.dark-mode .details-container ul li {
   width: 100%;
 }
 
+/* Short description under project title */
+.project-description {
+  font-size: 0.95rem;
+  color: rgb(85, 85, 85);
+  text-align: left;
+  padding: 0 1rem;
+  margin-top: 0.5rem;
+}
+
+/* Hidden detailed part */
+.project-more {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.4s ease;
+  font-size: 0.9rem;
+  color: rgb(85, 85, 85);
+  text-align: left;
+  padding: 0 1rem;
+  margin-top: 0.3rem;
+}
+
+/* Optional: slightly highlight expanded cards */
+.details-container.project-expanded {
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.12);
+}
 
 
 /* ==== SCROLL REVEAL ANIMATION ==== */
@@ -699,4 +724,9 @@ body.dark-mode .details-container ul li {
 .reveal.visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+.btn[disabled] {
+  opacity: 1;        /* remove fade */
+  cursor: default;   /* normal cursor */
 }
