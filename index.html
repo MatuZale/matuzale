@@ -514,6 +514,97 @@
   </div>
 </div>
 
+<div class="details-container color-container">
+  <div class="article-container">
+    <img src="./assets/pfa.png" alt="Project 2" class="project-img" />
+  </div>
+
+  <h2 class="experience-sub-title project-title">Personal Finance Analyzer</h2>
+
+  <!-- Short always-visible description -->
+  <p class="project-description">
+    A data-analysis tool for cleaning, categorizing, and visualizing personal
+    bank transactions with an interactive Python/Streamlit interface.
+  </p>
+
+  <!-- Hidden detailed description -->
+  <div class="project-more">
+    <p>
+      This project processes raw bank CSV exports and transforms them into a
+      structured, intelligible financial overview. It includes a robust 
+      <strong>data-cleaning pipeline</strong>, a flexible 
+      <strong>rule-based categorization system</strong>, and a 
+      <strong>visual analytics module</strong> that reveals monthly spending 
+      patterns, largest expenses, and category distributions.
+    </p>
+
+    <ul>
+      <li>
+        A resilient <strong>CSV ingestion system</strong> that handles Polish bank formats, 
+        various encodings (<code>cp1250</code>, <code>iso-8859-2</code>), inconsistent separators, 
+        and locale-specific number formats like <code>1 234,56 zł</code>.
+      </li>
+
+      <li>
+        Cleans and standardizes all transactions into a unified structure with
+        <strong>parsed dates, normalized amounts, merged descriptions, and type detection</strong>
+        (income vs expense).
+      </li>
+
+      <li>
+        Implements a <strong>configurable categorization engine</strong> based on keyword
+        matching (JSON-defined), covering Groceries, Transport, Salary, Rent,
+        Shopping, Services, etc.—with room for more sophisticated ML-based
+        classification.
+      </li>
+
+      <li>
+        Provides <strong>analytics functions</strong> for:
+        monthly income/expense summaries, category spending analysis, top-N
+        expense detection, and net flow calculations.
+      </li>
+
+      <li>
+        Generates <strong>portfolio-quality visualizations</strong>:
+        - Monthly income vs expenses bar chart  
+        - Stacked category spending chart  
+        - Largest expenses horizontal bar plot  
+        All rendered with Matplotlib and saved in high resolution.
+      </li>
+
+      <li>
+        Ships with both a full <strong>CLI interface</strong> for automated batch analysis
+        and a <strong>Streamlit web app</strong> that enables interactive filtering, CSV
+        uploading, dynamic plots, and exporting cleaned data.
+      </li>
+    </ul>
+
+    <p>
+      This is an <strong>ongoing, evolving project</strong>. Planned improvements include:
+      a richer UI, real-time filtering, recurring payment detection, 
+      financial forecasting, customizable category editors, PDF report exports, 
+      and eventually a deployable cloud-based dashboard.
+      The goal is to build a complete personal financial insights platform—
+      robust, user-friendly, and fully extensible.
+    </p>
+  </div>
+
+  <div class="btn-container">
+    <!-- TOGGLE BUTTON -->
+    <button class="btn btn-color-2 project-btn project-toggle">
+      Read more
+    </button>
+
+    <!-- GITHUB BUTTON -->
+    <button
+      class="btn btn-color-2 project-btn"
+      onclick="location.href='https://github.com/MatuZale/personal-finance-analyzer'"
+    >
+      Github
+    </button>
+  </div>
+</div>
+
 
 <div class="details-container color-container">
   <div class="article-container">

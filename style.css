@@ -730,3 +730,22 @@ body.dark-mode .details-container ul li {
   opacity: 1;        /* remove fade */
   cursor: default;   /* normal cursor */
 }
+
+/* ===== PROJECTS LAYOUT FIX ===== */
+
+/* Layout container that holds all project cards */
+#projects .about-containers {
+  /* Switch from plain flex to a responsive grid */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2rem;
+  justify-items: center;
+  width: 100%;
+  margin: 2rem auto;
+}
+
+#projects .details-container {
+  width: 100%;
+  max-width: 340px;
+  box-sizing: border-box;
+}
