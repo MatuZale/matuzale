@@ -172,8 +172,11 @@ document.getElementById("year").textContent = new Date().getFullYear();
     mx += (tx - mx) * 0.04;
     my += (ty - my) * 0.04;
 
-    const a = -1.4 + 0.28 * Math.sin(t * 0.00018) + (mx - 0.5) * 0.12;
-    const b = 1.6 + 0.2 * Math.cos(t * 0.00013) + (my - 0.5) * 0.12;
+    // The pointer shifts a and b by ±0.15 across the window. The ranges are centred
+    // inside the region where the map stays chaotic and fills the canvas
+    // (a ≲ -1.2, b ≳ 1.4); outside it the attractor collapses into a few points.
+    const a = -1.55 + 0.12 * Math.sin(t * 0.00018) + (mx - 0.5) * 0.3;
+    const b = 1.7 + 0.12 * Math.cos(t * 0.00013) + (my - 0.5) * 0.3;
     const c = 1.0 + 0.06 * Math.sin(t * 0.00021);
     const d = 0.7 + 0.06 * Math.cos(t * 0.00017);
 
