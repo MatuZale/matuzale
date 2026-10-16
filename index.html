@@ -121,17 +121,16 @@
           <p class="reveal">
             Today I work on the applied side: data pipelines, dashboards, cloud services and automation.
             I'm Lead Software Engineer at Embedded Systems DO, where I lead a software team building
-            environmental and IoT monitoring products, and I help run science-popularisation projects
-            at the Centrum Nauki Experyment in Gdynia.
-            I learn new tools fast, explain technical things plainly, and enjoy working with both
-            engineers and non-technical stakeholders.
+            environmental and IoT monitoring products.
+            After hours I still play with maths: fractals and strange attractors rendered from chaotic maps —
+            the same kind of map that is moving in the background of this page.
           </p>
           <ul class="chips reveal" aria-label="Quick facts">
             <li>🎓 PhD in Physics</li>
             <li>🐍 Python-first</li>
             <li>🌊 Environmental data</li>
             <li>🎤 Conference speaker (Seoul, Kyoto)</li>
-            <li>🧑‍🏫 Teacher at heart</li>
+            <li>🌀 Fractals &amp; strange attractors</li>
           </ul>
         </div>
       </div>
@@ -204,22 +203,30 @@
             </div>
             <svg class="card__art" viewBox="0 0 320 220" aria-hidden="true">
               <defs>
-                <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0" stop-color="#2dd4ff" stop-opacity=".55"/><stop offset="1" stop-color="#7c3aed" stop-opacity=".15"/>
+                <linearGradient id="sea-back" gradientUnits="userSpaceOnUse" x1="0" y1="104" x2="0" y2="220">
+                  <stop offset="0" style="stop-color: var(--accent-2); stop-opacity: .22"/><stop offset="1" style="stop-color: var(--accent-3); stop-opacity: .06"/>
+                </linearGradient>
+                <linearGradient id="sea-front" gradientUnits="userSpaceOnUse" x1="0" y1="114" x2="0" y2="220">
+                  <stop offset="0" style="stop-color: var(--accent-3); stop-opacity: .42"/><stop offset="1" style="stop-color: var(--accent-2); stop-opacity: .14"/>
                 </linearGradient>
               </defs>
-              <rect y="120" width="320" height="100" fill="url(#sea)"/>
-              <path class="wave" d="M0 120 q20-12 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0" fill="none" stroke="#7ce7ff" stroke-width="2"/>
-              <path class="wave wave--2" d="M0 134 q20-10 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0" fill="none" stroke="#c9a7ff" stroke-width="1.5" opacity=".7"/>
-              <g class="buoy">
-                <line x1="160" y1="40" x2="160" y2="104" stroke="currentColor" stroke-width="3"/>
-                <circle cx="160" cy="36" r="5" fill="#ff5ecb"/>
-                <path d="M138 118 q22-34 44 0z" fill="#ff5ecb"/>
-                <rect x="140" y="104" width="40" height="16" rx="4" fill="currentColor"/>
-                <line x1="160" y1="120" x2="160" y2="196" stroke="currentColor" stroke-width="2" stroke-dasharray="4 5"/>
-                <circle cx="160" cy="160" r="4" fill="#7ce7ff"/><circle cx="160" cy="196" r="5" fill="#7ce7ff"/>
+              <g class="wave wave--back">
+                <path d="M-180 112 q20-8 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 V420 H-180 Z" fill="url(#sea-back)"/>
+                <path class="wave__crest wave__crest--back" d="M-180 112 q20-8 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0"/>
               </g>
-              <circle class="ping" cx="160" cy="36" r="6" fill="none" stroke="#ff5ecb"/>
+              <g class="buoy">
+                <line x1="160" y1="40" x2="160" y2="106" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                <circle class="buoy__light" cx="160" cy="36" r="5"/>
+                <circle class="ping" cx="160" cy="36" r="6"/>
+                <path class="buoy__dome" d="M140 112 q20-30 40 0z"/>
+                <rect x="138" y="108" width="44" height="20" rx="6" fill="currentColor"/>
+                <line x1="160" y1="128" x2="160" y2="196" stroke="currentColor" stroke-width="2" stroke-dasharray="4 5" opacity=".7"/>
+                <circle class="buoy__sensor" cx="160" cy="162" r="4"/><circle class="buoy__sensor" cx="160" cy="196" r="5"/>
+              </g>
+              <g class="wave">
+                <path d="M-160 122 q20-10 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 V420 H-160 Z" fill="url(#sea-front)"/>
+                <path class="wave__crest" d="M-160 122 q20-10 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0"/>
+              </g>
             </svg>
           </article>
 
@@ -450,7 +457,7 @@
               IoT and environmental monitoring (BENTOS, cold-chain products).</p>
           </article>
           <article class="tl reveal">
-            <span class="tl__when">08/2025 →</span>
+            <span class="tl__when">08/2025 – 04/2026</span>
             <h3>Junior specialist, events &amp; scientific programmes · Centrum Nauki Experyment</h3>
             <p class="tl__where">Gdynia, Poland</p>
             <p>Partnerships with universities and student organisations, science events across Poland and Europe,
