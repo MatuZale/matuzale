@@ -606,7 +606,12 @@
     <p class="chaos__intro" id="chaos-intro">You found the controls. A little maths, a lot of possibilities.</p>
     <div class="chaos__body">
       <div class="chaos__stage">
-        <div class="chaos__viewport" id="chaos-viewport" role="img" aria-label="Clifford attractor generated from the parameters in this lab"></div>
+        <div class="chaos__viewport" id="chaos-viewport">
+          <div class="chaos__result" id="chaos-result" hidden>
+            <span>Fixed point</span>
+            <button type="button" id="chaos-restore">Back to chaos ↗</button>
+          </div>
+        </div>
         <div class="chaos__equations" aria-label="Clifford map equations"><span>x′ = sin(a·y) + c·cos(a·x)</span><span>y′ = sin(b·x) + d·cos(b·y)</span></div>
       </div>
       <div class="chaos__controls">
@@ -633,7 +638,7 @@
           <button class="btn btn--ghost" id="chaos-reset" type="button">Reset</button>
           <button class="btn btn--primary" id="chaos-save" type="button">Save PNG ↗</button>
         </div>
-        <p class="chaos__note">Some parameters settle to a point. That's a result too. A preset will bring you back.</p>
+        <p class="chaos__note">Some parameters converge to a single point. It stays highlighted; “Back to chaos” restores the default map.</p>
       </div>
     </div>
     <footer class="chaos__footer"><p id="chaos-status" role="status" aria-live="polite">Running · 26,000 particles</p><span>Nothing broken. Just nonlinear.</span></footer>

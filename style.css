@@ -216,7 +216,7 @@ main[tabindex="-1"]:focus, main [tabindex="-1"]:focus { outline: none; }
 .hero__stats span { font-size: 0.85rem; color: var(--muted); }
 .hero__hint { position: relative; margin: 2.8rem 0 0; font: 400 0.8rem var(--font-mono); color: var(--muted); }
 @media (hover: none) { .hero__hint { display: none; } }
-@media (max-aspect-ratio: 1/1) { #attractor { opacity: 0.55; } }
+@media (max-aspect-ratio: 1/1) { .hero #attractor { opacity: 0.55; } }
 
 /* ───────────────────────── Sections ───────────────────────── */
 .section { padding: clamp(4rem, 9vw, 7.5rem) 0; position: relative; }
@@ -621,6 +621,11 @@ body.chaos-open, body.observer-open { overflow: hidden; }
 .chaos__intro { font-size: .88rem; color: var(--muted); margin: .8rem 0 1.8rem; }
 .chaos__body { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: clamp(1rem, 3vw, 2rem); align-items: start; }
 .chaos__viewport { position: relative; aspect-ratio: 1; overflow: hidden; border: 1px solid var(--line); border-radius: 16px; background: var(--bg); }
+.chaos__result { position: absolute; z-index: 1; inset: auto .8rem .8rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .6rem; padding: .65rem .8rem; border: 1px solid var(--line); border-radius: 10px; background: color-mix(in srgb, var(--surface) 92%, transparent); color: var(--text); font: 400 .65rem/1.6 var(--font-mono); }
+.chaos__result[hidden] { display: none; }
+.chaos__result.is-top { top: .8rem; bottom: auto; }
+.chaos__result button { padding: .3rem .4rem; min-height: 36px; border: 0; border-radius: 6px; background: var(--surface-2); color: var(--link); font: inherit; cursor: pointer; }
+.chaos__result button:hover { text-decoration: underline; text-underline-offset: 3px; }
 .chaos__equations { display: grid; gap: .2rem; padding-top: 1rem; color: var(--muted); font: 400 clamp(.6rem, 1.4vw, .75rem)/1.7 var(--font-mono); }
 .chaos__controls { min-width: 0; }
 .chaos__field { display: grid; gap: .5rem; color: var(--muted); font: 400 .7rem/1.5 var(--font-mono); }

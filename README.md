@@ -27,6 +27,7 @@ The source of the portfolio site — plain HTML, CSS and JavaScript, no build st
 - Linked EmbeddedSystems.do branding, section tracking, scroll progress and a keyboard-accessible mobile menu
 - Neon gradient frames and pointer lighting across the toolbox and projects, with softly lit publications and timeline
 - Easter eggs: the TM logo briefly glitches at random intervals (disabled with reduced motion; focus it and press G to trigger manually). Enter the Konami code or follow the footer hint to open Chaos Lab, with attractor presets, parameters, palettes, pause and PNG export. Parameter changes restart the particle distribution so a collapsed map can recover.
+- Fixed-point results stay visible with a highlighted marker and a “Back to chaos” action; settled maps stop rendering until the controls change.
 - “Observer detected” in the footer opens a local browser readout. A separate button fetches the visitor's public IPv4/IPv6 address from [ipify](https://www.ipify.org/); no lookup happens automatically, and the portfolio does not store the readout.
 - Light / dark theme (follows the system, remembers the choice), responsive and accessible
 

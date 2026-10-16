@@ -279,6 +279,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
   const paletteSelect = document.getElementById("chaos-palette");
   const playBtn = document.getElementById("chaos-play");
   const status = document.getElementById("chaos-status");
+  const result = document.getElementById("chaos-result");
   const parameters = ["a", "b", "c", "d"];
   const presets = {
     stable: { a: -1.55, b: 1.7, c: 1, d: .7 },
@@ -288,6 +289,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
   let coords = { ...presets.stable };
   let palette = "neon", playing = !reducedMotion, heroVisible = true;
   let dirty = true, raf = 0, resizeTimer = 0, returnFocus = null;
+  let settledPoint = null;
 
   const PARTICLES = 26000, STEPS = 3, DECAY = .86;
   let W = 0, H = 0, density, img, pix32, scale, cx, cy;
@@ -341,6 +343,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
     cx = lab.open ? W * .5 : wide ? W * .68 : W * .5;
     cy = lab.open ? H * .5 : wide ? H * .5 : H * .62;
     dirty = true;
+    clearResult();
     scheduleFrame();
   }
 
@@ -355,23 +358,44 @@ document.getElementById("year").textContent = new Date().getFullYear();
     mx += (tx - mx) * .04;
     my += (ty - my) * .04;
     // Pointer modulation stays in the hero's established chaotic range.
-    const { a, b, c, d } = lab.open ? coords : {
+    const inLab = lab.open;
+    const { a, b, c, d } = inLab ? coords : {
       a: -1.55 + .12 * Math.sin(t * .00018) + (mx - .5) * .3,
       b: 1.7 + .12 * Math.cos(t * .00013) + (my - .5) * .3,
       c: 1 + .06 * Math.sin(t * .00021),
       d: .7 + .06 * Math.cos(t * .00017),
     };
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity, motion = 0;
     for (let i = 0; i < density.length; i++) density[i] *= DECAY;
     for (let i = 0; i < PARTICLES; i++) {
       let x = px[i], y = py[i];
       for (let s = 0; s < STEPS; s++) {
         const nx = Math.sin(a * y) + c * Math.cos(a * x);
         const ny = Math.sin(b * x) + d * Math.cos(b * y);
+        if (inLab) motion = Math.max(motion, Math.abs(nx - x), Math.abs(ny - y));
         x = nx; y = ny;
         const ix = (cx + x * scale) | 0, iy = (cy + y * scale) | 0;
         if (ix >= 0 && ix < W && iy >= 0 && iy < H) density[iy * W + ix] += 1;
       }
       px[i] = x; py[i] = y;
+      if (inLab) {
+        minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+        minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+      }
+    }
+    // A point is a valid result, but a single bitmap pixel looks like a blank
+    // plot. Check both spread and motion so periodic orbits remain animated.
+    const nextPoint = inLab && Math.max(maxX - minX, maxY - minY, motion) * scale < .35
+      ? { x: cx + (minX + maxX) * .5 * scale, y: cy + (minY + maxY) * .5 * scale } : null;
+    const changed = Boolean(nextPoint) !== Boolean(settledPoint);
+    settledPoint = nextPoint;
+    if (changed) {
+      if (settledPoint) {
+        density.fill(0);
+        const index = Math.round(settledPoint.y) * W + Math.round(settledPoint.x);
+        if (index >= 0 && index < density.length) density[index] = 110;
+      }
+      updateStatus();
     }
     if (draw) paint();
   }
@@ -381,10 +405,32 @@ document.getElementById("year").textContent = new Date().getFullYear();
       const v = Math.log(1 + density[i]) * gain;
       pix32[i] = lut[v > 255 ? 255 : v | 0];
     }
+    if (lab.open && settledPoint) {
+      // Draw into ImageData so the visible point and halo are also in PNG exports.
+      const radius = Math.max(9, Math.round(Math.min(W, H) * .025));
+      const x0 = Math.round(settledPoint.x), y0 = Math.round(settledPoint.y);
+      const colour = lut[220];
+      const channels = [colour & 255, (colour >>> 8) & 255, (colour >>> 16) & 255];
+      for (let dy = -radius; dy <= radius; dy++) {
+        for (let dx = -radius; dx <= radius; dx++) {
+          const x = x0 + dx, y = y0 + dy, distance = Math.hypot(dx, dy);
+          if (x < 0 || x >= W || y < 0 || y >= H || distance > radius) continue;
+          const ring = Math.abs(distance - radius * .65) < .65 ? .5 : 0;
+          const alpha = distance <= 2.5 ? 1 : Math.max(ring, .3 * (1 - distance / radius) ** 2);
+          const index = (y * W + x) * 4;
+          for (let channel = 0; channel < 3; channel++) {
+            img.data[index + channel] = img.data[index + channel] * (1 - alpha) + channels[channel] * alpha;
+          }
+        }
+      }
+    }
     ctx.putImageData(img, 0, 0);
   }
   function settle(count) {
-    for (let i = 0; i < count; i++) frame(2e4, false);
+    for (let i = 0; i < count; i++) {
+      frame(2e4, false);
+      if (settledPoint) break;
+    }
     paint();
   }
   function scheduleFrame() {
@@ -405,7 +451,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
       } else if (animate) frame(t);
       dirty = false;
     }
-    if (visible && animate) scheduleFrame();
+    if (visible && animate && !settledPoint) scheduleFrame();
   }
   function onThemeChange() {
     buildLut();
@@ -436,7 +482,19 @@ document.getElementById("year").textContent = new Date().getFullYear();
   if (typeof lab.showModal !== "function") return;
   function updateStatus() {
     playBtn.textContent = playing ? "Pause" : "Play";
-    status.textContent = playing ? "Running · 26,000 particles" : "Static frame · change a parameter or press Play";
+    const message = settledPoint ? "Fixed point · all particles converged"
+      : playing ? "Running · 26,000 particles" : "Static frame · change a parameter or press Play";
+    if (status.textContent !== message) status.textContent = message;
+    result.hidden = !settledPoint;
+    result.classList.toggle("is-top", Boolean(settledPoint && settledPoint.y > H * .6));
+    if (lab.open) canvas.setAttribute("aria-label", settledPoint
+      ? "Clifford map converged to a fixed point, highlighted on the plot"
+      : "Clifford attractor generated from the current lab parameters");
+  }
+  function clearResult() {
+    if (!settledPoint) return;
+    settledPoint = null;
+    updateStatus();
   }
   function syncControls() {
     parameters.forEach(name => {
@@ -448,6 +506,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
   function redraw() {
     // Coalesce rapid slider events; reseed once at the next rendered frame.
     dirty = true;
+    clearResult();
     scheduleFrame();
   }
   function openLab() {
@@ -457,6 +516,8 @@ document.getElementById("year").textContent = new Date().getFullYear();
     lab.showModal();
     document.body.classList.add("chaos-open");
     viewport.append(canvas);
+    canvas.setAttribute("aria-hidden", "false");
+    canvas.setAttribute("role", "img");
     clearTimeout(resizeTimer);
     buildLut();
     resize();
@@ -468,6 +529,9 @@ document.getElementById("year").textContent = new Date().getFullYear();
   lab.addEventListener("close", () => {
     document.body.classList.remove("chaos-open");
     hero.prepend(canvas);
+    canvas.setAttribute("aria-hidden", "true");
+    canvas.removeAttribute("role");
+    canvas.removeAttribute("aria-label");
     clearTimeout(resizeTimer);
     buildLut();
     resize();
@@ -488,11 +552,17 @@ document.getElementById("year").textContent = new Date().getFullYear();
       redraw();
     });
   });
-  presetSelect.addEventListener("change", () => {
-    if (!presets[presetSelect.value]) return;
-    coords = { ...presets[presetSelect.value] };
+  function choosePreset(name) {
+    if (!presets[name]) return;
+    coords = { ...presets[name] };
+    presetSelect.value = name;
     syncControls();
     redraw();
+  }
+  presetSelect.addEventListener("change", () => choosePreset(presetSelect.value));
+  document.getElementById("chaos-restore").addEventListener("click", () => {
+    choosePreset("stable");
+    presetSelect.focus({ preventScroll: true });
   });
   paletteSelect.addEventListener("change", () => {
     palette = paletteSelect.value;
