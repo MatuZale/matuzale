@@ -27,10 +27,18 @@ The source of the portfolio site — plain HTML, CSS and JavaScript, no build st
 - Light / dark theme (follows the system, remembers the choice), responsive and accessible
 
 ```
-index.html   content
+index.html   content (+ JSON-LD Person metadata)
+404.html     not-found page
 style.css    design tokens, layout, themes
 script.js    theme, nav, reveal-on-scroll, attractor
-assets/      photo, images, CV (resume.pdf)
+assets/      photo, images, public CV (resume.pdf)
+cv/          HTML source of the public CV
+```
+
+The public CV is rendered from `cv/resume.html` (contains no ID number, date of birth, phone or street address):
+
+```
+chromium --headless --no-pdf-header-footer --print-to-pdf=assets/resume.pdf cv/resume.html
 ```
 
 Run locally by opening `index.html`, or `python3 -m http.server 8000`.

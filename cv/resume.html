@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Tomasz Młynik, PhD — CV</title>
+<style>
+  @page { size: A4; margin: 14mm 15mm; }
+  * { box-sizing: border-box; }
+  body { font: 9.6pt/1.42 "Inter", "Noto Sans", "DejaVu Sans", Arial, sans-serif; color: #1c1b2e; margin: 0; }
+  a { color: #4b2fb0; text-decoration: none; }
+  h1 { font-size: 22pt; margin: 0; letter-spacing: -.01em; }
+  h1 small { font-size: 13pt; font-weight: 500; color: #5b5873; }
+  .role { font-size: 11pt; font-weight: 600; color: #4b2fb0; margin: 2pt 0 4pt; }
+  .contact { display: flex; flex-wrap: wrap; gap: 2pt 12pt; font-size: 9pt; color: #3b3a52; }
+  h2 { break-after: avoid; font-size: 9.5pt; text-transform: uppercase; letter-spacing: .09em; color: #4b2fb0; border-bottom: 1px solid #d9d6ee; padding-bottom: 2pt; margin: 12pt 0 6pt; }
+  .job { margin-bottom: 7pt; break-inside: avoid; }
+  .job__head { display: flex; justify-content: space-between; gap: 8pt; font-weight: 600; }
+  .job__head span { font-weight: 400; color: #5b5873; white-space: nowrap; }
+  .job__sub { color: #5b5873; font-size: 9pt; }
+  ul { margin: 2pt 0 0; padding-left: 13pt; }
+  li { margin: 1pt 0; }
+  p { margin: 2pt 0; }
+  .grid { display: grid; grid-template-columns: 78pt 1fr; gap: 2pt 8pt; }
+  .grid b { color: #3b3a52; }
+  .pub { margin: 3pt 0; break-inside: avoid; }
+  .muted { color: #5b5873; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Tomasz Młynik<small>, PhD</small></h1>
+  <p class="role">Data &amp; Software Engineer · Physicist</p>
+  <div class="contact">
+    <span>Gdańsk, Poland</span>
+    <a href="mailto:tomek.mlynik@gmail.com">tomek.mlynik@gmail.com</a>
+    <a href="https://matuzale.github.io/matuzale/">matuzale.github.io/matuzale</a>
+    <a href="https://github.com/MatuZale">github.com/MatuZale</a>
+    <a href="https://www.linkedin.com/in/tomasz-m%C5%82ynik-phd-949659163/">LinkedIn</a>
+    <a href="https://orcid.org/0000-0003-4182-907X">ORCID 0000-0003-4182-907X</a>
+  </div>
+</header>
+
+<h2>Profile</h2>
+<p>Physicist turned data and software engineer. Lead Software Engineer at Embedded Systems DO, building Python and React
+applications on AWS and data pipelines for environmental and IoT monitoring (BENTOS water-quality buoy for the Gulf of Gdańsk).
+PhD in quantum information with a strong background in optimisation, numerical methods and reproducible analysis;
+I break ambiguous problems into testable pieces and explain technical things plainly.</p>
+
+<h2>Experience</h2>
+<div class="job">
+  <div class="job__head">Lead Software Engineer · Embedded Systems DO <span>04/2026 – present · Gdynia</span></div>
+  <div class="job__sub">Joined as software engineer and data analyst; leading the software team since 10/2026.</div>
+  <ul>
+    <li>Develop and maintain web applications with a Python backend and React frontend in a large, complex codebase; build and deploy components on AWS.</li>
+    <li>BENTOS (open-source water-quality buoy with the Institute of Oceanology PAN): data ingestion, validation and analysis workflows; dashboards, including the open-source SatBałtyk dashboard (Python/NumPy GeoTIFF pipeline, React, Vite, Leaflet).</li>
+    <li>Lead the software team: demo readiness, test coordination and delivery priorities.</li>
+  </ul>
+</div>
+<div class="job">
+  <div class="job__head">Junior Specialist, Events &amp; Scientific Programmes · Centrum Nauki Experyment <span>08/2025 – present · Gdynia</span></div>
+  <ul>
+    <li>Partnerships with universities and student organisations; science and outreach events across Poland and Europe; procurement for the unit.</li>
+    <li>Python and scikit-learn analysis to streamline internal processes; interactive physics demos for public events (quantum lab, genetic algorithm for the travelling-salesman problem).</li>
+  </ul>
+</div>
+<div class="job">
+  <div class="job__head">Administrative Assistant · Translation agency <span>11/2016 – 09/2018 · Gdynia</span></div>
+  <ul><li>Data-quality checks on client documents, Excel pipelines for translation workflows, invoicing.</li></ul>
+</div>
+<div class="job">
+  <div class="job__head">Physics &amp; Robotics Lecturer · Roboty i Spółka <span>03/2015 – 07/2016 · Gdańsk</span></div>
+  <ul><li>Taught robotics with LEGO Mindstorms EV3 and the basics of programming.</li></ul>
+</div>
+
+<h2>Education</h2>
+<div class="job">
+  <div class="job__head">PhD, Physics · University of Gdańsk <span>2019 – 2024</span></div>
+  <div class="job__sub">Thesis: <i>k-positive maps in physics</i></div>
+  <ul>
+    <li>Quantum information: positive maps and k-entanglement witnesses, higher-order transformations of unitary operations, port-based teleportation, symmetry-reduction methods.</li>
+    <li>Python and MATLAB code with semidefinite programming (CVX, YALMIP) to verify conjectures on finite-dimensional algebras.</li>
+    <li>Talks: AQIS 2023 (Seoul), YITP 2023 (Kyoto). Grants: PI of UGrants-start 2 and of an academic-exchange grant (NAVA); team member of NCN Sonata 16.</li>
+    <li>Taught algebra, stochastic processes, functional analysis and Python with algorithms.</li>
+  </ul>
+</div>
+<div class="job">
+  <div class="job__head">MSc, Physics · University of Gdańsk <span>2015 – 2019</span></div>
+  <div class="job__sub">Thesis: <i>k-positive indecomposable maps on matrix algebras</i></div>
+</div>
+<div class="job">
+  <div class="job__head">BSc, Physics · University of Gdańsk <span>2012 – 2015</span></div>
+  <div class="job__sub">Thesis: <i>Study of the galaxy's rotation curve</i> — exploratory data analysis and Monte Carlo simulations on satellite data of stars.</div>
+</div>
+
+<h2>Selected publications</h2>
+<div class="pub">F. Grosshans, M. Horodecki, M. Murao, <b>T. Młynik</b>, M. T. Quintino, M. Studziński, S. Yoshida. Multicopy quantum state teleportation with application to storage and retrieval of quantum programs. <i>Quantum</i> 10, 2105 (2026). <a href="https://doi.org/10.22331/q-2026-05-13-2105">doi:10.22331/q-2026-05-13-2105</a></div>
+<div class="pub"><b>T. Młynik</b>, H. Osaka, M. Marciniak. Characterization of k-positive maps. <i>Communications in Mathematical Physics</i> 406, 62 (2025). <a href="https://doi.org/10.1007/s00220-025-05250-4">doi:10.1007/s00220-025-05250-4</a></div>
+<div class="pub">D. Ebler, M. Horodecki, M. Marciniak, <b>T. Młynik</b>, M. T. Quintino, M. Studziński. Optimal universal quantum circuits for unitary complex conjugation. <i>IEEE Trans. Inf. Theory</i> 69(8), 5069 (2023). <a href="https://doi.org/10.1109/tit.2023.3263771">doi:10.1109/tit.2023.3263771</a></div>
+<div class="pub">M. Studziński, <b>T. Młynik</b>, M. Mozrzymas, M. Horodecki. Irreducible matrix representations for the walled Brauer algebra. Preprint <a href="https://arxiv.org/abs/2501.13067">arXiv:2501.13067</a> (2025).</div>
+<div class="pub">P. Gnaciński, <b>T. Młynik</b>. Keplerian rotation of our galaxy? <i>Publ. Astron. Soc. Pac.</i> 129(974), 044101 (2017). <a href="https://doi.org/10.1088/1538-3873/aa5c9b">doi:10.1088/1538-3873/aa5c9b</a></div>
+<p class="muted">Full list: <a href="https://scholar.google.com/citations?user=Fzdweu4AAAAJ&hl=en">Google Scholar</a></p>
+
+<h2>Selected projects</h2>
+<ul>
+  <li><b>BENTOS</b> — open-source buoy and public app for water quality and cyanobacteria risk in the Gulf of Gdańsk. <a href="https://embeddedsystems-do.github.io/bentos-satbaltyk-dashboard/">Live dashboard</a></li>
+  <li><b>coldchain-mcp</b> — MCP server for local analysis of cold-chain sensor data (threshold breaches, anomalies, journey segmentation); published on PyPI. <a href="https://github.com/MatuZale/coldchain-mcp">GitHub</a></li>
+  <li><b>Student-performance pipeline</b> — S3 → Lambda → Glue → Athena → Metabase with boto3, followed by gradient boosting, PCA/t-SNE/HDBSCAN and a leakage analysis.</li>
+  <li><b>Personal Finance Analyzer</b> — cleaning and categorising Polish bank CSV exports; CLI and Streamlit app. <a href="https://github.com/MatuZale/personal-finance-analyzer">GitHub</a></li>
+  <li><b>Strange attractors &amp; N-body simulator</b> — Numba-accelerated chaotic maps rendered as video; C++20/OpenGL gravity simulator with a symplectic integrator. <a href="https://github.com/MatuZale/color_recursive_maps">GitHub</a></li>
+</ul>
+
+<h2>Skills</h2>
+<div class="grid">
+  <b>Data &amp; Python</b><span>Python, NumPy, pandas, scikit-learn, Matplotlib, Numba, SQL, Streamlit, Excel (advanced, VBA)</span>
+  <b>Cloud &amp; DevOps</b><span>AWS (S3, Lambda, Glue, Athena, DynamoDB), Metabase, Docker, GitHub Actions, Git</span>
+  <b>Web</b><span>React, TypeScript, Vite, Leaflet, Recharts, HTML / CSS / JS</span>
+  <b>Science &amp; maths</b><span>Quantum information, semidefinite programming, optimisation, Monte Carlo, numerical simulation, MATLAB, SageMath, LaTeX</span>
+  <b>Learning now</b><span>C++ (OpenGL, numerics), Zephyr RTOS, TanStack Query, GraphQL</span>
+  <b>Languages</b><span>Polish (native), English (C1)</span>
+</div>
+</body>
+</html>

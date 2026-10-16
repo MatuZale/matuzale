@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <title>Page not found — Tomasz Młynik</title>
+  <link rel="stylesheet" href="/matuzale/style.css" />
+  <script>
+    try {
+      var t = localStorage.getItem("theme");
+      if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+    } catch (e) {}
+  </script>
+  <style>
+    .nf { min-height: 100vh; display: grid; place-content: center; text-align: center; gap: 1rem; padding: 2rem; }
+    .nf h1 { font-size: clamp(4rem, 14vw, 8rem); margin: 0; line-height: 1; }
+  </style>
+</head>
+<body>
+  <main class="nf">
+    <h1>404</h1>
+    <p class="section__lead">This page drifted off the attractor.</p>
+    <p><a class="btn btn--primary" href="/matuzale/">Back to the portfolio</a></p>
+  </main>
+</body>
+</html>
