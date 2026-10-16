@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200" fill="#fff" stroke="#fff" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Latent image under the research diagram: a ket. -->
+  <path d="M88 46V154M206 46l30 54-30 54" fill="none" stroke-width="7"/>
+  <text x="148" y="136" text-anchor="middle" stroke="none" font-family="Georgia, Times New Roman, serif" font-style="italic" font-size="104">ψ</text>
+</svg>

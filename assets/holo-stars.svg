@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+  <!-- Original foil embossing tile. Transparent space is as important as the stars. -->
+  <defs>
+    <path id="glint" d="M0-8 1.8-1.8 8 0 1.8 1.8 0 8-1.8 1.8-8 0-1.8-1.8Z"/>
+    <g id="star">
+      <path d="M0-8 2.4-3.2 7.6-2.5 3.8 1.2 4.7 6.5 0 4-4.7 6.5-3.8 1.2-7.6-2.5-2.4-3.2Z" fill="white" opacity=".15"/>
+      <path d="M0 0V-8L2.4-3.2Z" opacity="1"/><path d="M0 0 2.4-3.2 7.6-2.5Z" opacity=".35"/>
+      <path d="M0 0 7.6-2.5 3.8 1.2Z" opacity=".85"/><path d="M0 0 3.8 1.2 4.7 6.5Z" opacity=".25"/>
+      <path d="M0 0 4.7 6.5 0 4Z" opacity=".65"/><path d="M0 0 0 4-4.7 6.5Z" opacity="1"/>
+      <path d="M0 0-4.7 6.5-3.8 1.2Z" opacity=".4"/><path d="M0 0-3.8 1.2-7.6-2.5Z" opacity=".75"/>
+      <path d="M0 0-7.6-2.5-2.4-3.2Z" opacity=".25"/><path d="M0 0-2.4-3.2 0-8Z" opacity=".7"/>
+    </g>
+  </defs>
+  <g fill="white">
+    <use href="#glint" transform="translate(23 27) rotate(12)"/>
+    <use href="#star" transform="translate(94 17) rotate(-18) scale(.8)" opacity=".8"/>
+    <use href="#glint" transform="translate(175 35) scale(.6)" opacity=".7"/>
+    <use href="#star" transform="translate(218 15) rotate(14) scale(.5)"/>
+    <use href="#glint" transform="translate(61 74) rotate(-12) scale(.65)"/>
+    <use href="#star" transform="translate(132 66) rotate(9)"/>
+    <use href="#glint" transform="translate(215 87) rotate(20) scale(.85)"/>
+    <use href="#star" transform="translate(16 116) rotate(-24) scale(.65)" opacity=".7"/>
+    <use href="#glint" transform="translate(99 119) scale(.9)"/>
+    <use href="#star" transform="translate(172 117) rotate(22) scale(.7)"/>
+    <use href="#glint" transform="translate(45 162) rotate(10)"/>
+    <use href="#star" transform="translate(128 176) rotate(-14) scale(.7)" opacity=".8"/>
+    <use href="#glint" transform="translate(196 169) rotate(-8) scale(.65)"/>
+    <use href="#star" transform="translate(17 213) rotate(13) scale(.55)"/>
+    <use href="#glint" transform="translate(90 225) scale(.7)" opacity=".7"/>
+    <use href="#star" transform="translate(168 220) rotate(18)"/>
+    <use href="#glint" transform="translate(228 217) rotate(-15) scale(.6)"/>
+    <g opacity=".6">
+      <circle cx="52" cy="19" r="1"/><circle cx="144" cy="26" r="1.2"/>
+      <circle cx="33" cy="91" r=".8"/><circle cx="183" cy="75" r="1"/>
+      <circle cx="76" cy="145" r="1.2"/><circle cx="236" cy="140" r="1"/>
+      <circle cx="64" cy="198" r=".8"/><circle cx="151" cy="142" r=".9"/>
+      <circle cx="221" cy="187" r=".8"/>
+    </g>
+  </g>
+</svg>

@@ -143,16 +143,209 @@ if ("IntersectionObserver" in window && !reducedMotion) {
   revealEls.forEach((el) => el.classList.add("is-in"));
 }
 
-/* ───────── Card spotlight ───────── */
+/* ───────── Pointer light for the toolbox and employer / BENTOS cards ───────── */
 document.querySelectorAll("[data-spot]").forEach((card) => {
   card.addEventListener("pointermove", (e) => {
+    if (e.pointerType === "touch" || reducedMotion) return;
     const r = card.getBoundingClientRect();
-    card.style.setProperty("--mx", e.clientX - r.left + "px");
-    card.style.setProperty("--my", e.clientY - r.top + "px");
+    const x = Math.max(0, Math.min(r.width, e.clientX - r.left));
+    const y = Math.max(0, Math.min(r.height, e.clientY - r.top));
+    card.style.setProperty("--mx", x + "px");
+    card.style.setProperty("--my", y + "px");
+  });
+  card.addEventListener("pointerleave", () => {
+    ["--mx", "--my"].forEach(name => card.style.removeProperty(name));
   });
 });
 
+/* ───────── Holographic project cards ───────── */
+(function holographicProjects() {
+  const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const precisePointer = window.matchMedia("(any-hover: hover) and (any-pointer: fine)");
+  const resets = [], repaints = [];
+  const properties = ["--tilt-x", "--tilt-y", "--light-x", "--light-y", "--foil-x", "--foil-y", "--stars-x", "--stars-y", "--foil-angle", "--foil-exposure", "--shadow-x", "--shadow-y", "--holo-x", "--holo-y"];
+  document.querySelectorAll("[data-holo]").forEach(slot => {
+    const card = slot.querySelector(".card--holo:not(.card--bentos)");
+    if (!card) return;
+    let raf = 0, active = false, clientX = 0, clientY = 0;
+    function reset() {
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+      if (!active) return;
+      active = false;
+      slot.classList.remove("is-holo-active");
+      properties.forEach(name => card.style.removeProperty(name));
+    }
+    function paintLight() {
+      raf = 0;
+      // Measure the unrotated slot to avoid feedback / jitter at tilted edges.
+      const rect = slot.getBoundingClientRect();
+      if (!rect.width || !rect.height || document.hidden || motion.matches || !precisePointer.matches) { reset(); return; }
+      // After a scroll the pointer may no longer be over this card.
+      if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) { reset(); return; }
+      const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+      const y = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
+      // Limit physical edge travel on the wide research card and tall art card.
+      const tiltX = (.5 - y) * 2 * Math.min(8, 2600 / rect.height);
+      const tiltY = (x - .5) * 2 * Math.min(8, 2600 / rect.width);
+      card.style.setProperty("--tilt-x", tiltX.toFixed(2) + "deg");
+      card.style.setProperty("--tilt-y", tiltY.toFixed(2) + "deg");
+      card.style.setProperty("--light-x", (x * 100).toFixed(2) + "%");
+      card.style.setProperty("--light-y", (y * 100).toFixed(2) + "%");
+      card.style.setProperty("--foil-x", (100 - x * 100).toFixed(2) + "%");
+      card.style.setProperty("--foil-y", (100 - y * 100).toFixed(2) + "%");
+      card.style.setProperty("--stars-x", ((x - .5) * -3).toFixed(2) + "px");
+      card.style.setProperty("--stars-y", ((y - .5) * -3).toFixed(2) + "px");
+      card.style.setProperty("--foil-angle", (122 + (x - .5) * 36 - (y - .5) * 18).toFixed(2) + "deg");
+      card.style.setProperty("--foil-exposure", (.7 + Math.hypot(x - .5, y - .5) * .55).toFixed(3));
+      card.style.setProperty("--shadow-x", ((x - .5) * -16).toFixed(2) + "px");
+      card.style.setProperty("--shadow-y", (22 - (y - .5) * 12).toFixed(2) + "px");
+      // Unitless pointer offset (-.5 … .5) drives the parallax of the engraved foil layer.
+      card.style.setProperty("--holo-x", (x - .5).toFixed(3));
+      card.style.setProperty("--holo-y", (y - .5).toFixed(3));
+    }
+    function track(event) {
+      if (event.pointerType === "touch") { reset(); return; }
+      if (motion.matches || !precisePointer.matches || document.hidden) return;
+      clientX = event.clientX; clientY = event.clientY;
+      if (!active) { active = true; slot.classList.add("is-holo-active"); }
+      // Pointer events can arrive faster than screen refresh. One update per frame.
+      if (!raf) raf = requestAnimationFrame(paintLight);
+    }
+    slot.addEventListener("pointerenter", track);
+    slot.addEventListener("pointermove", track);
+    slot.addEventListener("pointerleave", reset);
+    slot.addEventListener("pointercancel", reset);
+    resets.push(reset);
+    // Scrolling moves the card under a still pointer: re-measure the light rather than switching it off.
+    repaints.push(() => { if (active && !raf) raf = requestAnimationFrame(paintLight); });
+  });
+  const resetAll = () => resets.forEach(reset => reset());
+  motion.addEventListener("change", resetAll);
+  precisePointer.addEventListener("change", resetAll);
+  window.addEventListener("blur", resetAll);
+  window.addEventListener("scroll", () => repaints.forEach(repaint => repaint()), { passive: true });
+  window.addEventListener("resize", resetAll, { passive: true });
+  document.addEventListener("visibilitychange", () => { if (document.hidden) resetAll(); });
+})();
+
 document.getElementById("year").textContent = new Date().getFullYear();
+
+/* ───────── A background process, underneath the footer ───────── */
+(function footerSnake() {
+  const board = document.getElementById("footer-snake");
+  const pixels = document.getElementById("snake-pixels");
+  const toggle = document.getElementById("snake-toggle");
+  if (!board || !pixels || !toggle) return;
+  const figure = board.closest("figure");
+  const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const columns = 40, rows = 8, cell = 8;
+  const cycle = [{ x: 0, y: 0 }];
+  // A closed route through every cell provides a safe fallback. Shortcuts may
+  // approach the food, but never pass the tail or reverse the body's route order.
+  for (let y = 0; y < rows; y++) {
+    for (let step = 1; step < columns; step++) {
+      cycle.push({ x: y % 2 ? columns - step : step, y });
+    }
+  }
+  for (let y = rows - 1; y > 0; y--) cycle.push({ x: 0, y });
+  const total = cycle.length;
+  const routeIndex = Array.from({ length: rows }, () => Array(columns));
+  cycle.forEach((point, i) => { routeIndex[point.y][point.x] = i; });
+  const distance = (from, to) => (to - from + total) % total;
+  let body = Array.from({ length: 10 }, (_, i) => 166 - i);
+  let food = 0, timer = 0, visible = false, paused = motion.matches;
+
+  function placeFood() {
+    const vacant = cycle.map((_, i) => i).filter(i => !body.includes(i));
+    food = vacant[Math.floor(Math.random() * vacant.length)];
+  }
+  function advance() {
+    const head = cycle[body[0]], target = cycle[food];
+    const gap = distance(body[0], body[body.length - 1]);
+    const foodAhead = distance(body[0], food);
+    const candidates = [[1, 0], [0, 1], [-1, 0], [0, -1]].map(([dx, dy]) => {
+      const x = head.x + dx, y = head.y + dy;
+      if (x < 0 || x >= columns || y < 0 || y >= rows) return null;
+      const index = routeIndex[y][x], skip = distance(body[0], index);
+      const grows = index === food && body.length < 44;
+      if (!skip || skip > foodAhead || skip > gap || (skip === gap && grows)) return null;
+      return { index, skip, score: Math.abs(x - target.x) + Math.abs(y - target.y) };
+    }).filter(Boolean).sort((a, b) => a.score - b.score || b.skip - a.skip);
+    // The next cycle cell is always safe while the board has free space.
+    const next = candidates[0]?.index ?? (body[0] + 1) % total;
+    const ate = next === food;
+    body.unshift(next);
+    if (!ate || body.length > 44) body.pop();
+    if (ate) placeFood();
+  }
+  function svgElement(tag, attributes) {
+    const element = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    Object.entries(attributes).forEach(([name, value]) => element.setAttribute(name, value));
+    return element;
+  }
+  function draw() {
+    const fragment = document.createDocumentFragment();
+    body.forEach((index, i) => {
+      const { x, y } = cycle[index];
+      fragment.append(svgElement("rect", {
+        x: 33 + x * cell, y: 33 + y * cell, width: 6, height: 6, rx: 1,
+        fill: i === 0 ? "#6ce7e4" : `hsl(${263 + 38 * i / body.length} 78% ${73 - 23 * i / body.length}%)`,
+        opacity: i === 0 ? 1 : 1 - .45 * i / body.length,
+        class: i === 0 ? "circuit-window__head" : "circuit-window__segment"
+      }));
+    });
+    const head = cycle[body[0]], neck = cycle[body[1]];
+    const dx = head.x - neck.x, dy = head.y - neck.y;
+    [-1, 1].forEach(side => fragment.append(svgElement("circle", {
+      cx: 36 + head.x * cell + dx * 1.5 + (dy ? side * 1.3 : 0),
+      cy: 36 + head.y * cell + dy * 1.5 + (dx ? side * 1.3 : 0),
+      r: .65, fill: "#08151d"
+    })));
+    const target = cycle[food];
+    fragment.append(svgElement("rect", { x: 33 + target.x * cell, y: 33 + target.y * cell, width: 6, height: 6, rx: 1.5, fill: "#ff80c8", class: "circuit-window__food" }));
+    pixels.replaceChildren(fragment);
+  }
+  function schedule() {
+    clearTimeout(timer);
+    timer = 0;
+    const running = visible && !document.hidden && !paused;
+    figure.classList.toggle("is-paused", !running);
+    if (running) timer = setTimeout(() => { advance(); draw(); schedule(); }, 110);
+  }
+  function updateToggle() {
+    toggle.setAttribute("aria-pressed", String(paused));
+    toggle.setAttribute("aria-label", paused ? "Play Snake animation" : "Pause Snake animation");
+    toggle.textContent = paused ? "play ▷" : "pause Ⅱ";
+    schedule();
+  }
+  toggle.hidden = false;
+  toggle.addEventListener("click", () => { paused = !paused; updateToggle(); });
+  motion.addEventListener("change", (event) => {
+    if (event.matches) { paused = true; updateToggle(); }
+  });
+  document.addEventListener("visibilitychange", schedule);
+  window.addEventListener("pagehide", () => { clearTimeout(timer); timer = 0; });
+  window.addEventListener("pageshow", schedule);
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      schedule();
+    }, { threshold: .1 }).observe(board);
+  } else {
+    const checkVisible = () => {
+      const rect = board.getBoundingClientRect();
+      visible = rect.bottom > 0 && rect.top < window.innerHeight;
+      schedule();
+    };
+    window.addEventListener("scroll", checkVisible, { passive: true });
+    window.addEventListener("resize", checkVisible, { passive: true });
+    checkVisible();
+  }
+  placeFood();
+  draw();
+  updateToggle();
+})();
 
 /* ───────── A small interruption in the signal ───────── */
 (function logoGlitch() {
@@ -262,62 +455,87 @@ document.getElementById("year").textContent = new Date().getFullYear();
   });
 })();
 
-/* ───────── Clifford attractor + the unlisted Chaos Lab ─────────
-   The hero and the lab share one canvas, density buffer and animation loop.
-   x' = sin(a·y) + c·cos(a·x)
-   y' = sin(b·x) + d·cos(b·y) */
+/* ───────── The hero's live Clifford attractor ─────────
+   x' = sin(a·y) + c·cos(a·x), y' = sin(b·x) + d·cos(b·y). */
 (function attractor() {
   const canvas = document.getElementById("attractor");
   const hero = document.getElementById("top");
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
-
-  const lab = document.getElementById("chaos-lab");
-  const viewport = document.getElementById("chaos-viewport");
-  const unlock = document.getElementById("chaos-unlock");
-  const presetSelect = document.getElementById("chaos-preset");
-  const paletteSelect = document.getElementById("chaos-palette");
-  const playBtn = document.getElementById("chaos-play");
-  const status = document.getElementById("chaos-status");
-  const result = document.getElementById("chaos-result");
-  const parameters = ["a", "b", "c", "d"];
-  const presets = {
-    stable: { a: -1.55, b: 1.7, c: 1, d: .7 },
-    questionable: { a: -1.7, b: 1.5, c: .9, d: .7 },
-    review: { a: -1.4, b: 1.8, c: 1, d: .8 },
-  };
-  let coords = { ...presets.stable };
-  let palette = "neon", playing = !reducedMotion, heroVisible = true;
-  let dirty = true, raf = 0, resizeTimer = 0, returnFocus = null;
-  let settledPoint = null;
-
   const PARTICLES = 26000, STEPS = 3, DECAY = .86;
-  let W = 0, H = 0, density, img, pix32, scale, cx, cy;
   const px = new Float64Array(PARTICLES), py = new Float64Array(PARTICLES);
-  function seedParticles() {
+  const lut = new Uint32Array(256);
+  const colours = {
+    dark: [[0,11,10,26],[.18,38,12,98],[.4,132,24,160],[.62,245,70,150],[.82,255,160,70],[1,255,240,214]],
+    light: [[0,251,250,255],[.15,222,208,252],[.4,165,115,238],[.65,214,36,159],[.85,112,20,124],[1,34,10,66]],
+  };
+  let W, H, density, img, pixels, scale, cx, cy;
+  let dirty = true, visible = true, raf = 0, resizeTimer = 0;
+  let mx = .5, my = .5, tx = .5, ty = .5;
+  function seed() {
     for (let i = 0; i < PARTICLES; i++) {
       px[i] = (Math.random() - .5) * 2;
       py[i] = (Math.random() - .5) * 2;
     }
   }
-  // Palettes are ink on paper in light mode, and light on ink in dark mode.
-  const PALETTES = {
-    neon: {
-      dark: [[0,11,10,26],[.18,38,12,98],[.4,132,24,160],[.62,245,70,150],[.82,255,160,70],[1,255,240,214]],
-      light: [[0,251,250,255],[.15,222,208,252],[.4,165,115,238],[.65,214,36,159],[.85,112,20,124],[1,34,10,66]],
-    },
-    ocean: {
-      dark: [[0,11,10,26],[.18,6,35,84],[.4,0,115,170],[.62,40,214,214],[.82,170,255,120],[1,230,255,220]],
-      light: [[0,251,250,255],[.18,205,235,243],[.4,60,170,188],[.62,0,115,150],[.82,8,70,110],[1,10,25,65]],
-    },
-    ember: {
-      dark: [[0,11,10,26],[.18,65,10,70],[.4,190,35,110],[.62,255,85,95],[.82,255,170,60],[1,255,240,190]],
-      light: [[0,251,250,255],[.18,255,222,219],[.4,230,125,70],[.62,190,60,85],[.82,110,25,90],[1,40,10,55]],
-    },
-  };
-  const lut = new Uint32Array(256);
-  function buildLut() {
-    const stops = PALETTES[lab.open ? palette : "neon"][currentTheme()];
+  function resize() {
+    const rect = hero.getBoundingClientRect();
+    const k = Math.min(1, 900 / Math.max(1, rect.width, rect.height));
+    W = Math.max(2, Math.round(rect.width * k));
+    H = Math.max(2, Math.round(rect.height * k));
+    canvas.width = W; canvas.height = H;
+    density = new Float32Array(W * H);
+    img = ctx.createImageData(W, H);
+    pixels = new Uint32Array(img.data.buffer);
+    const wide = W > H * 1.1;
+    scale = wide ? H / 5.4 : W / 4.8;
+    cx = wide ? W * .68 : W * .5;
+    cy = wide ? H * .5 : H * .62;
+    dirty = true;
+    schedule();
+  }
+  function paint() {
+    const gain = 255 / Math.log(111);
+    for (let i = 0; i < density.length; i++) {
+      const value = Math.log(1 + density[i]) * gain;
+      pixels[i] = lut[value > 255 ? 255 : value | 0];
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+  function frame(time) {
+    mx += (tx - mx) * .04; my += (ty - my) * .04;
+    const a = -1.55 + .12 * Math.sin(time * .00018) + (mx - .5) * .3;
+    const b = 1.7 + .12 * Math.cos(time * .00013) + (my - .5) * .3;
+    const c = 1 + .06 * Math.sin(time * .00021);
+    const d = .7 + .06 * Math.cos(time * .00017);
+    for (let i = 0; i < density.length; i++) density[i] *= DECAY;
+    for (let i = 0; i < PARTICLES; i++) {
+      let x = px[i], y = py[i];
+      for (let s = 0; s < STEPS; s++) {
+        const nx = Math.sin(a * y) + c * Math.cos(a * x);
+        y = Math.sin(b * x) + d * Math.cos(b * y); x = nx;
+        const ix = (cx + x * scale) | 0, iy = (cy + y * scale) | 0;
+        if (ix >= 0 && ix < W && iy >= 0 && iy < H) density[iy * W + ix]++;
+      }
+      px[i] = x; py[i] = y;
+    }
+  }
+  function schedule() {
+    if (!raf && visible && !document.hidden) raf = requestAnimationFrame(loop);
+  }
+  function loop(time) {
+    raf = 0;
+    if (!visible || document.hidden) return;
+    if (dirty) {
+      seed(); density.fill(0);
+      for (let i = 0; i < (reducedMotion ? 40 : 8); i++) frame(20000);
+      dirty = false;
+    } else if (!reducedMotion) frame(time);
+    paint();
+    if (!reducedMotion) schedule();
+  }
+  function themeChange() {
+    const stops = colours[currentTheme()];
     for (let i = 0; i < 256; i++) {
       const t = i / 255;
       let k = 0;
@@ -327,287 +545,27 @@ document.getElementById("year").textContent = new Date().getFullYear();
       const r = r0 + (r1 - r0) * u, g = g0 + (g1 - g0) * u, b = b0 + (b1 - b0) * u;
       lut[i] = (255 << 24) | (b << 16) | (g << 8) | r;
     }
-  }
-  function resize() {
-    const rect = (lab.open ? viewport : hero).getBoundingClientRect();
-    const k = (lab.open ? 720 : 900) / Math.max(1, rect.width, rect.height);
-    W = Math.max(2, Math.round(rect.width * Math.min(k, 1)));
-    H = Math.max(2, Math.round(rect.height * Math.min(k, 1)));
-    canvas.width = W;
-    canvas.height = H;
-    density = new Float32Array(W * H);
-    img = ctx.createImageData(W, H);
-    pix32 = new Uint32Array(img.data.buffer);
-    const wide = W > H * 1.1;
-    scale = lab.open ? Math.min(W, H) / 5.6 : wide ? H / 5.4 : W / 4.8;
-    cx = lab.open ? W * .5 : wide ? W * .68 : W * .5;
-    cy = lab.open ? H * .5 : wide ? H * .5 : H * .62;
-    dirty = true;
-    clearResult();
-    scheduleFrame();
-  }
-
-  let mx = .5, my = .5, tx = .5, ty = .5;
-  window.addEventListener("pointermove", (e) => {
-    if (lab.open) return;
-    tx = e.clientX / window.innerWidth;
-    ty = e.clientY / window.innerHeight;
-  }, { passive: true });
-
-  function frame(t, draw = true) {
-    mx += (tx - mx) * .04;
-    my += (ty - my) * .04;
-    // Pointer modulation stays in the hero's established chaotic range.
-    const inLab = lab.open;
-    const { a, b, c, d } = inLab ? coords : {
-      a: -1.55 + .12 * Math.sin(t * .00018) + (mx - .5) * .3,
-      b: 1.7 + .12 * Math.cos(t * .00013) + (my - .5) * .3,
-      c: 1 + .06 * Math.sin(t * .00021),
-      d: .7 + .06 * Math.cos(t * .00017),
-    };
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity, motion = 0;
-    for (let i = 0; i < density.length; i++) density[i] *= DECAY;
-    for (let i = 0; i < PARTICLES; i++) {
-      let x = px[i], y = py[i];
-      for (let s = 0; s < STEPS; s++) {
-        const nx = Math.sin(a * y) + c * Math.cos(a * x);
-        const ny = Math.sin(b * x) + d * Math.cos(b * y);
-        if (inLab) motion = Math.max(motion, Math.abs(nx - x), Math.abs(ny - y));
-        x = nx; y = ny;
-        const ix = (cx + x * scale) | 0, iy = (cy + y * scale) | 0;
-        if (ix >= 0 && ix < W && iy >= 0 && iy < H) density[iy * W + ix] += 1;
-      }
-      px[i] = x; py[i] = y;
-      if (inLab) {
-        minX = Math.min(minX, x); maxX = Math.max(maxX, x);
-        minY = Math.min(minY, y); maxY = Math.max(maxY, y);
-      }
-    }
-    // A point is a valid result, but a single bitmap pixel looks like a blank
-    // plot. Check both spread and motion so periodic orbits remain animated.
-    const nextPoint = inLab && Math.max(maxX - minX, maxY - minY, motion) * scale < .35
-      ? { x: cx + (minX + maxX) * .5 * scale, y: cy + (minY + maxY) * .5 * scale } : null;
-    const changed = Boolean(nextPoint) !== Boolean(settledPoint);
-    settledPoint = nextPoint;
-    if (changed) {
-      if (settledPoint) {
-        density.fill(0);
-        const index = Math.round(settledPoint.y) * W + Math.round(settledPoint.x);
-        if (index >= 0 && index < density.length) density[index] = 110;
-      }
-      updateStatus();
-    }
-    if (draw) paint();
-  }
-  function paint() {
-    const gain = 255 / Math.log(111);
-    for (let i = 0; i < density.length; i++) {
-      const v = Math.log(1 + density[i]) * gain;
-      pix32[i] = lut[v > 255 ? 255 : v | 0];
-    }
-    if (lab.open && settledPoint) {
-      // Draw into ImageData so the visible point and halo are also in PNG exports.
-      const radius = Math.max(9, Math.round(Math.min(W, H) * .025));
-      const x0 = Math.round(settledPoint.x), y0 = Math.round(settledPoint.y);
-      const colour = lut[220];
-      const channels = [colour & 255, (colour >>> 8) & 255, (colour >>> 16) & 255];
-      for (let dy = -radius; dy <= radius; dy++) {
-        for (let dx = -radius; dx <= radius; dx++) {
-          const x = x0 + dx, y = y0 + dy, distance = Math.hypot(dx, dy);
-          if (x < 0 || x >= W || y < 0 || y >= H || distance > radius) continue;
-          const ring = Math.abs(distance - radius * .65) < .65 ? .5 : 0;
-          const alpha = distance <= 2.5 ? 1 : Math.max(ring, .3 * (1 - distance / radius) ** 2);
-          const index = (y * W + x) * 4;
-          for (let channel = 0; channel < 3; channel++) {
-            img.data[index + channel] = img.data[index + channel] * (1 - alpha) + channels[channel] * alpha;
-          }
-        }
-      }
-    }
-    ctx.putImageData(img, 0, 0);
-  }
-  function settle(count) {
-    for (let i = 0; i < count; i++) {
-      frame(2e4, false);
-      if (settledPoint) break;
-    }
-    paint();
-  }
-  function scheduleFrame() {
-    if (!raf && !document.hidden) raf = requestAnimationFrame(loop);
-  }
-  function loop(t) {
-    raf = 0;
-    if (document.hidden) return;
-    const visible = lab.open || heroVisible;
-    const animate = lab.open ? playing : !reducedMotion;
-    if (visible) {
-      if (dirty) {
-        // A fixed point can make every particle identical. A deterministic map
-        // cannot separate them again: every geometry change needs fresh seeds.
-        seedParticles();
-        density.fill(0);
-        settle(animate ? 8 : lab.open ? 14 : 40);
-      } else if (animate) frame(t);
-      dirty = false;
-    }
-    if (visible && animate && !settledPoint) scheduleFrame();
-  }
-  function onThemeChange() {
-    buildLut();
     paint();
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute("content", currentTheme() === "dark" ? "#0b0a1a" : "#fbfaff");
   }
-  new MutationObserver(onThemeChange).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
-  systemDark.addEventListener("change", onThemeChange);
+  window.addEventListener("pointermove", event => {
+    tx = event.clientX / window.innerWidth; ty = event.clientY / window.innerHeight;
+  }, { passive: true });
   window.addEventListener("resize", () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(resize, 150);
+    clearTimeout(resizeTimer); resizeTimer = setTimeout(resize, 150);
   });
-  if ("IntersectionObserver" in window) {
-    new IntersectionObserver(([entry]) => {
-      heroVisible = entry.isIntersecting;
-      if (heroVisible) scheduleFrame();
-    }, { threshold: 0 }).observe(hero);
-  }
+  if ("IntersectionObserver" in window) new IntersectionObserver(([entry]) => {
+    visible = entry.isIntersecting;
+    if (visible) schedule();
+    else { cancelAnimationFrame(raf); raf = 0; }
+  }, { threshold: 0 }).observe(hero);
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) { cancelAnimationFrame(raf); raf = 0; }
-    else scheduleFrame();
+    else schedule();
   });
+  new MutationObserver(themeChange).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+  systemDark.addEventListener("change", themeChange);
   resize();
-  onThemeChange();
-
-  // The page still works when a browser cannot provide a modal dialog.
-  if (typeof lab.showModal !== "function") return;
-  function updateStatus() {
-    playBtn.textContent = playing ? "Pause" : "Play";
-    const message = settledPoint ? "Fixed point · all particles converged"
-      : playing ? "Running · 26,000 particles" : "Static frame · change a parameter or press Play";
-    if (status.textContent !== message) status.textContent = message;
-    result.hidden = !settledPoint;
-    result.classList.toggle("is-top", Boolean(settledPoint && settledPoint.y > H * .6));
-    if (lab.open) canvas.setAttribute("aria-label", settledPoint
-      ? "Clifford map converged to a fixed point, highlighted on the plot"
-      : "Clifford attractor generated from the current lab parameters");
-  }
-  function clearResult() {
-    if (!settledPoint) return;
-    settledPoint = null;
-    updateStatus();
-  }
-  function syncControls() {
-    parameters.forEach(name => {
-      document.getElementById("chaos-" + name).value = coords[name];
-      document.getElementById("chaos-" + name + "-value").value = coords[name].toFixed(2);
-    });
-    updateStatus();
-  }
-  function redraw() {
-    // Coalesce rapid slider events; reseed once at the next rendered frame.
-    dirty = true;
-    clearResult();
-    scheduleFrame();
-  }
-  function openLab() {
-    if (document.querySelector("dialog[open]")) return;
-    returnFocus = document.activeElement;
-    setMenu(false);
-    lab.showModal();
-    document.body.classList.add("chaos-open");
-    viewport.append(canvas);
-    canvas.setAttribute("aria-hidden", "false");
-    canvas.setAttribute("role", "img");
-    clearTimeout(resizeTimer);
-    buildLut();
-    resize();
-    syncControls();
-  }
-  unlock.hidden = false;
-  unlock.addEventListener("click", openLab);
-  document.getElementById("chaos-close").addEventListener("click", () => lab.close());
-  lab.addEventListener("close", () => {
-    document.body.classList.remove("chaos-open");
-    hero.prepend(canvas);
-    canvas.setAttribute("aria-hidden", "true");
-    canvas.removeAttribute("role");
-    canvas.removeAttribute("aria-label");
-    clearTimeout(resizeTimer);
-    buildLut();
-    resize();
-    updateNavSize();
-    const target = returnFocus?.isConnected && returnFocus !== document.body && !returnFocus.closest("[inert]") ? returnFocus : document.querySelector(".nav__brand");
-    target.focus({ preventScroll: true });
-  });
-  lab.addEventListener("click", (e) => {
-    if (e.target !== lab) return;
-    const rect = lab.getBoundingClientRect();
-    if (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom) lab.close();
-  });
-  parameters.forEach(name => {
-    document.getElementById("chaos-" + name).addEventListener("input", (e) => {
-      coords[name] = Number(e.target.value);
-      document.getElementById("chaos-" + name + "-value").value = coords[name].toFixed(2);
-      presetSelect.value = "custom";
-      redraw();
-    });
-  });
-  function choosePreset(name) {
-    if (!presets[name]) return;
-    coords = { ...presets[name] };
-    presetSelect.value = name;
-    syncControls();
-    redraw();
-  }
-  presetSelect.addEventListener("change", () => choosePreset(presetSelect.value));
-  document.getElementById("chaos-restore").addEventListener("click", () => {
-    choosePreset("stable");
-    presetSelect.focus({ preventScroll: true });
-  });
-  paletteSelect.addEventListener("change", () => {
-    palette = paletteSelect.value;
-    buildLut();
-    paint();
-  });
-  playBtn.addEventListener("click", () => {
-    playing = !playing;
-    updateStatus();
-    scheduleFrame();
-  });
-  document.getElementById("chaos-reset").addEventListener("click", () => {
-    coords = { ...presets.stable };
-    palette = "neon";
-    playing = !reducedMotion;
-    presetSelect.value = "stable";
-    paletteSelect.value = "neon";
-    buildLut();
-    syncControls();
-    redraw();
-  });
-  document.getElementById("chaos-save").addEventListener("click", () => {
-    canvas.toBlob(blob => {
-      if (!blob) { status.textContent = "Could not save this frame. Try again."; return; }
-      const url = URL.createObjectURL(blob);
-      const download = document.createElement("a");
-      download.href = url;
-      download.download = "chaos-lab.png";
-      download.hidden = true;
-      lab.append(download);
-      download.click();
-      download.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    }, "image/png");
-  });
-
-  const sequence = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a"];
-  let buffer = [], lastKeyAt = 0;
-  document.addEventListener("keydown", (e) => {
-    if (e.defaultPrevented || e.repeat || e.ctrlKey || e.metaKey || e.altKey || document.querySelector("dialog[open]")) return;
-    if (e.target.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"])')) return;
-    if (Date.now() - lastKeyAt > 2500) buffer = [];
-    lastKeyAt = Date.now();
-    buffer.push(e.key.length === 1 ? e.key.toLowerCase() : e.key);
-    buffer = buffer.slice(-sequence.length);
-    if (buffer.join("|") === sequence.join("|")) { buffer = []; openLab(); }
-  });
+  themeChange();
 })();

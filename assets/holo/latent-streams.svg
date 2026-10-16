@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="#fff" stroke="#fff" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Latent image: a graduation cap where the data streams converge. -->
+  <g transform="translate(222 170)">
+    <path d="M-40 0 0-18 40 0 0 18Z" stroke="none"/>
+    <path d="M-25 8V24Q0 36 25 24V8L0 19Z" stroke="none"/>
+    <path d="M0 0 31 7V30" fill="none" stroke-width="2.6"/>
+    <path d="M27 30h8l-1 9h-6Z" stroke="none"/>
+  </g>
+</svg>

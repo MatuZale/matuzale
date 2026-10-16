@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+  <!-- Reverse-holo foil tile: a playing-card-back lattice with a few card suits in it.
+       The bevel is baked in; the alpha doubles as a CSS mask for the moving chrome. -->
+  <defs>
+    <filter id="bevel" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1.1" result="blur"/>
+      <feSpecularLighting in="blur" surfaceScale="3.2" specularConstant="1.15" specularExponent="16" lighting-color="#fff" result="spec">
+        <feDistantLight azimuth="225" elevation="38"/>
+      </feSpecularLighting>
+      <feComposite in="spec" in2="SourceAlpha" operator="in" result="lit"/>
+      <feComposite in="SourceGraphic" in2="lit" operator="arithmetic" k2="1" k3=".9"/>
+    </filter>
+    <path id="spade" d="M0-8C0-8-8-2.2-8 1.8-8 4.9-6 6.4-4 6.4-2.5 6.4-1.3 5.7-.6 4.7-.8 6.5-1.6 8-3.2 9H3.2C1.6 8 .8 6.5.6 4.7 1.3 5.7 2.5 6.4 4 6.4 6 6.4 8 4.9 8 1.8 8-2.2 0-8 0-8Z"/>
+    <path id="heart" d="M0 7.6C0 7.6-8.2 1.6-8.2-3-8.2-6-6.2-8-3.9-8-2-8-.6-6.9 0-5.4.6-6.9 2-8 3.9-8 6.2-8 8.2-6 8.2-3 8.2 1.6 0 7.6 0 7.6Z"/>
+    <path id="diamond" d="M0-9Q3.4-4 6.4 0 3.4 4 0 9-3.4 4-6.4 0-3.4-4 0-9Z"/>
+    <g id="club">
+      <circle cy="-4.3" r="3.5"/><circle cx="-4" cy="1.3" r="3.5"/><circle cx="4" cy="1.3" r="3.5"/>
+      <path d="M-1.4-1 1.4-1 .9 4Q1.3 7.4 3.2 9H-3.2Q-1.3 7.4-.9 4Z"/>
+    </g>
+    <path id="lattice" d="M30 0 0 30M90 0 0 90M120 30 30 120M120 90 90 120M30 0 120 90M0 30 90 120M90 0 120 30M0 90 30 120"/>
+    <g id="dots">
+      <circle cx="60" cy="30" r="1.3"/><circle cx="30" cy="60" r="1.3"/><circle cx="90" cy="60" r="1.3"/><circle cx="60" cy="90" r="1.3"/>
+      <circle cx="30" cy="0" r="1.3"/><circle cx="90" cy="0" r="1.3"/><circle cx="0" cy="30" r="1.3"/><circle cx="0" cy="90" r="1.3"/>
+    </g>
+  </defs>
+  <g fill="none" stroke="#9aa0aa" stroke-width=".9" opacity=".55">
+    <use href="#lattice"/><use href="#lattice" x="120"/><use href="#lattice" y="120"/><use href="#lattice" x="120" y="120"/>
+  </g>
+  <g fill="#b4bac4" opacity=".75">
+    <use href="#dots"/><use href="#dots" x="120"/><use href="#dots" y="120"/><use href="#dots" x="120" y="120"/>
+    <circle cx="30" cy="30" r="1.6"/><circle cx="150" cy="30" r="1.6"/><circle cx="90" cy="90" r="1.6"/><circle cx="210" cy="90" r="1.6"/>
+    <circle cx="30" cy="150" r="1.6"/><circle cx="150" cy="150" r="1.6"/><circle cx="90" cy="210" r="1.6"/><circle cx="210" cy="210" r="1.6"/>
+  </g>
+  <!-- Four suits in sixteen lattice cells, each in its own row and column. -->
+  <g fill="#8c929d" filter="url(#bevel)">
+    <use href="#spade" transform="translate(90 30) scale(1.45)"/>
+    <use href="#heart" transform="translate(210 150) scale(1.45)"/>
+    <use href="#diamond" transform="translate(30 90) scale(1.45)"/>
+    <use href="#club" transform="translate(150 210) scale(1.45)"/>
+  </g>
+</svg>

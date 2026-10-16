@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="#fff" stroke="#fff" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Latent image: a ringed planet at the barycentre, and the conserved energy. -->
+  <g transform="translate(205 200) rotate(-18)">
+    <circle r="15" stroke="none"/>
+    <path d="M-15 0a31 8.5 0 1 0 30 0" fill="none" stroke-width="3.2"/>
+    <path d="M-23-3.5a31 8.5 0 0 1 46 0" fill="none" stroke-width="3.2" opacity=".55"/>
+  </g>
+  <text x="166" y="206" text-anchor="end" stroke="none" font-family="Helvetica Neue, Arial, sans-serif" font-size="16" font-weight="700" letter-spacing=".5">ΔE ≈ 0</text>
+</svg>

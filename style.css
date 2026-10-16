@@ -18,6 +18,13 @@
   --glow-hover: -8px -6px 28px -16px color-mix(in srgb, var(--accent) 50%, transparent), 10px 8px 32px -18px color-mix(in srgb, var(--accent-3) 50%, transparent);
   --shadow: 0 10px 30px -12px rgba(60, 30, 120, 0.25);
   --radius: 22px;
+  --card-paper: #f3eee4;
+  --card-ink: #27232f;
+  --card-muted: #635b6b;
+  --card-edge: #b1a5b6;
+  --card-shadow: #30213640;
+  --card-relief: #ffffffe6;
+  --card-foil-tone: saturate(1.9) brightness(.7);
 
   --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-head: "Space Grotesk", var(--font-body);
@@ -40,6 +47,13 @@
   --link: #4fd8ff;
   --grad: linear-gradient(120deg, #ff5ecb, #9b6bff 55%, #4fd8ff);
   --shadow: 0 14px 40px -16px rgba(0, 0, 0, 0.7);
+  --card-paper: #28262e;
+  --card-ink: #f1ebed;
+  --card-muted: #c1b7c1;
+  --card-edge: #615769;
+  --card-shadow: #00000099;
+  --card-relief: #00000080;
+  --card-foil-tone: saturate(1.1) brightness(1.05);
   color-scheme: dark;
 }
 
@@ -58,6 +72,13 @@
     --link: #4fd8ff;
     --grad: linear-gradient(120deg, #ff5ecb, #9b6bff 55%, #4fd8ff);
     --shadow: 0 14px 40px -16px rgba(0, 0, 0, 0.7);
+    --card-paper: #28262e;
+    --card-ink: #f1ebed;
+    --card-muted: #c1b7c1;
+    --card-edge: #615769;
+    --card-shadow: #00000099;
+    --card-relief: #00000080;
+    --card-foil-tone: saturate(1.1) brightness(1.05);
     color-scheme: dark;
   }
 }
@@ -180,6 +201,49 @@ main[tabindex="-1"]:focus, main [tabindex="-1"]:focus { outline: none; }
 .btn--ghost:hover { border-color: var(--accent); }
 .btn--lg { padding: 1.05rem 1.9rem; font-size: 1.15rem; }
 
+/* Brief RGB interference in the lettering; hit areas and outlines stay steady.
+   Start near the burst so a quick hover catches it, then leave a quiet interval. */
+:where(.btn, button, .back-top, .socials a) {
+  --glitch-a: color-mix(in srgb, var(--accent) 85%, transparent);
+  --glitch-b: color-mix(in srgb, var(--accent-3) 85%, transparent);
+  animation: var(--glitch-text, none) 2.4s steps(1, end) -2.05s infinite;
+  text-shadow: var(--glitch-rest, none);
+}
+:where(.icon-btn, .back-top, .socials a) > svg {
+  animation: var(--glitch-icon, none) 2.4s steps(1, end) -2.05s infinite;
+}
+:where(.btn, button, .back-top, .socials a):not(:disabled, [aria-disabled="true"]):is(:focus-visible, :active) {
+  --glitch-text: rgb-split;
+  --glitch-icon: rgb-split-icon;
+  --glitch-rest: .6px 0 var(--glitch-a), -.6px 0 var(--glitch-b);
+}
+@media (hover: hover) and (pointer: fine) {
+  :where(.btn, button, .back-top, .socials a):not(:disabled, [aria-disabled="true"]):hover {
+    --glitch-text: rgb-split;
+    --glitch-icon: rgb-split-icon;
+    --glitch-rest: .6px 0 var(--glitch-a), -.6px 0 var(--glitch-b);
+  }
+}
+/* Touch browsers can keep :active after a tap: let that pulse finish once. */
+@media (hover: none) {
+  :where(.btn, button, .back-top, .socials a),
+  :where(.icon-btn, .back-top, .socials a) > svg { animation-iteration-count: 1; }
+}
+@keyframes rgb-split {
+  0%, 86%, 96%, 100% { text-shadow: none; }
+  88% { text-shadow: 2px 0 var(--glitch-a), -2px 0 var(--glitch-b); }
+  90% { text-shadow: -3px 0 var(--glitch-a), 3px 0 var(--glitch-b); }
+  92% { text-shadow: 4px 1px var(--glitch-a), -4px -1px var(--glitch-b); }
+  94% { text-shadow: -1px 0 var(--glitch-a), 1px 0 var(--glitch-b); }
+}
+@keyframes rgb-split-icon {
+  0%, 86%, 96%, 100% { filter: none; }
+  88% { filter: drop-shadow(2px 0 var(--glitch-a)) drop-shadow(-2px 0 var(--glitch-b)); }
+  90% { filter: drop-shadow(-2px 0 var(--glitch-a)) drop-shadow(2px 0 var(--glitch-b)); }
+  92% { filter: drop-shadow(3px 1px var(--glitch-a)) drop-shadow(-3px -1px var(--glitch-b)); }
+  94% { filter: drop-shadow(-1px 0 var(--glitch-a)) drop-shadow(1px 0 var(--glitch-b)); }
+}
+
 /* ───────────────────────── Hero (follows the theme) ───────────────────────── */
 .hero {
   position: relative; min-height: 100svh; display: flex; align-items: center; overflow: hidden;
@@ -228,6 +292,7 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
 
 /* About */
 .about { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.4fr); gap: clamp(2rem, 6vw, 5rem); align-items: center; }
+.about__aside { min-width: 0; display: grid; gap: 1.7rem; }
 .about__photo { margin: 0; position: relative; }
 .about__photo::before {
   content: ""; position: absolute; inset: -14px; border-radius: 40px; background: var(--grad); filter: blur(34px); opacity: 0.45; z-index: 0;
@@ -235,9 +300,21 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
 .about__photo img { height: auto; position: relative; z-index: 1; border-radius: 32px; width: 100%; aspect-ratio: 1; object-fit: cover; border: 1px solid var(--line); transform: rotate(-2deg); transition: transform 0.5s; }
 .about__photo:hover img { transform: rotate(0); }
 .about__text p { color: var(--muted); }
-.chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.4rem; }
-.chips li { padding: 0.45rem 0.9rem; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font-size: 0.9rem; }
-@media (max-width: 800px) { .about { grid-template-columns: 1fr; } .about__photo { max-width: 340px; } }
+.about-terminal { position: relative; overflow: hidden; border: 1px solid transparent; border-radius: 13px; background: linear-gradient(#100e20, #100e20) padding-box, var(--rim) border-box; color: #dfd9ee; box-shadow: var(--glow), 0 16px 36px -24px #08051c80; font: 400 .69rem/1.9 var(--font-mono); }
+.about-terminal__bar { display: flex; justify-content: space-between; align-items: center; gap: .8rem; padding: .65rem .9rem; border-bottom: 1px solid #c5b6ef1a; background: linear-gradient(100deg, #30213a70, #192a3d70); color: #b6accb; font-size: .6rem; }
+.about-terminal__lights { display: flex; gap: 5px; }
+.about-terminal__lights i { width: 6px; height: 6px; border-radius: 50%; background: #ff7db5; }
+.about-terminal__lights i:nth-child(2) { background: #bb9bff; }
+.about-terminal__lights i:nth-child(3) { background: #6ce7e4; }
+.about-terminal__body { padding: 1rem 1.1rem .85rem; overflow-wrap: anywhere; }
+.about-terminal__body p { margin: 0 0 .8rem; }
+.about-terminal__body .about-terminal__command { margin-bottom: .3rem; color: #eeceff; }
+.about-terminal__command > span, .about-terminal__prompt { color: #6ce7e4; }
+.about-terminal__command > span { margin-right: .4rem; }
+.about-terminal__arrow { color: #ff91cf; }
+.about-terminal__cursor { display: inline-block; width: .5em; height: 1em; vertical-align: -.1em; background: #6ce7e4; animation: terminal-cursor 1.2s step-end 4; }
+@keyframes terminal-cursor { 0%, 55%, 100% { opacity: 1; } 56%, 99% { opacity: 0; } }
+@media (max-width: 800px) { .about { grid-template-columns: 1fr; } .about__aside { width: min(100%, 380px); margin-inline: auto; } }
 
 /* The employer keeps its own mark, on the white field it was designed for. */
 .workplace { display: grid; grid-template-columns: 170px minmax(0, 1fr) 20px; gap: 1rem; align-items: center; padding: 1rem; margin: 1.5rem 0; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--text); transition: border-color .2s, transform .2s; }
@@ -309,11 +386,20 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
 .card--research .card__body { padding: 2rem; }
 .card--outreach { background: linear-gradient(160deg, var(--surface), color-mix(in srgb, var(--accent-3) 10%, var(--surface))); }
 
+/* The slot stays still for pointer hit-testing; its card can move in perspective.
+   Scroll reveals belong to the slot, independently of the card's rotation. */
+.project-slot { position: relative; min-width: 0; display: grid; grid-column: span 2; perspective: 1100px; }
+.project-slot--wide { grid-column: 1 / -1; }
+.project-slot > .card { min-width: 0; grid-column: auto; }
+.project-slot.is-holo-active { z-index: 2; }
+
 @media (max-width: 980px) {
   .bento { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .card--xl, .card--wide { grid-column: span 2; }
   .card--tall { grid-column: span 2; }
   .card--m { grid-column: span 1; }
+  .project-slot { grid-column: span 1; }
+  .project-slot--wide, .project-slot--tall { grid-column: 1 / -1; }
 }
 @media (max-width: 640px) {
   .bento { grid-template-columns: 1fr; }
@@ -321,6 +407,7 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
   .card--xl, .card--research { flex-direction: column; }
   .card--research img { width: 100%; max-width: none; height: 160px; border-right: 0; border-bottom: 1px solid var(--line); }
   .card__art { max-width: 100%; margin: 0 auto 1rem; padding: 0 1rem; }
+  .project-slot, .project-slot--wide, .project-slot--tall { grid-column: auto; }
 }
 
 /* BUOY animation. Waves have an 80-unit period, so drifting by exactly one period loops seamlessly.
@@ -386,7 +473,7 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
 .bentos__role p { color: #fff; line-height: 1.6; font-size: .98rem; margin: .5rem 0 0; }
 .bentos__role strong { color: var(--muted); font-weight: 400; font-size: .92rem; }
 .bentos__actions { display: flex; align-items: center; flex-wrap: wrap; gap: 1.2rem 1.5rem; margin-top: 2rem; }
-.bentos .bentos__btn { color: #001562; background: #aaff00; border-radius: 8px; font-size: .88rem; padding: .9rem 1.1rem; }
+.bentos .bentos__btn { --glitch-a: #6e9aff; --glitch-b: #7eddeb; color: #001562; background: #aaff00; border-radius: 8px; font-size: .88rem; padding: .9rem 1.1rem; }
 .bentos .bentos__btn:hover { background: #c2ff4d; box-shadow: 0 6px 24px #aaff0020; }
 .bentos__text-link { display: inline-block; font-weight: 500; font-size: .88rem; padding-block: .5rem; color: #fff; }
 .bentos__panel { background: #000b35a6; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
@@ -463,9 +550,28 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
 .socials a:hover { transform: translateY(-2px); border-color: var(--accent); text-decoration: none; }
 .socials svg { width: 20px; height: 20px; fill: currentColor; }
 
-.footer { border-top: 1px solid var(--line); padding: 1.6rem 0; color: var(--muted); font-size: 0.9rem; }
-.footer__inner { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+.footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: 0.9rem; }
+.footer__inner { display: grid; grid-template-columns: 1fr 1.2fr minmax(260px, 340px); }
 .footer p { margin: 0; }
+.footer__circuit { min-width: 0; width: 100%; margin: 0; }
+.circuit-window { width: 100%; height: auto; filter: drop-shadow(0 0 12px #9570ef22); }
+.circuit-window__head { filter: drop-shadow(0 0 3px #6ce7e4b3); }
+.circuit-window__food { filter: drop-shadow(0 0 3px #ff80c899); }
+.circuit-caption { display: flex; align-items: center; justify-content: space-between; gap: .25rem; padding-inline: .5rem; font: 400 .58rem/1.7 var(--font-mono); }
+.circuit-caption strong { font-weight: 500; color: var(--link); }
+.circuit-caption__dot { display: inline-block; width: 4px; height: 4px; margin-right: .45rem; border-radius: 50%; background: var(--accent-3); box-shadow: 0 0 5px color-mix(in srgb, var(--accent-3) 45%, transparent); }
+.footer__circuit.is-paused .circuit-caption__dot { background: var(--muted); box-shadow: none; }
+.circuit-caption__pause { display: inline-flex; align-items: center; justify-content: flex-end; gap: .5rem; min-width: 44px; min-height: 32px; padding: .25rem 0 .25rem .5rem; border: 0; background: none; color: var(--muted); font: inherit; cursor: pointer; }
+.circuit-caption__pause:hover { color: var(--link); }
+.circuit-caption__pause[hidden] { display: none; }
+@media (max-width: 1000px) {
+  .footer__inner { grid-template-columns: 1fr minmax(260px, 340px); }
+  .footer__circuit { grid-column: 2; grid-row: 1 / 3; }
+}
+@media (max-width: 640px) {
+  .footer__inner { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; }
+  .footer__circuit { grid-column: auto; grid-row: auto; width: min(100%, 340px); margin-top: .5rem; }
+}
 
 /* ───────────────────────── Neon accents ─────────────────────────
    Shared portfolio treatments. BENTOS keeps its own project palette. */
@@ -498,7 +604,7 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
   background: var(--panel-fill, linear-gradient(var(--surface), var(--surface))) padding-box, var(--grad) border-box;
   box-shadow: var(--glow-hover), var(--shadow);
 }
-.workplace::before, .skill::before, .card:not(.card--bentos)::before {
+.workplace::before, .skill::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -510,10 +616,316 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
   transition: opacity .3s;
 }
 .workplace:hover::before, .workplace:focus-visible::before,
-.skill:hover::before,
-.card:not(.card--bentos):hover::before, .card:not(.card--bentos):focus-within::before { opacity: 1; }
+.skill:hover::before { opacity: 1; }
 .workplace > *, .skill > * { position: relative; }
 .card__media { overflow: hidden; flex-shrink: 0; }
+
+/* Printed cardstock, with a foil illustration beneath a thin laminate.
+   The SVGs and surface recipe are original; visual reference: Simey Goellner. */
+.card.card--holo, .card.card--holo:hover, .card.card--holo:focus-within {
+  --surface: var(--card-paper);
+  --surface-2: color-mix(in srgb, var(--card-paper) 92%, var(--card-ink));
+  --text: var(--card-ink);
+  --muted: var(--card-muted);
+  --line: color-mix(in srgb, var(--card-ink) 15%, transparent);
+  border: 1px solid var(--card-edge);
+  border-radius: 17px;
+  color: var(--card-ink);
+  background: linear-gradient(135deg, #ffffff08, transparent 42%, #0000000a), var(--card-paper);
+  box-shadow: inset 0 1px 0 #ffffff2b, inset 0 -1px 0 #00000026, 0 1px 0 var(--card-edge), 0 2px 0 color-mix(in srgb, var(--card-edge) 55%, #17131f), 0 12px 26px -15px var(--card-shadow);
+}
+/* The light is registered so it can be interpolated: entering, leaving or re-measuring a card glides
+   the highlight and the foil colours instead of jumping to the new value in one frame. */
+@property --light-x { syntax: "<percentage>"; inherits: true; initial-value: 50%; }
+@property --light-y { syntax: "<percentage>"; inherits: true; initial-value: 30%; }
+@property --foil-x { syntax: "<percentage>"; inherits: true; initial-value: 50%; }
+@property --foil-y { syntax: "<percentage>"; inherits: true; initial-value: 50%; }
+@property --foil-angle { syntax: "<angle>"; inherits: true; initial-value: 122deg; }
+@property --foil-exposure { syntax: "<number>"; inherits: true; initial-value: .7; }
+@property --stars-x { syntax: "<length>"; inherits: true; initial-value: 0px; }
+@property --stars-y { syntax: "<length>"; inherits: true; initial-value: 0px; }
+@property --holo-x { syntax: "<number>"; inherits: true; initial-value: 0; }
+@property --holo-y { syntax: "<number>"; inherits: true; initial-value: 0; }
+@property --holo-on { syntax: "<number>"; inherits: true; initial-value: 0; }
+.project-slot > .card--holo {
+  --light-ease: .9s cubic-bezier(.45, .05, .35, 1);
+  transform: translateY(var(--holo-lift, 0px)) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+  transform-origin: center;
+  transition:
+    transform .55s cubic-bezier(.18, .8, .25, 1.08), box-shadow .4s,
+    --light-x var(--light-ease), --light-y var(--light-ease), --foil-x var(--light-ease), --foil-y var(--light-ease),
+    --foil-angle var(--light-ease), --foil-exposure var(--light-ease), --stars-x var(--light-ease), --stars-y var(--light-ease),
+    --holo-x var(--light-ease), --holo-y var(--light-ease), --holo-on .8s cubic-bezier(.45, .05, .35, 1);
+}
+.project-slot:focus-within > .card--holo { --holo-on: 1; }
+.project-slot.is-holo-active > .card--holo {
+  --holo-lift: -5px;
+  --holo-on: 1;
+  will-change: transform;
+  /* The light trails the pointer with a little inertia, so colours drift rather than flick. */
+  transition-duration: .12s, .2s, .35s, .35s, .35s, .35s, .35s, .35s, .35s, .35s, .35s, .35s, .6s;
+  transition-timing-function: ease, ease, ease-out, ease-out, ease-out, ease-out, ease-out, ease-out, ease-out, ease-out, ease-out, ease-out, ease-in-out;
+  box-shadow: inset 0 1px 0 #ffffff40, inset 0 -1px 0 #00000033, 0 1px 0 var(--card-edge), 0 2px 0 color-mix(in srgb, var(--card-edge) 55%, #17131f), var(--shadow-x, 0px) var(--shadow-y, 22px) 34px -15px var(--card-shadow);
+}
+.card.card--holo::before, .card.card--holo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.card.card--holo::before {
+  z-index: 4;
+  opacity: .36;
+  background: url("assets/card-grain.svg") 0 0 / 192px 192px repeat;
+  mix-blend-mode: soft-light;
+}
+.card.card--holo::after {
+  z-index: 5;
+  opacity: .1;
+  background: radial-gradient(ellipse 75% 60% at var(--light-x, 50%) var(--light-y, 30%), #ffffffb3, #ffffff18 32%, transparent 60%, #00000040);
+  mix-blend-mode: soft-light;
+  transition: opacity .45s;
+}
+.project-slot.is-holo-active .card--holo::after, .project-slot:focus-within .card--holo::after { opacity: .32; }
+.card--holo .card__body { z-index: 2; padding: 1.2rem 1.4rem 1.5rem; }
+.card--holo .card__body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .035;
+  background: repeating-linear-gradient(var(--foil-angle, 122deg), #d9499e, #c79f44 18%, #3caa99 36%, #398dc2 54%, #9274d0 72%, #d9499e);
+  background-size: 350% 350%;
+  background-position: var(--foil-x, 50%) var(--foil-y, 50%);
+  -webkit-mask-image: url("assets/holo-stars.svg"), radial-gradient(ellipse at var(--light-x, 50%) var(--light-y, 30%), #000 10%, #0009 45%, transparent 85%);
+  mask-image: url("assets/holo-stars.svg"), radial-gradient(ellipse at var(--light-x, 50%) var(--light-y, 30%), #000 10%, #0009 45%, transparent 85%);
+  -webkit-mask-size: 164px 164px, 100% 100%;
+  mask-size: 164px 164px, 100% 100%;
+  -webkit-mask-position: 8px 0, center;
+  mask-position: 8px 0, center;
+  -webkit-mask-repeat: repeat, no-repeat;
+  mask-repeat: repeat, no-repeat;
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  transition: opacity .45s;
+}
+.project-slot.is-holo-active .card__body::before, .project-slot:focus-within .card__body::before { opacity: .18; }
+.card.card--holo .badge { background: transparent; border-color: var(--line); border-radius: 5px; color: var(--muted); font-size: .65rem; }
+
+/* A framed print is reflective; the surrounding paper and type remain matte. */
+.card--holo .card__print {
+  position: relative;
+  isolation: isolate;
+  flex-shrink: 0;
+  height: 124px;
+  margin: 10px 10px 0;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--card-edge) 70%, #12141c);
+  border-radius: 9px;
+  background: radial-gradient(ellipse at 30% 15%, #354b51, #202835 60%, #151b28);
+  box-shadow: inset 0 0 20px #00000040, 0 1px 0 #ffffff18;
+}
+.card--holo .card__print > img { width: 100%; height: 100%; object-fit: cover; }
+.card--art .card__print { height: 208px; }
+.card--holo .card__print::before, .card--holo .card__print::after { content: ""; position: absolute; inset: 0; pointer-events: none; }
+.card--holo .card__print::before {
+  z-index: 1;
+  opacity: .3;
+  background-image:
+    url("assets/card-grain.svg"),
+    linear-gradient(var(--foil-angle, 122deg), #e06e9c, #e5c36e 17%, #88c699 33%, #6ecdd5 50%, #867bd8 67%, #d47bc8 83%, #e06e9c),
+    radial-gradient(ellipse at var(--light-x, 50%) var(--light-y, 30%), #e0eee5, #536777 42%, #111521 85%);
+  background-size: 128px 128px, 400% 400%, 100% 100%;
+  background-position: center, var(--foil-x, 50%) var(--foil-y, 50%), center;
+  background-blend-mode: soft-light, color;
+  mix-blend-mode: color-dodge;
+  filter: contrast(1.7) saturate(1.25) brightness(var(--foil-exposure, .7));
+  transition: opacity .45s;
+}
+.card--holo .card__print::after {
+  z-index: 2;
+  opacity: .28;
+  background:
+    radial-gradient(ellipse at var(--light-x, 50%) var(--light-y, 30%), #c3c7bc, #7d8992 45%, #263245),
+    repeating-conic-gradient(from var(--foil-angle, 122deg) at var(--light-x, 50%) var(--light-y, 30%), #c94791, #bba24d 16deg, #4aab86 32deg, #3a9aaf 48deg, #6657b5 64deg, #b14ba3 80deg, #c94791 96deg);
+  background-size: 100% 100%, 250% 250%;
+  background-position: center, var(--foil-x, 50%) var(--foil-y, 50%);
+  background-blend-mode: overlay;
+  -webkit-mask: url("assets/holo-stars.svg") var(--stars-x, 0px) var(--stars-y, 0px) / 164px 164px repeat;
+  mask: url("assets/holo-stars.svg") var(--stars-x, 0px) var(--stars-y, 0px) / 164px 164px repeat;
+  mix-blend-mode: color-dodge;
+  filter: contrast(1.2) brightness(1.1);
+  transition: opacity .45s;
+}
+.project-slot.is-holo-active .card__print::before, .project-slot:focus-within .card__print::before { opacity: .85; }
+.project-slot.is-holo-active .card__print::after, .project-slot:focus-within .card__print::after { opacity: .95; }
+/* Research print: a reverse-holo on granular pearl cardstock. Chrome card suits sit under the printed
+   diagram; their chrome and the rainbow sheen around them run in opposite directions, so suits and
+   ground take turns to flash as the card tilts. */
+.card--holo .card__print--research {
+  flex: 0 0 36%;
+  width: 36%;
+  height: auto;
+  min-height: 180px;
+  margin: 10px 0 10px 10px;
+  background:
+    url("assets/holo/paper.svg") 0 0 / 160px 160px,
+    radial-gradient(ellipse 90% 80% at calc(35% + var(--holo-x) * 40%) calc(25% + var(--holo-y) * 30%), #fdfcf7, #ebe7dc 55%, #d8d3c7);
+  background-blend-mode: overlay, normal;
+}
+.print__suits {
+  --tile: 132px;
+  position: absolute;
+  inset: -12px;
+  z-index: 0;
+  opacity: .5;
+  background:
+    url("assets/holo/suits.svg") 0 0 / var(--tile) var(--tile),
+    linear-gradient(-45deg, transparent 38%, #ffffffd9 50%, transparent 62%),
+    repeating-linear-gradient(calc(var(--foil-angle) - 60deg), #ff6ec766, #ffd27a66 8%, #7ef5c066 16%, #6ecbff66 24%, #a98bff66 32%, #ff6ec766 40%),
+    repeating-linear-gradient(118deg, #fbfbf7 0, #858b97 13px, #f1f2ef 24px, #545b69 38px, #e6e9ec 50px, #fbfbf7 62px);
+  background-size: var(--tile) var(--tile), 300% 300%, 240% 240%, auto;
+  background-position: 0 0, var(--foil-x) var(--foil-y), var(--foil-x) var(--foil-y), calc(var(--holo-x) * 180px) calc(var(--holo-y) * 120px);
+  background-blend-mode: overlay, screen, color, normal;
+  -webkit-mask: url("assets/holo/suits.svg") 0 0 / var(--tile) var(--tile) repeat;
+  mask: url("assets/holo/suits.svg") 0 0 / var(--tile) var(--tile) repeat;
+  /* The foil sits a hair deeper than the ink printed over it. */
+  transform: translate(calc(var(--holo-x) * -7px), calc(var(--holo-y) * -6px));
+  filter: contrast(1.2) saturate(calc(.35 + var(--holo-on) * .55));
+  transition: opacity .45s;
+}
+/* The print's own latent image: a ket under the diagram, lit only where the light falls.
+   The light is measured on the whole card; the print covers its left 36%. */
+.print__latent {
+  position: absolute;
+  inset: 8% 6%;
+  z-index: 0;
+  opacity: calc(var(--holo-on) * .85);
+  transform: translate(calc(var(--holo-x) * -12px), calc(var(--holo-y) * -9px));
+  background: linear-gradient(var(--foil-angle), #9fb4c9, #d9a5c9 25%, #e2c98f 50%, #8fcab3 75%, #a99fd8);
+  background-size: 200% 200%;
+  background-position: var(--foil-x) var(--foil-y);
+  -webkit-mask: url("assets/holo/latent-psi.svg") center / contain no-repeat, radial-gradient(circle 110px at calc(var(--light-x) / .36) var(--light-y), #000, #0009 45%, transparent);
+  mask: url("assets/holo/latent-psi.svg") center / contain no-repeat, radial-gradient(circle 110px at calc(var(--light-x) / .36) var(--light-y), #000, #0009 45%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  mix-blend-mode: multiply;
+}
+.card--holo .card__print--research > img {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  padding: .7rem;
+  max-width: none;
+  border: 0;
+  background: transparent;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+.card--holo .card__print--research::before {
+  z-index: 2;
+  opacity: .32;
+  background:
+    repeating-linear-gradient(var(--foil-angle), #ff6ec7, #ffd27a 7%, #7ef5c0 14%, #6ecbff 21%, #a98bff 28%, #ff6ec7 35%),
+    linear-gradient(-45deg, #000 20%, #fff 50%, #000 80%);
+  background-size: 260% 260%, 300% 300%;
+  background-position: var(--foil-x) var(--foil-y), calc(100% - var(--foil-x)) calc(100% - var(--foil-y));
+  background-blend-mode: multiply;
+  mix-blend-mode: soft-light;
+  filter: saturate(1.4) contrast(1.2);
+}
+.card--holo .card__print--research::after {
+  z-index: 3;
+  opacity: .35;
+  background: radial-gradient(farthest-corner circle at var(--light-x) var(--light-y), #fff 0, #ffffff80 18%, #ffffff00 45%, #00000026 100%);
+  -webkit-mask: none;
+  mask: none;
+  mix-blend-mode: soft-light;
+  filter: none;
+}
+.project-slot.is-holo-active .print__suits, .project-slot:focus-within .print__suits { opacity: .9; }
+.project-slot.is-holo-active .card__print--research::before, .project-slot:focus-within .card__print--research::before { opacity: .8; }
+.project-slot.is-holo-active .card__print--research::after, .project-slot:focus-within .card__print--research::after { opacity: .9; }
+@media (max-width: 640px) {
+  .card--holo .card__print--research { flex: none; width: auto; height: 180px; margin: 10px 10px 0; }
+}
+/* An engraved foil motif on the cardstock itself, one per project. It reads as a matte relief at rest
+   and turns into a hologram under the light. Three planes give it depth: a soft glow deep inside the
+   card, the engraving above it and the foil stars on the surface; each drifts less than the one below.
+   The motif SVGs are generated by assets/holo/generate.js. */
+.card__holo {
+  /* A third of the shared foil rotation: the rainbow drifts across the engraving instead of cycling. */
+  --calm-angle: calc(122deg + (var(--foil-angle) - 122deg) * .35);
+  --motif-size: 420px;
+  --motif-pos: right -120px bottom -140px;
+  --holo-tint: var(--accent-2);
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(55% 50% at calc(var(--glow-x, 78%) + var(--holo-x, 0) * -34%) calc(var(--glow-y, 80%) + var(--holo-y, 0) * -28%), color-mix(in srgb, var(--holo-tint) 15%, transparent), transparent 72%),
+    radial-gradient(30% 28% at calc(var(--glow-x, 78%) + 6% + var(--holo-x, 0) * -30%) calc(var(--glow-y, 80%) + 4% + var(--holo-y, 0) * -24%), color-mix(in srgb, var(--accent) 9%, transparent), transparent 70%);
+  /* Relief, plus a glow that fades in with the light. The glow keeps its colour and only changes its
+     amount: interpolating it from a transparent black shadow flashed it dark, then cyan. */
+  filter:
+    drop-shadow(calc(var(--holo-x, 0) * -2.4px) calc(.9px + var(--holo-y, 0) * -1.6px) 0 var(--card-relief))
+    drop-shadow(0 0 4px color-mix(in srgb, var(--holo-tint) calc(var(--holo-on) * 45%), transparent));
+  /* Quiet behind the title and copy, rich where the card has room. */
+  -webkit-mask-image: radial-gradient(125% 115% at 100% 100%, #000 34%, #0008 56%, #0002 76%, transparent 94%);
+  mask-image: radial-gradient(125% 115% at 100% 100%, #000 34%, #0008 56%, #0002 76%, transparent 94%);
+}
+.card__holo::before, .card__holo::after {
+  content: "";
+  position: absolute;
+  inset: -24px;
+  transform: translate(calc(var(--holo-x) * -18px), calc(var(--holo-y) * -14px));
+  -webkit-mask: var(--motif) var(--motif-pos) / var(--motif-size) var(--motif-size) no-repeat;
+  mask: var(--motif) var(--motif-pos) / var(--motif-size) var(--motif-size) no-repeat;
+  transition: opacity .7s ease-in-out;
+}
+/* Ink: the matte engraving, faintly tinted per project. */
+.card__holo::before { background: color-mix(in srgb, color-mix(in srgb, var(--holo-tint) 40%, var(--card-ink)) 20%, transparent); }
+/* Foil: a fine rainbow, lit around the light source. */
+.card__holo::after {
+  opacity: .45;
+  background:
+    radial-gradient(ellipse 75% 65% at calc(80% + (var(--light-x) - 80%) * var(--holo-on)) calc(82% + (var(--light-y) - 82%) * var(--holo-on)), transparent 25%, var(--card-paper) 92%),
+    repeating-linear-gradient(var(--calm-angle), #ff6ec7, #ffd27a 8%, #7ef5c0 16%, #6ecbff 24%, #a98bff 32%, #ff6ec7 40%);
+  background-size: 100% 100%, 130% 130%;
+  background-position: center, var(--foil-x) var(--foil-y);
+  filter: var(--card-foil-tone);
+}
+.project-slot.is-holo-active .card__holo::after, .project-slot:focus-within .card__holo::after { opacity: 1; }
+/* Latent image, as on a banknote: invisible at rest, revealed as pearl foil only inside the light.
+   It sits deeper than the engraving, so it slides a little further as the card tilts. */
+.card__latent {
+  position: absolute;
+  inset: -24px;
+  opacity: calc(var(--holo-on) * .62);
+  transform: translate(calc(var(--holo-x) * -30px), calc(var(--holo-y) * -24px));
+  background: linear-gradient(var(--calm-angle), #d9efff, #9fdcff 18%, #f7b8e6 36%, #ffe39a 54%, #a8f0d2 72%, #c6b5ff 90%);
+  background-size: 220% 220%;
+  background-position: var(--foil-x) var(--foil-y);
+  -webkit-mask: var(--latent) var(--motif-pos) / var(--motif-size) var(--motif-size) no-repeat, radial-gradient(circle 105px at var(--light-x) var(--light-y), #000, #0007 40%, transparent);
+  mask: var(--latent) var(--motif-pos) / var(--motif-size) var(--motif-size) no-repeat, radial-gradient(circle 105px at var(--light-x) var(--light-y), #000, #0007 40%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  filter: var(--card-foil-tone);
+}
+.card__holo--isotherms { --motif: url("assets/holo/isotherms.svg"); --latent: url("assets/holo/latent-isotherms.svg"); --motif-size: 470px; --motif-pos: right -150px bottom -180px; --holo-tint: var(--accent-3); }
+.card__holo--guilloche { --motif: url("assets/holo/guilloche.svg"); --latent: url("assets/holo/latent-guilloche.svg"); --motif-size: 360px; --motif-pos: right -135px bottom -130px; --holo-tint: #c79f44; }
+.card__holo--streams { --motif: url("assets/holo/streams.svg"); --latent: url("assets/holo/latent-streams.svg"); --motif-size: 540px; --motif-pos: right -150px bottom -225px; --holo-tint: var(--accent-2); --glow-x: 62%; --glow-y: 88%; }
+.card__holo--harmonograph { --motif: url("assets/holo/harmonograph.svg"); --latent: url("assets/holo/latent-harmonograph.svg"); --motif-size: 400px; --motif-pos: right -110px bottom -120px; --holo-tint: var(--accent); }
+.card__holo--orbits { --motif: url("assets/holo/orbits.svg"); --latent: url("assets/holo/latent-orbits.svg"); --motif-size: 450px; --motif-pos: right -140px bottom -150px; --holo-tint: var(--accent-2); --glow-x: 82%; --glow-y: 84%; }
+.card__holo--interference { --motif: url("assets/holo/interference.svg"); --latent: url("assets/holo/latent-interference.svg"); --motif-size: 540px; --motif-pos: right -80px bottom -150px; --holo-tint: var(--accent-3); --glow-x: 62%; --glow-y: 100%; }
+@media (prefers-reduced-motion: reduce) {
+  .project-slot > .card--holo, .card__holo::before, .card__holo::after, .card__latent, .print__suits, .print__latent { transform: none; }
+}
 
 /* A little light inside the toolbox, with a distinct accent for each discipline. */
 .skills { counter-reset: toolbox; }
@@ -534,8 +946,29 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
 .skill h3::before { content: ""; display: block; width: 36px; height: 3px; margin-bottom: 1rem; border-radius: 3px; background: var(--grad); box-shadow: 0 0 14px color-mix(in srgb, var(--tool-tone) 35%, transparent); }
 .skill .tags li { background: color-mix(in srgb, var(--tool-tone) 5%, var(--surface)); border-color: color-mix(in srgb, var(--tool-tone) 24%, var(--line)); }
 
+/* The learning card is torn open, like the footer, onto the rules that colour these cards. */
+.skill--learning { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 48%); align-items: center; gap: 1rem; }
+.code-tear { display: block; width: 100%; height: auto; margin-top: 1.4rem; filter: drop-shadow(0 0 12px #9570ef22); font: 400 7.6px var(--font-mono); }
+.code-tear__code { fill: #8fa3ad; white-space: pre; }
+.code-tear__code .c { fill: #4d6b78; font-style: italic; }
+.code-tear__code .s { fill: #ac80f6; }
+.code-tear__code .p { fill: #6ce7e4; }
+.code-tear__code .v { fill: #c9b4d6; }
+.code-tear__code .a1 { fill: #ff5ecb; }
+.code-tear__code .a2 { fill: #9b6bff; }
+.code-tear__code .a3 { fill: #4fd8ff; }
+.code-tear__code .t { fill: #ff80c8; }
+.code-tear__current { fill: #9b6bff; opacity: .16; transition: opacity .3s; }
+.skill--learning:hover .code-tear__current { opacity: .28; }
+.code-tear__caret { fill: #6ce7e4; animation: tear-caret 1.1s steps(1) infinite; }
+@keyframes tear-caret { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .code-tear__caret { animation: none; } }
+@media (max-width: 560px) {
+  .skill--learning { grid-template-columns: minmax(0, 1fr); }
+  .code-tear { max-width: 340px; margin-top: .4rem; }
+}
+
 /* Small frames repeat the colour rhythm without taking over the content. */
-.chips li, .card:not(.card--bentos) .badge,
 .btn--ghost, .icon-btn, .socials a, .back-top {
   border-color: transparent;
   background: linear-gradient(var(--surface), var(--surface)) padding-box, var(--rim) border-box;
@@ -598,61 +1031,10 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
 @keyframes signal-red { 0%, 100% { clip-path: inset(10% 0 65%); transform: translateX(-3px); } 35% { clip-path: inset(45% 0 30%); transform: translateX(3px); } 70% { clip-path: inset(20% 0 50%); transform: translateX(-2px); } }
 @keyframes signal-blue { 0%, 100% { clip-path: inset(60% 0 10%); transform: translateX(3px); } 35% { clip-path: inset(15% 0 60%); transform: translateX(-2px); } 70% { clip-path: inset(65% 0 5%); transform: translateX(2px); } }
 .footer__inner { align-items: center; gap: .8rem 1.2rem; }
-.footer__secret { max-width: 26rem; padding: .3rem 0; border: 0; background: none; color: var(--muted); text-align: left; font: 400 .64rem/1.7 var(--font-mono); text-decoration: underline dotted; text-underline-offset: 4px; cursor: pointer; }
-.footer__secret:hover { color: var(--link); }
-.footer__secret[hidden] { display: none; }
-body.chaos-open, body.observer-open { overflow: hidden; }
-.chaos {
-  width: min(960px, calc(100% - 2rem));
-  max-height: calc(100svh - 2rem);
-  padding: clamp(1rem, 3vw, 2rem);
-  overflow: auto;
-  color: var(--text);
-  border: 1px solid transparent;
-  border-radius: 24px;
-  background: linear-gradient(var(--bg), var(--bg)) padding-box, var(--grad) border-box;
-  box-shadow: var(--glow-hover), 0 32px 100px #0006;
-}
-.chaos::backdrop { background: color-mix(in srgb, var(--bg) 75%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-.chaos__header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
-.chaos__eyebrow { font: 400 .65rem/1.5 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: .6rem; }
-.chaos h2 { font-size: clamp(2rem, 5vw, 2.8rem); margin: 0; background: var(--grad-text); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.chaos h2 span { color: var(--accent-3); }
-.chaos__intro { font-size: .88rem; color: var(--muted); margin: .8rem 0 1.8rem; }
-.chaos__body { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: clamp(1rem, 3vw, 2rem); align-items: start; }
-.chaos__viewport { position: relative; aspect-ratio: 1; overflow: hidden; border: 1px solid var(--line); border-radius: 16px; background: var(--bg); }
-.chaos__result { position: absolute; z-index: 1; inset: auto .8rem .8rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .6rem; padding: .65rem .8rem; border: 1px solid var(--line); border-radius: 10px; background: color-mix(in srgb, var(--surface) 92%, transparent); color: var(--text); font: 400 .65rem/1.6 var(--font-mono); }
-.chaos__result[hidden] { display: none; }
-.chaos__result.is-top { top: .8rem; bottom: auto; }
-.chaos__result button { padding: .3rem .4rem; min-height: 36px; border: 0; border-radius: 6px; background: var(--surface-2); color: var(--link); font: inherit; cursor: pointer; }
-.chaos__result button:hover { text-decoration: underline; text-underline-offset: 3px; }
-.chaos__equations { display: grid; gap: .2rem; padding-top: 1rem; color: var(--muted); font: 400 clamp(.6rem, 1.4vw, .75rem)/1.7 var(--font-mono); }
-.chaos__controls { min-width: 0; }
-.chaos__field { display: grid; gap: .5rem; color: var(--muted); font: 400 .7rem/1.5 var(--font-mono); }
-.chaos select { width: 100%; padding: .7rem .65rem; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); color: var(--text); font: 500 .85rem var(--font-body); }
-.chaos__parameters { margin: 1.3rem 0; padding: 0; border: 0; }
-.chaos__parameters legend { padding: 0; margin-bottom: .8rem; font: 400 .62rem/1.5 var(--font-mono); color: var(--muted); }
-.chaos__parameter { display: grid; grid-template-columns: 1fr auto; gap: .2rem .5rem; margin-bottom: .5rem; font: 400 .78rem var(--font-mono); }
-.chaos__parameter label { color: var(--accent); }
-.chaos__parameter output { color: var(--link); font-variant-numeric: tabular-nums; }
-.chaos__parameter input { grid-column: 1 / -1; width: 100%; height: 24px; margin: 0; accent-color: var(--accent); cursor: pointer; }
-.chaos__actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.2rem; }
-.chaos__actions .btn { min-height: 42px; padding: .6rem .8rem; border-radius: 9px; font-size: .76rem; }
-.chaos__note { color: var(--muted); font: 400 .64rem/1.8 var(--font-mono); margin: 1rem 0 0; }
-.chaos__footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .5rem 1rem; margin-top: 1.6rem; padding-top: 1rem; border-top: 1px solid var(--line); font: 400 .6rem/1.7 var(--font-mono); color: var(--muted); }
-.chaos__footer p { color: var(--link); margin: 0; }
-@media (max-width: 640px) {
-  .footer__secrets { order: 3; flex-basis: 100%; align-items: center; }
-  .footer__secret { max-width: none; text-align: center; }
-  .chaos__body { grid-template-columns: 1fr; }
-  .chaos__viewport { max-width: 360px; margin-inline: auto; }
-  .chaos__equations { text-align: center; }
-  .chaos__intro { margin-bottom: 1.2rem; }
-  .chaos__parameters { margin-block: 1rem; }
-}
+.footer__secrets { display: flex; flex-direction: column; align-items: flex-start; }
+body.observer-open { overflow: hidden; }
 
 /* A visitor-facing terminal. Values come from the visitor's browser. */
-.footer__secrets { display: flex; flex-direction: column; gap: .25rem; align-items: flex-start; }
 .footer__trace { padding: .25rem 0; border: 0; background: none; color: var(--link); font: 400 .65rem/1.7 var(--font-mono); cursor: pointer; }
 .footer__trace span { color: var(--accent); margin-right: .3rem; }
 .footer__trace:hover { text-decoration: underline; text-underline-offset: 3px; }

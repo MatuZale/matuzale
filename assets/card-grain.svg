@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <filter id="paper" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency=".78" numOctaves="3" seed="23" stitchTiles="stitch"/>
+    <feColorMatrix type="saturate" values="0"/>
+  </filter>
+  <path fill="#888" d="M0 0h192v192H0z"/>
+  <path filter="url(#paper)" d="M0 0h192v192H0z"/>
+  <g stroke="#d8d4c9" stroke-width=".4" opacity=".25">
+    <path d="m12 27 5-2m38 16 3 4m61-29 7 1m32 18 4-3M29 88l4-5m52-7 4 3m47 17 6-2m27 17 4 3M12 143l6 2m53 8 3-5m43 16 4 2m36-24 6-1M38 182l6-1m53-3 4 3m57-1 6-2"/>
+  </g>
+</svg>

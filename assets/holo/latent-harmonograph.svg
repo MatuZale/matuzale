@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="#fff" stroke="#fff" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Latent image: two beamed notes at the heart of the harmonograph. -->
+  <g transform="translate(200 200)">
+    <ellipse cx="-19" cy="22" rx="10" ry="7" transform="rotate(-22 -19 22)" stroke="none"/>
+    <ellipse cx="21" cy="14" rx="10" ry="7" transform="rotate(-22 21 14)" stroke="none"/>
+    <path d="M-10 19V-30M30 11V-38" fill="none" stroke-width="3.4"/>
+    <path d="M-11.7-31 31.7-39.4V-29L-11.7-20.6Z" stroke="none"/>
+  </g>
+</svg>

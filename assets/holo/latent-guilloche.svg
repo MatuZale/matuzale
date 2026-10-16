@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="#fff" stroke="#fff" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Latent image: the denomination in the rosette, circled by microprint, as on a banknote. -->
+  <defs><path id="ring" d="M200 125a75 75 0 1 1-.01 0"/></defs>
+  <text x="200" y="217" text-anchor="middle" stroke="none" font-family="Georgia, Times New Roman, serif" font-size="44" font-weight="700">zł</text>
+  <text stroke="none" font-family="Helvetica Neue, Arial, sans-serif" font-size="8.4" font-weight="700" letter-spacing="1.1"><textPath href="#ring">1 234,56 zł · 1 234,56 zł · 1 234,56 zł · 1 234,56 zł · 1 234,56 zł · 1 234,56 zł ·</textPath></text>
+</svg>

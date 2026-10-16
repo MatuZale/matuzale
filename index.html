@@ -107,37 +107,39 @@
     <!-- ───────── ABOUT ───────── -->
     <section class="section" id="about">
       <div class="wrap about">
-        <figure class="about__photo reveal">
-          <img src="assets/profile.jpg" alt="Portrait of Tomasz Młynik" width="720" height="720" loading="lazy" />
-        </figure>
+        <div class="about__aside">
+          <figure class="about__photo reveal">
+            <img src="assets/profile.jpg" alt="Portrait of Tomasz Młynik" width="720" height="720" loading="lazy" />
+          </figure>
+          <div class="about-terminal reveal" role="group" aria-label="A few things about me, in terminal form">
+            <div class="about-terminal__bar"><span class="about-terminal__lights" aria-hidden="true"><i></i><i></i><i></i></span><span>tomasz@gdansk: ~</span><span aria-hidden="true">⌘</span></div>
+            <div class="about-terminal__body">
+              <p class="about-terminal__command"><span aria-hidden="true">❯</span> whoami</p>
+              <p>PhD in Physics <span class="about-terminal__arrow">→</span> software engineer<br />Python-first. Environmental &amp; IoT data.</p>
+              <p class="about-terminal__command"><span aria-hidden="true">❯</span> cat after-hours.txt</p>
+              <p>Fractals. Strange attractors.<br />Mathematical rabbit holes.</p>
+              <span class="about-terminal__prompt" aria-hidden="true">❯ <span class="about-terminal__cursor"></span></span>
+            </div>
+          </div>
+        </div>
         <div class="about__text">
           <p class="kicker reveal">About</p>
           <h2 class="reveal">From <em>Hilbert spaces</em> to production data.</h2>
           <p class="reveal">
-            I spent five years at the University of Gdańsk doing research in quantum information theory, building
-            Python and MATLAB code to verify mathematical conjectures and solving semidefinite programs on
-            problems most people never see. That taught me to break huge, ambiguous problems into
-            testable pieces - and to be suspicious of any number I can't reproduce.
+            Five years of quantum information research at the University of Gdańsk taught me to turn
+            abstract questions into reproducible results. I built Python and MATLAB tools, solved
+            semidefinite programs, and took my research to conferences in Seoul and Kyoto.
           </p>
           <p class="reveal">
-            Today I work on the applied side: data pipelines, dashboards, cloud services and automation.
-            I'm Lead Software Engineer at <a href="https://embeddedsystems.do/" target="_blank" rel="noopener">EmbeddedSystems.do</a>, where I lead a software team building
-            environmental and IoT monitoring products.
-            After hours I still play with maths: fractals and strange attractors rendered from chaotic maps -
-            the same kind of map that is moving in the background of this page.
+            Today I lead the software team at <a href="https://embeddedsystems.do/" target="_blank" rel="noopener">EmbeddedSystems.do</a>,
+            building environmental and IoT monitoring products: data pipelines, dashboards, cloud services
+            and automation. I like making complex systems useful — and keeping a little room for curiosity.
           </p>
           <a class="workplace reveal" href="https://embeddedsystems.do/" target="_blank" rel="noopener" data-spot>
             <span class="workplace__logo"><img src="assets/brand/embeddedsystems.svg" alt="EmbeddedSystems.do" width="194" height="51" loading="lazy" /></span>
             <span class="workplace__text"><small>Where I build</small><strong>Lead Software Engineer</strong><span>Environmental &amp; IoT software · Gdynia</span></span>
             <span class="workplace__arrow" aria-hidden="true">↗</span>
           </a>
-          <ul class="chips reveal" aria-label="Quick facts">
-            <li>🎓 PhD in Physics</li>
-            <li>🐍 Python-first</li>
-            <li>🌊 Environmental data</li>
-            <li>🎤 Conference speaker (Seoul, Kyoto)</li>
-            <li>🌀 Fractals &amp; strange attractors</li>
-          </ul>
         </div>
       </div>
     </section>
@@ -175,11 +177,40 @@
               <li>Monte Carlo</li><li>MATLAB</li><li>SageMath</li><li>LaTeX</li>
             </ul>
           </article>
-          <article class="skill reveal" data-spot>
-            <h3>Currently learning</h3>
-            <ul class="tags tags--soft">
-              <li>C++ (OpenGL, numerics)</li><li>Zephyr RTOS</li><li>TanStack Query</li><li>GraphQL</li>
-            </ul>
+          <article class="skill skill--learning reveal" data-spot>
+            <div class="skill__main">
+              <h3>Currently learning</h3>
+              <ul class="tags tags--soft">
+                <li>C++ (OpenGL, numerics)</li><li>Zephyr RTOS</li><li>TanStack Query</li><li>GraphQL</li>
+              </ul>
+            </div>
+            <!-- Torn open like the footer: the stylesheet rules that colour these cards, running underneath. -->
+            <svg class="code-tear" viewBox="0 0 300 132" role="img" aria-label="A torn-open patch of the card, showing the CSS rules that give each toolbox card its colour">
+              <defs>
+                <path id="tear-edge" d="M8 22 22 16 15 7 58 11 70 3 108 9 124 2 160 8 178 2 206 10 232 5 247 13 280 8 288 18 294 30 286 44 296 62 288 78 295 96 284 104 290 122 258 118 244 127 210 121 194 128 160 122 130 127 112 119 78 124 64 116 26 121 14 110 6 96 13 78 4 62 12 46 5 34Z" />
+                <clipPath id="tear-cut"><use href="#tear-edge" /></clipPath>
+                <linearGradient id="tear-rim" x2="1" y2="1"><stop stop-color="#f46acb" /><stop offset=".5" stop-color="#8364e8" /><stop offset="1" stop-color="#59dce8" /></linearGradient>
+                <pattern id="tear-grid" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M8 0H0V8" fill="none" stroke="#203440" stroke-width=".5" /></pattern>
+              </defs>
+              <g clip-path="url(#tear-cut)">
+                <path fill="#08151d" d="M0 0H300V132H0Z" />
+                <path fill="url(#tear-grid)" opacity=".45" d="M0 0H300V132H0Z" />
+                <!-- This card is the fifth: 3n + 2. -->
+                <rect class="code-tear__current" x="0" y="46" width="300" height="12.5" />
+                <text class="code-tear__code" x="20">
+                  <tspan x="20" y="27" class="c">/* A little light inside the toolbox, one accent per discipline. */</tspan>
+                  <tspan x="20" y="41"><tspan class="s">.skill</tspan> { <tspan class="p">--tool-tone</tspan>: <tspan class="v">var(</tspan><tspan class="a1">--accent</tspan><tspan class="v">)</tspan>; }</tspan>
+                  <tspan x="20" y="55"><tspan class="s">.skill:nth-child(3n + 2)</tspan> { <tspan class="p">--tool-tone</tspan>: <tspan class="v">var(</tspan><tspan class="a2">--accent-2</tspan><tspan class="v">)</tspan>; }</tspan>
+                  <tspan x="20" y="69"><tspan class="s">.skill:nth-child(3n)</tspan> { <tspan class="p">--tool-tone</tspan>: <tspan class="v">var(</tspan><tspan class="a3">--accent-3</tspan><tspan class="v">)</tspan>; }</tspan>
+                  <tspan x="20" y="83"><tspan class="s">.skill .tags li</tspan> {</tspan>
+                  <tspan x="30" y="97"><tspan class="p">border-color</tspan>: <tspan class="v">color-mix(in srgb, var(</tspan><tspan class="t">--tool-tone</tspan><tspan class="v">) 24%, var(--line))</tspan>;</tspan>
+                  <tspan x="20" y="111">}</tspan>
+                </text>
+                <rect class="code-tear__caret" x="27" y="103.5" width="4.6" height="9" />
+                <use href="#tear-edge" fill="none" stroke="#000" stroke-opacity=".55" stroke-width="5" transform="translate(1.6 2.2)" />
+              </g>
+              <use href="#tear-edge" fill="none" stroke="url(#tear-rim)" stroke-width="1.2" opacity=".7" />
+            </svg>
           </article>
         </div>
       </div>
@@ -237,110 +268,132 @@
           </article>
 
           <!-- Generative art -->
-          <article class="card card--tall card--art reveal" data-spot id="art">
-            <div class="card__media">
-              <img src="assets/attractor.jpg" alt="Neon Clifford strange attractor rendered in purple and orange" loading="lazy" width="900" height="900" />
-            </div>
-            <div class="card__body">
-              <span class="badge">Generative art · Python</span>
-              <h3>Strange attractors &amp; fractals</h3>
-              <p>Numba-accelerated chaotic maps rendered as density histograms with custom neon colormaps,
-                animated into 1080p60 videos. The hero background of this page is the same maths, running live in your browser.</p>
-              <div class="card__links">
-                <a href="https://github.com/MatuZale/color_recursive_maps" target="_blank" rel="noopener">Code ↗</a>
-                <a href="https://www.instagram.com/mathuzaleh/" target="_blank" rel="noopener">Instagram ↗</a>
+          <div class="project-slot project-slot--tall reveal" data-holo>
+            <article class="card card--tall card--art card--holo" id="art">
+              <div class="card__media card__print">
+                <img src="assets/attractor.jpg" alt="Neon Clifford strange attractor rendered in purple and orange" loading="lazy" width="900" height="900" />
               </div>
-            </div>
-          </article>
+              <div class="card__body">
+                <span class="badge">Generative art · Python</span>
+                <h3>Strange attractors &amp; fractals</h3>
+                <p>Numba-accelerated chaotic maps rendered as density histograms with custom neon colormaps,
+                  animated into 1080p60 videos. The hero background of this page is the same maths, running live in your browser.</p>
+                <div class="card__links">
+                  <a href="https://github.com/MatuZale/color_recursive_maps" target="_blank" rel="noopener">Code ↗</a>
+                  <a href="https://www.instagram.com/mathuzaleh/" target="_blank" rel="noopener">Instagram ↗</a>
+                </div>
+              </div>
+            </article>
+          </div>
 
           <!-- coldchain-mcp -->
-          <article class="card card--m reveal" data-spot>
-            <div class="card__body">
-              <span class="badge">Python · PyPI</span>
-              <h3>coldchain-mcp</h3>
-              <p>An MCP server that lets AI assistants analyse cold-chain sensor data locally: threshold
-                breaches, anomalies and journey segmentation. Published on PyPI.</p>
-              <div class="card__links">
-                <a href="https://github.com/MatuZale/coldchain-mcp" target="_blank" rel="noopener">Code ↗</a>
+          <div class="project-slot reveal" data-holo>
+            <article class="card card--m card--holo">
+              <div class="card__holo card__holo--isotherms" aria-hidden="true"><span class="card__latent"></span></div>
+              <div class="card__body">
+                <span class="badge">Python · PyPI</span>
+                <h3>coldchain-mcp</h3>
+                <p>An MCP server that lets AI assistants analyse cold-chain sensor data locally: threshold
+                  breaches, anomalies and journey segmentation. Published on PyPI.</p>
+                <div class="card__links">
+                  <a href="https://github.com/MatuZale/coldchain-mcp" target="_blank" rel="noopener">Code ↗</a>
+                </div>
               </div>
-            </div>
-          </article>
+            </article>
+          </div>
 
           <!-- Personal finance -->
-          <article class="card card--m reveal" data-spot>
-            <div class="card__body">
-              <span class="badge">Python · Streamlit</span>
-              <h3>Personal Finance Analyzer</h3>
-              <p>Cleans Polish bank CSV exports (odd encodings, <code>1 234,56 zł</code>), categorises
-                transactions with JSON rules and visualises spending in a CLI and a Streamlit app.</p>
-              <div class="card__links">
-                <a href="https://github.com/MatuZale/personal-finance-analyzer" target="_blank" rel="noopener">Code ↗</a>
+          <div class="project-slot reveal" data-holo>
+            <article class="card card--m card--holo">
+              <div class="card__holo card__holo--guilloche" aria-hidden="true"><span class="card__latent"></span></div>
+              <div class="card__body">
+                <span class="badge">Python · Streamlit</span>
+                <h3>Personal Finance Analyzer</h3>
+                <p>Cleans Polish bank CSV exports (odd encodings, <code>1 234,56 zł</code>), categorises
+                  transactions with JSON rules and visualises spending in a CLI and a Streamlit app.</p>
+                <div class="card__links">
+                  <a href="https://github.com/MatuZale/personal-finance-analyzer" target="_blank" rel="noopener">Code ↗</a>
+                </div>
               </div>
-            </div>
-          </article>
+            </article>
+          </div>
 
           <!-- AWS pipeline -->
-          <article class="card card--m reveal" data-spot>
-            <div class="card__body">
-              <span class="badge">AWS · ML</span>
-              <h3>Student-performance data pipeline</h3>
-              <p>S3 → Lambda → Glue → Athena → Metabase, all scripted with boto3. Followed by a
-                gradient-boosting model, PCA/t-SNE/HDBSCAN analysis and a careful look at feature leakage.</p>
-            </div>
-          </article>
+          <div class="project-slot reveal" data-holo>
+            <article class="card card--m card--holo">
+              <div class="card__holo card__holo--streams" aria-hidden="true"><span class="card__latent"></span></div>
+              <div class="card__body">
+                <span class="badge">AWS · ML</span>
+                <h3>Student-performance data pipeline</h3>
+                <p>S3 → Lambda → Glue → Athena → Metabase, all scripted with boto3. Followed by a
+                  gradient-boosting model, PCA/t-SNE/HDBSCAN analysis and a careful look at feature leakage.</p>
+              </div>
+            </article>
+          </div>
 
           <!-- Pendulum -->
-          <article class="card card--m reveal" data-spot>
-            <div class="card__body">
-              <span class="badge">Web Audio · Canvas</span>
-              <h3>Pendulum Wave Chimes</h3>
-              <p>A single-file browser toy: a pendulum-wave simulation drives a bell synthesiser and
-                chord pad, with stars drawn on canvas. Polyrhythm you can watch.</p>
-              <div class="card__links">
-                <a href="https://github.com/MatuZale/pendulum-wave-chimes" target="_blank" rel="noopener">Code ↗</a>
+          <div class="project-slot reveal" data-holo>
+            <article class="card card--m card--holo">
+              <div class="card__holo card__holo--harmonograph" aria-hidden="true"><span class="card__latent"></span></div>
+              <div class="card__body">
+                <span class="badge">Web Audio · Canvas</span>
+                <h3>Pendulum Wave Chimes</h3>
+                <p>A single-file browser toy: a pendulum-wave simulation drives a bell synthesiser and
+                  chord pad, with stars drawn on canvas. Polyrhythm you can watch.</p>
+                <div class="card__links">
+                  <a href="https://github.com/MatuZale/pendulum-wave-chimes" target="_blank" rel="noopener">Code ↗</a>
+                </div>
               </div>
-            </div>
-          </article>
+            </article>
+          </div>
 
           <!-- N-body -->
-          <article class="card card--m reveal" data-spot>
-            <div class="card__body">
-              <span class="badge">C++ · OpenGL</span>
-              <h3>N-body simulator</h3>
-              <p>3D gravity in C++20 with a symplectic leapfrog integrator, orbital camera and energy
-                tracking to verify the numerics. Heading towards molecular dynamics.</p>
-              <div class="card__links">
-                <a href="https://github.com/MatuZale/Projekt-n-bodies" target="_blank" rel="noopener">Code ↗</a>
+          <div class="project-slot reveal" data-holo>
+            <article class="card card--m card--holo">
+              <div class="card__holo card__holo--orbits" aria-hidden="true"><span class="card__latent"></span></div>
+              <div class="card__body">
+                <span class="badge">C++ · OpenGL</span>
+                <h3>N-body simulator</h3>
+                <p>3D gravity in C++20 with a symplectic leapfrog integrator, orbital camera and energy
+                  tracking to verify the numerics. Heading towards molecular dynamics.</p>
+                <div class="card__links">
+                  <a href="https://github.com/MatuZale/Projekt-n-bodies" target="_blank" rel="noopener">Code ↗</a>
+                </div>
               </div>
-            </div>
-          </article>
+            </article>
+          </div>
 
           <!-- Outreach -->
-          <article class="card card--m card--outreach reveal" data-spot>
-            <div class="card__body">
-              <span class="badge">Science outreach · HTML / JS</span>
-              <h3>Interactive physics for the public</h3>
-              <p>Browser-based demos built for the Centrum Nauki Experyment and public events: a quantum
-                lab (double slit, photoelectric effect, Planck's constant from LEDs, BB84 key exchange)
-                and a genetic algorithm for the travelling-salesman problem.</p>
-            </div>
-          </article>
+          <div class="project-slot reveal" data-holo>
+            <article class="card card--m card--outreach card--holo">
+              <div class="card__holo card__holo--interference" aria-hidden="true"><span class="card__latent"></span></div>
+              <div class="card__body">
+                <span class="badge">Science outreach · HTML / JS</span>
+                <h3>Interactive physics for the public</h3>
+                <p>Browser-based demos built for the Centrum Nauki Experyment and public events: a quantum
+                  lab (double slit, photoelectric effect, Planck's constant from LEDs, BB84 key exchange)
+                  and a genetic algorithm for the travelling-salesman problem.</p>
+              </div>
+            </article>
+          </div>
 
           <!-- Research code -->
-          <article class="card card--wide card--research reveal" data-spot>
-            <img src="assets/young-yamanouchi.png" alt="Lattice of Young diagrams used in the Young–Yamanouchi basis" loading="lazy" width="1354" height="628" />
-            <div class="card__body">
-              <span class="badge">Research code · MATLAB / Sage</span>
-              <h3>Tools from my PhD</h3>
-              <p>An SDP-based test of decomposability of positive maps and a generator of the
-                Young–Yamanouchi basis for Schur–Weyl decompositions - building blocks for studying
-                entanglement, teleportation and symmetric quantum channels.</p>
-              <div class="card__links">
-                <a href="https://github.com/MatuZale/Test-decomposability-of-positive-maps" target="_blank" rel="noopener">Decomposability test ↗</a>
-                <a href="https://github.com/MatuZale/Young-Yamanouchi-basis" target="_blank" rel="noopener">Young–Yamanouchi ↗</a>
+          <div class="project-slot project-slot--wide reveal" data-holo>
+            <article class="card card--wide card--research card--holo">
+              <div class="card__print card__print--research"><span class="print__suits" aria-hidden="true"></span><span class="print__latent" aria-hidden="true"></span><img src="assets/young-yamanouchi.png" alt="Lattice of Young diagrams used in the Young–Yamanouchi basis" loading="lazy" width="1354" height="628" /></div>
+              <div class="card__body">
+                <span class="badge">Research code · MATLAB / Sage</span>
+                <h3>Tools from my PhD</h3>
+                <p>An SDP-based test of decomposability of positive maps and a generator of the
+                  Young–Yamanouchi basis for Schur–Weyl decompositions - building blocks for studying
+                  entanglement, teleportation and symmetric quantum channels.</p>
+                <div class="card__links">
+                  <a href="https://github.com/MatuZale/Test-decomposability-of-positive-maps" target="_blank" rel="noopener">Decomposability test ↗</a>
+                  <a href="https://github.com/MatuZale/Young-Yamanouchi-basis" target="_blank" rel="noopener">Young–Yamanouchi ↗</a>
+                </div>
               </div>
-            </div>
-          </article>
+            </article>
+          </div>
         </div>
       </div>
     </section>
@@ -587,62 +640,39 @@
     <div class="wrap footer__inner">
       <p>© <span id="year">2026</span> Tomasz Młynik</p>
       <div class="footer__secrets">
-        <button class="footer__secret" id="chaos-unlock" type="button" aria-label="Open the hidden Chaos Lab" aria-haspopup="dialog" aria-controls="chaos-lab" title="↑ ↑ ↓ ↓ ← → ← → B A · or follow the signal" hidden>Some things respond to a different kind of input.</button>
         <button class="footer__trace" id="observer-unlock" type="button" aria-haspopup="dialog" aria-controls="observer-trace" hidden><span aria-hidden="true">◎</span> observer detected ↗</button>
       </div>
-      <a href="#top">Back to top ↑</a>
+      <figure class="footer__circuit">
+        <svg class="circuit-window" id="footer-snake" viewBox="0 0 384 128" role="img" aria-label="A little Snake game running by itself beneath a torn-open circuit board">
+          <defs>
+            <path id="circuit-edge" d="M5 30 20 25 13 15 65 18 77 8 121 14 139 5 182 12 203 4 238 13 268 8 284 17 324 10 334 20 372 16 368 32 380 40 373 57 380 80 368 86 374 108 335 106 321 119 280 113 263 123 224 115 204 124 169 116 136 122 117 112 73 119 59 108 15 113 19 94 6 86 13 65 4 51 12 41Z" />
+            <clipPath id="circuit-cut"><use href="#circuit-edge" /></clipPath>
+            <linearGradient id="circuit-rim" x2="1" y2="1"><stop stop-color="#f46acb" /><stop offset=".5" stop-color="#8364e8" /><stop offset="1" stop-color="#59dce8" /></linearGradient>
+            <pattern id="circuit-grid" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M8 0H0V8" fill="none" stroke="#203440" stroke-width=".5" /></pattern>
+          </defs>
+          <g clip-path="url(#circuit-cut)">
+            <path fill="#08151d" d="M0 0H384V128H0Z" />
+            <path fill="url(#circuit-grid)" opacity=".6" d="M0 0H384V128H0Z" />
+            <g class="circuit-window__traces" fill="none" stroke="#255264" stroke-width="1">
+              <path d="M0 25H50L60 35H88M104 0V15L116 27H170M210 0V18H261L273 30H384M0 104H92L103 115H150M196 128V109H243L257 95H300M315 128V113L335 93H384M18 0V58L28 68V128M366 0V45L355 56V128" />
+              <g fill="#08151d"><circle cx="88" cy="35" r="2.5" /><circle cx="170" cy="27" r="2.5" /><circle cx="300" cy="95" r="2.5" /></g>
+            </g>
+            <g fill="#172833" stroke="#37515e" stroke-width=".7"><rect x="49" y="18" width="16" height="6" rx="1" /><rect x="287" y="105" width="20" height="7" rx="1" /><path d="M45 19H49M45 23H49M65 19H69M65 23H69M283 107H287M307 107H311M283 110H287M307 110H311" /></g>
+            <g id="snake-pixels" aria-hidden="true">
+              <path fill="#ac80f6" d="M113 65h6v6h-6zM121 65h6v6h-6zM129 65h6v6h-6zM137 65h6v6h-6zM145 65h6v6h-6zM153 65h6v6h-6zM161 65h6v6h-6z" />
+              <rect x="169" y="65" width="6" height="6" rx="1" fill="#6ce7e4" /><rect x="225" y="49" width="6" height="6" rx="1" fill="#ff80c8" />
+            </g>
+          </g>
+          <use href="#circuit-edge" fill="none" stroke="url(#circuit-rim)" stroke-width="1.2" opacity=".65" />
+        </svg>
+        <figcaption class="circuit-caption"><span><span class="circuit-caption__dot" aria-hidden="true"></span>background process: <strong>snake</strong></span><button class="circuit-caption__pause" id="snake-toggle" type="button" aria-label="Pause Snake animation" aria-pressed="false" hidden>pause <span aria-hidden="true">Ⅱ</span></button></figcaption>
+      </figure>
     </div>
   </footer>
 
   <a class="back-top" id="back-top" href="#top" aria-label="Back to top" inert>
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 12 6-6 6 6M12 6v14" /></svg>
   </a>
-
-  <dialog class="chaos" id="chaos-lab" aria-labelledby="chaos-title" aria-describedby="chaos-intro">
-    <header class="chaos__header">
-      <div><p class="chaos__eyebrow">Unlisted experiment / 01</p><h2 id="chaos-title">Chaos Lab<span aria-hidden="true">_</span></h2></div>
-      <button class="icon-btn" id="chaos-close" type="button" aria-label="Close Chaos Lab" autofocus><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6" /></svg></button>
-    </header>
-    <p class="chaos__intro" id="chaos-intro">You found the controls. A little maths, a lot of possibilities.</p>
-    <div class="chaos__body">
-      <div class="chaos__stage">
-        <div class="chaos__viewport" id="chaos-viewport">
-          <div class="chaos__result" id="chaos-result" hidden>
-            <span>Fixed point</span>
-            <button type="button" id="chaos-restore">Back to chaos ↗</button>
-          </div>
-        </div>
-        <div class="chaos__equations" aria-label="Clifford map equations"><span>x′ = sin(a·y) + c·cos(a·x)</span><span>y′ = sin(b·x) + d·cos(b·y)</span></div>
-      </div>
-      <div class="chaos__controls">
-        <label class="chaos__field" for="chaos-preset">Starting point
-          <select id="chaos-preset">
-            <option value="stable">Stable enough</option>
-            <option value="questionable">Questionable numerics</option>
-            <option value="review">Peer review pending</option>
-            <option value="custom" disabled>Custom coordinates</option>
-          </select>
-        </label>
-        <fieldset class="chaos__parameters">
-          <legend>Change the initial assumptions</legend>
-          <div class="chaos__parameter"><label for="chaos-a">a</label><output id="chaos-a-value" for="chaos-a">−1.55</output><input id="chaos-a" type="range" min="-2.5" max="2.5" step="0.01" value="-1.55" /></div>
-          <div class="chaos__parameter"><label for="chaos-b">b</label><output id="chaos-b-value" for="chaos-b">1.70</output><input id="chaos-b" type="range" min="-2.5" max="2.5" step="0.01" value="1.70" /></div>
-          <div class="chaos__parameter"><label for="chaos-c">c</label><output id="chaos-c-value" for="chaos-c">1.00</output><input id="chaos-c" type="range" min="-1.5" max="1.5" step="0.01" value="1.00" /></div>
-          <div class="chaos__parameter"><label for="chaos-d">d</label><output id="chaos-d-value" for="chaos-d">0.70</output><input id="chaos-d" type="range" min="-1.5" max="1.5" step="0.01" value="0.70" /></div>
-        </fieldset>
-        <label class="chaos__field" for="chaos-palette">Colour the chaos
-          <select id="chaos-palette"><option value="neon">Portfolio neon</option><option value="ocean">Deep water</option><option value="ember">After hours</option></select>
-        </label>
-        <div class="chaos__actions">
-          <button class="btn btn--ghost" id="chaos-play" type="button">Pause</button>
-          <button class="btn btn--ghost" id="chaos-reset" type="button">Reset</button>
-          <button class="btn btn--primary" id="chaos-save" type="button">Save PNG ↗</button>
-        </div>
-        <p class="chaos__note">Some parameters converge to a single point. It stays highlighted; “Back to chaos” restores the default map.</p>
-      </div>
-    </div>
-    <footer class="chaos__footer"><p id="chaos-status" role="status" aria-live="polite">Running · 26,000 particles</p><span>Nothing broken. Just nonlinear.</span></footer>
-  </dialog>
 
   <dialog class="observer" id="observer-trace" aria-labelledby="observer-title" aria-describedby="observer-intro">
     <header class="observer__header">
