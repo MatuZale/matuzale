@@ -15,49 +15,109 @@ themeBtn.addEventListener("click", () => {
   const next = currentTheme() === "dark" ? "light" : "dark";
   root.setAttribute("data-theme", next);
   try { localStorage.setItem("theme", next); } catch (e) { /* storage unavailable */ }
+  updateThemeLabel();
 });
 
-/* ───────── Nav: scrolled state, mobile menu, active link ───────── */
+function updateThemeLabel() {
+  themeBtn.setAttribute("aria-label", `Switch to ${currentTheme() === "dark" ? "light" : "dark"} theme`);
+}
+updateThemeLabel();
+systemDark.addEventListener("change", updateThemeLabel);
+
+/* ───────── Nav: section tracking and an accessible mobile disclosure ───────── */
 const nav = document.getElementById("nav");
 const links = document.getElementById("nav-links");
 const burger = document.getElementById("burger");
+const backTop = document.getElementById("back-top");
+const mobileNav = window.matchMedia("(max-width: 1000px)");
+const navAnchors = [...links.querySelectorAll("a")];
+const watched = [...document.querySelectorAll("main > section[id]")];
+let scrollPending = false;
 
-function onScroll() {
-  nav.classList.toggle("is-scrolled", window.scrollY > 24);
+function setMenu(open, restoreFocus = false) {
+  open = mobileNav.matches && open;
+  links.classList.toggle("is-open", open);
+  nav.classList.toggle("is-menu-open", open);
+  links.inert = mobileNav.matches && !open;
+  burger.setAttribute("aria-expanded", String(open));
+  burger.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+  if (restoreFocus) burger.focus();
 }
-onScroll();
-window.addEventListener("scroll", onScroll, { passive: true });
 
 burger.addEventListener("click", () => {
-  const open = links.classList.toggle("is-open");
-  burger.setAttribute("aria-expanded", String(open));
+  const open = burger.getAttribute("aria-expanded") !== "true";
+  setMenu(open);
+  if (open) navAnchors[0].focus();
 });
-links.addEventListener("click", (e) => {
-  if (e.target.closest("a")) {
-    links.classList.remove("is-open");
-    burger.setAttribute("aria-expanded", "false");
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && links.classList.contains("is-open")) {
+    setMenu(false, true);
   }
 });
+document.addEventListener("click", (e) => {
+  if (!nav.contains(e.target)) setMenu(false);
+  const anchor = e.target.closest('a[href^="#"]');
+  if (!anchor || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  const target = document.getElementById(anchor.hash.slice(1));
+  if (!target) return;
+  setMenu(false);
+  // Keep native fragment navigation/history, and move keyboard focus with the visitor.
+  target.setAttribute("tabindex", "-1");
+  requestAnimationFrame(() => target.focus({ preventScroll: true }));
+});
+nav.addEventListener("focusout", () => {
+  requestAnimationFrame(() => {
+    if (!nav.contains(document.activeElement)) setMenu(false);
+  });
+});
+mobileNav.addEventListener("change", () => {
+  // A resize can hide the currently focused mobile link.
+  const focusWasInLinks = links.contains(document.activeElement);
+  setMenu(false, mobileNav.matches && focusWasInLinks);
+  updateNavSize();
+});
+setMenu(false);
 
-const navAnchors = [...links.querySelectorAll("a")];
-const watched = navAnchors
-  .map((a) => document.querySelector(a.getAttribute("href")))
-  .filter(Boolean);
+function updateNavigation() {
+  scrollPending = false;
+  const y = window.scrollY;
+  const pageTravel = root.scrollHeight - window.innerHeight;
+  nav.classList.toggle("is-scrolled", y > 24);
+  nav.style.setProperty("--scroll-progress", pageTravel > 0 ? Math.min(1, Math.max(0, y / pageTravel)) : 0);
+  const showBackTop = y > window.innerHeight * 0.8;
+  backTop.classList.toggle("is-visible", showBackTop);
+  backTop.inert = !showBackTop;
 
-if ("IntersectionObserver" in window) {
-  const spy = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        navAnchors.forEach((a) =>
-          a.classList.toggle("is-active", a.getAttribute("href") === "#" + entry.target.id)
-        );
-      });
-    },
-    { rootMargin: "-45% 0px -50% 0px" }
-  );
-  watched.forEach((s) => spy.observe(s));
+  // Track section starts, including Toolbox, rather than a narrow intersection band.
+  const readingLine = nav.offsetHeight + Math.min(140, window.innerHeight * 0.18);
+  let active = watched[0];
+  for (const section of watched) {
+    if (section.getBoundingClientRect().top > readingLine) break;
+    active = section;
+  }
+  if (pageTravel > 0 && y >= pageTravel - 2) active = watched[watched.length - 1];
+  navAnchors.forEach((a) => {
+    const isActive = a.hash === "#" + active.id;
+    a.classList.toggle("is-active", isActive);
+    if (isActive) a.setAttribute("aria-current", "location");
+    else a.removeAttribute("aria-current");
+  });
 }
+function scheduleNavigation() {
+  if (scrollPending) return;
+  scrollPending = true;
+  requestAnimationFrame(updateNavigation);
+}
+function updateNavSize() {
+  root.style.setProperty("--nav-height", nav.offsetHeight + "px");
+  scheduleNavigation();
+}
+updateNavSize();
+window.addEventListener("scroll", scheduleNavigation, { passive: true });
+window.addEventListener("resize", updateNavSize, { passive: true });
+window.addEventListener("pageshow", scheduleNavigation);
+window.addEventListener("load", scheduleNavigation);
+if ("ResizeObserver" in window) new ResizeObserver(scheduleNavigation).observe(document.body);
 
 /* ───────── Reveal on scroll ───────── */
 const revealEls = [...document.querySelectorAll(".reveal")];

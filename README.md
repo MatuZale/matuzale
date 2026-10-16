@@ -23,7 +23,8 @@ for the Baltic Sea.
 The source of the portfolio site — plain HTML, CSS and JavaScript, no build step, no dependencies.
 
 - Hero with a live [Clifford attractor](https://en.wikipedia.org/wiki/Clifford_attractor) on `<canvas>` (reacts to the mouse, pauses off-screen, static with `prefers-reduced-motion`)
-- Bento-grid projects, a BENTOS deep-dive, publications, timeline and contact
+- Bento-grid projects, a BENTOS feature using the project's navy/lime branding, publications, timeline and contact
+- Linked EmbeddedSystems.do branding, section tracking, scroll progress and a keyboard-accessible mobile menu
 - Light / dark theme (follows the system, remembers the choice), responsive and accessible
 
 ```
@@ -47,3 +48,4 @@ Deployed with GitHub Pages from the `main` branch (root).
 ## License
 
 MIT — see [LICENSE](LICENSE). The photo and CV are © Tomasz Młynik; please don't reuse them.
+Third-party logos in `assets/brand/` belong to their respective owners and are excluded from the MIT license; see [asset sources](assets/brand/README.md).

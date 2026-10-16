@@ -30,7 +30,7 @@
     "url": "https://matuzale.github.io/matuzale/",
     "image": "https://matuzale.github.io/matuzale/assets/profile.jpg",
     "jobTitle": "Lead Software Engineer",
-    "worksFor": { "@type": "Organization", "name": "Embedded Systems DO" },
+    "worksFor": { "@type": "Organization", "name": "EmbeddedSystems.do", "url": "https://embeddedsystems.do/" },
     "alumniOf": { "@type": "CollegeOrUniversity", "name": "University of Gdańsk" },
     "address": { "@type": "PostalAddress", "addressLocality": "Gdańsk", "addressCountry": "PL" },
     "knowsAbout": ["Python", "Data engineering", "Quantum information", "Environmental monitoring"],
@@ -57,6 +57,7 @@
     <a class="nav__brand" href="#top" aria-label="Tomasz Młynik — home">TM<span>.</span></a>
     <nav class="nav__links" id="nav-links" aria-label="Main">
       <a href="#about">About</a>
+      <a href="#skills">Toolbox</a>
       <a href="#projects">Projects</a>
       <a href="#bentos">BENTOS</a>
       <a href="#research">Research</a>
@@ -72,6 +73,7 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
     </div>
+    <span class="nav__progress" aria-hidden="true"></span>
   </header>
 
   <main id="main">
@@ -80,7 +82,7 @@
       <canvas id="attractor" aria-hidden="true"></canvas>
       <div class="hero__shade" aria-hidden="true"></div>
       <div class="wrap hero__inner">
-        <p class="eyebrow reveal"><span class="dot"></span> Lead Software Engineer · Embedded Systems DO · Gdańsk, Poland</p>
+        <p class="eyebrow reveal"><span class="dot" aria-hidden="true"></span><span>Lead Software Engineer · <a href="https://embeddedsystems.do/" target="_blank" rel="noopener">EmbeddedSystems.do ↗</a> · Gdańsk, Poland</span></p>
         <h1 class="hero__title reveal">
           Tomasz<br />Młynik<span class="phd">, PhD</span>
         </h1>
@@ -120,11 +122,16 @@
           </p>
           <p class="reveal">
             Today I work on the applied side: data pipelines, dashboards, cloud services and automation.
-            I'm Lead Software Engineer at Embedded Systems DO, where I lead a software team building
+            I'm Lead Software Engineer at <a href="https://embeddedsystems.do/" target="_blank" rel="noopener">EmbeddedSystems.do</a>, where I lead a software team building
             environmental and IoT monitoring products.
             After hours I still play with maths: fractals and strange attractors rendered from chaotic maps -
             the same kind of map that is moving in the background of this page.
           </p>
+          <a class="workplace reveal" href="https://embeddedsystems.do/" target="_blank" rel="noopener">
+            <span class="workplace__logo"><img src="assets/brand/embeddedsystems.svg" alt="EmbeddedSystems.do" width="194" height="51" loading="lazy" /></span>
+            <span class="workplace__text"><small>Where I build</small><strong>Lead Software Engineer</strong><span>Environmental &amp; IoT software · Gdynia</span></span>
+            <span class="workplace__arrow" aria-hidden="true">↗</span>
+          </a>
           <ul class="chips reveal" aria-label="Quick facts">
             <li>🎓 PhD in Physics</li>
             <li>🐍 Python-first</li>
@@ -191,14 +198,14 @@
           <!-- BENTOS -->
           <article class="card card--xl card--bentos reveal" data-spot>
             <div class="card__body">
-              <span class="badge badge--live">Open source · In development</span>
+              <span class="badge">Open source · In development</span>
               <h3>BENTOS — water-quality buoy for the Gulf of Gdańsk</h3>
-              <p>A buoy with in-situ sensors, satellite data and a predictive model, feeding a public app that
-                tells residents how the water is - and warns about risks such as cyanobacteria blooms.
+              <p>A system in development combining in-situ sensors, satellite data and predictive modelling
+                for a public water-quality platform for the Gulf of Gdańsk.
                 I build the software side: data pipelines and dashboards.</p>
               <div class="card__links">
                 <a href="#bentos">Read the story →</a>
-                <a href="https://embeddedsystems-do.github.io/bentos-satbaltyk-dashboard/" target="_blank" rel="noopener">Live dashboard ↗</a>
+                <a href="https://embeddedsystems-do.github.io/bentos-satbaltyk-dashboard/" target="_blank" rel="noopener">Dashboard demo ↗</a>
               </div>
             </div>
             <svg class="card__art" viewBox="0 0 320 220" aria-hidden="true">
@@ -337,56 +344,95 @@
       </div>
     </section>
 
-    <!-- ───────── BENTOS deep-dive ───────── -->
-    <section class="section bentos" id="bentos">
-      <div class="wrap">
-        <p class="kicker reveal">Featured · Open source</p>
-        <h2 class="reveal">BENTOS: a smart buoy for the Gulf of Gdańsk</h2>
+    <!-- ───────── BENTOS: a small window into the project's own visual world ───────── -->
+    <section class="section bentos" id="bentos" aria-labelledby="bentos-title">
+      <div class="bentos__water" aria-hidden="true"></div>
+      <div class="wrap bentos__inner">
+        <div class="bentos__masthead reveal">
+          <p class="kicker">Featured project / Environmental monitoring</p>
+          <a class="bentos__brand" href="https://www.bentos.info/" target="_blank" rel="noopener" aria-label="BENTOS — visit the project website">
+            <img src="assets/brand/bentos-white.png" alt="BENTOS" width="2000" height="635" loading="lazy" />
+            <span aria-hidden="true">↗</span>
+          </a>
+        </div>
 
         <div class="bentos__grid">
-          <div class="bentos__story reveal">
-            <p>
-              Every summer, the Gulf of Gdańsk raises the same questions: Is it safe to swim today? Is there
-              a bloom? <strong>BENTOS</strong> is a joint effort of <strong>Embedded Systems DO</strong> and the
-              <strong>Institute of Oceanology of the Polish Academy of Sciences (IO PAN)</strong>, co-financed
-              by the EU programme <em>Fundusze Europejskie dla Pomorza</em>, to answer them with data.
+          <div class="bentos__story">
+            <p class="bentos__location reveal"><span aria-hidden="true">◎</span> Gulf of Gdańsk · Baltic Sea</p>
+            <h2 class="reveal" id="bentos-title">A sea of data.<br /><em>A clearer picture.</em></h2>
+            <p class="bentos__intro reveal">What's happening beneath the surface? We're building the tools to find out.</p>
+            <p class="reveal">
+              BENTOS brings together in-situ water-quality sensors, satellite observations and predictive
+              modelling to help people understand the Gulf of Gdańsk — from everyday conditions to risks
+              such as cyanobacteria blooms.
             </p>
-            <p>
-              An autonomous measuring buoy collects in-situ water-quality readings. They are combined
-              with satellite and model products and fed into a predictive model developed with IO PAN. The
-              result is a public web and mobile app that shows current water quality and a forecast of risks
-              for local residents. The whole system is designed to be <strong>open source</strong>.
+            <p class="reveal">
+              Developed by <a href="https://embeddedsystems.do/" target="_blank" rel="noopener">EmbeddedSystems.do</a>
+              with the <a href="https://www.iopan.pl/" target="_blank" rel="noopener">Institute of Oceanology, Polish Academy of Sciences</a>.
+              Designed around open data, open code and open hardware.
             </p>
-            <p>
-              <strong>My part:</strong> the software side - data pipelines, APIs and the public-facing
-              dashboards.
-            </p>
-            <div class="card__links card__links--big">
-              <a class="btn btn--primary" href="https://embeddedsystems-do.github.io/bentos-satbaltyk-dashboard/" target="_blank" rel="noopener">Open live dashboard ↗</a>
-              <a class="btn btn--ghost" href="https://github.com/embeddedsystems-do/bentos-satbaltyk-dashboard" target="_blank" rel="noopener">Source on GitHub ↗</a>
-              <a class="btn btn--ghost" href="https://bentos.info" target="_blank" rel="noopener">bentos.info ↗</a>
+            <div class="bentos__role reveal">
+              <span class="bentos__label">My contribution</span>
+              <p>Data pipelines, APIs &amp; dashboards.<br /><strong>Turning scientific data into something people can use.</strong></p>
+            </div>
+            <div class="bentos__actions reveal">
+              <a class="btn bentos__btn" href="https://embeddedsystems-do.github.io/bentos-satbaltyk-dashboard/" target="_blank" rel="noopener">Explore the dashboard ↗</a>
+              <a class="bentos__text-link" href="https://www.bentos.info/" target="_blank" rel="noopener">Meet BENTOS ↗</a>
             </div>
           </div>
 
-          <aside class="bentos__panel reveal">
-            <h3>How the data flows</h3>
-            <ol class="flow">
-              <li><span class="flow__n">1</span><div><strong>Sense</strong><small>Buoy with in-situ water-quality sensors</small></div></li>
-              <li><span class="flow__n">2</span><div><strong>Fuse</strong><small>Satellite &amp; model layers from SatBałtyk (SST, chlorophyll-a, oxygen, waves)</small></div></li>
-              <li><span class="flow__n">3</span><div><strong>Predict</strong><small>Water-quality &amp; risk model developed with IO PAN</small></div></li>
-              <li><span class="flow__n">4</span><div><strong>Inform</strong><small>Public web &amp; mobile app for residents</small></div></li>
-            </ol>
-            <h3>SatBałtyk dashboard</h3>
-            <ul class="tags">
-              <li>React 18</li><li>Vite</li><li>Leaflet</li><li>Python</li><li>NumPy</li><li>GeoTIFF</li><li>GitHub Actions</li><li>GitHub Pages</li><li>MIT</li>
-            </ul>
-            <p class="note">
-              A Python pipeline turns gigabyte-scale GeoTIFF exports into lightweight map overlays; the React
-              front-end adds time playback, layer comparison with a slider, point charts and PL / EN / SV
-              interface. <em>Buoy markers in the public demo are simulated placeholders.</em>
-            </p>
+          <aside class="bentos__panel reveal" aria-labelledby="bentos-dashboard-title">
+            <div class="bentos__panel-heading"><span class="bentos__label">From sea to screen</span><span class="bentos__status">In development</span></div>
+            <figure class="bentos__diagram">
+              <svg viewBox="0 0 440 260" role="img" aria-labelledby="bentos-diagram-title bentos-diagram-desc">
+                <title id="bentos-diagram-title">BENTOS system overview</title>
+                <desc id="bentos-diagram-desc">A schematic buoy collects underwater measurements. Satellite observations add a wider view. Both feed the software and models.</desc>
+                <defs>
+                  <pattern id="bentos-grid" width="22" height="22" patternUnits="userSpaceOnUse"><path d="M22 0H0V22" fill="none" stroke="#89aeff" stroke-opacity=".12" stroke-width=".7" /></pattern>
+                  <linearGradient id="bentos-depth" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#0036ff" stop-opacity=".2" /><stop offset="1" stop-color="#0036ff" stop-opacity="0" /></linearGradient>
+                </defs>
+                <rect width="440" height="260" fill="url(#bentos-grid)" />
+                <path d="M0 111Q28 102 55 111T110 111T165 111T220 111T275 111T330 111T385 111T440 111V260H0Z" fill="url(#bentos-depth)" />
+                <path d="M0 111Q28 102 55 111T110 111T165 111T220 111T275 111T330 111T385 111T440 111" fill="none" stroke="#78a0ff" stroke-opacity=".65" />
+                <g fill="none" stroke="#aaff00" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M147 78V38M135 100V86H159V100M126 100H168L162 116H132Z" stroke-width="2" />
+                  <circle cx="147" cy="34" r="4" fill="#aaff00" stroke="none" />
+                  <path d="M137 23Q147 14 157 23M129 16Q147 0 165 16" stroke-opacity=".5" />
+                  <path d="M147 117V210" stroke-dasharray="3 5" stroke-opacity=".6" />
+                  <circle cx="147" cy="161" r="5" fill="#081b65" /><circle cx="147" cy="205" r="5" fill="#081b65" />
+                  <path d="M156 161H196M156 205H196" stroke-opacity=".35" />
+                  <g transform="translate(325 45) rotate(-25)"><rect x="-9" y="-8" width="18" height="16" rx="2" /><path d="M-14-5H-34V5H-14ZM14-5H34V5H14ZM0 8V15M-5 16Q0 21 5 16" /></g>
+                  <path d="M310 70L274 94M303 74L265 101" stroke-dasharray="3 5" stroke-opacity=".4" />
+                </g>
+                <g fill="#c4d3fa" font-family="ui-monospace, monospace" font-size="10" letter-spacing="1">
+                  <text x="25" y="62">IN SITU</text><path d="M78 66L124 84" stroke="#c4d3fa" stroke-opacity=".4" />
+                  <text x="292" y="22">SATELLITE</text>
+                  <text x="205" y="165">WATER QUALITY</text><text x="205" y="209">DEPTH PROFILE</text>
+                  <text x="25" y="246" fill="#aaff00">BALTIC SEA / SYSTEM SCHEMATIC</text>
+                </g>
+              </svg>
+            </figure>
+            <div class="bentos__dashboard">
+              <span class="bentos__label">The software I build</span>
+              <h3 id="bentos-dashboard-title">SatBałtyk dashboard</h3>
+              <p>A Python pipeline turns gigabyte-scale GeoTIFF exports into lightweight map layers.
+                A React app makes them explorable: time playback, layer comparison and point charts.</p>
+              <ul class="tags" aria-label="Dashboard technologies">
+                <li>Python</li><li>NumPy</li><li>React</li><li>Leaflet</li><li>GeoTIFF</li>
+              </ul>
+              <a class="bentos__text-link" href="https://github.com/embeddedsystems-do/bentos-satbaltyk-dashboard" target="_blank" rel="noopener">Explore the source on GitHub ↗</a>
+              <p class="note">The public demo uses satellite and model layers. Its buoy markers are simulated placeholders.</p>
+            </div>
           </aside>
         </div>
+
+        <ol class="bentos__flow" aria-label="The planned BENTOS data flow">
+          <li class="reveal"><span>01 / Sense</span><h3>Below the surface</h3><p>In-situ sensors collect water-quality measurements.</p></li>
+          <li class="reveal"><span>02 / Combine</span><h3>The wider picture</h3><p>Satellite and model layers add context from SatBałtyk.</p></li>
+          <li class="reveal"><span>03 / Predict</span><h3>From data to insight</h3><p>Modelling with IO PAN aims to forecast conditions and risks.</p></li>
+          <li class="reveal"><span>04 / Share</span><h3>Open to everyone</h3><p>A public platform is being developed to make the data useful.</p></li>
+        </ol>
+        <p class="bentos__footnote reveal">A project in development · Co-financed by the EU programme Fundusze Europejskie dla Pomorza.</p>
       </div>
     </section>
 
@@ -449,7 +495,7 @@
         <div class="timeline">
           <article class="tl reveal">
             <span class="tl__when">04/2026 →</span>
-            <h3>Lead Software Engineer · Embedded Systems DO</h3>
+            <h3>Lead Software Engineer · <a href="https://embeddedsystems.do/" target="_blank" rel="noopener">EmbeddedSystems.do ↗</a></h3>
             <p class="tl__where">Gdynia, Poland</p>
             <p>Joined as a software engineer and data analyst; leading the software team since 10/2026.
               Python and React web applications on AWS, plus data pipelines, dashboards and cloud tooling for
@@ -549,6 +595,9 @@
     </div>
   </footer>
 
+  <a class="back-top" id="back-top" href="#top" aria-label="Back to top" inert>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 12 6-6 6 6M12 6v14" /></svg>
+  </a>
   <script src="script.js"></script>
 </body>
 </html>
