@@ -25,17 +25,21 @@ The source of the portfolio site — plain HTML, CSS and JavaScript, no build st
 - Hero with a live [Clifford attractor](https://en.wikipedia.org/wiki/Clifford_attractor) on `<canvas>` (reacts to the mouse, pauses off-screen, static with `prefers-reduced-motion`)
 - Bento-grid projects, a BENTOS feature using the project's navy/lime branding, publications, timeline and contact
 - Linked EmbeddedSystems.do branding, section tracking, scroll progress and a keyboard-accessible mobile menu
+- Neon gradient frames and pointer lighting across the toolbox and projects, with softly lit publications and timeline
+- Easter eggs: the TM logo briefly glitches at random intervals (disabled with reduced motion; focus it and press G to trigger manually). Enter the Konami code or follow the footer hint to open Chaos Lab, with attractor presets, parameters, palettes, pause and PNG export. Parameter changes restart the particle distribution so a collapsed map can recover.
+- “Observer detected” in the footer opens a local browser readout. A separate button fetches the visitor's public IPv4/IPv6 address from [ipify](https://www.ipify.org/); no lookup happens automatically, and the portfolio does not store the readout.
 - Light / dark theme (follows the system, remembers the choice), responsive and accessible
 
 ```
 index.html   content (+ JSON-LD Person metadata)
 404.html     not-found page
 style.css    design tokens, layout, themes
-script.js    theme, nav, reveal-on-scroll, attractor
+script.js    theme, nav, reveal-on-scroll, attractor and hidden Chaos Lab
 assets/      photo, images, public CV (resume.pdf)
 cv/          HTML source of the public CV
 ```
 
+CV files remain in this repository; the portfolio currently has no CV download links.
 The public CV is rendered from `cv/resume.html` (contains no ID number, date of birth, phone or street address):
 
 ```

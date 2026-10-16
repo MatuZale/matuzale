@@ -54,7 +54,7 @@
   <a class="skip" href="#main">Skip to content</a>
 
   <header class="nav" id="nav">
-    <a class="nav__brand" href="#top" aria-label="Tomasz Młynik — home">TM<span>.</span></a>
+    <a class="nav__brand" href="#top" aria-label="Tomasz Młynik — home" data-text="TM." title="Sometimes the signal slips. Focus here and press G.">TM<span>.</span></a>
     <nav class="nav__links" id="nav-links" aria-label="Main">
       <a href="#about">About</a>
       <a href="#skills">Toolbox</a>
@@ -94,7 +94,6 @@
         <div class="hero__cta reveal">
           <a class="btn btn--primary" href="#contact">Get in touch</a>
           <a class="btn btn--ghost" href="#projects">See my work</a>
-          <a class="btn btn--ghost" href="assets/resume.pdf" target="_blank" rel="noopener">Download CV</a>
         </div>
         <ul class="hero__stats reveal" aria-label="Highlights">
           <li><strong>PhD</strong><span>Physics, Univ. of Gdańsk, 2024</span></li>
@@ -127,7 +126,7 @@
             After hours I still play with maths: fractals and strange attractors rendered from chaotic maps -
             the same kind of map that is moving in the background of this page.
           </p>
-          <a class="workplace reveal" href="https://embeddedsystems.do/" target="_blank" rel="noopener">
+          <a class="workplace reveal" href="https://embeddedsystems.do/" target="_blank" rel="noopener" data-spot>
             <span class="workplace__logo"><img src="assets/brand/embeddedsystems.svg" alt="EmbeddedSystems.do" width="194" height="51" loading="lazy" /></span>
             <span class="workplace__text"><small>Where I build</small><strong>Lead Software Engineer</strong><span>Environmental &amp; IoT software · Gdynia</span></span>
             <span class="workplace__arrow" aria-hidden="true">↗</span>
@@ -149,34 +148,34 @@
         <p class="kicker reveal">Toolbox</p>
         <h2 class="reveal">What I work with</h2>
         <div class="skills">
-          <article class="skill reveal">
+          <article class="skill reveal" data-spot>
             <h3>Data &amp; Python</h3>
             <ul class="tags">
               <li>Python</li><li>NumPy</li><li>pandas</li><li>scikit-learn</li><li>Matplotlib</li>
               <li>Numba</li><li>SQL</li><li>Streamlit</li><li>Excel (advanced)</li>
             </ul>
           </article>
-          <article class="skill reveal">
+          <article class="skill reveal" data-spot>
             <h3>Cloud &amp; data engineering</h3>
             <ul class="tags">
               <li>AWS S3</li><li>Lambda</li><li>Glue</li><li>Athena</li><li>DynamoDB</li>
               <li>Metabase</li><li>Docker</li><li>GitHub Actions</li>
             </ul>
           </article>
-          <article class="skill reveal">
+          <article class="skill reveal" data-spot>
             <h3>Web &amp; front-end</h3>
             <ul class="tags">
               <li>React</li><li>TypeScript</li><li>Vite</li><li>Leaflet</li><li>HTML / CSS / JS</li><li>Recharts</li>
             </ul>
           </article>
-          <article class="skill reveal">
+          <article class="skill reveal" data-spot>
             <h3>Science &amp; maths</h3>
             <ul class="tags">
               <li>Quantum information</li><li>Semidefinite programming (CVX)</li><li>Representation theory</li>
               <li>Monte Carlo</li><li>MATLAB</li><li>SageMath</li><li>LaTeX</li>
             </ul>
           </article>
-          <article class="skill reveal">
+          <article class="skill reveal" data-spot>
             <h3>Currently learning</h3>
             <ul class="tags tags--soft">
               <li>C++ (OpenGL, numerics)</li><li>Zephyr RTOS</li><li>TanStack Query</li><li>GraphQL</li>
@@ -239,7 +238,9 @@
 
           <!-- Generative art -->
           <article class="card card--tall card--art reveal" data-spot id="art">
-            <img src="assets/attractor.jpg" alt="Neon Clifford strange attractor rendered in purple and orange" loading="lazy" width="900" height="900" />
+            <div class="card__media">
+              <img src="assets/attractor.jpg" alt="Neon Clifford strange attractor rendered in purple and orange" loading="lazy" width="900" height="900" />
+            </div>
             <div class="card__body">
               <span class="badge">Generative art · Python</span>
               <h3>Strange attractors &amp; fractals</h3>
@@ -577,12 +578,6 @@
               Google Scholar
             </a>
           </li>
-          <li>
-            <a href="assets/resume.pdf" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h8l6 6v14H6V2Zm7 1.5V9h5.5L13 3.5ZM8 13h8v1.5H8V13Zm0 3.5h8V18H8v-1.5Z"/></svg>
-              CV (PDF)
-            </a>
-          </li>
         </ul>
       </div>
     </section>
@@ -591,6 +586,10 @@
   <footer class="footer">
     <div class="wrap footer__inner">
       <p>© <span id="year">2026</span> Tomasz Młynik</p>
+      <div class="footer__secrets">
+        <button class="footer__secret" id="chaos-unlock" type="button" aria-label="Open the hidden Chaos Lab" aria-haspopup="dialog" aria-controls="chaos-lab" title="↑ ↑ ↓ ↓ ← → ← → B A · or follow the signal" hidden>Some things respond to a different kind of input.</button>
+        <button class="footer__trace" id="observer-unlock" type="button" aria-haspopup="dialog" aria-controls="observer-trace" hidden><span aria-hidden="true">◎</span> observer detected ↗</button>
+      </div>
       <a href="#top">Back to top ↑</a>
     </div>
   </footer>
@@ -598,6 +597,68 @@
   <a class="back-top" id="back-top" href="#top" aria-label="Back to top" inert>
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 12 6-6 6 6M12 6v14" /></svg>
   </a>
+
+  <dialog class="chaos" id="chaos-lab" aria-labelledby="chaos-title" aria-describedby="chaos-intro">
+    <header class="chaos__header">
+      <div><p class="chaos__eyebrow">Unlisted experiment / 01</p><h2 id="chaos-title">Chaos Lab<span aria-hidden="true">_</span></h2></div>
+      <button class="icon-btn" id="chaos-close" type="button" aria-label="Close Chaos Lab" autofocus><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6" /></svg></button>
+    </header>
+    <p class="chaos__intro" id="chaos-intro">You found the controls. A little maths, a lot of possibilities.</p>
+    <div class="chaos__body">
+      <div class="chaos__stage">
+        <div class="chaos__viewport" id="chaos-viewport" role="img" aria-label="Clifford attractor generated from the parameters in this lab"></div>
+        <div class="chaos__equations" aria-label="Clifford map equations"><span>x′ = sin(a·y) + c·cos(a·x)</span><span>y′ = sin(b·x) + d·cos(b·y)</span></div>
+      </div>
+      <div class="chaos__controls">
+        <label class="chaos__field" for="chaos-preset">Starting point
+          <select id="chaos-preset">
+            <option value="stable">Stable enough</option>
+            <option value="questionable">Questionable numerics</option>
+            <option value="review">Peer review pending</option>
+            <option value="custom" disabled>Custom coordinates</option>
+          </select>
+        </label>
+        <fieldset class="chaos__parameters">
+          <legend>Change the initial assumptions</legend>
+          <div class="chaos__parameter"><label for="chaos-a">a</label><output id="chaos-a-value" for="chaos-a">−1.55</output><input id="chaos-a" type="range" min="-2.5" max="2.5" step="0.01" value="-1.55" /></div>
+          <div class="chaos__parameter"><label for="chaos-b">b</label><output id="chaos-b-value" for="chaos-b">1.70</output><input id="chaos-b" type="range" min="-2.5" max="2.5" step="0.01" value="1.70" /></div>
+          <div class="chaos__parameter"><label for="chaos-c">c</label><output id="chaos-c-value" for="chaos-c">1.00</output><input id="chaos-c" type="range" min="-1.5" max="1.5" step="0.01" value="1.00" /></div>
+          <div class="chaos__parameter"><label for="chaos-d">d</label><output id="chaos-d-value" for="chaos-d">0.70</output><input id="chaos-d" type="range" min="-1.5" max="1.5" step="0.01" value="0.70" /></div>
+        </fieldset>
+        <label class="chaos__field" for="chaos-palette">Colour the chaos
+          <select id="chaos-palette"><option value="neon">Portfolio neon</option><option value="ocean">Deep water</option><option value="ember">After hours</option></select>
+        </label>
+        <div class="chaos__actions">
+          <button class="btn btn--ghost" id="chaos-play" type="button">Pause</button>
+          <button class="btn btn--ghost" id="chaos-reset" type="button">Reset</button>
+          <button class="btn btn--primary" id="chaos-save" type="button">Save PNG ↗</button>
+        </div>
+        <p class="chaos__note">Some parameters settle to a point. That's a result too. A preset will bring you back.</p>
+      </div>
+    </div>
+    <footer class="chaos__footer"><p id="chaos-status" role="status" aria-live="polite">Running · 26,000 particles</p><span>Nothing broken. Just nonlinear.</span></footer>
+  </dialog>
+
+  <dialog class="observer" id="observer-trace" aria-labelledby="observer-title" aria-describedby="observer-intro">
+    <header class="observer__header">
+      <div><p class="observer__eyebrow">Incoming connection / 02</p><h2 id="observer-title">You left a signal<span aria-hidden="true">_</span></h2></div>
+      <button class="icon-btn" id="observer-close" type="button" aria-label="Close observer readout" autofocus><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6" /></svg></button>
+    </header>
+    <p class="observer__intro" id="observer-intro">Your browser brought a few clues. Let's see what they say.</p>
+    <dl class="observer__readout">
+      <div class="observer__ip"><dt>PUBLIC_IP</dt><dd id="observer-ip" role="status" aria-live="polite">Awaiting your signal</dd></div>
+      <div><dt>TIME_ZONE</dt><dd id="observer-zone">—</dd></div>
+      <div><dt>LANGUAGES</dt><dd id="observer-languages">—</dd></div>
+      <div><dt>DISPLAY</dt><dd id="observer-display">—</dd></div>
+      <div><dt>VIEWPORT</dt><dd id="observer-viewport">—</dd></div>
+      <div><dt>INPUT</dt><dd id="observer-input">—</dd></div>
+      <div><dt>LOCAL_TIME</dt><dd id="observer-time">—</dd></div>
+    </dl>
+    <button class="btn btn--ghost" id="observer-reveal-ip" type="button" aria-describedby="observer-ip-source">Reveal public IP ↗</button>
+    <p class="observer__source" id="observer-ip-source">This button contacts <a href="https://www.ipify.org/" target="_blank" rel="noopener">ipify</a> to look up your public address.</p>
+    <p class="observer__note">A small demo of information websites can read. The local readout stays in this tab; this portfolio doesn't save these fields.</p>
+    <footer class="observer__footer"><span>ACCESS: browser sandbox</span><span>Observation changes the observer.</span></footer>
+  </dialog>
   <script src="script.js"></script>
 </body>
 </html>
