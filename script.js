@@ -117,21 +117,32 @@ document.getElementById("year").textContent = new Date().getFullYear();
     py[i] = (Math.random() - 0.5) * 2;
   }
 
-  // 256-step palette: black → indigo → magenta → orange → warm white (little-endian ABGR)
-  const stops = [
-    [0.0, 6, 4, 20], [0.18, 38, 12, 98], [0.4, 132, 24, 160],
-    [0.62, 245, 70, 150], [0.82, 255, 160, 70], [1.0, 255, 240, 214],
-  ];
+  // 256-step palettes (little-endian ABGR). Dark: glowing neon on the dark page background.
+  // Light: ink-like violet/magenta strokes on the light page background.
+  const PALETTES = {
+    dark: [
+      [0.0, 11, 10, 26], [0.18, 38, 12, 98], [0.4, 132, 24, 160],
+      [0.62, 245, 70, 150], [0.82, 255, 160, 70], [1.0, 255, 240, 214],
+    ],
+    light: [
+      [0.0, 251, 250, 255], [0.15, 222, 208, 252], [0.4, 165, 115, 238],
+      [0.65, 214, 36, 159], [0.85, 112, 20, 124], [1.0, 34, 10, 66],
+    ],
+  };
   const lut = new Uint32Array(256);
-  for (let i = 0; i < 256; i++) {
-    const t = i / 255;
-    let k = 0;
-    while (k < stops.length - 2 && t > stops[k + 1][0]) k++;
-    const [t0, r0, g0, b0] = stops[k], [t1, r1, g1, b1] = stops[k + 1];
-    const u = (t - t0) / (t1 - t0);
-    const r = r0 + (r1 - r0) * u, g = g0 + (g1 - g0) * u, b = b0 + (b1 - b0) * u;
-    lut[i] = (255 << 24) | (b << 16) | (g << 8) | r;
+  function buildLut() {
+    const stops = PALETTES[currentTheme()];
+    for (let i = 0; i < 256; i++) {
+      const t = i / 255;
+      let k = 0;
+      while (k < stops.length - 2 && t > stops[k + 1][0]) k++;
+      const [t0, r0, g0, b0] = stops[k], [t1, r1, g1, b1] = stops[k + 1];
+      const u = (t - t0) / (t1 - t0);
+      const r = r0 + (r1 - r0) * u, g = g0 + (g1 - g0) * u, b = b0 + (b1 - b0) * u;
+      lut[i] = (255 << 24) | (b << 16) | (g << 8) | r;
+    }
   }
+  buildLut();
 
   function resize() {
     const rect = hero.getBoundingClientRect();
@@ -181,6 +192,10 @@ document.getElementById("year").textContent = new Date().getFullYear();
       px[i] = x; py[i] = y;
     }
 
+    paint();
+  }
+
+  function paint() {
     const gain = 255 / Math.log(1 + 110);
     for (let i = 0; i < density.length; i++) {
       const v = Math.log(1 + density[i]) * gain;
@@ -189,7 +204,18 @@ document.getElementById("year").textContent = new Date().getFullYear();
     ctx.putImageData(img, 0, 0);
   }
 
+  // Re-colour when the theme changes (toggle button or system setting).
+  function onThemeChange() {
+    buildLut();
+    paint();
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", currentTheme() === "dark" ? "#0b0a1a" : "#fbfaff");
+  }
+  new MutationObserver(onThemeChange).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+  systemDark.addEventListener("change", onThemeChange);
+
   resize();
+  onThemeChange();
   let resizeTimer;
   window.addEventListener("resize", () => {
     clearTimeout(resizeTimer);
