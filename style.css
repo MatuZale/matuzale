@@ -445,6 +445,9 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
 .card--bentos { background: radial-gradient(ellipse at 100% 0, #0036ff80, transparent 65%), #001562; }
 .card--bentos .badge { color: #aaff00; background: #aaff0010; border-color: #aaff0040; }
 .card--bentos .card__links a { color: #aaff00; }
+.card__deck { padding: 0; border: 0; background: none; color: var(--link); font: inherit; cursor: pointer; }
+.card__deck:hover { text-decoration: underline; text-underline-offset: 3px; }
+.card__deck[aria-busy="true"] { cursor: progress; opacity: .7; }
 .card--bentos .card__art { flex: 0 0 33%; width: 33%; min-width: 0; color: #d9e5ff; }
 .card--bentos .card__body { min-width: 0; }
 .bentos { background: #00093d; border-block: 1px solid #2b4690; overflow: hidden; }
@@ -917,7 +920,7 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
   mask-composite: intersect;
   filter: var(--card-foil-tone);
 }
-.card__holo--isotherms { --motif: url("assets/holo/isotherms.svg"); --latent: url("assets/holo/latent-isotherms.svg"); --motif-size: 470px; --motif-pos: right -150px bottom -180px; --holo-tint: var(--accent-3); }
+.card__holo--isotherms { --motif: url("assets/holo/isotherms.svg"); --latent: url("assets/holo/latent-isotherms.svg"); --motif-size: 705px; --motif-pos: right -268px bottom -298px; --holo-tint: var(--accent-3); }
 .card__holo--guilloche { --motif: url("assets/holo/guilloche.svg"); --latent: url("assets/holo/latent-guilloche.svg"); --motif-size: 360px; --motif-pos: right -135px bottom -130px; --holo-tint: #c79f44; }
 .card__holo--streams { --motif: url("assets/holo/streams.svg"); --latent: url("assets/holo/latent-streams.svg"); --motif-size: 540px; --motif-pos: right -150px bottom -225px; --holo-tint: var(--accent-2); --glow-x: 62%; --glow-y: 88%; }
 .card__holo--harmonograph { --motif: url("assets/holo/harmonograph.svg"); --latent: url("assets/holo/latent-harmonograph.svg"); --motif-size: 400px; --motif-pos: right -110px bottom -120px; --holo-tint: var(--accent); }

@@ -23,9 +23,11 @@ function d(pts, closed) {
 }
 const path = (pts, w, o = 1, closed = false) =>
   `<path d="${d(pts, closed)}" stroke-width="${(w * S).toFixed(0)}"${o < 1 ? ` opacity="${o}"` : ''}/>`;
-const svg = (body, note) =>
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${400 * S} ${400 * S}" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round">\n<!-- ${note} -->\n${body}\n</svg>\n`;
-const write = (name, body, note) => fs.writeFileSync(`${out}/${name}.svg`, svg(body, note));
+// `pad` widens the viewBox on every side, for motifs whose lines run past the 400x400 design square;
+// a mask image is clipped to its viewBox, so anything outside it would end on a hard edge.
+const svg = (body, note, pad = 0) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-pad * S} ${-pad * S} ${(400 + 2 * pad) * S} ${(400 + 2 * pad) * S}" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round">\n<!-- ${note} -->\n${body}\n</svg>\n`;
+const write = (name, body, note, pad) => fs.writeFileSync(`${out}/${name}.svg`, svg(body, note, pad));
 
 // coldchain-mcp: isotherms around a cold spot. Every fifth line is an index contour.
 {
@@ -39,7 +41,7 @@ const write = (name, body, note) => fs.writeFileSync(`${out}/${name}.svg`, svg(b
     }
     b += path(pts, k % 5 === 2 ? 1.7 : .8, +(1 - k * .022).toFixed(2), true);
   }
-  write('isotherms', b, 'Isotherms around a cold spot');
+  write('isotherms', b, 'Isotherms around a cold spot', 100); // outer rings reach x -94..498
 }
 
 // Personal finance: a banknote-style guilloche rosette.

@@ -1,0 +1,499 @@
+/* ───────── The attractor collection (loaded by deck.js) ─────────
+   Trading cards for the renders behind "Strange attractors & fractals". The card recipe follows the
+   layered shine + glare idea of Simon Goellner's Pokémon cards (codepen.io/simeydotme/pen/abYWJdX);
+   the patterns, frames and artwork here are original. Every card gets its own foil. */
+
+html.deck-open { overflow: hidden; }
+
+.deck {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0 0 3rem;
+  border: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  color: #ece9ff;
+  background:
+    radial-gradient(60% 50% at 15% 0%, #3a1a5c66, transparent 70%),
+    radial-gradient(50% 45% at 90% 100%, #0b4d6266, transparent 70%),
+    #07060f;
+  font-family: var(--font-body);
+  color-scheme: dark;
+}
+.deck[open] { animation: deck-in .35s ease-out; }
+.deck::backdrop { background: #05040c; }
+@keyframes deck-in { from { opacity: 0; } }
+
+.deck__bar {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .6rem 1.6rem;
+  padding: 1rem clamp(1rem, 4vw, 2.5rem);
+  border-bottom: 1px solid #ffffff14;
+  background: #07060fcc;
+  backdrop-filter: blur(10px);
+}
+.deck__heading { margin-right: auto; }
+.deck__kicker { margin: 0; color: #a5a1c7; font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; }
+.deck h2 { margin: .1rem 0 0; font-family: var(--font-head); font-size: clamp(1.25rem, 3vw, 1.6rem); line-height: 1.15; }
+.deck h2 span { color: #a5a1c7; font-weight: 500; }
+.deck__hint { max-width: 32rem; margin: 0; color: #a5a1c7; font-size: .85rem; }
+.deck__close {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .6rem 1.1rem;
+  border: 1px solid #ffffff2e;
+  border-radius: 999px;
+  background: #ffffff0d;
+  color: #ece9ff;
+  font: 600 .92rem var(--font-body);
+  cursor: pointer;
+}
+.deck__close:hover, .deck__close:focus-visible { border-color: #ff5ecb; background: #ff5ecb1f; }
+.deck__hint--touch { display: none; }
+@media (hover: none) { .deck__hint--pointer { display: none; } .deck__hint--touch { display: inline; } }
+@media (max-width: 640px) { .deck__hint { order: 3; flex-basis: 100%; font-size: .8rem; } }
+
+.deck__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr));
+  gap: clamp(1.2rem, 3vw, 2.4rem);
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: clamp(1.4rem, 4vw, 2.6rem) clamp(1rem, 4vw, 2.5rem);
+  list-style: none;
+}
+@media (max-width: 560px) { .deck__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem .8rem; } }
+.deck__slot { position: relative; z-index: 1; min-width: 0; aspect-ratio: 63 / 88; }
+.deck__slot.is-raised { z-index: 6; }
+.deck.is-dealt .deck__slot { animation: deal .7s cubic-bezier(.2, .9, .25, 1.1) backwards; animation-delay: calc(var(--i) * 65ms + 80ms); }
+@keyframes deal {
+  from { opacity: 0; transform: translate(calc((var(--i) - 3.5) * -14%), 55vh) rotate(calc((var(--i) - 3.5) * 5deg)) scale(.7); }
+}
+
+/* While a card is lifted, everything else steps back. */
+.deck__veil {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  background: #05040ccc;
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .35s, visibility 0s .35s;
+}
+.deck.has-active .deck__veil { opacity: 1; visibility: visible; transition: opacity .35s; }
+
+/* ───────── Card ───────── */
+.tcard {
+  /* Per card: frame metal, accent and foil. */
+  --frame: linear-gradient(135deg, #cfd3e6, #7d82a0 45%, #e8eaf5 70%, #8a8fae);
+  --accent: #b6a6ff;
+  --panel: #0e0c1a;
+  --spectrum: #ff7a9a, #ffd56b, #a7ff8a, #6ff7ff, #7f9bff, #d38bff, #ff7a9a;
+  --shine-o: .3;
+  --foil-o: .55;
+  --radius: 4.6cqw;
+  position: absolute;
+  inset: 0;
+  display: block;
+  container-type: inline-size;
+  aspect-ratio: 63 / 88;
+  outline: none;
+  cursor: pointer;
+  pointer-events: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.tcard__rotator {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  transform-style: preserve-3d;
+  /* No will-change: it would cache the card as a small bitmap and blur it once lifted and scaled. */
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), 0) scale(var(--s, 1)) perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+}
+.tcard.is-staged { position: fixed; inset: auto; top: var(--stage-y); left: var(--stage-x); width: var(--stage-w); }
+.tcard.is-active { cursor: grab; touch-action: none; }
+.tcard.is-active:active { cursor: grabbing; }
+.tcard__face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: var(--radius);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  box-shadow:
+    0 0 0 1px #ffffff1f,
+    0 calc(2px + var(--o, 0) * 10px) calc(10px + var(--o, 0) * 30px) -6px #000c,
+    0 0 calc(var(--o, 0) * 26px) calc(var(--o, 0) * -4px) color-mix(in srgb, var(--accent) 55%, transparent);
+}
+.tcard:focus-visible .tcard__face { box-shadow: 0 0 0 2px #07060f, 0 0 0 4px var(--accent), 0 14px 30px -8px #000c; }
+
+.tcard__front { padding: 3.4cqw; background: var(--frame); }
+/* A fine engraving on the frame metal. */
+.tcard__front::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: .5;
+  background: repeating-linear-gradient(115deg, #ffffff26 0 .4cqw, transparent .4cqw 1.1cqw);
+  mix-blend-mode: overlay;
+}
+.tcard__panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 2.6cqw 3.2cqw 2.2cqw;
+  border-radius: calc(var(--radius) - 2cqw);
+  background:
+    radial-gradient(90% 55% at 50% 0%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%),
+    linear-gradient(var(--panel), color-mix(in srgb, var(--panel) 80%, #000));
+  box-shadow: inset 0 0 0 .5cqw #00000059, inset 0 .6cqw 1.2cqw #00000080;
+  color: #f2efff;
+}
+.tcard__panel > * { flex-shrink: 0; }
+.tcard__head { display: flex; align-items: baseline; justify-content: space-between; gap: 2cqw; margin-bottom: 2cqw; }
+.tcard__name {
+  margin: 0;
+  overflow: hidden;
+  font-family: var(--font-head);
+  font-size: 7.4cqw;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -.01em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.tcard__kind { display: inline-flex; align-items: center; gap: 1.2cqw; flex-shrink: 0; color: color-mix(in srgb, var(--accent) 70%, #fff); font: 500 3.3cqw var(--font-mono); text-transform: uppercase; letter-spacing: .04em; }
+.tcard__symbol {
+  display: grid;
+  place-items: center;
+  width: 5.6cqw;
+  height: 5.6cqw;
+  border-radius: 50%;
+  background: var(--frame);
+  box-shadow: inset 0 0 0 .3cqw #0006;
+  color: #120f1e;
+  font-size: 3.6cqw;
+  font-weight: 700;
+  line-height: 1;
+}
+.tcard__art {
+  position: relative;
+  flex-shrink: 0;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 1.8cqw;
+  background: #000;
+  box-shadow: 0 0 0 .7cqw color-mix(in srgb, var(--accent) 35%, #0d0b15), 0 0 0 1.1cqw #0009, 0 1.4cqw 2.4cqw -.8cqw #000;
+}
+.tcard__art img { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.tcard__credit {
+  margin: 2cqw -3.2cqw 0;
+  padding: .8cqw 3.2cqw;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 22%, transparent) 20% 80%, transparent);
+  color: #d8d2f2;
+  font-size: 3cqw;
+  font-style: italic;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tcard__eq {
+  display: grid;
+  gap: .5cqw;
+  margin-top: 2cqw;
+  padding: 1.5cqw 2.6cqw;
+  border-radius: 1.6cqw;
+  background: #ffffff0b;
+  box-shadow: inset 0 0 0 .3cqw #ffffff12;
+  font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", "Times New Roman", Georgia, serif;
+  font-size: 4.3cqw;
+  line-height: 1.28;
+  white-space: nowrap;
+}
+.tcard__eq i, .tcard__params i { font-family: "STIX Two Text", "Cambria", "Times New Roman", Georgia, serif; }
+.tcard__eq sub { font-size: .7em; line-height: 0; }
+.tcard__params {
+  margin: 1.6cqw 0 0;
+  color: color-mix(in srgb, var(--accent) 65%, #fff);
+  font: 3cqw/1.35 var(--font-mono);
+}
+.tcard__params i { font-size: 1.15em; }
+.tcard__text { flex-shrink: 1; min-height: 0; margin: 1.6cqw 0 0; overflow: hidden; color: #c9c3e3; font-size: 3.05cqw; line-height: 1.4; }
+.tcard__foot {
+  display: flex;
+  align-items: center;
+  gap: 2cqw;
+  margin-top: auto;
+  padding-top: 1.8cqw;
+  border-top: .25cqw solid #ffffff1a;
+  color: #8f89ad;
+  font: 2.6cqw var(--font-mono);
+  white-space: nowrap;
+}
+.tcard__foot span:nth-child(2) { flex: 1; overflow: hidden; text-overflow: ellipsis; text-align: center; }
+.tcard__rarity { color: var(--accent); font-size: 3.4cqw; letter-spacing: .1em; }
+
+/* ───────── Light ───────── */
+/* Shine: the foil printed over the whole card. Colour dodge leaves the dark panel dark and lights
+   the metal frame and the type. Glare: a soft hotspot that follows the pointer. */
+.tcard__shine, .tcard__glare, .tcard__foil { position: absolute; inset: 0; z-index: 2; pointer-events: none; border-radius: inherit; }
+.tcard__shine {
+  opacity: calc(var(--o, 0) * var(--shine-o));
+  background:
+    repeating-linear-gradient(110deg, var(--spectrum)),
+    repeating-linear-gradient(-45deg, #0e152e 0%, #8fa3a3 3.8%, #8fc1c1 4.5%, #8fa3a3 5.2%, #0e152e 10%, #0e152e 12%);
+  background-size: 400% 400%, 300% 300%;
+  background-position: var(--posx, 50%) var(--posy, 50%);
+  background-blend-mode: overlay;
+  mix-blend-mode: color-dodge;
+  filter: brightness(.8) contrast(1.4) saturate(1.3);
+}
+.tcard__glare {
+  z-index: 3;
+  opacity: calc(var(--o, 0) * .75);
+  background: radial-gradient(farthest-corner circle at var(--mx, 50%) var(--my, 50%), #ffffffc0 6%, #ffffff40 25%, #0000004d 90%);
+  mix-blend-mode: overlay;
+}
+/* Foil inside the artwork window: dodge flares the bright filaments into colour, and a faint screen
+   pass lets the foil pattern show on the black around them where the light falls. */
+.tcard__foil {
+  z-index: 1;
+  border-radius: 0;
+  opacity: calc(var(--o, 0) * var(--foil-o));
+  background: var(--foil);
+  background-size: var(--foil-size, 300% 300%);
+  background-position: var(--foil-pos, var(--posx, 50%) var(--posy, 50%));
+  mix-blend-mode: color-dodge;
+  filter: var(--foil-filter, brightness(.8) contrast(1.3) saturate(1.3));
+}
+.tcard__foil::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: .32;
+  background: inherit;
+  mix-blend-mode: screen;
+  -webkit-mask: radial-gradient(farthest-corner circle at var(--mx, 50%) var(--my, 50%), #000 0%, #0008 30%, transparent 70%);
+  mask: radial-gradient(farthest-corner circle at var(--mx, 50%) var(--my, 50%), #000 0%, #0008 30%, transparent 70%);
+}
+
+/* ───────── One foil per attractor ───────── */
+/* Clifford: sun-pillar rainbow bars crossed by a diagonal sheen. */
+.tcard--clifford {
+  --frame: linear-gradient(140deg, #8f7dff, #3b2bb8 30%, #b9a8ff 52%, #2a7bdc 78%, #7ef0ff);
+  --accent: #9d8cff;
+  --panel: #0d0b22;
+  --foil:
+    repeating-linear-gradient(0deg, #ff7a9a 5%, #ffd56b 10%, #a7ff8a 15%, #6ff7ff 20%, #7f9bff 25%, #d38bff 30%, #ff7a9a 35%),
+    repeating-linear-gradient(133deg, #0e152e 0%, #8fa3a3 3.8%, #8fc1c1 4.5%, #8fa3a3 5.2%, #0e152e 10%, #0e152e 12%);
+  --foil-size: 200% 700%, 300% 300%;
+  --foil-pos: 0 var(--posy, 50%), var(--posx, 50%) var(--posy, 50%);
+}
+.tcard--clifford .tcard__foil { background-blend-mode: hue; }
+
+/* Peter de Jong: cosmos, faceted stars over a slow rainbow. */
+.tcard--dejong {
+  --frame: linear-gradient(140deg, #ff6fd0, #9b1f88 34%, #ffb2ec 55%, #6c2bd9 80%, #ff7ad8);
+  --accent: #ff6fd0;
+  --panel: #1a0a1d;
+  --foil:
+    url("assets/holo-stars.svg") 0 0 / 22cqw 22cqw,
+    radial-gradient(circle at var(--mx, 50%) var(--my, 50%), #fff 0%, #ffffff00 45%),
+    linear-gradient(125deg, #ff7ad8, #ffd56b 20%, #7ef5c0 40%, #6ecbff 60%, #b28bff 80%, #ff7ad8);
+  --foil-size: 22cqw 22cqw, 100% 100%, 300% 300%;
+  --foil-pos: calc(var(--posx, 50%) * .4) calc(var(--posy, 50%) * .4), center, var(--posx, 50%) var(--posy, 50%);
+}
+.tcard--dejong { --foil-o: .55; --foil-filter: brightness(.7) contrast(1.25) saturate(1.3); }
+.tcard--dejong .tcard__foil { background-blend-mode: soft-light, overlay, normal; }
+.tcard--dejong .tcard__foil::after { opacity: .4; }
+
+/* Simon: a reverse holo. Radiant cross-hatch on the frame and panel; the art stays nearly matte. */
+.tcard--simon {
+  --frame: linear-gradient(140deg, #7ff8e4, #0d8a8f 32%, #c8fff5 54%, #1758c9 80%, #86f0ff);
+  --accent: #4fe6d2;
+  --panel: #04161e;
+  --shine-o: .5;
+  --foil-o: .22;
+  --foil: linear-gradient(115deg, var(--spectrum));
+}
+.tcard--simon .tcard__shine {
+  background:
+    repeating-linear-gradient(45deg, #0000 0 1.2cqw, #ffffff 1.2cqw 1.6cqw, #0000 1.6cqw 2.8cqw),
+    repeating-linear-gradient(-45deg, #0000 0 1.2cqw, #ffffff 1.2cqw 1.6cqw, #0000 1.6cqw 2.8cqw),
+    linear-gradient(115deg, var(--spectrum));
+  background-size: auto, auto, 400% 400%;
+  background-position: calc(var(--posx) * .3) 0, calc(var(--posy) * .3) 0, var(--posx) var(--posy);
+  background-blend-mode: exclusion, multiply, normal;
+  -webkit-mask: radial-gradient(farthest-corner circle at var(--mx) var(--my), #000 10%, #0007 50%, #0002 100%);
+  mask: radial-gradient(farthest-corner circle at var(--mx) var(--my), #000 10%, #0007 50%, #0002 100%);
+  filter: brightness(.6) contrast(1.4) saturate(1.4);
+}
+
+/* Ikeda: a swirl, like the spiral it draws. */
+.tcard--ikeda {
+  --frame: linear-gradient(140deg, #ffd0b0, #c4566f 34%, #ffe1cf 56%, #a14277 80%, #ffb48f);
+  --accent: #ffad8f;
+  --panel: #1b0d12;
+  --foil:
+    repeating-conic-gradient(from calc(var(--mx, 50%) * 3.6deg) at 72% 48%, #ff7a9a 0deg, #ffd56b 12deg, #a7ff8a 24deg, #6ff7ff 36deg, #7f9bff 48deg, #d38bff 60deg, #ff7a9a 72deg),
+    repeating-radial-gradient(circle at 72% 48%, #000 0 2cqw, #fff 2.6cqw, #000 3.4cqw);
+  --foil-size: 100% 100%, 100% 100%;
+  --foil-pos: center, center;
+}
+.tcard--ikeda .tcard__foil { background-blend-mode: overlay; }
+
+/* Julia: the gold secret rare. Glitter grain on gold metal, reverse holo, the fractal stays clean. */
+.tcard--julia {
+  --frame: linear-gradient(140deg, #fff1b0, #b88a2b 30%, #ffe28a 50%, #8d6316 74%, #ffe9a6);
+  --accent: #f3cf6b;
+  --panel: #15110a;
+  --shine-o: .5;
+  --foil-o: .28;
+  --foil: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), #fff3c0, #b77d1d 60%, #000);
+  --foil-size: 100% 100%;
+  --foil-pos: center;
+}
+.tcard--julia .tcard__shine {
+  background:
+    url("assets/card-grain.svg") 0 0 / 30cqw 30cqw,
+    url("assets/card-grain.svg") 7cqw 11cqw / 19cqw 19cqw,
+    linear-gradient(125deg, #fff3c0, #d9a441 25%, #fff 45%, #b37a1c 65%, #ffe6a0 85%);
+  background-size: 30cqw 30cqw, 19cqw 19cqw, 300% 300%;
+  background-position: calc(var(--posx) * .5) calc(var(--posy) * .5), calc(var(--posy) * -.4) calc(var(--posx) * .4), var(--posx) var(--posy);
+  background-blend-mode: color-dodge, overlay, normal;
+  filter: brightness(.55) contrast(1.7) saturate(1.1);
+}
+
+/* Thomas: aurora streams flowing round the frame, borrowed from the data-stream engraving. */
+.tcard--thomas {
+  --frame: linear-gradient(140deg, #d7fbff, #4bb7d6 30%, #ffb3ec 52%, #6a5bd8 76%, #e0fdff);
+  --accent: #74e3ff;
+  --panel: #070a17;
+  --foil:
+    linear-gradient(var(--spectrum-angle, 100deg), #ff7ad8, #ffd56b 18%, #7ef5c0 36%, #6ecbff 54%, #b28bff 72%, #ff7ad8 90%),
+    repeating-linear-gradient(170deg, #000 0 3cqw, #fff 4.4cqw, #000 6cqw);
+  --foil-size: 300% 300%, 100% 140%;
+  --foil-pos: var(--posx, 50%) var(--posy, 50%), 0 calc(var(--posy, 50%) * .6);
+}
+.tcard--thomas { --foil-o: .45; }
+.tcard--thomas .tcard__foil { background-blend-mode: overlay; }
+.tcard--thomas .tcard__shine {
+  background: linear-gradient(100deg, var(--spectrum));
+  background-size: 400% 400%;
+  background-position: var(--posx) var(--posy);
+  -webkit-mask: url("assets/holo/streams.svg") center / 170% auto no-repeat;
+  mask: url("assets/holo/streams.svg") center / 170% auto no-repeat;
+  --shine-o: .6;
+}
+
+/* Layered Clifford: a V-max style lattice of triangles. */
+.tcard--layered {
+  --frame: linear-gradient(140deg, #ffd66b, #e2530f 32%, #ffb347 54%, #1b3a9e 82%, #ffcf6b);
+  --accent: #ffad3b;
+  --panel: #0a0d22;
+  --foil:
+    repeating-linear-gradient(60deg, #000 0 4cqw, #fff 4cqw 4.6cqw, #000 4.6cqw 8cqw),
+    repeating-linear-gradient(-60deg, #000 0 4cqw, #fff 4cqw 4.6cqw, #000 4.6cqw 8cqw),
+    linear-gradient(115deg, var(--spectrum));
+  --foil-size: auto, auto, 400% 400%;
+  --foil-pos: calc(var(--posx, 50%) * .2) 0, calc(var(--posx, 50%) * -.2) 0, var(--posx, 50%) var(--posy, 50%);
+}
+.tcard--layered { --foil-o: .4; }
+.tcard--layered .tcard__foil { background-blend-mode: screen, overlay; }
+
+/* Simon smoke: alternate art. The artwork fills the card; the foil is an etched guilloche in pearl. */
+.tcard--smoke {
+  --frame: linear-gradient(140deg, #f4f2ff, #8d89aa 34%, #ffffff 52%, #6d6a8c 78%, #f0eefc);
+  --accent: #f08bff;
+  --panel: #06050c;
+  --shine-o: .45;
+  --foil-o: .4;
+  --foil: linear-gradient(115deg, #d9efff, #9fdcff 18%, #f7b8e6 36%, #ffe39a 54%, #a8f0d2 72%, #c6b5ff 90%);
+  --foil-size: 300% 300%;
+}
+.tcard--smoke .tcard__panel { background: #000; }
+.tcard--smoke .tcard__art {
+  position: absolute;
+  inset: 0 0 34%;
+  z-index: -1;
+  aspect-ratio: auto;
+  border-radius: inherit;
+  box-shadow: none;
+}
+.tcard--smoke .tcard__art img { object-position: 28% 50%; }
+.tcard--smoke .tcard__art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(#000a, transparent 20%, transparent 55%, #000); }
+.tcard--smoke .tcard__head { margin-bottom: auto; }
+.tcard--smoke .tcard__credit { margin-top: 0; }
+.tcard--smoke .tcard__eq { background: #0000004d; backdrop-filter: blur(2px); }
+.tcard--smoke .tcard__shine {
+  background: linear-gradient(115deg, #d9efff, #9fdcff 18%, #f7b8e6 36%, #ffe39a 54%, #a8f0d2 72%, #c6b5ff 90%);
+  background-size: 300% 300%;
+  background-position: var(--posx) var(--posy);
+  -webkit-mask: url("assets/holo/guilloche.svg") 100% 2% / 80% auto no-repeat, linear-gradient(#000 35%, transparent 55%);
+  mask: url("assets/holo/guilloche.svg") 100% 2% / 80% auto no-repeat, linear-gradient(#000 35%, transparent 55%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  mix-blend-mode: screen;
+  filter: none;
+}
+
+/* ───────── Back ───────── */
+.tcard__back {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 4cqw;
+  transform: rotateY(180deg);
+  border: 3.4cqw solid transparent;
+  background:
+    radial-gradient(70% 50% at 50% 45%, #2a1650, #0d0a1f 70%) padding-box,
+    linear-gradient(140deg, #ff5ecb, #9b6bff 50%, #4fd8ff) border-box;
+}
+.tcard__back-motif {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(calc(110deg + var(--ry, 0deg) * .2), #ff7ad8, #ffd56b 20%, #7ef5c0 40%, #6ecbff 60%, #b28bff 80%, #ff7ad8);
+  background-size: 300% 300%;
+  background-position: var(--posx, 50%) var(--posy, 50%);
+  opacity: .55;
+  -webkit-mask: url("assets/holo/harmonograph.svg") center / 115% auto no-repeat;
+  mask: url("assets/holo/harmonograph.svg") center / 115% auto no-repeat;
+}
+.tcard__back-mark {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 30cqw;
+  height: 30cqw;
+  border-radius: 50%;
+  background: #0b0a1a;
+  box-shadow: 0 0 0 1cqw #ffffff1f, 0 0 8cqw #ff5ecb66;
+  color: #ff5ecb;
+  font: 700 13cqw/1 var(--font-head);
+}
+.tcard__back-title { position: relative; color: #d8d2f2; font: 500 3.6cqw var(--font-mono); letter-spacing: .3em; text-transform: uppercase; }
+
+@media (prefers-reduced-motion: reduce) {
+  .deck[open], .deck.is-dealt .deck__slot { animation: none; }
+}

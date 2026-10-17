@@ -229,6 +229,25 @@ document.querySelectorAll("[data-spot]").forEach((card) => {
   document.addEventListener("visibilitychange", () => { if (document.hidden) resetAll(); });
 })();
 
+/* ───────── Attractor card collection, loaded on first use ───────── */
+(function attractorDeck() {
+  const opener = document.querySelector("[data-deck-open]");
+  if (!opener) return;
+  let deck;
+  opener.addEventListener("click", async () => {
+    opener.setAttribute("aria-busy", "true");
+    try {
+      deck ??= import("./deck.js").then(module => module.createDeck());
+      (await deck).open(opener);
+    } catch (error) {
+      deck = undefined;
+      console.error(error);
+    } finally {
+      opener.removeAttribute("aria-busy");
+    }
+  });
+})();
+
 document.getElementById("year").textContent = new Date().getFullYear();
 
 /* ───────── A background process, underneath the footer ───────── */
