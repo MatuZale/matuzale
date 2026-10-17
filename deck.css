@@ -169,90 +169,143 @@ html.deck-open { overflow: hidden; }
   color: #f2efff;
 }
 .tcard__panel > * { flex-shrink: 0; }
-.tcard__head { display: flex; align-items: baseline; justify-content: space-between; gap: 2cqw; margin-bottom: 2cqw; }
+
+/* Header: stage tag, name, "HP" (here the dimension of the system) and the type energy. */
+.tcard__head { display: flex; align-items: center; gap: 1.6cqw; margin-bottom: 1.8cqw; }
+.tcard__stage {
+  flex-shrink: 0;
+  padding: .5cqw 1.3cqw;
+  border-radius: .8cqw;
+  background: var(--frame);
+  box-shadow: inset 0 0 0 .2cqw #0004;
+  color: #15121f;
+  font: italic 700 2.3cqw/1.1 var(--font-body);
+  letter-spacing: .02em;
+  text-transform: uppercase;
+}
 .tcard__name {
+  flex: 1;
+  min-width: 0;
   margin: 0;
   overflow: hidden;
   font-family: var(--font-head);
-  font-size: 7.4cqw;
+  font-size: 6.6cqw;
   font-weight: 700;
   line-height: 1.05;
-  letter-spacing: -.01em;
+  letter-spacing: -.015em;
   white-space: nowrap;
   text-overflow: ellipsis;
+  text-shadow: 0 .3cqw .8cqw #0009;
 }
-.tcard__kind { display: inline-flex; align-items: center; gap: 1.2cqw; flex-shrink: 0; color: color-mix(in srgb, var(--accent) 70%, #fff); font: 500 3.3cqw var(--font-mono); text-transform: uppercase; letter-spacing: .04em; }
-.tcard__symbol {
-  display: grid;
+.tcard__hp { flex-shrink: 0; font: 700 6.2cqw/1 var(--font-head); text-shadow: 0 .3cqw .8cqw #0009; }
+.tcard__hp small { margin-right: .5cqw; color: color-mix(in srgb, var(--accent) 60%, #fff); font: 700 2.3cqw var(--font-body); letter-spacing: .04em; vertical-align: .35em; }
+.tcard__energy {
+  display: inline-grid;
   place-items: center;
-  width: 5.6cqw;
-  height: 5.6cqw;
+  flex-shrink: 0;
+  width: 6.2cqw;
+  height: 6.2cqw;
   border-radius: 50%;
-  background: var(--frame);
-  box-shadow: inset 0 0 0 .3cqw #0006;
-  color: #120f1e;
-  font-size: 3.6cqw;
-  font-weight: 700;
-  line-height: 1;
+  background: radial-gradient(circle at 34% 28%, #ffffffb0, transparent 42%), var(--frame);
+  box-shadow: inset 0 0 0 .3cqw #00000052, 0 .3cqw .7cqw #0008;
+  color: #14111f;
+  font: 700 3.6cqw/1 var(--font-body);
 }
+
+/* Artwork in a metal window. */
 .tcard__art {
   position: relative;
   flex-shrink: 0;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 16 / 9.6;
   overflow: hidden;
   isolation: isolate;
-  border-radius: 1.8cqw;
-  background: #000;
-  box-shadow: 0 0 0 .7cqw color-mix(in srgb, var(--accent) 35%, #0d0b15), 0 0 0 1.1cqw #0009, 0 1.4cqw 2.4cqw -.8cqw #000;
+  padding: .8cqw;
+  border-radius: 1.6cqw;
+  background: var(--frame);
+  box-shadow: 0 1.2cqw 2.2cqw -.8cqw #000, inset 0 0 0 .2cqw #0005;
 }
-.tcard__art img { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-.tcard__credit {
-  margin: 2cqw -3.2cqw 0;
-  padding: .8cqw 3.2cqw;
-  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 22%, transparent) 20% 80%, transparent);
-  color: #d8d2f2;
-  font-size: 3cqw;
-  font-style: italic;
+.tcard__art img { display: block; width: 100%; height: 100%; border-radius: .9cqw; background: #000; object-fit: cover; pointer-events: none; }
+.tcard__art .tcard__foil { inset: .8cqw; border-radius: .9cqw; }
+
+/* The Pokédex strip under the art. */
+.tcard__strip {
+  margin: 1.2cqw 2.6cqw 0;
+  padding: .55cqw 2.4cqw;
+  overflow: hidden;
+  background: var(--frame);
+  color: #1a1626;
+  font: italic 600 2.45cqw/1.2 var(--font-body);
   text-align: center;
   white-space: nowrap;
-  overflow: hidden;
   text-overflow: ellipsis;
+  clip-path: polygon(1.6cqw 0, 100% 0, calc(100% - 1.6cqw) 100%, 0 100%);
 }
-.tcard__eq {
-  display: grid;
-  gap: .5cqw;
-  margin-top: 2cqw;
-  padding: 1.5cqw 2.6cqw;
-  border-radius: 1.6cqw;
-  background: #ffffff0b;
-  box-shadow: inset 0 0 0 .3cqw #ffffff12;
+.tcard__strip span { margin-right: 1.6cqw; font-style: normal; font-weight: 800; letter-spacing: .04em; }
+
+.tcard__ability { display: flex; align-items: center; gap: 1.8cqw; margin: 2.1cqw 0 0; color: #ff9a8b; font: 700 3.8cqw/1.1 var(--font-head); text-shadow: 0 .2cqw .6cqw #0008; }
+.tcard__ability-tag {
+  padding: .35cqw 1.5cqw;
+  border-radius: .6cqw;
+  background: linear-gradient(#ef4d3f, #b4231b);
+  box-shadow: inset 0 .2cqw 0 #ffffff59, 0 .2cqw .5cqw #0008;
+  color: #fff;
+  font: italic 800 2.4cqw/1.2 var(--font-body);
+  letter-spacing: .03em;
+  text-shadow: none;
+  transform: skewX(-8deg);
+}
+
+/* The update rules, set as attacks: energy cost, then the move. */
+.tcard__moves { display: flex; flex: 1 0 auto; flex-direction: column; justify-content: center; margin-top: .8cqw; }
+.tcard__move {
+  display: flex;
+  align-items: center;
+  gap: 2.2cqw;
+  margin: 0;
+  padding: 1cqw 0;
+  border-bottom: .25cqw solid #ffffff17;
   font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", "Times New Roman", Georgia, serif;
-  font-size: 4.3cqw;
-  line-height: 1.28;
+  font-size: 4.15cqw;
+  line-height: 1.2;
   white-space: nowrap;
 }
-.tcard__eq i, .tcard__params i { font-family: "STIX Two Text", "Cambria", "Times New Roman", Georgia, serif; }
+.tcard__move .tcard__energy { width: 4.4cqw; height: 4.4cqw; font-size: 2.6cqw; }
+.tcard__eq { overflow: hidden; text-overflow: ellipsis; }
+.tcard__eq b { display: inline-block; min-width: 4.4cqw; font-size: 1.1em; font-weight: 700; }
+.tcard__eq i, .tcard__stats i { font-family: "STIX Two Text", "Cambria", "Times New Roman", Georgia, serif; }
 .tcard__eq sub { font-size: .7em; line-height: 0; }
-.tcard__params {
-  margin: 1.6cqw 0 0;
-  color: color-mix(in srgb, var(--accent) 65%, #fff);
-  font: 3cqw/1.35 var(--font-mono);
+
+/* Parameters in the weakness / resistance / retreat bar. */
+.tcard__stats { display: flex; margin: 1.6cqw 0 0; }
+.tcard__stats div { flex: 1 1 auto; min-width: 0; padding: 0 1.2cqw; text-align: center; }
+.tcard__stats div + div { border-left: .25cqw solid #ffffff1f; }
+.tcard__stats dt { color: #9d97bb; font: 600 2.1cqw/1.2 var(--font-body); letter-spacing: .06em; text-transform: uppercase; }
+.tcard__stats dt i { color: #d8d3ee; font-size: 1.45em; letter-spacing: 0; text-transform: none; }
+.tcard__stats dd { margin: .3cqw 0 0; color: color-mix(in srgb, var(--accent) 45%, #fff); font: 600 3.1cqw/1.2 var(--font-mono); white-space: nowrap; }
+
+.tcard__flavor {
+  flex-shrink: 1;
+  min-height: 0;
+  margin: 1.8cqw 0 0;
+  padding: 1.1cqw 2cqw;
+  overflow: hidden;
+  border: .3cqw solid color-mix(in srgb, var(--accent) 45%, transparent);
+  border-radius: 1.2cqw;
+  color: #d4cfea;
+  font: italic 2.85cqw/1.38 var(--font-body);
 }
-.tcard__params i { font-size: 1.15em; }
-.tcard__text { flex-shrink: 1; min-height: 0; margin: 1.6cqw 0 0; overflow: hidden; color: #c9c3e3; font-size: 3.05cqw; line-height: 1.4; }
 .tcard__foot {
   display: flex;
   align-items: center;
   gap: 2cqw;
   margin-top: auto;
-  padding-top: 1.8cqw;
-  border-top: .25cqw solid #ffffff1a;
+  padding-top: 1.3cqw;
   color: #8f89ad;
-  font: 2.6cqw var(--font-mono);
+  font: 2.3cqw var(--font-mono);
   white-space: nowrap;
 }
-.tcard__foot span:nth-child(2) { flex: 1; overflow: hidden; text-overflow: ellipsis; text-align: center; }
-.tcard__rarity { color: var(--accent); font-size: 3.4cqw; letter-spacing: .1em; }
+.tcard__foot > span:nth-child(2) { flex: 1; overflow: hidden; text-overflow: ellipsis; text-align: center; }
+.tcard__rarity { margin-left: .6cqw; color: var(--accent); font-size: 3.2cqw; letter-spacing: .1em; }
 
 /* ───────── Light ───────── */
 /* Shine: the foil printed over the whole card. Colour dodge leaves the dark panel dark and lights
@@ -422,36 +475,43 @@ html.deck-open { overflow: hidden; }
 .tcard--layered { --foil-o: .4; }
 .tcard--layered .tcard__foil { background-blend-mode: screen, overlay; }
 
-/* Simon smoke: alternate art. The artwork fills the card; the foil is an etched guilloche in pearl. */
+/* Simon smoke: a full-art alternate. The render bleeds to a thin silver rim, the text sits on
+   frosted panels and the foil is an etched pearl guilloche across the sky of the art. */
 .tcard--smoke {
   --frame: linear-gradient(140deg, #f4f2ff, #8d89aa 34%, #ffffff 52%, #6d6a8c 78%, #f0eefc);
-  --accent: #f08bff;
-  --panel: #06050c;
-  --shine-o: .45;
-  --foil-o: .4;
+  --accent: #8fb4ff;
+  --panel: #000;
+  --shine-o: .5;
+  --foil-o: .22;
   --foil: linear-gradient(115deg, #d9efff, #9fdcff 18%, #f7b8e6 36%, #ffe39a 54%, #a8f0d2 72%, #c6b5ff 90%);
   --foil-size: 300% 300%;
 }
-.tcard--smoke .tcard__panel { background: #000; }
+.tcard--smoke .tcard__front { padding: 1.5cqw; }
+.tcard--smoke .tcard__panel { padding-top: 3.4cqw; background: #000; box-shadow: inset 0 0 0 .3cqw #ffffff1a; }
 .tcard--smoke .tcard__art {
   position: absolute;
-  inset: 0 0 34%;
+  inset: 0;
   z-index: -1;
   aspect-ratio: auto;
+  padding: 0;
   border-radius: inherit;
+  background: #000;
   box-shadow: none;
 }
-.tcard--smoke .tcard__art img { object-position: 28% 50%; }
-.tcard--smoke .tcard__art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(#000a, transparent 20%, transparent 55%, #000); }
-.tcard--smoke .tcard__head { margin-bottom: auto; }
-.tcard--smoke .tcard__credit { margin-top: 0; }
-.tcard--smoke .tcard__eq { background: #0000004d; backdrop-filter: blur(2px); }
+.tcard--smoke .tcard__art img, .tcard--smoke .tcard__art .tcard__foil { inset: 0; border-radius: 0; }
+.tcard--smoke .tcard__art::after { content: ""; position: absolute; inset: 0; z-index: 2; background: linear-gradient(#000000b3, transparent 16%, transparent 44%, #000000d9 60%); pointer-events: none; }
+.tcard--smoke .tcard__strip { margin-top: auto; }
+.tcard--smoke .tcard__moves, .tcard--smoke .tcard__stats, .tcard--smoke .tcard__flavor { border-radius: 1.2cqw; background: #0a0c1d99; backdrop-filter: blur(.6cqw); }
+.tcard--smoke .tcard__moves { flex: none; margin-top: 1.2cqw; padding: 0 2cqw; }
+.tcard--smoke .tcard__move:last-child { border-bottom: 0; }
+.tcard--smoke .tcard__stats { padding: 1cqw 0; }
+.tcard--smoke .tcard__foot { margin-top: 1.2cqw; }
 .tcard--smoke .tcard__shine {
   background: linear-gradient(115deg, #d9efff, #9fdcff 18%, #f7b8e6 36%, #ffe39a 54%, #a8f0d2 72%, #c6b5ff 90%);
   background-size: 300% 300%;
   background-position: var(--posx) var(--posy);
-  -webkit-mask: url("assets/holo/guilloche.svg") 100% 2% / 80% auto no-repeat, linear-gradient(#000 35%, transparent 55%);
-  mask: url("assets/holo/guilloche.svg") 100% 2% / 80% auto no-repeat, linear-gradient(#000 35%, transparent 55%);
+  -webkit-mask: url("assets/holo/guilloche.svg") 110% 0 / 85% auto no-repeat, linear-gradient(#000 30%, transparent 48%);
+  mask: url("assets/holo/guilloche.svg") 110% 0 / 85% auto no-repeat, linear-gradient(#000 30%, transparent 48%);
   -webkit-mask-composite: source-in;
   mask-composite: intersect;
   mix-blend-mode: screen;

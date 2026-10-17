@@ -3,78 +3,81 @@
 // tilted hard and spun round by dragging. The equations and parameters are the ones used for the
 // renders (github.com/MatuZale/color_recursive_maps).
 
+// Each card reads like a trading card: a stage tag and dimension in the header, a Pokédex-style
+// strip under the art, an ability, the update rules as "attacks", the parameters in the
+// weakness / resistance bar and the description as flavour text.
 const CARDS = [
   {
-    id: "clifford", name: "Clifford", kind: "2D map", symbol: "↻", rarity: "★",
-    credit: "after Clifford A. Pickover",
-    eq: ["<i>x</i>′ = sin(<i>a y</i>) + <i>c</i> cos(<i>a x</i>)", "<i>y</i>′ = sin(<i>b x</i>) + <i>d</i> cos(<i>b y</i>)"],
-    params: "<i>a</i> = −1.4 · <i>b</i> = 1.6 · <i>c</i> = 1.0 · <i>d</i> = 0.7",
-    text: "Four numbers and two trigonometric terms. Every orbit lands on the same filigree, so a density histogram of the hits reads like silk. The hero of this page runs this map live.",
-    stats: "4096² · 30.8 M points",
+    id: "clifford", name: "Clifford", stage: "2D map", dim: 2, symbol: "↻", rarity: "★",
+    credit: "after Clifford A. Pickover", ability: "Four-number filigree",
+    eq: [["<i>x</i>′", "sin(<i>a y</i>) + <i>c</i> cos(<i>a x</i>)"], ["<i>y</i>′", "sin(<i>b x</i>) + <i>d</i> cos(<i>b y</i>)"]],
+    stats: [["<i>a</i>", "−1.4"], ["<i>b</i>", "1.6"], ["<i>c</i>", "1.0"], ["<i>d</i>", "0.7"]],
+    text: "Every orbit lands on the same filigree, so a histogram of 30 million hits reads like silk. The hero of this page runs this map live.",
+    size: "4096² · 30.8 M points",
     alt: "Clifford attractor in electric violet with yellow-green edges",
   },
   {
-    id: "dejong", name: "Peter de Jong", kind: "2D map", symbol: "↻", rarity: "★",
-    credit: "after Peter de Jong",
-    eq: ["<i>x</i>′ = sin(<i>a y</i>) − cos(<i>b x</i>)", "<i>y</i>′ = sin(<i>c x</i>) − cos(<i>d y</i>)"],
-    params: "<i>a</i> = 1.4 · <i>b</i> = −2.3 · <i>c</i> = 2.4 · <i>d</i> = −2.1",
-    text: "Clifford's sibling, with its own frequency for every term. Most parameter sets collapse onto a few points; a handful unfold into folded veils like this one.",
-    stats: "4096² · 33 M points",
+    id: "dejong", name: "Peter de Jong", stage: "2D map", dim: 2, symbol: "↻", rarity: "★",
+    credit: "after Peter de Jong", ability: "Folded veil",
+    eq: [["<i>x</i>′", "sin(<i>a y</i>) − cos(<i>b x</i>)"], ["<i>y</i>′", "sin(<i>c x</i>) − cos(<i>d y</i>)"]],
+    stats: [["<i>a</i>", "1.4"], ["<i>b</i>", "−2.3"], ["<i>c</i>", "2.4"], ["<i>d</i>", "−2.1"]],
+    text: "Clifford's sibling, with its own frequency for every term. Most parameter sets collapse onto a few points; a handful unfold into veils.",
+    size: "4096² · 33 M points",
     alt: "Peter de Jong attractor: folded magenta veils on black",
   },
   {
-    id: "simon", name: "Simon", kind: "2D map", symbol: "↻", rarity: "★",
-    credit: "Clifford, with sine and cosine swapped",
-    eq: ["<i>x</i>′ = cos(<i>b y</i>) + <i>c</i> sin(<i>b x</i>)", "<i>y</i>′ = cos(<i>a x</i>) + <i>d</i> sin(<i>a y</i>)"],
-    params: "<i>a</i> = 1.9 · <i>b</i> = 1.3 · <i>c</i> = −1.6 · <i>d</i> = 0.8",
-    text: "A tiny change to the formula and a different creature: wide translucent ribbons, pinched into two bright cusps where the orbit lingers.",
-    stats: "4096² · 30 M points",
+    id: "simon", name: "Simon", stage: "2D map", dim: 2, symbol: "↻", rarity: "★",
+    credit: "Clifford, with sine and cosine swapped", ability: "Swapped phase",
+    eq: [["<i>x</i>′", "cos(<i>b y</i>) + <i>c</i> sin(<i>b x</i>)"], ["<i>y</i>′", "cos(<i>a x</i>) + <i>d</i> sin(<i>a y</i>)"]],
+    stats: [["<i>a</i>", "1.9"], ["<i>b</i>", "1.3"], ["<i>c</i>", "−1.6"], ["<i>d</i>", "0.8"]],
+    text: "A tiny change to the formula, a different creature: translucent ribbons pinched into two bright cusps where the orbit lingers.",
+    size: "4096² · 30 M points",
     alt: "Simon attractor: translucent teal ribbons with two bright cusps",
   },
   {
-    id: "ikeda", name: "Ikeda", kind: "2D map", symbol: "◎", rarity: "★",
-    credit: "Kensuke Ikeda, 1979",
-    eq: ["<i>t</i> = 0.4 − 6 / (1 + <i>x</i>² + <i>y</i>²)", "<i>x</i>′ = 1 + <i>u</i>(<i>x</i> cos <i>t</i> − <i>y</i> sin <i>t</i>)", "<i>y</i>′ = <i>u</i>(<i>x</i> sin <i>t</i> + <i>y</i> cos <i>t</i>)"],
-    params: "<i>u</i> = 0.9",
-    text: "Light circulating in a nonlinear optical ring cavity. Each pass rotates the field by an angle that depends on its intensity, winding the orbit into a spiral.",
-    stats: "4096² · 35 M points",
+    id: "ikeda", name: "Ikeda", stage: "2D map", dim: 2, symbol: "◎", rarity: "★",
+    credit: "Kensuke Ikeda, 1979", ability: "Ring-cavity spiral",
+    eq: [["<i>t</i>", "0.4 − 6 / (1 + <i>x</i>² + <i>y</i>²)"], ["<i>x</i>′", "1 + <i>u</i>(<i>x</i> cos <i>t</i> − <i>y</i> sin <i>t</i>)"], ["<i>y</i>′", "<i>u</i>(<i>x</i> sin <i>t</i> + <i>y</i> cos <i>t</i>)"]],
+    stats: [["<i>u</i>", "0.9"], ["iterations", "160"], ["orbits", "220 k"]],
+    text: "Light circling a nonlinear optical cavity. Each pass turns the field by an angle set by its intensity, winding the orbit into a spiral.",
+    size: "4096² · 35 M points",
     alt: "Ikeda attractor: a spiral of peach and pink filaments",
   },
   {
-    id: "julia", name: "Julia set", kind: "Fractal", symbol: "✣", rarity: "★★",
-    credit: "Gaston Julia, 1918",
-    eq: ["<i>z</i>′ = <i>z</i>² + <i>c</i>", "escape when |<i>z</i>| > 2"],
-    params: "<i>c</i> = −0.8 + 0.156<i>i</i> · 220 iterations",
-    text: "Not an attractor but its mirror image: the border between points that stay bounded and points that run off to infinity. Colour counts how fast each pixel escapes.",
-    stats: "4096² · every pixel iterated",
+    id: "julia", name: "Julia set", stage: "Fractal", dim: 2, symbol: "✣", rarity: "★★",
+    credit: "Gaston Julia, 1918", ability: "Escape time",
+    eq: [["<i>z</i>′", "<i>z</i>² + <i>c</i>"], ["", "escape when |<i>z</i>| > 2"]],
+    stats: [["<i>c</i>", "−0.8 + 0.156<i>i</i>"], ["iterations", "220"]],
+    text: "Not an attractor but its mirror image: the border between points that stay bounded and points that run to infinity. Colour is escape speed.",
+    size: "4096² · every pixel iterated",
     alt: "Julia set for c = −0.8 + 0.156i in rainbow colours",
   },
   {
-    id: "thomas", name: "Thomas", kind: "3D flow", symbol: "∿", rarity: "★★",
-    credit: "René Thomas, 1999",
-    eq: ["<i>ẋ</i> = sin <i>y</i> − <i>b x</i>", "<i>ẏ</i> = sin <i>z</i> − <i>b y</i>", "<i>ż</i> = sin <i>x</i> − <i>b z</i>"],
-    params: "<i>b</i> ≈ 0.208 · d<i>t</i> = 0.006",
-    text: "A continuous flow, not a map: three identical equations chasing each other round x → y → z. b is the friction; near 0.208 the motion turns chaotic. A frame from a particle animation.",
-    stats: "2560 × 1440 · 150 k particles",
+    id: "thomas", name: "Thomas", stage: "3D flow", dim: 3, symbol: "∿", rarity: "★★",
+    credit: "René Thomas, 1999", ability: "Cyclic symmetry",
+    eq: [["<i>ẋ</i>", "sin <i>y</i> − <i>b x</i>"], ["<i>ẏ</i>", "sin <i>z</i> − <i>b y</i>"], ["<i>ż</i>", "sin <i>x</i> − <i>b z</i>"]],
+    stats: [["<i>b</i>", "≈ 0.208"], ["<i>dt</i>", "0.006"], ["particles", "150 k"]],
+    text: "A flow, not a map: three identical equations chasing each other round x → y → z. b is friction; near 0.208 the motion turns chaotic.",
+    size: "2560 × 1440 · animation frame",
     alt: "Thomas attractor: neon particle trails in cyan, magenta and yellow",
   },
   {
-    id: "layered", name: "Layered Clifford", kind: "2D maps", symbol: "≋", rarity: "★★",
-    credit: "three Clifford maps, one exposure",
-    eq: ["<i>x</i>′ = sin(<i>a</i><sub>k</sub><i>y</i>) + <i>c</i><sub>k</sub> cos(<i>a</i><sub>k</sub><i>x</i>)", "<i>y</i>′ = sin(<i>b</i><sub>k</sub><i>x</i>) + <i>d</i><sub>k</sub> cos(<i>b</i><sub>k</sub><i>y</i>)"],
-    params: "<i>a</i> = −1.4 · <i>b</i> = 1.7 · (<i>c</i>, <i>d</i>)<sub>k</sub> = (1, .7) (−.5, −1) (1.6, .9)",
-    text: "Three Clifford maps with different weights, each nudged off the base parameters, blurred by different amounts and summed like layers of a long exposure.",
-    stats: "3 layers · density composite",
+    id: "layered", name: "Layered Clifford", stage: "2D maps", dim: 2, symbol: "≋", rarity: "★★",
+    credit: "three Clifford maps, one exposure", ability: "Long exposure",
+    eq: [["<i>x</i>′", "sin(<i>a</i><sub>k</sub><i>y</i>) + <i>c</i><sub>k</sub> cos(<i>a</i><sub>k</sub><i>x</i>)"], ["<i>y</i>′", "sin(<i>b</i><sub>k</sub><i>x</i>) + <i>d</i><sub>k</sub> cos(<i>b</i><sub>k</sub><i>y</i>)"]],
+    stats: [["<i>a</i>", "−1.4"], ["<i>b</i>", "1.7"], ["layers <i>k</i>", "3"]],
+    text: "Three Clifford maps with different weights, each nudged off the base parameters, blurred by different amounts and summed like layers of film.",
+    size: "density composite",
     alt: "Layered Clifford attractors in cosmic-fire orange on deep blue",
   },
   {
-    id: "smoke", name: "Simon · smoke", kind: "Alt art", symbol: "↻", rarity: "✦",
-    credit: "same map, heavier exposure",
-    eq: ["<i>x</i>′ = cos(<i>b y</i>) + <i>c</i> sin(<i>b x</i>)", "<i>y</i>′ = cos(<i>a x</i>) + <i>d</i> sin(<i>a y</i>)"],
-    params: "<i>a</i> = −1.2 · <i>b</i> = 1.9 · <i>c</i> = 1.3 · <i>d</i> = −1.1",
-    text: "Alternate art. Four times the points, more iterations, a wider blur and a softer tone curve: 117 million hits dissolved into smoke.",
-    stats: "4096² · 117 M points",
-    alt: "Smoky magenta Simon attractor shaped like a twisted ribbon",
+    id: "smoke", name: "Simon", stage: "Alt art", dim: 2, symbol: "↻", rarity: "✦",
+    credit: "smoke variant · heavier exposure", ability: "Smoke screen",
+    eq: [["<i>x</i>′", "cos(<i>b y</i>) + <i>c</i> sin(<i>b x</i>)"], ["<i>y</i>′", "cos(<i>a x</i>) + <i>d</i> sin(<i>a y</i>)"]],
+    stats: [["<i>a</i>", "1.5"], ["<i>b</i>", "−1.8"], ["<i>c</i>", "1.6"], ["<i>d</i>", "0.9"]],
+    text: "Alternate art. Twice the orbits, longer runs, a wider blur and a softer tone curve: 117 million hits dissolved into smoke.",
+    size: "4096² · 117 M points",
+    alt: "Smoky Simon attractor in indigo with green and yellow highlights",
   },
 ];
 
@@ -101,26 +104,33 @@ class Spring {
 }
 
 function cardMarkup(card, index) {
-  const number = String(index + 1).padStart(2, "0") + "/" + String(CARDS.length).padStart(2, "0");
+  const number = String(index + 1).padStart(3, "0");
+  const set = String(index + 1).padStart(2, "0") + "/" + String(CARDS.length).padStart(2, "0");
+  const energy = `<span class="tcard__energy" aria-hidden="true">${card.symbol}</span>`;
+  // The alternate art is a portrait full-bleed render; the others sit in a landscape window.
+  const [file, width, height] = card.id === "smoke" ? ["simon-smoke", 900, 1257] : [card.id, 1200, 900];
   return `
     <li class="deck__slot" style="--i: ${index}">
-      <div class="tcard tcard--${card.id}" role="button" tabindex="0" aria-pressed="false" aria-label="${card.name}: lift the card">
+      <div class="tcard tcard--${card.id}" role="button" tabindex="0" aria-pressed="false" aria-label="${card.name}${card.id === "smoke" ? " (alternate art)" : ""}: lift the card">
         <div class="tcard__rotator">
           <div class="tcard__face tcard__front">
             <div class="tcard__panel">
               <div class="tcard__head">
+                <span class="tcard__stage">${card.stage}</span>
                 <h3 class="tcard__name">${card.name}</h3>
-                <span class="tcard__kind">${card.kind}<span class="tcard__symbol" aria-hidden="true">${card.symbol}</span></span>
+                <span class="tcard__hp"><small>DIM</small>${card.dim}</span>
+                ${energy}
               </div>
               <div class="tcard__art">
-                <img src="assets/deck/${card.id === "smoke" ? "simon-smoke" : card.id}.webp" alt="${card.alt}" width="1200" height="900" decoding="async" draggable="false" />
+                <img src="assets/deck/${file}.webp" alt="${card.alt}" width="${width}" height="${height}" decoding="async" draggable="false" />
                 <span class="tcard__foil" aria-hidden="true"></span>
               </div>
-              <p class="tcard__credit">${card.credit}</p>
-              <div class="tcard__eq">${card.eq.map(line => `<span>${line}</span>`).join("")}</div>
-              <p class="tcard__params">${card.params}</p>
-              <p class="tcard__text">${card.text}</p>
-              <div class="tcard__foot"><span>No. ${number}</span><span>${card.stats}</span><span class="tcard__rarity" aria-hidden="true">${card.rarity}</span></div>
+              <p class="tcard__strip"><span>NO. ${number}</span>${card.credit}</p>
+              <p class="tcard__ability"><span class="tcard__ability-tag">Ability</span>${card.ability}</p>
+              <div class="tcard__moves">${card.eq.map(([lhs, rhs]) => `<p class="tcard__move">${energy}<span class="tcard__eq">${lhs ? `<b>${lhs}</b> = ` : ""}${rhs}</span></p>`).join("")}</div>
+              <dl class="tcard__stats">${card.stats.map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join("")}</dl>
+              <p class="tcard__flavor">${card.text}</p>
+              <div class="tcard__foot"><span>Illus. Tomasz Młynik</span><span>${card.size}</span><span>${set} <span class="tcard__rarity" aria-hidden="true">${card.rarity}</span></span></div>
             </div>
             <span class="tcard__shine" aria-hidden="true"></span>
             <span class="tcard__glare" aria-hidden="true"></span>
