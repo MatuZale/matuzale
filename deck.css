@@ -5,6 +5,93 @@
 
 html.deck-open { overflow: hidden; }
 
+/* ───────── Themes ─────────
+   The collection follows the site theme. Dark is the default here; light swaps the room and the card
+   panels. Card backs and the full-art alternate stay dark, as printed cards do. */
+.deck {
+  --deck-scheme: dark;
+  --deck-bg: radial-gradient(60% 50% at 15% 0%, #3a1a5c66, transparent 70%), radial-gradient(50% 45% at 90% 100%, #0b4d6266, transparent 70%), #07060f;
+  --deck-text: #ece9ff;
+  --deck-muted: #a5a1c7;
+  --deck-line: #ffffff2e;
+  --deck-rule: #ffffff14;
+  --deck-bar: #07060fcc;
+  --deck-chip: #15132bcc;
+  --deck-hot: #ff5ecb;
+  --deck-veil: #05040ccc;
+}
+.tcard, .tcard--smoke {
+  --ink: #f2efff;
+  --ink-soft: #d4cfea;
+  --ink-muted: #9d97bb;
+  --ink-accent: color-mix(in srgb, var(--accent) 60%, #fff);
+  --ink-value: color-mix(in srgb, var(--accent) 45%, #fff);
+  --ink-ability: #ff9a8b;
+  --ink-shadow: 0 .3cqw .8cqw #0009;
+  --rule: #ffffff1c;
+  --flavor-bg: transparent;
+  --shine-blend: color-dodge;
+  --panel-bg:
+    radial-gradient(90% 55% at 50% 0%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%),
+    linear-gradient(var(--panel), color-mix(in srgb, var(--panel) 80%, #000));
+}
+:root[data-theme="light"] .deck {
+  --deck-scheme: light;
+  --deck-bg: radial-gradient(60% 50% at 15% 0%, #e7d9ff, transparent 70%), radial-gradient(50% 45% at 90% 100%, #d3f0f6, transparent 70%), #f6f3fc;
+  --deck-text: #17152b;
+  --deck-muted: #5a5775;
+  --deck-line: #17152b2e;
+  --deck-rule: #17152b14;
+  --deck-bar: #f6f3fcd9;
+  --deck-chip: #ffffffd9;
+  --deck-hot: #d6249f;
+  --deck-veil: #efeaf8d9;
+}
+:root[data-theme="light"] .tcard:not(.tcard--smoke) {
+  --ink: #1d1a2b;
+  --ink-soft: #3b364d;
+  --ink-muted: #6c6684;
+  --ink-accent: color-mix(in srgb, var(--accent) 55%, #1d1a2b);
+  --ink-value: color-mix(in srgb, var(--accent) 50%, #1d1a2b);
+  --ink-ability: #c0321f;
+  --ink-shadow: none;
+  --rule: #1d1a2b1f;
+  --flavor-bg: #ffffff8c;
+  --shine-blend: soft-light;
+  --panel-bg:
+    radial-gradient(90% 55% at 50% 0%, color-mix(in srgb, var(--accent) 24%, transparent), transparent 70%),
+    linear-gradient(color-mix(in srgb, var(--accent) 7%, #fbf9f4), color-mix(in srgb, var(--accent) 12%, #eee9df));
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .deck {
+    --deck-scheme: light;
+    --deck-bg: radial-gradient(60% 50% at 15% 0%, #e7d9ff, transparent 70%), radial-gradient(50% 45% at 90% 100%, #d3f0f6, transparent 70%), #f6f3fc;
+    --deck-text: #17152b;
+    --deck-muted: #5a5775;
+    --deck-line: #17152b2e;
+    --deck-rule: #17152b14;
+    --deck-bar: #f6f3fcd9;
+    --deck-chip: #ffffffd9;
+    --deck-hot: #d6249f;
+    --deck-veil: #efeaf8d9;
+  }
+  :root:not([data-theme="dark"]) .tcard:not(.tcard--smoke) {
+    --ink: #1d1a2b;
+    --ink-soft: #3b364d;
+    --ink-muted: #6c6684;
+    --ink-accent: color-mix(in srgb, var(--accent) 55%, #1d1a2b);
+    --ink-value: color-mix(in srgb, var(--accent) 50%, #1d1a2b);
+    --ink-ability: #c0321f;
+    --ink-shadow: none;
+    --rule: #1d1a2b1f;
+    --flavor-bg: #ffffff8c;
+    --shine-blend: soft-light;
+    --panel-bg:
+      radial-gradient(90% 55% at 50% 0%, color-mix(in srgb, var(--accent) 24%, transparent), transparent 70%),
+      linear-gradient(color-mix(in srgb, var(--accent) 7%, #fbf9f4), color-mix(in srgb, var(--accent) 12%, #eee9df));
+  }
+}
+
 .deck {
   position: fixed;
   inset: 0;
@@ -18,16 +105,15 @@ html.deck-open { overflow: hidden; }
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
-  color: #ece9ff;
-  background:
-    radial-gradient(60% 50% at 15% 0%, #3a1a5c66, transparent 70%),
-    radial-gradient(50% 45% at 90% 100%, #0b4d6266, transparent 70%),
-    #07060f;
+  color: var(--deck-text);
+  background: var(--deck-bg);
   font-family: var(--font-body);
-  color-scheme: dark;
+  color-scheme: var(--deck-scheme);
 }
 .deck[open] { animation: deck-in .35s ease-out; }
 .deck::backdrop { background: #05040c; }
+:root[data-theme="light"] .deck::backdrop { background: #f6f3fc; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .deck::backdrop { background: #f6f3fc; } }
 @keyframes deck-in { from { opacity: 0; } }
 
 .deck__bar {
@@ -39,28 +125,28 @@ html.deck-open { overflow: hidden; }
   align-items: center;
   gap: .6rem 1.6rem;
   padding: 1rem clamp(1rem, 4vw, 2.5rem);
-  border-bottom: 1px solid #ffffff14;
-  background: #07060fcc;
+  border-bottom: 1px solid var(--deck-rule);
+  background: var(--deck-bar);
   backdrop-filter: blur(10px);
 }
 .deck__heading { margin-right: auto; }
-.deck__kicker { margin: 0; color: #a5a1c7; font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; }
+.deck__kicker { margin: 0; color: var(--deck-muted); font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; }
 .deck h2 { margin: .1rem 0 0; font-family: var(--font-head); font-size: clamp(1.25rem, 3vw, 1.6rem); line-height: 1.15; }
-.deck h2 span { color: #a5a1c7; font-weight: 500; }
-.deck__hint { max-width: 32rem; margin: 0; color: #a5a1c7; font-size: .85rem; }
+.deck h2 span { color: var(--deck-muted); font-weight: 500; }
+.deck__hint { max-width: 34rem; margin: 0; color: var(--deck-muted); font-size: .85rem; }
 .deck__close {
   display: inline-flex;
   align-items: center;
   gap: .5rem;
   padding: .6rem 1.1rem;
-  border: 1px solid #ffffff2e;
+  border: 1px solid var(--deck-line);
   border-radius: 999px;
-  background: #ffffff0d;
-  color: #ece9ff;
+  background: var(--deck-chip);
+  color: var(--deck-text);
   font: 600 .92rem var(--font-body);
   cursor: pointer;
 }
-.deck__close:hover, .deck__close:focus-visible { border-color: #ff5ecb; background: #ff5ecb1f; }
+.deck__close:hover, .deck__close:focus-visible { border-color: var(--deck-hot); background: color-mix(in srgb, var(--deck-hot) 12%, transparent); }
 .deck__hint--touch { display: none; }
 @media (hover: none) { .deck__hint--pointer { display: none; } .deck__hint--touch { display: inline; } }
 @media (max-width: 640px) { .deck__hint { order: 3; flex-basis: 100%; font-size: .8rem; } }
@@ -87,13 +173,41 @@ html.deck-open { overflow: hidden; }
   position: fixed;
   inset: 0;
   z-index: 4;
-  background: #05040ccc;
+  background: var(--deck-veil);
   backdrop-filter: blur(3px);
   opacity: 0;
   visibility: hidden;
   transition: opacity .35s, visibility 0s .35s;
 }
 .deck.has-active .deck__veil { opacity: 1; visibility: visible; transition: opacity .35s; }
+.deck__tools {
+  position: fixed;
+  left: 50%;
+  bottom: 14px;
+  z-index: 7;
+  display: flex;
+  gap: .6rem;
+  transform: translate(-50%, 12px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .3s, transform .3s, visibility 0s .3s;
+}
+.deck.has-active .deck__tools { transform: translate(-50%, 0); opacity: 1; visibility: visible; transition: opacity .3s .15s, transform .3s .15s; }
+.deck__tool {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .55rem 1.05rem;
+  border: 1px solid var(--deck-line);
+  border-radius: 999px;
+  background: var(--deck-chip);
+  color: var(--deck-text);
+  font: 600 .88rem var(--font-body);
+  white-space: nowrap;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+.deck__tool:hover, .deck__tool:focus-visible { border-color: var(--deck-hot); }
 
 /* ───────── Card ───────── */
 .tcard {
@@ -162,11 +276,9 @@ html.deck-open { overflow: hidden; }
   height: 100%;
   padding: 2.6cqw 3.2cqw 2.2cqw;
   border-radius: calc(var(--radius) - 2cqw);
-  background:
-    radial-gradient(90% 55% at 50% 0%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%),
-    linear-gradient(var(--panel), color-mix(in srgb, var(--panel) 80%, #000));
+  background: var(--panel-bg);
   box-shadow: inset 0 0 0 .5cqw #00000059, inset 0 .6cqw 1.2cqw #00000080;
-  color: #f2efff;
+  color: var(--ink);
 }
 .tcard__panel > * { flex-shrink: 0; }
 
@@ -195,10 +307,10 @@ html.deck-open { overflow: hidden; }
   letter-spacing: -.015em;
   white-space: nowrap;
   text-overflow: ellipsis;
-  text-shadow: 0 .3cqw .8cqw #0009;
+  text-shadow: var(--ink-shadow);
 }
-.tcard__hp { flex-shrink: 0; font: 700 6.2cqw/1 var(--font-head); text-shadow: 0 .3cqw .8cqw #0009; }
-.tcard__hp small { margin-right: .5cqw; color: color-mix(in srgb, var(--accent) 60%, #fff); font: 700 2.3cqw var(--font-body); letter-spacing: .04em; vertical-align: .35em; }
+.tcard__hp { flex-shrink: 0; font: 700 6.2cqw/1 var(--font-head); text-shadow: var(--ink-shadow); }
+.tcard__hp small { margin-right: .5cqw; color: var(--ink-accent); font: 700 2.3cqw var(--font-body); letter-spacing: .04em; vertical-align: .35em; }
 .tcard__energy {
   display: inline-grid;
   place-items: center;
@@ -242,7 +354,7 @@ html.deck-open { overflow: hidden; }
 }
 .tcard__strip span { margin-right: 1.6cqw; font-style: normal; font-weight: 800; letter-spacing: .04em; }
 
-.tcard__ability { display: flex; align-items: center; gap: 1.8cqw; margin: 2.1cqw 0 0; color: #ff9a8b; font: 700 3.8cqw/1.1 var(--font-head); text-shadow: 0 .2cqw .6cqw #0008; }
+.tcard__ability { display: flex; align-items: center; gap: 1.8cqw; margin: 2.1cqw 0 0; color: var(--ink-ability); font: 700 3.8cqw/1.1 var(--font-head); text-shadow: var(--ink-shadow); }
 .tcard__ability-tag {
   padding: .35cqw 1.5cqw;
   border-radius: .6cqw;
@@ -263,7 +375,7 @@ html.deck-open { overflow: hidden; }
   gap: 2.2cqw;
   margin: 0;
   padding: 1cqw 0;
-  border-bottom: .25cqw solid #ffffff17;
+  border-bottom: .25cqw solid var(--rule);
   font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", "Times New Roman", Georgia, serif;
   font-size: 4.15cqw;
   line-height: 1.2;
@@ -278,10 +390,10 @@ html.deck-open { overflow: hidden; }
 /* Parameters in the weakness / resistance / retreat bar. */
 .tcard__stats { display: flex; margin: 1.6cqw 0 0; }
 .tcard__stats div { flex: 1 1 auto; min-width: 0; padding: 0 1.2cqw; text-align: center; }
-.tcard__stats div + div { border-left: .25cqw solid #ffffff1f; }
-.tcard__stats dt { color: #9d97bb; font: 600 2.1cqw/1.2 var(--font-body); letter-spacing: .06em; text-transform: uppercase; }
-.tcard__stats dt i { color: #d8d3ee; font-size: 1.45em; letter-spacing: 0; text-transform: none; }
-.tcard__stats dd { margin: .3cqw 0 0; color: color-mix(in srgb, var(--accent) 45%, #fff); font: 600 3.1cqw/1.2 var(--font-mono); white-space: nowrap; }
+.tcard__stats div + div { border-left: .25cqw solid var(--rule); }
+.tcard__stats dt { color: var(--ink-muted); font: 600 2.1cqw/1.2 var(--font-body); letter-spacing: .06em; text-transform: uppercase; }
+.tcard__stats dt i { color: var(--ink-soft); font-size: 1.45em; letter-spacing: 0; text-transform: none; }
+.tcard__stats dd { margin: .3cqw 0 0; color: var(--ink-value); font: 600 3.1cqw/1.2 var(--font-mono); white-space: nowrap; }
 
 .tcard__flavor {
   flex-shrink: 1;
@@ -291,7 +403,8 @@ html.deck-open { overflow: hidden; }
   overflow: hidden;
   border: .3cqw solid color-mix(in srgb, var(--accent) 45%, transparent);
   border-radius: 1.2cqw;
-  color: #d4cfea;
+  background: var(--flavor-bg);
+  color: var(--ink-soft);
   font: italic 2.85cqw/1.38 var(--font-body);
 }
 .tcard__foot {
@@ -300,7 +413,7 @@ html.deck-open { overflow: hidden; }
   gap: 2cqw;
   margin-top: auto;
   padding-top: 1.3cqw;
-  color: #8f89ad;
+  color: var(--ink-muted);
   font: 2.3cqw var(--font-mono);
   white-space: nowrap;
 }
@@ -319,7 +432,7 @@ html.deck-open { overflow: hidden; }
   background-size: 400% 400%, 300% 300%;
   background-position: var(--posx, 50%) var(--posy, 50%);
   background-blend-mode: overlay;
-  mix-blend-mode: color-dodge;
+  mix-blend-mode: var(--shine-blend);
   filter: brightness(.8) contrast(1.4) saturate(1.3);
 }
 .tcard__glare {

@@ -106,23 +106,42 @@ const write = (name, body, note, pad) => fs.writeFileSync(`${out}/${name}.svg`, 
   write('harmonograph', b, 'Decaying harmonograph');
 }
 
-// N-body simulator: precessing orbits around a heavy body.
+// N-body simulator: a black hole. A dark shadow inside the photon ring, an accretion disk whose near
+// side crosses in front of the hole, and the far side of the disk bent by gravity over the top.
 {
   let b = '';
-  const orbit = (p, e, prec, turns, rot, cx, cy, w, o) => {
-    const pts = [];
-    for (let i = 0; i <= turns * 220; i++) {
-      const th = (i / 220) * TAU;
-      const r = p / (1 + e * Math.cos(th * (1 - prec)));
-      pts.push([cx + r * Math.cos(th + rot), cy + r * Math.sin(th + rot) * .9]);
+  const cx = 205, cy = 200, shadow = 40, tilt = -.2;
+  const turn = ([x, y]) => [cx + x * Math.cos(tilt) - y * Math.sin(tilt), cy + x * Math.sin(tilt) + y * Math.cos(tilt)];
+  // Disk rings: the near half is always drawn; the far half only where it is not behind the hole.
+  for (let k = 0; k < 24; k++) {
+    const rx = 50 + k * 4.6, ry = rx * .22, w = k % 5 === 1 ? 1.25 : .65, o = +(1 - k * .03).toFixed(2);
+    let run = [];
+    const flush = () => { if (run.length > 1) b += path(run, w, o); run = []; };
+    for (let i = 0; i <= 360; i++) {
+      const t = (i / 360) * TAU, x = rx * Math.cos(t), y = ry * Math.sin(t);
+      const hidden = y < 0 && Math.hypot(x, y) < shadow + 3;
+      if (hidden) flush(); else run.push(turn([x, y]));
     }
-    b += path(pts, w, o);
-  };
-  orbit(78, .62, .085, 12, .3, 205, 200, .8, 1);
-  orbit(34, .35, -.06, 6, 2.1, 205, 200, .7, .7);
-  orbit(150, .2, .03, 3, 1.2, 205, 200, .6, .45);
-  b += `<g fill="#fff" stroke="none"><circle cx="${205 * S}" cy="${200 * S}" r="${5 * S}"/><circle cx="${312 * S}" cy="${148 * S}" r="${2.6 * S}"/><circle cx="${180 * S}" cy="${236 * S}" r="${1.8 * S}"/><circle cx="${70 * S}" cy="${120 * S}" r="${2 * S}" opacity=".6"/></g>`;
-  write('orbits', b, 'Precessing orbits');
+    flush();
+  }
+  // The lensed far side of the disk, arching over the hole, and a faint secondary image beneath it.
+  for (let k = 0; k < 8; k++) {
+    const r = 44 + k * 3.4, pts = [];
+    for (let t = Math.PI + .1 + k * .025; t <= TAU - .1 - k * .025; t += .02) pts.push(turn([r * Math.cos(t), r * .94 * Math.sin(t)]));
+    b += path(pts, k === 0 ? 1.3 : .7, +(1 - k * .1).toFixed(2));
+  }
+  for (let k = 0; k < 3; k++) {
+    const r = 43 + k * 3.6, pts = [];
+    for (let t = .5; t <= Math.PI - .5; t += .02) pts.push(turn([r * Math.cos(t), r * .78 * Math.sin(t)]));
+    b += path(pts, .6, .5);
+  }
+  // Photon ring.
+  const ring = [];
+  for (let i = 0; i <= 200; i++) { const t = (i / 200) * TAU; ring.push([cx + shadow * Math.cos(t), cy + shadow * Math.sin(t)]); }
+  b += path(ring, 1.8, 1, true);
+  // A few background stars.
+  b += `<g fill="#fff" stroke="none">${[[318, 92, 2.4], [92, 116, 1.8], [348, 286, 1.6], [64, 300, 2], [262, 58, 1.4]].map(([x, y, r]) => `<circle cx="${x * S}" cy="${y * S}" r="${r * S}"/>`).join('')}</g>`;
+  write('blackhole', b, 'Black hole: photon ring, accretion disk and its lensed far side');
 }
 
 // Interactive physics: two coherent sources and their interference fringes.

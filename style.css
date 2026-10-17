@@ -25,6 +25,31 @@
   --card-shadow: #30213640;
   --card-relief: #ffffffe6;
   --card-foil-tone: saturate(1.9) brightness(.7);
+  /* Terminal under the portrait and the torn-open code in "Currently learning". */
+  --term-bg: #fdfcff;
+  --term-bar: linear-gradient(100deg, #f8e8f4, #e6f0fa);
+  --term-bar-text: #6b6585;
+  --term-rule: #6d28d91a;
+  --term-text: #3a3550;
+  --term-command: #7a2e9e;
+  --term-prompt: #0a8f96;
+  --term-arrow: #c2268f;
+  --term-shadow: 0 16px 36px -24px #5a3fa055;
+  --tear-bg: #f8f6fd;
+  --tear-grid: #ddd6ee;
+  --tear-shade: #3b2a6a;
+  --tear-shade-o: .18;
+  --tear-code: #5f6b78;
+  --tear-comment: #8d97a3;
+  --tear-sel: #7c3fd6;
+  --tear-prop: #0a8a91;
+  --tear-val: #7a5f88;
+  --tear-a1: #d6249f;
+  --tear-a2: #6d28d9;
+  --tear-a3: #0891b2;
+  --tear-tone: #c2268f;
+  --tear-current: #6d28d9;
+  --tear-glow: #9570ef1a;
 
   --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-head: "Space Grotesk", var(--font-body);
@@ -54,6 +79,30 @@
   --card-shadow: #00000099;
   --card-relief: #00000080;
   --card-foil-tone: saturate(1.1) brightness(1.05);
+  --term-bg: #100e20;
+  --term-bar: linear-gradient(100deg, #30213a70, #192a3d70);
+  --term-bar-text: #b6accb;
+  --term-rule: #c5b6ef1a;
+  --term-text: #dfd9ee;
+  --term-command: #eeceff;
+  --term-prompt: #6ce7e4;
+  --term-arrow: #ff91cf;
+  --term-shadow: 0 16px 36px -24px #08051c80;
+  --tear-bg: #08151d;
+  --tear-grid: #203440;
+  --tear-shade: #000;
+  --tear-shade-o: .55;
+  --tear-code: #8fa3ad;
+  --tear-comment: #4d6b78;
+  --tear-sel: #ac80f6;
+  --tear-prop: #6ce7e4;
+  --tear-val: #c9b4d6;
+  --tear-a1: #ff5ecb;
+  --tear-a2: #9b6bff;
+  --tear-a3: #4fd8ff;
+  --tear-tone: #ff80c8;
+  --tear-current: #9b6bff;
+  --tear-glow: #9570ef22;
   color-scheme: dark;
 }
 
@@ -79,6 +128,30 @@
     --card-shadow: #00000099;
     --card-relief: #00000080;
     --card-foil-tone: saturate(1.1) brightness(1.05);
+    --term-bg: #100e20;
+    --term-bar: linear-gradient(100deg, #30213a70, #192a3d70);
+    --term-bar-text: #b6accb;
+    --term-rule: #c5b6ef1a;
+    --term-text: #dfd9ee;
+    --term-command: #eeceff;
+    --term-prompt: #6ce7e4;
+    --term-arrow: #ff91cf;
+    --term-shadow: 0 16px 36px -24px #08051c80;
+    --tear-bg: #08151d;
+    --tear-grid: #203440;
+    --tear-shade: #000;
+    --tear-shade-o: .55;
+    --tear-code: #8fa3ad;
+    --tear-comment: #4d6b78;
+    --tear-sel: #ac80f6;
+    --tear-prop: #6ce7e4;
+    --tear-val: #c9b4d6;
+    --tear-a1: #ff5ecb;
+    --tear-a2: #9b6bff;
+    --tear-a3: #4fd8ff;
+    --tear-tone: #ff80c8;
+    --tear-current: #9b6bff;
+    --tear-glow: #9570ef22;
     color-scheme: dark;
   }
 }
@@ -269,6 +342,9 @@ main[tabindex="-1"]:focus, main [tabindex="-1"]:focus { outline: none; }
 .hero__title {
   font-size: clamp(3.2rem, 11vw, 8rem); font-weight: 700; margin: 1.2rem 0 1.4rem; letter-spacing: -0.045em; line-height: 0.95; color: var(--text);
 }
+/* A full stop in the accent, like the one in the TM. logo. */
+.end-dot { color: var(--accent); }
+.bentos .end-dot { color: #aaff00; }
 .hero__title .phd { font-size: 0.4em; letter-spacing: -0.02em; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .hero__lead { max-width: 40rem; font-size: clamp(1.05rem, 2.2vw, 1.3rem); color: var(--muted); }
 .hero__lead strong { color: var(--text); }
@@ -300,20 +376,22 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
 .about__photo img { height: auto; position: relative; z-index: 1; border-radius: 32px; width: 100%; aspect-ratio: 1; object-fit: cover; border: 1px solid var(--line); transform: rotate(-2deg); transition: transform 0.5s; }
 .about__photo:hover img { transform: rotate(0); }
 .about__text p { color: var(--muted); }
-.about-terminal { position: relative; overflow: hidden; border: 1px solid transparent; border-radius: 13px; background: linear-gradient(#100e20, #100e20) padding-box, var(--rim) border-box; color: #dfd9ee; box-shadow: var(--glow), 0 16px 36px -24px #08051c80; font: 400 .69rem/1.9 var(--font-mono); }
-.about-terminal__bar { display: flex; justify-content: space-between; align-items: center; gap: .8rem; padding: .65rem .9rem; border-bottom: 1px solid #c5b6ef1a; background: linear-gradient(100deg, #30213a70, #192a3d70); color: #b6accb; font-size: .6rem; }
+.about-terminal { position: relative; overflow: hidden; border: 1px solid transparent; border-radius: 13px; background: linear-gradient(var(--term-bg), var(--term-bg)) padding-box, var(--rim) border-box; color: var(--term-text); box-shadow: var(--glow), var(--term-shadow); font: 400 .69rem/1.9 var(--font-mono); }
+.about-terminal__bar { display: flex; justify-content: space-between; align-items: center; gap: .8rem; padding: .65rem .9rem; border-bottom: 1px solid var(--term-rule); background: var(--term-bar); color: var(--term-bar-text); font-size: .6rem; }
 .about-terminal__lights { display: flex; gap: 5px; }
 .about-terminal__lights i { width: 6px; height: 6px; border-radius: 50%; background: #ff7db5; }
 .about-terminal__lights i:nth-child(2) { background: #bb9bff; }
 .about-terminal__lights i:nth-child(3) { background: #6ce7e4; }
 .about-terminal__body { padding: 1rem 1.1rem .85rem; overflow-wrap: anywhere; }
 .about-terminal__body p { margin: 0 0 .8rem; }
-.about-terminal__body .about-terminal__command { margin-bottom: .3rem; color: #eeceff; }
-.about-terminal__command > span, .about-terminal__prompt { color: #6ce7e4; }
+.about-terminal__body .about-terminal__command { margin-bottom: .3rem; color: var(--term-command); }
+.about-terminal__command > span, .about-terminal__prompt { color: var(--term-prompt); }
 .about-terminal__command > span { margin-right: .4rem; }
-.about-terminal__arrow { color: #ff91cf; }
-.about-terminal__cursor { display: inline-block; width: .5em; height: 1em; vertical-align: -.1em; background: #6ce7e4; animation: terminal-cursor 1.2s step-end 4; }
-@keyframes terminal-cursor { 0%, 55%, 100% { opacity: 1; } 56%, 99% { opacity: 0; } }
+.about-terminal__arrow { color: var(--term-arrow); }
+/* A block cursor that keeps blinking at the prompt, like an idle shell. */
+.about-terminal__cursor { display: inline-block; width: .55em; height: 1.05em; vertical-align: -.15em; background: var(--term-prompt); box-shadow: 0 0 6px color-mix(in srgb, var(--term-prompt) 55%, transparent); animation: terminal-cursor 1.1s steps(1) infinite; }
+@keyframes terminal-cursor { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .about-terminal__cursor { animation: none; } }
 @media (max-width: 800px) { .about { grid-template-columns: 1fr; } .about__aside { width: min(100%, 380px); margin-inline: auto; } }
 
 /* The employer keeps its own mark, on the white field it was designed for. */
@@ -924,7 +1002,7 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
 .card__holo--guilloche { --motif: url("assets/holo/guilloche.svg"); --latent: url("assets/holo/latent-guilloche.svg"); --motif-size: 360px; --motif-pos: right -135px bottom -130px; --holo-tint: #c79f44; }
 .card__holo--streams { --motif: url("assets/holo/streams.svg"); --latent: url("assets/holo/latent-streams.svg"); --motif-size: 540px; --motif-pos: right -150px bottom -225px; --holo-tint: var(--accent-2); --glow-x: 62%; --glow-y: 88%; }
 .card__holo--harmonograph { --motif: url("assets/holo/harmonograph.svg"); --latent: url("assets/holo/latent-harmonograph.svg"); --motif-size: 400px; --motif-pos: right -110px bottom -120px; --holo-tint: var(--accent); }
-.card__holo--orbits { --motif: url("assets/holo/orbits.svg"); --latent: url("assets/holo/latent-orbits.svg"); --motif-size: 450px; --motif-pos: right -140px bottom -150px; --holo-tint: var(--accent-2); --glow-x: 82%; --glow-y: 84%; }
+.card__holo--blackhole { --motif: url("assets/holo/blackhole.svg"); --latent: url("assets/holo/latent-blackhole.svg"); --motif-size: 390px; --motif-pos: right -97px bottom -117px; --holo-tint: var(--accent-2); --glow-x: 58%; --glow-y: 88%; }
 .card__holo--interference { --motif: url("assets/holo/interference.svg"); --latent: url("assets/holo/latent-interference.svg"); --motif-size: 540px; --motif-pos: right -80px bottom -150px; --holo-tint: var(--accent-3); --glow-x: 62%; --glow-y: 100%; }
 @media (prefers-reduced-motion: reduce) {
   .project-slot > .card--holo, .card__holo::before, .card__holo::after, .card__latent, .print__suits, .print__latent { transform: none; }
@@ -951,19 +1029,22 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
 
 /* The learning card is torn open, like the footer, onto the rules that colour these cards. */
 .skill--learning { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 48%); align-items: center; gap: 1rem; }
-.code-tear { display: block; width: 100%; height: auto; margin-top: 1.4rem; filter: drop-shadow(0 0 12px #9570ef22); font: 400 7.6px var(--font-mono); }
-.code-tear__code { fill: #8fa3ad; white-space: pre; }
-.code-tear__code .c { fill: #4d6b78; font-style: italic; }
-.code-tear__code .s { fill: #ac80f6; }
-.code-tear__code .p { fill: #6ce7e4; }
-.code-tear__code .v { fill: #c9b4d6; }
-.code-tear__code .a1 { fill: #ff5ecb; }
-.code-tear__code .a2 { fill: #9b6bff; }
-.code-tear__code .a3 { fill: #4fd8ff; }
-.code-tear__code .t { fill: #ff80c8; }
-.code-tear__current { fill: #9b6bff; opacity: .16; transition: opacity .3s; }
+.code-tear { display: block; width: 100%; height: auto; margin-top: 1.4rem; filter: drop-shadow(0 0 12px var(--tear-glow)); font: 400 7.6px var(--font-mono); }
+.code-tear__bg { fill: var(--tear-bg); }
+.code-tear__grid { stroke: var(--tear-grid); }
+.code-tear__shade { stroke: var(--tear-shade); stroke-opacity: var(--tear-shade-o); }
+.code-tear__code { fill: var(--tear-code); white-space: pre; }
+.code-tear__code .c { fill: var(--tear-comment); font-style: italic; }
+.code-tear__code .s { fill: var(--tear-sel); }
+.code-tear__code .p { fill: var(--tear-prop); }
+.code-tear__code .v { fill: var(--tear-val); }
+.code-tear__code .a1 { fill: var(--tear-a1); }
+.code-tear__code .a2 { fill: var(--tear-a2); }
+.code-tear__code .a3 { fill: var(--tear-a3); }
+.code-tear__code .t { fill: var(--tear-tone); }
+.code-tear__current { fill: var(--tear-current); opacity: .16; transition: opacity .3s; }
 .skill--learning:hover .code-tear__current { opacity: .28; }
-.code-tear__caret { fill: #6ce7e4; animation: tear-caret 1.1s steps(1) infinite; }
+.code-tear__caret { fill: var(--tear-prop); animation: tear-caret 1.1s steps(1) infinite; }
 @keyframes tear-caret { 50% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .code-tear__caret { animation: none; } }
 @media (max-width: 560px) {

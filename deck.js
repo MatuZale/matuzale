@@ -169,13 +169,17 @@ export async function createDeck() {
         <h2 id="deck-title">The collection <span>· ${CARDS.length} cards</span></h2>
       </div>
       <p class="deck__hint">
-        <span class="deck__hint--pointer">Tilt a card with the pointer. Click to lift it out, drag to spin it round, Esc to put it back.</span>
+        <span class="deck__hint--pointer">Tilt a card with the pointer and click to lift it out. Flip it with the button, the mouse wheel, F or a sideways drag. Esc puts it back.</span>
         <span class="deck__hint--touch">Tap a card to lift it out and drag to spin it round. Tap again to put it back.</span>
       </p>
       <button type="button" class="deck__close">Close <span aria-hidden="true">✕</span></button>
     </div>
     <ul class="deck__grid">${CARDS.map(cardMarkup).join("")}</ul>
-    <div class="deck__veil" aria-hidden="true"></div>`;
+    <div class="deck__veil" aria-hidden="true"></div>
+    <div class="deck__tools">
+      <button type="button" class="deck__tool" data-deck-flip>Flip card <span aria-hidden="true">↻</span></button>
+      <button type="button" class="deck__tool" data-deck-back>Put back</button>
+    </div>`;
   document.body.append(dialog);
 
   const veil = dialog.querySelector(".deck__veil");
@@ -237,10 +241,11 @@ export async function createDeck() {
     // would turn soft. The flight between grid and stage is a scale *down* from the staged size.
     function stage() {
       const vw = document.documentElement.clientWidth, vh = window.innerHeight;
-      const width = Math.min(vh * .88 * 63 / 88, vw * .92, 560);
+      // Leave room under the card for the flip / put back buttons.
+      const room = 64, width = Math.min((vh - room) * .9 * 63 / 88, vw * .92, 560);
       el.style.setProperty("--stage-w", width.toFixed(1) + "px");
       el.style.setProperty("--stage-x", ((vw - width) / 2).toFixed(1) + "px");
-      el.style.setProperty("--stage-y", ((vh - width * 88 / 63) / 2).toFixed(1) + "px");
+      el.style.setProperty("--stage-y", ((vh - room - width * 88 / 63) / 2).toFixed(1) + "px");
       el.classList.add("is-staged");
       el.parentElement.classList.add("is-raised");
     }
@@ -320,6 +325,7 @@ export async function createDeck() {
     card.el.addEventListener("keydown", event => {
       if (event.key === "Enter" || event.key === " ") { event.preventDefault(); card === active ? drop() : lift(card); }
       else if (card === active && (event.key === "ArrowLeft" || event.key === "ArrowRight")) { event.preventDefault(); card.flip(event.key === "ArrowLeft" ? -1 : 1); }
+      else if (card === active && event.key.toLowerCase() === "f") { event.preventDefault(); card.flip(1); }
     });
   }
 
@@ -354,6 +360,8 @@ export async function createDeck() {
       return;
     }
     if (event.pointerType === "touch" || motion.matches) return;
+    // Over the buttons the card faces the viewer instead of craning towards the pointer.
+    if (event.target.closest(".deck__tools")) { active.aim(.5, .5, 0); return; }
     // The staged card's own box, unaffected by its tilt.
     const r = active.el.getBoundingClientRect();
     active.aim(clamp((event.clientX - r.left) / r.width, 0, 1), clamp((event.clientY - r.top) / r.height, 0, 1), 34);
@@ -368,6 +376,22 @@ export async function createDeck() {
   dialog.addEventListener("pointerup", endDrag);
   dialog.addEventListener("pointercancel", endDrag);
   veil.addEventListener("click", drop);
+  dialog.querySelector("[data-deck-flip]").addEventListener("click", () => active?.flip(1));
+  dialog.querySelector("[data-deck-back]").addEventListener("click", () => {
+    const card = active;
+    drop();
+    card?.el.focus({ preventScroll: true });
+  });
+  // The wheel turns a lifted card like a dial and lets it settle on the nearer face.
+  let wheelEnd = 0;
+  dialog.addEventListener("wheel", event => {
+    if (!active) return;
+    event.preventDefault();
+    active.spinTo(active.s.spin.target + clamp(event.deltaY + event.deltaX, -80, 80) * .9, false);
+    clearTimeout(wheelEnd);
+    const card = active;
+    wheelEnd = setTimeout(() => card.spinTo(card.s.spin.target, true), 160);
+  }, { passive: false });
 
   dialog.querySelector(".deck__close").addEventListener("click", () => dialog.close());
   // Esc first puts a lifted card back; a second Esc leaves the collection. Handled on keydown:
