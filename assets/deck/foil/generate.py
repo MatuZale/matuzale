@@ -181,3 +181,46 @@ r1, r2 = np.hypot(x1, y1), np.hypot(x2, y2)
 pot = lines(np.log((r1 + 1e-6) / (r2 + 1e-6)) / .24, 1.1, False)
 ang = lines((np.arctan2(y1, x1) - np.arctan2(y2, x2)) * 20 / (2 * np.pi), 1.0)
 finish("harmonic", np.maximum(pot, ang * .85), "regular", .95)
+
+
+# 13  Cosmos dust for the artwork windows: a seamless tile of round dots, mostly tiny, a few larger with a faint
+# halo, thickening and thinning in drifts like a star field. Not a card texture: deck.css tints and shifts it
+# differently on every card.
+def cosmos(name="cosmos", n=600, dots=3300, seed=11):
+    rng = np.random.default_rng(seed)
+    gy, gx = np.mgrid[0:n, 0:n] / n
+    dens = np.zeros((n, n))
+    for _ in range(7):                                  # periodic drifts, so the tile repeats without a seam
+        kx, ky = rng.integers(1, 4, 2) * rng.choice([-1, 1], 2)
+        dens += np.cos(2 * np.pi * (kx * gx + ky * gy) + rng.uniform(0, 2 * np.pi)) * rng.uniform(.4, 1)
+    dens = (dens - dens.min()) / (dens.max() - dens.min())
+    dens = .12 + .88 * dens ** 1.7
+    canvas = np.zeros((n, n))
+    placed = 0
+    while placed < dots:
+        x, y = rng.integers(0, n, 2)
+        if rng.random() > dens[y, x]:
+            continue
+        roll = rng.random()
+        if roll < .80:
+            sigma, amp, halo = rng.uniform(.55, .8), rng.uniform(.35, .8), 0
+        elif roll < .97:
+            sigma, amp, halo = rng.uniform(.85, 1.2), rng.uniform(.55, .95), 0
+        else:
+            sigma, amp, halo = rng.uniform(1.3, 1.8), 1.0, .14
+        reach = int(np.ceil(4 * sigma * (3.2 if halo else 1)))
+        ds = np.arange(-reach, reach + 1)
+        iy, ix = (y + ds) % n, (x + ds) % n
+        dy, dx = np.meshgrid(ds, ds, indexing="ij")
+        r2 = dx * dx + dy * dy
+        g = amp * np.exp(-r2 / (2 * sigma ** 2)) + halo * np.exp(-r2 / (2 * (sigma * 3.2) ** 2))
+        sub = canvas[np.ix_(iy, ix)]
+        canvas[np.ix_(iy, ix)] = np.maximum(sub, g)
+        placed += 1
+    alpha = np.clip(canvas, 0, 1)
+    img = Image.fromarray((alpha * 255).astype(np.uint8), "L")
+    Image.merge("RGBA", [Image.new("L", (n, n), 255)] * 3 + [img]).save(f"{name}.webp", "WEBP", quality=85, alpha_quality=100, method=6)
+    print(name, "tile", n, round(float(alpha.mean()), 3))
+
+
+cosmos()
