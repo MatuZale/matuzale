@@ -281,114 +281,21 @@ document.getElementById("year").textContent = new Date().getFullYear();
   new IntersectionObserver(([entry]) => horizon.classList.toggle("is-idle", !entry.isIntersecting)).observe(horizon);
 })();
 
-/* ───────── Journey: a faint isometric surface plot with its axes ─────────
-   MATLAB's peaks(x, y) on a 36 × 36 mesh, drawn back to front so nearer faces hide the ones behind.
-   Faces are coloured by height in the site's accents, so the plot follows the theme. */
-(function journeySurface() {
-  const svg = document.querySelector(".surface-plot");
-  if (!svg) return;
-  const NS = "http://www.w3.org/2000/svg";
-  const N = 36, R = 3, Z = 8, S = 210, H = 1.05;
-  const peaks = (x, y) =>
-    3 * (1 - x) ** 2 * Math.exp(-x * x - (y + 1) ** 2)
-    - 10 * (x / 5 - x ** 3 - y ** 5) * Math.exp(-x * x - y * y)
-    - Math.exp(-((x + 1) ** 2) - y * y) / 3;
-  // World x, y in [-R, R] and z in [-Z, Z] go to an isometric screen; +x and +y come towards the reader.
-  const project = (x, y, z) => [(x - y) / R * Math.cos(Math.PI / 6) * S, ((x + y) / R * .5 - z / Z * H) * S];
-  const pts = list => list.map(p => project(...p).map(v => v.toFixed(1)).join(",")).join(" ");
-  const add = (tag, attrs, text) => {
-    const el = document.createElementNS(NS, tag);
-    for (const [key, value] of Object.entries(attrs)) el.setAttribute(key, value);
-    if (text) el.textContent = text;
-    return svg.appendChild(el);
-  };
-  const line = (a, b, cls) => add("polyline", { points: pts([a, b]), class: cls });
-  const label = (p, text, anchor = "middle") => {
-    const [x, y] = project(...p);
-    add("text", { x: x.toFixed(1), y: y.toFixed(1), "text-anchor": anchor, "dominant-baseline": "middle" }, text);
-  };
-
-  // The panes: floor and the two far walls, each with a grid at the ticks.
-  const ticks = [-3, -2, -1, 0, 1, 2, 3], zTicks = [-8, -4, 0, 4, 8];
-  add("polygon", { points: pts([[-R, -R, -Z], [R, -R, -Z], [R, R, -Z], [-R, R, -Z]]), class: "surface-plot__pane" });
-  add("polygon", { points: pts([[-R, -R, -Z], [-R, R, -Z], [-R, R, Z], [-R, -R, Z]]), class: "surface-plot__pane" });
-  add("polygon", { points: pts([[-R, -R, -Z], [R, -R, -Z], [R, -R, Z], [-R, -R, Z]]), class: "surface-plot__pane" });
-  for (const t of ticks) {
-    line([t, -R, -Z], [t, R, -Z], "surface-plot__grid"); line([-R, t, -Z], [R, t, -Z], "surface-plot__grid");
-    line([-R, t, -Z], [-R, t, Z], "surface-plot__grid"); line([t, -R, -Z], [t, -R, Z], "surface-plot__grid");
-  }
-  for (const z of zTicks) { line([-R, R, z], [-R, -R, z], "surface-plot__grid"); line([-R, -R, z], [R, -R, z], "surface-plot__grid"); }
-
-  // The surface, far faces first. The order depends only on the mesh, so the faces are made once and
-  // draw() moves them: peaks turns slowly about the z axis under fixed axes, its hills wandering the grid.
-  const step = 2 * R / N, at = i => -R + i * step;
-  const faces = [];
-  for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) faces.push({ i, j, bin: -1 });
-  faces.sort((a, b) => (a.i + a.j) - (b.i + b.j));
-  for (const face of faces) face.el = add("polygon", { class: "surface-plot__face" });
-  // Heights are coloured in 24 steps, so a face's style only changes when it crosses one.
-  const BINS = 24, colours = Array.from({ length: BINS + 1 }, (_, k) => {
-    const t = k / BINS;
-    return t < .5
-      ? `color-mix(in srgb, var(--accent-2) ${Math.round(t * 200)}%, var(--accent-3))`
-      : `color-mix(in srgb, var(--accent) ${Math.round((t - .5) * 200)}%, var(--accent-2))`;
-  });
-  const heights = new Float64Array((N + 1) ** 2);
-  const corner = (a, b) => project(at(a), at(b), heights[a * (N + 1) + b]).map(v => v.toFixed(1)).join(",");
-  function draw(angle) {
-    const c = Math.cos(angle), s = Math.sin(angle);
-    for (let a = 0; a <= N; a++) for (let b = 0; b <= N; b++) {
-      const x = at(a), y = at(b);
-      heights[a * (N + 1) + b] = peaks(x * c + y * s, y * c - x * s);
-    }
-    for (const face of faces) {
-      const { i, j } = face, k = i * (N + 1) + j;
-      const z = (heights[k] + heights[k + 1] + heights[k + N + 1] + heights[k + N + 2]) / 4;
-      face.el.setAttribute("points", `${corner(i, j)} ${corner(i + 1, j)} ${corner(i + 1, j + 1)} ${corner(i, j + 1)}`);
-      const bin = Math.round(Math.min(1, Math.max(0, (z + 6.5) / 14.5)) * BINS);
-      if (bin !== face.bin) { face.bin = bin; face.el.style.setProperty("--c", colours[bin]); }
-    }
-  }
-  draw(0);
-
-  // Axes on the near edges, with tick labels and titles.
-  line([-R, R, -Z], [R, R, -Z], "surface-plot__axis");
-  line([R, -R, -Z], [R, R, -Z], "surface-plot__axis");
-  line([-R, R, -Z], [-R, R, Z], "surface-plot__axis");
-  for (const t of ticks) {
-    label([t, R + .55, -Z], String(t).replace("-", "−"));
-    label([R + .55, t, -Z], String(t).replace("-", "−"));
-  }
-  // −8 is left off: it would sit on top of the x axis's −3 at the corner.
-  for (const z of zTicks.slice(1)) label([-R, R + .3, z], String(z).replace("-", "−"), "end");
-  label([0, R + 1.3, -Z], "x");
-  label([R + 1.3, 0, -Z], "y");
-  label([-R, R + .3, Z + 1.6], "f(x, y)", "end");
-
-  // Fit the view box to everything drawn.
-  const box = svg.getBBox();
-  svg.setAttribute("viewBox", `${(box.x - 8).toFixed(0)} ${(box.y - 8).toFixed(0)} ${(box.width + 16).toFixed(0)} ${(box.height + 16).toFixed(0)}`);
-
-  // One turn a minute, at about 24 frames a second, only while the plot is on screen.
-  // Reduced motion keeps the still plot.
-  const TURN = 60000, FRAME = 1000 / 24;
-  const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  let visible = false, raf = 0, last = 0, elapsed = 0;
-  function tick(now) {
-    raf = requestAnimationFrame(tick);
-    if (now - last < FRAME) return;
-    elapsed += Math.min(now - last, 100);
-    last = now;
-    draw(elapsed / TURN * 2 * Math.PI);
-  }
-  function update() {
-    const run = visible && !motion.matches;
-    if (run && !raf) { last = performance.now(); raf = requestAnimationFrame(tick); }
-    if (!run && raf) { cancelAnimationFrame(raf); raf = 0; }
-  }
-  motion.addEventListener("change", update);
+/* ───────── Journey: light bending round a black hole ─────────
+   spacetime.js loads when the section is near. */
+(function journeySpacetime() {
+  const canvas = document.querySelector(".spacetime");
+  if (!canvas || !canvas.getContext) return;
+  const load = () => import("./spacetime.js")
+    .then(module => module.startSpacetime(canvas))
+    .catch(error => console.error(error));
   if ("IntersectionObserver" in window) {
-    new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; update(); }).observe(svg);
+    const watcher = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      watcher.disconnect();
+      load();
+    }, { rootMargin: "400px" });
+    watcher.observe(canvas);
   }
 })();
 
