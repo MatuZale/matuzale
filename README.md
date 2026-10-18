@@ -98,11 +98,12 @@ Write to **tomek.mlynik@gmail.com** or find me on [LinkedIn](https://www.linkedi
 
 The source of the portfolio site: plain HTML, CSS and JavaScript, no build step, no dependencies.
 
-- Hero with a live [Clifford attractor](https://en.wikipedia.org/wiki/Clifford_attractor) on `<canvas>` (reacts to the mouse, pauses off-screen, static with `prefers-reduced-motion`)
+- Hero with a live [Clifford attractor](https://en.wikipedia.org/wiki/Clifford_attractor) on `<canvas>` (reacts to the mouse, pauses off-screen, static with `prefers-reduced-motion`). The drifting parameters now and then brush a periodic window where particles used to merge for good and thin out to a few dots; a few are re-seeded every frame and the drift fast-forwards through a collapse
 - Bento-grid projects, a BENTOS feature in the project's navy/lime branding, publications, timeline and contact
 - Holographic project cards: textured cardstock, engraved foil motifs with latent images that appear under the light, and spectral reflections that follow the pointer. Touch and reduced motion keep them flat
-- A collection of eight attractor trading cards (Clifford, Peter de Jong, Simon, Ikeda, Julia, Thomas and more), each with its own foil, the render, the equations and parameters. Cards tilt on springs and flip with a button, the mouse wheel, `F`, the arrow keys or a drag. `deck.js` and `deck.css` load only on first use; renders come from the chaosv2 notebooks, exported to `assets/deck/`
-- Easter eggs: a glitching TM logo (focus it and press `G`), an autonomous Snake under a torn-open circuit board in the footer, and an "Observer detected" readout of browser info. The readout's separate button fetches the public IP from [ipify](https://www.ipify.org/); nothing is looked up automatically or stored
+- A collection of thirteen attractor trading cards (Clifford, Peter de Jong, Simon, Ikeda, Julia, Thomas, Field–Golubitsky, Gumowski–Mira, Bedhead, McMullen, a harmonic IFS and more), each with its own foil, the render, the equations and parameters. Cards tilt on springs and flip with a button, the mouse wheel, `F`, the arrow keys or a drag. `deck.js` and `deck.css` load only on first use; renders come from the chaosv2 notebooks and `ifs_complex.py`, exported to `assets/deck/`
+- A faint synthwave horizon closes About (pure CSS), and the BENTOS section has an animated schematic plus a sample feed that is labelled as a simulation, not buoy data
+- Easter eggs: a glitching TM logo (focus it and press `G`), a torn-open circuit board in the footer where Snake (most often), Tetris or Pac-Man plays itself in the current theme, and an "Observer detected" readout of browser info. The readout's separate button fetches the public IP from [ipify](https://www.ipify.org/); nothing is looked up automatically or stored
 - Light / dark theme (follows the system, remembers the choice), responsive and accessible
 - Visual inspiration: [Pokémon holographic cards by Simon Goellner](https://codepen.io/simeydotme/pen/abYWJdX) and this [terminal card](https://uiverse.io/mrhyddenn/tame-mouse-76). The CSS/JS, [faceted stars](assets/holo-stars.svg), [paper grain](assets/card-grain.svg) and [foil motifs](assets/holo/) are original; no reference code, Pokémon art or external texture assets are bundled
 
@@ -110,8 +111,9 @@ The source of the portfolio site: plain HTML, CSS and JavaScript, no build step,
 index.html   content (+ JSON-LD Person metadata)
 404.html     not-found page
 style.css    design tokens, layout, themes
-script.js    theme, nav, reveal-on-scroll, attractor and footer Snake
+script.js    theme, nav, reveal-on-scroll, attractor, BENTOS visuals, horizon
 deck.js      attractor card collection (loaded on demand, with deck.css)
+games.js     the footer's Snake / Tetris / Pac-Man (loaded when the footer is near)
 assets/      photo, images, public CV (resume.pdf)
 cv/          HTML source of the public CV
 ```

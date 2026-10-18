@@ -165,7 +165,7 @@ html.deck-open { overflow: hidden; }
 .deck__slot.is-raised { z-index: 6; }
 .deck.is-dealt .deck__slot { animation: deal .7s cubic-bezier(.2, .9, .25, 1.1) backwards; animation-delay: calc(var(--i) * 65ms + 80ms); }
 @keyframes deal {
-  from { opacity: 0; transform: translate(calc((var(--i) - 3.5) * -14%), 55vh) rotate(calc((var(--i) - 3.5) * 5deg)) scale(.7); }
+  from { opacity: 0; transform: translate(calc((var(--i) - var(--mid, 3.5)) * -14%), 55vh) rotate(calc((var(--i) - var(--mid, 3.5)) * 5deg)) scale(.7); }
 }
 
 /* While a card is lifted, everything else steps back. */
@@ -587,6 +587,84 @@ html.deck-open { overflow: hidden; }
 }
 .tcard--layered { --foil-o: .4; }
 .tcard--layered .tcard__foil { background-blend-mode: screen, overlay; }
+
+/* Symmetric icon: a 23-spoke rosette, one spoke per fold of the rotation symmetry. */
+.tcard--symmetric {
+  --frame: linear-gradient(140deg, #e3f1ff, #5d8fd6 32%, #f4faff 54%, #2e56a8 80%, #bfe0ff);
+  --accent: #8ec4ff;
+  --panel: #060b18;
+  --foil:
+    repeating-conic-gradient(from calc(var(--mx, 50%) * .4deg) at 50% 50%, #000 0deg, #fff 7.83deg, #000 15.652deg),
+    linear-gradient(115deg, var(--spectrum));
+  --foil-size: 100% 100%, 300% 300%;
+  --foil-pos: center, var(--posx, 50%) var(--posy, 50%);
+  --foil-o: .42;
+}
+.tcard--symmetric .tcard__foil { background-blend-mode: overlay; }
+
+/* Gumowski–Mira: feathers, fine hatching swept along the wing. */
+.tcard--gumowski {
+  --frame: linear-gradient(140deg, #9fb3ff, #3a3fc0 32%, #c9d4ff 54%, #1b6ec8 80%, #7fe8ff);
+  --accent: #7f94ff;
+  --panel: #070920;
+  --foil:
+    repeating-linear-gradient(32deg, #000 0 .9cqw, #fff 1.5cqw, #000 2.1cqw),
+    linear-gradient(115deg, var(--spectrum));
+  --foil-size: 100% 100%, 300% 300%;
+  --foil-pos: calc(var(--posx, 50%) * .3) 0, var(--posx, 50%) var(--posy, 50%);
+  --foil-o: .4;
+}
+.tcard--gumowski .tcard__foil { background-blend-mode: overlay; }
+
+/* Bedhead: loose waves of foil, as if the ribbons had been combed. */
+.tcard--bedhead {
+  --frame: linear-gradient(140deg, #8ff7e0, #6d3fd6 32%, #d7fff2 54%, #1aa39b 80%, #ffe56b);
+  --accent: #5be6cd;
+  --panel: #070b17;
+  --foil:
+    repeating-radial-gradient(ellipse 120% 70% at 20% 110%, #000 0 2cqw, #fff 3cqw, #000 4.4cqw),
+    linear-gradient(115deg, var(--spectrum));
+  --foil-size: 100% 100%, 300% 300%;
+  --foil-pos: center, var(--posx, 50%) var(--posy, 50%);
+  --foil-o: .42;
+}
+.tcard--bedhead .tcard__foil { background-blend-mode: overlay; }
+
+/* McMullen: copper rings, a gold reverse holo like the Julia set but engraved in circles. */
+.tcard--mcmullen {
+  --frame: linear-gradient(140deg, #ffe0b0, #b8742b 30%, #ffd59a 50%, #8a4f18 74%, #ffe7bf);
+  --accent: #f0b268;
+  --panel: #120d0c;
+  --shine-o: .5;
+  --foil-o: .3;
+  --foil: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), #fff0cc, #b8742b 60%, #000);
+  --foil-size: 100% 100%;
+  --foil-pos: center;
+}
+.tcard--mcmullen .tcard__shine {
+  background:
+    repeating-radial-gradient(circle at 50% 50%, #0000 0 1.5cqw, #ffffff 1.5cqw 1.9cqw, #0000 1.9cqw 3.2cqw),
+    linear-gradient(125deg, #fff0cc, #d9983f 25%, #fff 45%, #a8631b 65%, #ffe2b0 85%);
+  background-size: 100% 100%, 300% 300%;
+  background-position: center, var(--posx) var(--posy);
+  background-blend-mode: soft-light, normal;
+  filter: brightness(.6) contrast(1.6) saturate(1.1);
+}
+
+/* Harmonic: two poles, interference rings between them. */
+.tcard--harmonic {
+  --frame: linear-gradient(140deg, #ffb3f0, #a82dd0 32%, #ffd0f7 52%, #2b8fd8 78%, #7fe8ff);
+  --accent: #ff7fe0;
+  --panel: #0e0820;
+  --foil:
+    repeating-radial-gradient(circle at 38% 50%, #000 0 1.6cqw, #fff 2.4cqw, #000 3.2cqw),
+    repeating-radial-gradient(circle at 62% 50%, #000 0 1.6cqw, #fff 2.4cqw, #000 3.2cqw),
+    linear-gradient(115deg, var(--spectrum));
+  --foil-size: 100% 100%, 100% 100%, 300% 300%;
+  --foil-pos: center, center, var(--posx, 50%) var(--posy, 50%);
+  --foil-o: .26;
+}
+.tcard--harmonic .tcard__foil { background-blend-mode: overlay, overlay, normal; }
 
 /* Simon smoke: a full-art alternate. The render bleeds to a thin silver rim, the text sits on
    frosted panels and the foil is an etched pearl guilloche across the sky of the art. */

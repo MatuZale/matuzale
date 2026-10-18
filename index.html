@@ -106,6 +106,11 @@
 
     <!-- ───────── ABOUT ───────── -->
     <section class="section" id="about">
+      <!-- A faint synthwave horizon under the text: a sun setting over a perspective grid. -->
+      <div class="horizon" aria-hidden="true">
+        <div class="horizon__sky"><span class="horizon__sun"></span></div>
+        <div class="horizon__floor"><span class="horizon__grid"></span></div>
+      </div>
       <div class="wrap about">
         <div class="about__aside">
           <figure class="about__photo reveal">
@@ -439,33 +444,135 @@
           <aside class="bentos__panel reveal" aria-labelledby="bentos-dashboard-title">
             <div class="bentos__panel-heading"><span class="bentos__label">From sea to screen</span><span class="bentos__status">In development</span></div>
             <figure class="bentos__diagram">
-              <svg viewBox="0 0 440 260" role="img" aria-labelledby="bentos-diagram-title bentos-diagram-desc">
-                <title id="bentos-diagram-title">BENTOS system overview</title>
-                <desc id="bentos-diagram-desc">A schematic buoy collects underwater measurements. Satellite observations add a wider view. Both feed the software and models.</desc>
-                <defs>
-                  <pattern id="bentos-grid" width="22" height="22" patternUnits="userSpaceOnUse"><path d="M22 0H0V22" fill="none" stroke="#89aeff" stroke-opacity=".12" stroke-width=".7" /></pattern>
-                  <linearGradient id="bentos-depth" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#0036ff" stop-opacity=".2" /><stop offset="1" stop-color="#0036ff" stop-opacity="0" /></linearGradient>
-                </defs>
-                <rect width="440" height="260" fill="url(#bentos-grid)" />
-                <path d="M0 111Q28 102 55 111T110 111T165 111T220 111T275 111T330 111T385 111T440 111V260H0Z" fill="url(#bentos-depth)" />
-                <path d="M0 111Q28 102 55 111T110 111T165 111T220 111T275 111T330 111T385 111T440 111" fill="none" stroke="#78a0ff" stroke-opacity=".65" />
-                <g fill="none" stroke="#aaff00" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M147 78V38M135 100V86H159V100M126 100H168L162 116H132Z" stroke-width="2" />
-                  <circle cx="147" cy="34" r="4" fill="#aaff00" stroke="none" />
-                  <path d="M137 23Q147 14 157 23M129 16Q147 0 165 16" stroke-opacity=".5" />
-                  <path d="M147 117V210" stroke-dasharray="3 5" stroke-opacity=".6" />
-                  <circle cx="147" cy="161" r="5" fill="#081b65" /><circle cx="147" cy="205" r="5" fill="#081b65" />
-                  <path d="M156 161H196M156 205H196" stroke-opacity=".35" />
-                  <g transform="translate(325 45) rotate(-25)"><rect x="-9" y="-8" width="18" height="16" rx="2" /><path d="M-14-5H-34V5H-14ZM14-5H34V5H14ZM0 8V15M-5 16Q0 21 5 16" /></g>
-                  <path d="M310 70L274 94M303 74L265 101" stroke-dasharray="3 5" stroke-opacity=".4" />
-                </g>
-                <g fill="#c4d3fa" font-family="ui-monospace, monospace" font-size="10" letter-spacing="1">
-                  <text x="25" y="62">IN SITU</text><path d="M78 66L124 84" stroke="#c4d3fa" stroke-opacity=".4" />
-                  <text x="292" y="22">SATELLITE</text>
-                  <text x="205" y="165">WATER QUALITY</text><text x="205" y="209">DEPTH PROFILE</text>
-                  <text x="25" y="246" fill="#aaff00">BALTIC SEA / SYSTEM SCHEMATIC</text>
-                </g>
-              </svg>
+              <svg viewBox="0 0 360 280" role="img" aria-labelledby="cad-title cad-desc">
+              <title id="cad-title">BENTOS technical schematic</title>
+              <desc id="cad-desc">A satellite and a measurement buoy with an underwater camera both send data to the BENTOS platform at the centre.</desc>
+              <defs>
+              <pattern id="cad-grid-fine" width="10" height="10" patternUnits="userSpaceOnUse">
+              <path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(170,255,0,0.08)" stroke-width="0.5" />
+              </pattern>
+              <pattern id="cad-grid-major" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(170,255,0,0.18)" stroke-width="0.6" />
+              </pattern>
+              <radialGradient id="hub-glow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="rgba(170,255,0,0.45)" /><stop offset="100%" stop-color="rgba(170,255,0,0)" /></radialGradient>
+              <linearGradient id="beam-grad" x1="0" x2="1" y1="0" y2="0"><stop offset="0%" stop-color="rgba(170,255,0,0.6)" /><stop offset="100%" stop-color="rgba(170,255,0,0)" /></linearGradient>
+              <clipPath id="underwater">
+              <rect x="6" y="130" width="348" height="144" /></clipPath>
+              </defs>
+              <rect x="0" y="0" width="360" height="280" fill="url(#cad-grid-fine)" />
+              <rect x="0" y="0" width="360" height="280" fill="url(#cad-grid-major)" />
+              <rect x="6" y="6" width="348" height="268" fill="none" stroke="rgba(170,255,0,0.35)" stroke-width="0.6" />
+              <g stroke="#aaff00" stroke-width="0.8">
+              <line x1="1" y1="6" x2="11" y2="6" />
+              <line x1="6" y1="1" x2="6" y2="11" />
+              </g>
+              <g stroke="#aaff00" stroke-width="0.8">
+              <line x1="349" y1="6" x2="359" y2="6" />
+              <line x1="354" y1="1" x2="354" y2="11" />
+              </g>
+              <g stroke="#aaff00" stroke-width="0.8">
+              <line x1="1" y1="274" x2="11" y2="274" />
+              <line x1="6" y1="269" x2="6" y2="279" />
+              </g>
+              <g stroke="#aaff00" stroke-width="0.8">
+              <line x1="349" y1="274" x2="359" y2="274" />
+              <line x1="354" y1="269" x2="354" y2="279" />
+              </g>
+              <path d="M20 6V11M40 6V11M60 6V11M80 6V11M100 6V11M120 6V11M140 6V11M160 6V11M180 6V11M200 6V11M220 6V11M240 6V11M260 6V11M280 6V11M300 6V11M320 6V11M340 6V11M6 20H11M6 40H11M6 60H11M6 80H11M6 100H11M6 120H11M6 140H11M6 160H11M6 180H11M6 200H11M6 220H11M6 240H11M6 260H11" stroke="rgba(170,255,0,0.35)" stroke-width="0.5" />
+              <rect x="6" y="130" width="348" height="144" fill="rgba(0,30,90,0.35)" />
+              <path d="M14 130 Q 27 122 40 130 T 66 130 T 92 130 T 118 130 T 144 130 T 170 130 T 196 130 T 222 130 T 248 130 T 274 130 T 300 130 T 326 130 T 346 130" fill="none" stroke="#aaff00" stroke-width="1" opacity="0.9">
+              <animate attributeName="d" dur="4s" repeatCount="indefinite" values="M14 130 Q 27 122 40 130 T 66 130 T 92 130 T 118 130 T 144 130 T 170 130 T 196 130 T 222 130 T 248 130 T 274 130 T 300 130 T 326 130 T 346 130;M14 130 Q 27 138 40 130 T 66 130 T 92 130 T 118 130 T 144 130 T 170 130 T 196 130 T 222 130 T 248 130 T 274 130 T 300 130 T 326 130 T 346 130;M14 130 Q 27 122 40 130 T 66 130 T 92 130 T 118 130 T 144 130 T 170 130 T 196 130 T 222 130 T 248 130 T 274 130 T 300 130 T 326 130 T 346 130" /></path>
+              <path d="M14 130 Q 27 122 40 130 T 66 130 T 92 130 T 118 130 T 144 130 T 170 130 T 196 130 T 222 130 T 248 130 T 274 130 T 300 130 T 326 130 T 346 130" fill="none" stroke="rgba(170,255,0,0.35)" stroke-width="0.6" transform="translate(0 4)">
+              <animate attributeName="d" dur="5s" repeatCount="indefinite" values="M14 130 Q 27 138 40 130 T 66 130 T 92 130 T 118 130 T 144 130 T 170 130 T 196 130 T 222 130 T 248 130 T 274 130 T 300 130 T 326 130 T 346 130;M14 130 Q 27 122 40 130 T 66 130 T 92 130 T 118 130 T 144 130 T 170 130 T 196 130 T 222 130 T 248 130 T 274 130 T 300 130 T 326 130 T 346 130;M14 130 Q 27 138 40 130 T 66 130 T 92 130 T 118 130 T 144 130 T 170 130 T 196 130 T 222 130 T 248 130 T 274 130 T 300 130 T 326 130 T 346 130" /></path>
+              <g fill="none" stroke="#aaff00" stroke-width="1">
+              <path d="M70 56 Q 130 90 170 120" stroke-dasharray="4 4">
+              <animate attributeName="stroke-dashoffset" from="0" to="-16" dur="1.4s" repeatCount="indefinite" /></path>
+              <path d="M270 100 Q 230 115 200 122" stroke-dasharray="4 4">
+              <animate attributeName="stroke-dashoffset" from="0" to="-16" dur="1.2s" repeatCount="indefinite" /></path>
+              <path d="M260 166 Q 230 155 204 144" stroke-dasharray="4 4">
+              <animate attributeName="stroke-dashoffset" from="0" to="-16" dur="1.6s" repeatCount="indefinite" /></path>
+              </g>
+              <g fill="#aaff00">
+              <circle r="1.8">
+              <animateMotion dur="2.6s" repeatCount="indefinite" path="M70 56 Q 130 90 170 120" /></circle>
+              <circle r="1.8">
+              <animateMotion dur="2.2s" repeatCount="indefinite" path="M270 100 Q 230 115 200 122" /></circle>
+              <circle r="1.8">
+              <animateMotion dur="2.4s" repeatCount="indefinite" path="M260 166 Q 230 155 204 144" /></circle>
+              </g>
+              <g stroke="#aaff00" stroke-width="1" fill="none">
+              <rect x="62" y="50" width="16" height="10" />
+              <line x1="52" y1="48" x2="62" y2="52" />
+              <line x1="52" y1="62" x2="62" y2="58" />
+              <line x1="78" y1="52" x2="88" y2="48" />
+              <line x1="78" y1="58" x2="88" y2="62" />
+              <rect x="50" y="46" width="4" height="18" />
+              <rect x="86" y="46" width="4" height="18" />
+              <circle cx="70" cy="55" r="1.4" fill="#aaff00" />
+              <circle cx="70" cy="55" r="14" stroke-dasharray="1 3" opacity="0.5">
+              <animateTransform attributeName="transform" type="rotate" from="0 70 55" to="360 70 55" dur="22s" repeatCount="indefinite" /></circle>
+              </g>
+              <g font-family="ui-monospace, monospace" font-size="8" fill="rgba(255,255,255,0.9)">
+              <line x1="90" y1="46" x2="110" y2="28" stroke="rgba(170,255,0,0.35)" stroke-width="0.5" />
+              <text x="112" y="26" letter-spacing="0.5">SATELLITE IMAGERY</text>
+              </g>
+              <g stroke="#aaff00" stroke-width="1" fill="none">
+              <line x1="270" y1="90" x2="270" y2="106" />
+              <circle cx="270" cy="88" r="2" fill="#aaff00">
+              <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite" /></circle>
+              <g>
+              <animateTransform attributeName="transform" type="translate" values="0 0; 0 2; 0 0" dur="4s" repeatCount="indefinite" />
+              <path d="M256 124 L270 106 L284 124 Z" fill="rgba(0,9,61,0.9)" />
+              <line x1="260" y1="118" x2="280" y2="118" />
+              <ellipse cx="270" cy="124" rx="14" ry="3" />
+              </g>
+              <line x1="270" y1="124" x2="270" y2="158" stroke-dasharray="3 3" opacity="0.7" />
+              <rect x="264" y="130" width="12" height="8" rx="1" fill="rgba(0,9,61,0.9)" />
+              <ellipse cx="270" cy="130" rx="14" ry="2">
+              <animate attributeName="rx" values="8;24;8" dur="3s" repeatCount="indefinite" />
+              <animate attributeName="opacity" values="0.9;0;0.9" dur="3s" repeatCount="indefinite" /></ellipse>
+              <ellipse cx="270" cy="130" rx="20" ry="2.5" opacity="0.4">
+              <animate attributeName="rx" values="10;30;10" dur="3s" begin="0.6s" repeatCount="indefinite" />
+              <animate attributeName="opacity" values="0.6;0;0.6" dur="3s" begin="0.6s" repeatCount="indefinite" /></ellipse>
+              </g>
+              <g font-family="ui-monospace, monospace" font-size="8" fill="rgba(255,255,255,0.9)">
+              <line x1="270" y1="88" x2="270" y2="74" stroke="rgba(170,255,0,0.35)" stroke-width="0.5" />
+              <text x="270" y="72" text-anchor="middle" letter-spacing="0.5">MEASUREMENT BUOY</text>
+              </g>
+              <g clip-path="url(#underwater)">
+              <g>
+              <animateTransform attributeName="transform" type="rotate" from="0 270 166" to="360 270 166" dur="6s" repeatCount="indefinite" />
+              <path d="M270 166 L 340 144 A 72 72 0 0 1 340 188 Z" fill="url(#beam-grad)" opacity="0.85" />
+              <line x1="270" y1="166" x2="342" y2="166" stroke="#aaff00" stroke-width="0.6" opacity="0.65" />
+              </g>
+              </g>
+              <g stroke="#aaff00" stroke-width="1" fill="none">
+              <rect x="258" y="158" width="26" height="16" rx="2" fill="rgba(0,9,61,0.95)" />
+              <circle cx="278" cy="166" r="4.2" />
+              <circle cx="278" cy="166" r="1.8" fill="#aaff00">
+              <animate attributeName="opacity" values="0.4;1;0.4" dur="1.8s" repeatCount="indefinite" /></circle>
+              <line x1="258" y1="162" x2="254" y2="162" />
+              <line x1="258" y1="170" x2="254" y2="170" />
+              </g>
+              <g font-family="ui-monospace, monospace" font-size="7.5" fill="rgba(255,255,255,0.9)">
+              <line x1="270" y1="176" x2="270" y2="184" stroke="rgba(170,255,0,0.35)" stroke-width="0.5" />
+              <text x="270" y="194" text-anchor="middle" letter-spacing="0.5">UNDERWATER CAMERA</text>
+              </g>
+              <circle cx="180" cy="130" r="38" fill="url(#hub-glow)">
+              <animate attributeName="r" values="34;42;34" dur="3.6s" repeatCount="indefinite" />
+              <animate attributeName="opacity" values="0.6;1;0.6" dur="3.6s" repeatCount="indefinite" /></circle>
+              <g>
+              <polygon points="180,102 204,116 204,144 180,158 156,144 156,116" fill="rgba(0,9,61,0.95)" stroke="#aaff00" stroke-width="1.2" />
+              <polygon points="180,110 198,120 198,140 180,150 162,140 162,120" fill="none" stroke="#aaff00" stroke-width="0.6" stroke-dasharray="2 2">
+              <animateTransform attributeName="transform" type="rotate" from="0 180 130" to="360 180 130" dur="18s" repeatCount="indefinite" /></polygon>
+              <circle cx="180" cy="130" r="3.5" fill="#aaff00">
+              <animate attributeName="opacity" values="0.5;1;0.5" dur="1.6s" repeatCount="indefinite" /></circle>
+              <line x1="170" y1="130" x2="190" y2="130" stroke="#aaff00" stroke-width="0.5" />
+              <line x1="180" y1="120" x2="180" y2="140" stroke="#aaff00" stroke-width="0.5" />
+              </g>
+              <g font-family="ui-monospace, monospace" font-size="9" fill="#aaff00" font-weight="700">
+              <text x="180" y="175" text-anchor="middle" letter-spacing="1.2">BENTOS</text>
+              </g></svg>
             </figure>
             <div class="bentos__dashboard">
               <span class="bentos__label">The software I build</span>
@@ -479,6 +586,29 @@
               <p class="note">The public demo uses satellite and model layers. Its buoy markers are simulated placeholders.</p>
             </div>
           </aside>
+        </div>
+
+        <div class="bentos__feed">
+          <div class="bentos__feed-copy reveal">
+            <span class="bentos__label">What the data looks like</span>
+            <h3 id="feed-title">One sample, six readings</h3>
+            <p>Whatever the final sensors measure, the software meets the same shape: a numbered, timestamped
+              sample, and a handful of readings that each have a unit and a plausible range. The buoy is still
+              in development, so this panel is a simulation: values wander through typical Baltic ranges.
+              It is not buoy data.</p>
+          </div>
+          <div class="feed reveal" data-feed role="group" aria-labelledby="feed-title">
+            <div class="feed__top"><span class="feed__status"><i class="feed__dot" aria-hidden="true"></i>Simulated · sensor prototype</span><time class="feed__clock" data-feed-clock>2026-10-18 12:04:52</time></div>
+            <div class="feed__grid">
+              <div class="feed__item" data-sensor data-min="0" data-max="16" data-digits="2"><div class="feed__row"><span>TEMP</span><span class="feed__value"><b>8.38</b><small>°C</small></span></div><div class="feed__bar"><i style="width: 52%"></i></div></div>
+              <div class="feed__item" data-sensor data-min="5" data-max="9" data-digits="2"><div class="feed__row"><span>SAL</span><span class="feed__value"><b>7.23</b><small>PSU</small></span></div><div class="feed__bar"><i style="width: 56%"></i></div></div>
+              <div class="feed__item" data-sensor data-min="6" data-max="14" data-digits="2"><div class="feed__row"><span>O₂</span><span class="feed__value"><b>9.19</b><small>mg/L</small></span></div><div class="feed__bar"><i style="width: 40%"></i></div></div>
+              <div class="feed__item" data-sensor data-min="0" data-max="12" data-digits="2"><div class="feed__row"><span>CHL-a</span><span class="feed__value"><b>2.65</b><small>µg/L</small></span></div><div class="feed__bar"><i style="width: 22%"></i></div></div>
+              <div class="feed__item" data-sensor data-min="7.6" data-max="8.6" data-digits="2"><div class="feed__row"><span>pH</span><span class="feed__value"><b>8.14</b><small></small></span></div><div class="feed__bar"><i style="width: 54%"></i></div></div>
+              <div class="feed__item" data-sensor data-min="0" data-max="8" data-digits="2"><div class="feed__row"><span>TURB</span><span class="feed__value"><b>2.75</b><small>NTU</small></span></div><div class="feed__bar"><i style="width: 34%"></i></div></div>
+            </div>
+            <div class="feed__foot"><span>SAMPLE #<span data-feed-sample>1058</span></span><span>Simulated values</span></div>
+          </div>
         </div>
 
         <ol class="bentos__flow" aria-label="The planned BENTOS data flow">
@@ -644,29 +774,30 @@
         <button class="footer__trace" id="observer-unlock" type="button" aria-haspopup="dialog" aria-controls="observer-trace" hidden><span aria-hidden="true">◎</span> observer detected ↗</button>
       </div>
       <figure class="footer__circuit">
-        <svg class="circuit-window" id="footer-snake" viewBox="0 0 384 128" role="img" aria-label="A little Snake game running by itself beneath a torn-open circuit board">
+        <svg class="circuit-window" id="footer-game" viewBox="0 0 384 128" role="img" aria-label="A little Snake game playing itself beneath a torn-open circuit board">
           <defs>
             <path id="circuit-edge" d="M5 30 20 25 13 15 65 18 77 8 121 14 139 5 182 12 203 4 238 13 268 8 284 17 324 10 334 20 372 16 368 32 380 40 373 57 380 80 368 86 374 108 335 106 321 119 280 113 263 123 224 115 204 124 169 116 136 122 117 112 73 119 59 108 15 113 19 94 6 86 13 65 4 51 12 41Z" />
             <clipPath id="circuit-cut"><use href="#circuit-edge" /></clipPath>
             <linearGradient id="circuit-rim" x2="1" y2="1"><stop stop-color="#f46acb" /><stop offset=".5" stop-color="#8364e8" /><stop offset="1" stop-color="#59dce8" /></linearGradient>
-            <pattern id="circuit-grid" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M8 0H0V8" fill="none" stroke="#203440" stroke-width=".5" /></pattern>
+            <pattern id="circuit-grid" width="8" height="8" patternUnits="userSpaceOnUse"><path class="circuit-window__gridline" d="M8 0H0V8" fill="none" stroke-width=".5" /></pattern>
           </defs>
           <g clip-path="url(#circuit-cut)">
-            <path fill="#08151d" d="M0 0H384V128H0Z" />
+            <path class="circuit-window__bg" d="M0 0H384V128H0Z" />
             <path fill="url(#circuit-grid)" opacity=".6" d="M0 0H384V128H0Z" />
-            <g class="circuit-window__traces" fill="none" stroke="#255264" stroke-width="1">
+            <g class="circuit-window__traces" fill="none" stroke-width="1">
               <path d="M0 25H50L60 35H88M104 0V15L116 27H170M210 0V18H261L273 30H384M0 104H92L103 115H150M196 128V109H243L257 95H300M315 128V113L335 93H384M18 0V58L28 68V128M366 0V45L355 56V128" />
-              <g fill="#08151d"><circle cx="88" cy="35" r="2.5" /><circle cx="170" cy="27" r="2.5" /><circle cx="300" cy="95" r="2.5" /></g>
+              <g class="circuit-window__via"><circle cx="88" cy="35" r="2.5" /><circle cx="170" cy="27" r="2.5" /><circle cx="300" cy="95" r="2.5" /></g>
             </g>
-            <g fill="#172833" stroke="#37515e" stroke-width=".7"><rect x="49" y="18" width="16" height="6" rx="1" /><rect x="287" y="105" width="20" height="7" rx="1" /><path d="M45 19H49M45 23H49M65 19H69M65 23H69M283 107H287M307 107H311M283 110H287M307 110H311" /></g>
-            <g id="snake-pixels" aria-hidden="true">
-              <path fill="#ac80f6" d="M113 65h6v6h-6zM121 65h6v6h-6zM129 65h6v6h-6zM137 65h6v6h-6zM145 65h6v6h-6zM153 65h6v6h-6zM161 65h6v6h-6z" />
-              <rect x="169" y="65" width="6" height="6" rx="1" fill="#6ce7e4" /><rect x="225" y="49" width="6" height="6" rx="1" fill="#ff80c8" />
+            <g class="circuit-window__part" stroke-width=".7"><rect x="49" y="18" width="16" height="6" rx="1" /><rect x="287" y="105" width="20" height="7" rx="1" /><path d="M45 19H49M45 23H49M65 19H69M65 23H69M283 107H287M307 107H311M283 110H287M307 110H311" /></g>
+            <!-- A still Snake until games.js takes over the board. -->
+            <g id="game-pixels" aria-hidden="true">
+              <path class="g-snake" style="--t: .35" d="M113 65h6v6h-6zM121 65h6v6h-6zM129 65h6v6h-6zM137 65h6v6h-6zM145 65h6v6h-6zM153 65h6v6h-6zM161 65h6v6h-6z" />
+              <rect class="circuit-window__head" x="169" y="65" width="6" height="6" rx="1" /><rect class="circuit-window__food" x="225" y="49" width="6" height="6" rx="1.5" />
             </g>
           </g>
           <use href="#circuit-edge" fill="none" stroke="url(#circuit-rim)" stroke-width="1.2" opacity=".65" />
         </svg>
-        <figcaption class="circuit-caption"><span><span class="circuit-caption__dot" aria-hidden="true"></span>background process: <strong>snake</strong></span><button class="circuit-caption__pause" id="snake-toggle" type="button" aria-label="Pause Snake animation" aria-pressed="false" hidden>pause <span aria-hidden="true">Ⅱ</span></button></figcaption>
+        <figcaption class="circuit-caption"><span><span class="circuit-caption__dot" aria-hidden="true"></span>background process: <strong id="game-name">snake</strong></span><button class="circuit-caption__pause" id="game-toggle" type="button" aria-label="Pause Snake animation" aria-pressed="false" hidden>pause <span aria-hidden="true">Ⅱ</span></button></figcaption>
       </figure>
     </div>
   </footer>

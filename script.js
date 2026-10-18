@@ -250,120 +250,76 @@ document.querySelectorAll("[data-spot]").forEach((card) => {
 
 document.getElementById("year").textContent = new Date().getFullYear();
 
-/* ───────── A background process, underneath the footer ───────── */
-(function footerSnake() {
-  const board = document.getElementById("footer-snake");
-  const pixels = document.getElementById("snake-pixels");
-  const toggle = document.getElementById("snake-toggle");
-  if (!board || !pixels || !toggle) return;
-  const figure = board.closest("figure");
-  const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const columns = 40, rows = 8, cell = 8;
-  const cycle = [{ x: 0, y: 0 }];
-  // A closed route through every cell provides a safe fallback. Shortcuts may
-  // approach the food, but never pass the tail or reverse the body's route order.
-  for (let y = 0; y < rows; y++) {
-    for (let step = 1; step < columns; step++) {
-      cycle.push({ x: y % 2 ? columns - step : step, y });
+/* ───────── A background process, underneath the footer ─────────
+   Snake most of the time, now and then Tetris or Pac-Man. games.js loads when the footer is near. */
+(function footerGames() {
+  const board = document.getElementById("footer-game");
+  const pixels = document.getElementById("game-pixels");
+  const toggle = document.getElementById("game-toggle");
+  const caption = document.getElementById("game-name");
+  if (!board || !pixels || !toggle || !caption) return;
+  const load = () => import("./games.js")
+    .then(module => module.startFooterGames({ board, pixels, toggle, caption }))
+    .catch(error => console.error(error));
+  if ("IntersectionObserver" in window) {
+    const watcher = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      watcher.disconnect();
+      load();
+    }, { rootMargin: "400px" });
+    watcher.observe(board);
+  } else load();
+})();
+
+/* ───────── The About horizon only drives while it is on screen ───────── */
+(function horizonIdle() {
+  const horizon = document.querySelector(".horizon");
+  if (!horizon || !("IntersectionObserver" in window)) return;
+  new IntersectionObserver(([entry]) => horizon.classList.toggle("is-idle", !entry.isIntersecting)).observe(horizon);
+})();
+
+/* ───────── BENTOS: the animated schematic and a simulated sample feed ───────── */
+(function bentosVisuals() {
+  const schematic = document.querySelector(".bentos__diagram svg");
+  const feed = document.querySelector("[data-feed]");
+  // SMIL ignores prefers-reduced-motion by itself, so pause it by hand: also while off-screen.
+  if (schematic && schematic.pauseAnimations) {
+    if (reducedMotion) schematic.pauseAnimations();
+    else if ("IntersectionObserver" in window) {
+      new IntersectionObserver(([entry]) => entry.isIntersecting ? schematic.unpauseAnimations() : schematic.pauseAnimations()).observe(schematic);
     }
   }
-  for (let y = rows - 1; y > 0; y--) cycle.push({ x: 0, y });
-  const total = cycle.length;
-  const routeIndex = Array.from({ length: rows }, () => Array(columns));
-  cycle.forEach((point, i) => { routeIndex[point.y][point.x] = i; });
-  const distance = (from, to) => (to - from + total) % total;
-  let body = Array.from({ length: 10 }, (_, i) => 166 - i);
-  let food = 0, timer = 0, visible = false, paused = motion.matches;
-
-  function placeFood() {
-    const vacant = cycle.map((_, i) => i).filter(i => !body.includes(i));
-    food = vacant[Math.floor(Math.random() * vacant.length)];
-  }
-  function advance() {
-    const head = cycle[body[0]], target = cycle[food];
-    const gap = distance(body[0], body[body.length - 1]);
-    const foodAhead = distance(body[0], food);
-    const candidates = [[1, 0], [0, 1], [-1, 0], [0, -1]].map(([dx, dy]) => {
-      const x = head.x + dx, y = head.y + dy;
-      if (x < 0 || x >= columns || y < 0 || y >= rows) return null;
-      const index = routeIndex[y][x], skip = distance(body[0], index);
-      const grows = index === food && body.length < 44;
-      if (!skip || skip > foodAhead || skip > gap || (skip === gap && grows)) return null;
-      return { index, skip, score: Math.abs(x - target.x) + Math.abs(y - target.y) };
-    }).filter(Boolean).sort((a, b) => a.score - b.score || b.skip - a.skip);
-    // The next cycle cell is always safe while the board has free space.
-    const next = candidates[0]?.index ?? (body[0] + 1) % total;
-    const ate = next === food;
-    body.unshift(next);
-    if (!ate || body.length > 44) body.pop();
-    if (ate) placeFood();
-  }
-  function svgElement(tag, attributes) {
-    const element = document.createElementNS("http://www.w3.org/2000/svg", tag);
-    Object.entries(attributes).forEach(([name, value]) => element.setAttribute(name, value));
-    return element;
-  }
-  function draw() {
-    const fragment = document.createDocumentFragment();
-    body.forEach((index, i) => {
-      const { x, y } = cycle[index];
-      fragment.append(svgElement("rect", {
-        x: 33 + x * cell, y: 33 + y * cell, width: 6, height: 6, rx: 1,
-        fill: i === 0 ? "#6ce7e4" : `hsl(${263 + 38 * i / body.length} 78% ${73 - 23 * i / body.length}%)`,
-        opacity: i === 0 ? 1 : 1 - .45 * i / body.length,
-        class: i === 0 ? "circuit-window__head" : "circuit-window__segment"
-      }));
-    });
-    const head = cycle[body[0]], neck = cycle[body[1]];
-    const dx = head.x - neck.x, dy = head.y - neck.y;
-    [-1, 1].forEach(side => fragment.append(svgElement("circle", {
-      cx: 36 + head.x * cell + dx * 1.5 + (dy ? side * 1.3 : 0),
-      cy: 36 + head.y * cell + dy * 1.5 + (dx ? side * 1.3 : 0),
-      r: .65, fill: "#08151d"
-    })));
-    const target = cycle[food];
-    fragment.append(svgElement("rect", { x: 33 + target.x * cell, y: 33 + target.y * cell, width: 6, height: 6, rx: 1.5, fill: "#ff80c8", class: "circuit-window__food" }));
-    pixels.replaceChildren(fragment);
+  if (!feed) return;
+  const clock = feed.querySelector("[data-feed-clock]"), counter = feed.querySelector("[data-feed-sample]");
+  const sensors = [...feed.querySelectorAll("[data-sensor]")].map(el => ({
+    value: el.querySelector("b"), bar: el.querySelector("i"),
+    min: +el.dataset.min, max: +el.dataset.max, digits: +el.dataset.digits,
+    phase: Math.random() * 6.28, wobble: Math.random() * 6.28, rate: .12 + Math.random() * .2,
+  }));
+  const pad = n => String(n).padStart(2, "0");
+  let sample = 1057, step = 0, timer = 0, visible = false;
+  // Two slow sines and a little noise: it wanders like a real sensor without leaving its range.
+  function update() {
+    step++; sample++;
+    for (const s of sensors) {
+      const u = .5 + .3 * Math.sin(s.phase + step * s.rate) + .1 * Math.sin(s.wobble + step * s.rate * 3.1) + (Math.random() - .5) * .04;
+      s.value.textContent = (s.min + u * (s.max - s.min)).toFixed(s.digits);
+      s.bar.style.width = (u * 100).toFixed(1) + "%";
+    }
+    const now = new Date();
+    clock.textContent = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    counter.textContent = sample;
   }
   function schedule() {
-    clearTimeout(timer);
+    clearInterval(timer);
     timer = 0;
-    const running = visible && !document.hidden && !paused;
-    figure.classList.toggle("is-paused", !running);
-    if (running) timer = setTimeout(() => { advance(); draw(); schedule(); }, 110);
+    if (visible && !document.hidden && !reducedMotion) timer = setInterval(update, 1800);
   }
-  function updateToggle() {
-    toggle.setAttribute("aria-pressed", String(paused));
-    toggle.setAttribute("aria-label", paused ? "Play Snake animation" : "Pause Snake animation");
-    toggle.textContent = paused ? "play ▷" : "pause Ⅱ";
-    schedule();
-  }
-  toggle.hidden = false;
-  toggle.addEventListener("click", () => { paused = !paused; updateToggle(); });
-  motion.addEventListener("change", (event) => {
-    if (event.matches) { paused = true; updateToggle(); }
-  });
+  update();
   document.addEventListener("visibilitychange", schedule);
-  window.addEventListener("pagehide", () => { clearTimeout(timer); timer = 0; });
-  window.addEventListener("pageshow", schedule);
   if ("IntersectionObserver" in window) {
-    new IntersectionObserver(([entry]) => {
-      visible = entry.isIntersecting;
-      schedule();
-    }, { threshold: .1 }).observe(board);
-  } else {
-    const checkVisible = () => {
-      const rect = board.getBoundingClientRect();
-      visible = rect.bottom > 0 && rect.top < window.innerHeight;
-      schedule();
-    };
-    window.addEventListener("scroll", checkVisible, { passive: true });
-    window.addEventListener("resize", checkVisible, { passive: true });
-    checkVisible();
+    new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; schedule(); }).observe(feed);
   }
-  placeFood();
-  draw();
-  updateToggle();
 })();
 
 /* ───────── A small interruption in the signal ───────── */
@@ -481,8 +437,9 @@ document.getElementById("year").textContent = new Date().getFullYear();
   const hero = document.getElementById("top");
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
-  const PARTICLES = 26000, STEPS = 3, DECAY = .86;
+  const PARTICLES = 26000, STEPS = 3, DECAY = .86, RECYCLE = 64;
   const px = new Float64Array(PARTICLES), py = new Float64Array(PARTICLES);
+  const occupied = new Uint8Array(40 * 40);
   const lut = new Uint32Array(256);
   const colours = {
     dark: [[0,11,10,26],[.18,38,12,98],[.4,132,24,160],[.62,245,70,150],[.82,255,160,70],[1,255,240,214]],
@@ -491,6 +448,9 @@ document.getElementById("year").textContent = new Date().getFullYear();
   let W, H, density, img, pixels, scale, cx, cy;
   let dirty = true, visible = true, raf = 0, resizeTimer = 0;
   let mx = .5, my = .5, tx = .5, ty = .5;
+  // The parameters drift on their own clock, so a hidden tab never makes them jump, and the clock can
+  // be run fast to get out of a periodic window (see watch).
+  let clock = 20000, speed = 1, last = 0, lowSamples = 0, ticks = 0, cursor = 0;
   function seed() {
     for (let i = 0; i < PARTICLES; i++) {
       px[i] = (Math.random() - .5) * 2;
@@ -521,13 +481,39 @@ document.getElementById("year").textContent = new Date().getFullYear();
     }
     ctx.putImageData(img, 0, 0);
   }
-  function frame(time) {
+  // The drift now and then brushes a periodic window, where the map has a stable cycle. Every particle
+  // is pulled onto it, and once two have merged to the last bit they follow the same orbit for ever, so
+  // the cloud used to thin out for good until only a few dots were left. Re-seeding a few particles each
+  // frame from a random neighbour, plus a hair of noise, lets the cloud open up again once the window
+  // has passed.
+  function recycle() {
+    for (let k = 0; k < RECYCLE; k++) {
+      const donor = (Math.random() * PARTICLES) | 0;
+      cursor = (cursor + 1) % PARTICLES;
+      px[cursor] = px[donor] + (Math.random() - .5) * 6e-3;
+      py[cursor] = py[donor] + (Math.random() - .5) * 6e-3;
+    }
+  }
+  // Windows are thin, so if the cloud visibly collapses, run the drift at 40× until it is chaotic again.
+  function watch() {
+    occupied.fill(0);
+    let cells = 0;
+    for (let i = 0; i < PARTICLES; i += 3) {
+      const cell = ((px[i] + 2.4) * 6.6 | 0) * 40 + ((py[i] + 2.4) * 6.6 | 0);
+      if (!occupied[cell]) { occupied[cell] = 1; cells++; }
+    }
+    lowSamples = cells < 90 ? lowSamples + 1 : 0;
+    speed = lowSamples >= 2 ? 40 : 1;
+  }
+  function frame(dt) {
+    clock += dt * speed;
     mx += (tx - mx) * .04; my += (ty - my) * .04;
-    const a = -1.55 + .12 * Math.sin(time * .00018) + (mx - .5) * .3;
-    const b = 1.7 + .12 * Math.cos(time * .00013) + (my - .5) * .3;
-    const c = 1 + .06 * Math.sin(time * .00021);
-    const d = .7 + .06 * Math.cos(time * .00017);
-    for (let i = 0; i < density.length; i++) density[i] *= DECAY;
+    const a = -1.55 + .12 * Math.sin(clock * .00018) + (mx - .5) * .3;
+    const b = 1.7 + .12 * Math.cos(clock * .00013) + (my - .5) * .3;
+    const c = 1 + .06 * Math.sin(clock * .00021);
+    const d = .7 + .06 * Math.cos(clock * .00017);
+    // Below 1e-3 a pixel is invisible; zeroing it keeps the buffer clear of denormal floats.
+    for (let i = 0; i < density.length; i++) { const v = density[i]; density[i] = v > 1e-3 ? v * DECAY : 0; }
     for (let i = 0; i < PARTICLES; i++) {
       let x = px[i], y = py[i];
       for (let s = 0; s < STEPS; s++) {
@@ -538,18 +524,22 @@ document.getElementById("year").textContent = new Date().getFullYear();
       }
       px[i] = x; py[i] = y;
     }
+    recycle();
+    if (++ticks % 10 === 0) watch();
   }
   function schedule() {
     if (!raf && visible && !document.hidden) raf = requestAnimationFrame(loop);
   }
   function loop(time) {
     raf = 0;
-    if (!visible || document.hidden) return;
+    if (!visible || document.hidden) { last = 0; return; }
     if (dirty) {
       seed(); density.fill(0);
-      for (let i = 0; i < (reducedMotion ? 40 : 8); i++) frame(20000);
+      clock = 20000; speed = 1; lowSamples = 0;
+      for (let i = 0; i < (reducedMotion ? 40 : 8); i++) frame(0);
       dirty = false;
-    } else if (!reducedMotion) frame(time);
+    } else if (!reducedMotion) frame(last ? Math.min(time - last, 100) : 16);
+    last = time;
     paint();
     if (!reducedMotion) schedule();
   }

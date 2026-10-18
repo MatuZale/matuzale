@@ -71,6 +71,51 @@ const CARDS = [
     alt: "Layered Clifford attractors in cosmic-fire orange on deep blue",
   },
   {
+    id: "symmetric", name: "Symmetric icon", stage: "2D map", dim: 2, symbol: "✺", rarity: "★★",
+    credit: "after Field &amp; Golubitsky", ability: "23-fold lace",
+    eq: [["<i>z</i>′", "(<i>λ</i> + <i>α</i>|<i>z</i>|² + <i>β</i> Re <i>z</i><sup>n</sup> + <i>iω</i>) <i>z</i>"], ["", "+ <i>γ</i> <i>z̄</i><sup>n−1</sup>"]],
+    stats: [["<i>λ</i>", "2.409"], ["<i>α</i>", "−2.5"], ["<i>γ</i>", "0.9"], ["<i>n</i>", "23"]],
+    text: "One complex map that mixes a polynomial, a conjugate and a radial term. It turns by 2π/23 and the picture follows: a lace rosette from a single orbit. (<i>β</i> = <i>ω</i> = 0.)",
+    size: "1600 × 1200 · 64 M steps",
+    alt: "Symmetric icon: a 23-fold lace rosette in pale blue on navy",
+  },
+  {
+    id: "gumowski", name: "Gumowski–Mira", stage: "2D map", dim: 2, symbol: "❧", rarity: "★★",
+    credit: "after Gumowski &amp; Mira", ability: "Feather fan",
+    eq: [["<i>x</i>′", "<i>y</i> + <i>a y</i>(1 − <i>b y</i>²) + <i>G</i>(<i>x</i>)"], ["<i>y</i>′", "−<i>x</i> + <i>G</i>(<i>x</i>′)"], ["<i>G</i>(<i>x</i>)", "<i>μx</i> + 2(1 − <i>μ</i>)<i>x</i>² / (1 + <i>x</i>²)"]],
+    stats: [["<i>a</i>", "0.008"], ["<i>b</i>", "0.05"], ["<i>μ</i>", "−0.496"]],
+    text: "Two lines of algebra fold a bird out of one orbit, its wings thousands of nested curves. The catch: <i>y</i>′ must use the new <i>x</i>′, or the bird never takes off.",
+    size: "1600 × 1200 · 64 M steps",
+    alt: "Gumowski–Mira attractor: a bird with fanned wings in indigo and teal",
+  },
+  {
+    id: "bedhead", name: "Bedhead", stage: "2D map", dim: 2, symbol: "∾", rarity: "★",
+    credit: "after Ivan Emrich", ability: "Tangled ribbons",
+    eq: [["<i>x</i>′", "<i>y</i> sin(<i>xy</i> / <i>b</i>) + cos(<i>a x</i> − <i>y</i>)"], ["<i>y</i>′", "<i>x</i> + sin <i>y</i> / <i>b</i>"]],
+    stats: [["<i>a</i>", "−0.81"], ["<i>b</i>", "−0.92"]],
+    text: "The product <i>x</i>·<i>y</i> inside the sine tangles the orbit into ribbons that fold back over themselves, like hair after a night's sleep.",
+    size: "1600 × 1200 · 64 M steps",
+    alt: "Bedhead attractor: twisted ribbons in violet, teal and yellow",
+  },
+  {
+    id: "mcmullen", name: "McMullen", stage: "Fractal", dim: 2, symbol: "◌", rarity: "★★",
+    credit: "after Curtis McMullen", ability: "Ring after ring",
+    eq: [["<i>F</i>(<i>z</i>)", "<i>z</i><sup>n</sup> + <i>λ</i> / <i>z</i><sup>n</sup>"], ["", "run backwards: 2<i>n</i> inverse branches"]],
+    stats: [["<i>λ</i>", "0.02"], ["<i>n</i>", "3"], ["branches", "6"]],
+    text: "A Julia set once more, drawn by running the map in reverse: every step picks one of the 2<i>n</i> inverse branches at random and the orbit settles onto the set.",
+    size: "1600 × 1200 · 64 M steps",
+    alt: "McMullen map Julia set: a golden foam of nested rings on dark brown",
+  },
+  {
+    id: "harmonic", name: "Harmonic", stage: "Chaos game", dim: 2, symbol: "✧", rarity: "★★",
+    credit: "an IFS of my own", ability: "Field lines",
+    eq: [["<i>z</i>′", "±<i>w</i> / (<i>A z</i> + <i>B z̄</i> + <i>C</i>)"], ["", "<i>w</i> = 0.995 or 1, chosen at random"]],
+    stats: [["<i>A</i> ≈", "2.7+0.7<i>i</i>"], ["<i>B</i> ≈", "−0.7−0.4<i>i</i>"], ["<i>C</i> ≈", "−0.5+0.4<i>i</i>"]],
+    text: "One inversion with a conjugate in the denominator, played as a chaos game. Nothing in it is a magnet, yet the density settles into field lines around two poles.",
+    size: "1600 × 1200 · 800 k orbits",
+    alt: "Harmonic IFS: magenta and cyan field lines with golden poles on deep violet",
+  },
+  {
     id: "smoke", name: "Simon", stage: "Alt art", dim: 2, symbol: "↻", rarity: "✦",
     credit: "smoke variant · heavier exposure", ability: "Smoke screen",
     eq: [["<i>x</i>′", "cos(<i>b y</i>) + <i>c</i> sin(<i>b x</i>)"], ["<i>y</i>′", "cos(<i>a x</i>) + <i>d</i> sin(<i>a y</i>)"]],
@@ -174,7 +219,7 @@ export async function createDeck() {
       </p>
       <button type="button" class="deck__close">Close <span aria-hidden="true">✕</span></button>
     </div>
-    <ul class="deck__grid">${CARDS.map(cardMarkup).join("")}</ul>
+    <ul class="deck__grid" style="--mid: ${(CARDS.length - 1) / 2}">${CARDS.map(cardMarkup).join("")}</ul>
     <div class="deck__veil" aria-hidden="true"></div>
     <div class="deck__tools">
       <button type="button" class="deck__tool" data-deck-flip>Flip card <span aria-hidden="true">↻</span></button>
