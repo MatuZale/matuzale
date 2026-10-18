@@ -1,10 +1,9 @@
 """Foil masks for the attractor cards: one texture per card, drawn from that card's own mathematics.
 
 Each mask is a white image whose alpha is the foil: deck.css lays a slow rainbow over it, so the colour
-shows only along the lines. Three kinds, as on printed holo cards:
+shows only along the lines. Two kinds for the frame, as on printed holo cards (regular holo cards keep a matte frame):
   reverse  texture everywhere except the artwork window, which stays matte
-  regular  texture only inside the artwork window, the frame stays matte
-  full     texture everywhere (the gold cards)
+  full     texture on the frame and panel, stronger (the gold cards)
 
 Run from this folder:  python3 generate.py     (needs numpy, Pillow, scipy)
 """
@@ -56,8 +55,8 @@ def art_window(feather=1.5):
 def finish(name, alpha, kind, gain=1.0, wash=None):
     """Apply the region of `kind` and a faint wash of foil beneath the lines."""
     win = art_window()
-    region = {"reverse": 1 - win, "regular": win, "full": 1 - .55 * win}[kind]
-    wash = {"reverse": .07, "regular": .2, "full": .1}[kind] if wash is None else wash
+    region = {"reverse": 1 - win, "full": 1 - win}[kind]
+    wash = {"reverse": .07, "full": .1}[kind] if wash is None else wash
     alpha = np.maximum(np.nan_to_num(alpha) * gain * region, wash * region)
     alpha = np.clip(alpha, 0, 1)
     img = Image.fromarray((alpha * 255).astype(np.uint8), "L").resize((W, H), Image.LANCZOS)
@@ -133,32 +132,6 @@ for _ in range(70):
     dr.line(pts, fill=255, width=2)
 finish("thomas", np.asarray(canvas, np.float64) / 255, "reverse", .8)
 
-# 7  Layered Clifford: three lattices, three weights (regular)
-def lattice(spacing, angle, weight):
-    out = np.zeros_like(U)
-    for k in range(3):
-        ang = np.deg2rad(angle + 60 * k)
-        out = np.maximum(out, lines((Xc * np.cos(ang) + Yc * np.sin(ang)) / spacing, 1.1, False))
-    return out * weight
-finish("layered", np.maximum.reduce([lattice(15, 0, 1), lattice(19, 9, .8), lattice(24, -7, .6)]), "regular", .95)
-
-# 8  Symmetric icon: 23 spokes and guilloche rings around the window's centre (regular)
-cx, cy = ART[0] + ART[2] / 2, ART[1] + ART[3] / 2
-Xs, Ys = (U - cx) * W, (V - cy) * H
-rr, th = np.hypot(Xs, Ys), np.arctan2(Ys, Xs)
-spokes = lines(23 * th / (2 * np.pi), 1.0)
-rings = lines(rr * (1 + .06 * np.cos(23 * th)) / 15, 1.1, False)
-rings2 = lines(rr * (1 - .06 * np.cos(23 * th)) / 15 + .5, 1.0, False)
-finish("symmetric", np.maximum(np.maximum(rings, rings2) * .9, spokes * .6), "regular", 1.0)
-
-# 9  Gumowski-Mira: the map's own x' and y' fields; their curves fan out like wings (regular)
-X, Y = at(14, .5, .21)
-a, b, mu = .008, .05, -.496
-G = lambda x: mu * x + 2 * (1 - mu) * x * x / (1 + x * x)
-f1 = Y + a * Y * (1 - b * Y * Y) + G(X)
-f2 = -X + G(f1)
-finish("gumowski", np.maximum(lines(f1 / 1.15, 1.15, False), lines(f2 / 1.15, 1.15, False)), "regular", .95)
-
 # 10  Bedhead: ripples from x * y inside the sine (reverse)
 X, Y = at(3.0)
 a, b = -.81, -.92
@@ -173,54 +146,83 @@ n3, lam = 3, .02
 Fz = zc ** n3 + lam / zc ** n3
 finish("mcmullen", lines(np.log(np.abs(Fz) + 1e-9) / .42, 1.25, False), "full", .9)
 
-# 12  Harmonic: two poles, equipotentials and field lines (regular)
-px1, px2 = (cx - .2) * W, (cx + .2) * W
-x1, y1 = U * W - px1, V * H - cy * H
-x2, y2 = U * W - px2, V * H - cy * H
-r1, r2 = np.hypot(x1, y1), np.hypot(x2, y2)
-pot = lines(np.log((r1 + 1e-6) / (r2 + 1e-6)) / .24, 1.1, False)
-ang = lines((np.arctan2(y1, x1) - np.arctan2(y2, x2)) * 20 / (2 * np.pi), 1.0)
-finish("harmonic", np.maximum(pot, ang * .85), "regular", .95)
+# ───────── Artwork foils ─────────
+# As on printed holo cards, the foil in the artwork window sits on the background and the subject is cut out of
+# it. Here the subject is the attractor itself, so the mask is the dark space around it (found from the render's
+# brightness, with the attractor widened and softened a little), filled with one of three classic patterns:
+#   bars    vertical holo bars, as on a regular holo card
+#   etched  a fine fingerprint-like etching, as on the etched secret rares
+#   pillar  a smooth field for sun-pillar colours, with a faint grain
+from scipy import ndimage
+
+AW, AH = 720, 540
 
 
-# 13  Cosmos dust for the artwork windows: a seamless tile of round dots, mostly tiny, a few larger with a faint
-# halo, thickening and thinning in drifts like a star field. Not a card texture: deck.css tints and shifts it
-# differently on every card.
-def cosmos(name="cosmos", n=600, dots=3300, seed=11):
+def background(card):
+    img = Image.open(f"../{card}.webp").convert("L").resize((AW, AH), Image.LANCZOS)
+    lum = np.asarray(img, np.float64) / 255
+    subject = smooth(.05, .2, ndimage.gaussian_filter(lum, 1.2))
+    subject = ndimage.grey_dilation(subject, size=(9, 9))
+    # The whole silhouette is cut out, holes and all, as a figure is on a printed card.
+    solid = ndimage.binary_fill_holes(ndimage.binary_closing(subject > .35, iterations=6))
+    subject = np.maximum(subject, solid)
+    subject = ndimage.gaussian_filter(subject, 2.5)
+    return 1 - np.clip(subject * 1.15, 0, 1)
+
+
+def art_lines(phase, width):
+    gy, gx = np.gradient(phase)
+    grad = np.hypot(gx, gy) + 1e-9
+    px = np.abs(phase - np.round(phase)) / grad
+    return 1 - smooth(width * .5 - .6, width * .5 + .6, px)
+
+
+ay, ax = np.mgrid[0:AH, 0:AW].astype(np.float64)
+
+
+def bars(period=12):
+    x = (ax % period) / period
+    return smooth(.08, .2, x) * (1 - smooth(.55, .67, x))
+
+
+def etched(seed):
     rng = np.random.default_rng(seed)
-    gy, gx = np.mgrid[0:n, 0:n] / n
-    dens = np.zeros((n, n))
-    for _ in range(7):                                  # periodic drifts, so the tile repeats without a seam
-        kx, ky = rng.integers(1, 4, 2) * rng.choice([-1, 1], 2)
-        dens += np.cos(2 * np.pi * (kx * gx + ky * gy) + rng.uniform(0, 2 * np.pi)) * rng.uniform(.4, 1)
-    dens = (dens - dens.min()) / (dens.max() - dens.min())
-    dens = .12 + .88 * dens ** 1.7
-    canvas = np.zeros((n, n))
-    placed = 0
-    while placed < dots:
-        x, y = rng.integers(0, n, 2)
-        if rng.random() > dens[y, x]:
-            continue
-        roll = rng.random()
-        if roll < .80:
-            sigma, amp, halo = rng.uniform(.55, .8), rng.uniform(.35, .8), 0
-        elif roll < .97:
-            sigma, amp, halo = rng.uniform(.85, 1.2), rng.uniform(.55, .95), 0
-        else:
-            sigma, amp, halo = rng.uniform(1.3, 1.8), 1.0, .14
-        reach = int(np.ceil(4 * sigma * (3.2 if halo else 1)))
-        ds = np.arange(-reach, reach + 1)
-        iy, ix = (y + ds) % n, (x + ds) % n
-        dy, dx = np.meshgrid(ds, ds, indexing="ij")
-        r2 = dx * dx + dy * dy
-        g = amp * np.exp(-r2 / (2 * sigma ** 2)) + halo * np.exp(-r2 / (2 * (sigma * 3.2) ** 2))
-        sub = canvas[np.ix_(iy, ix)]
-        canvas[np.ix_(iy, ix)] = np.maximum(sub, g)
-        placed += 1
-    alpha = np.clip(canvas, 0, 1)
+    warp = np.zeros_like(ax)
+    for _ in range(9):
+        k = rng.uniform(.004, .016)
+        th = rng.uniform(0, np.pi)
+        warp += rng.uniform(18, 46) * np.sin(k * (ax * np.cos(th) + ay * np.sin(th)) + rng.uniform(0, 2 * np.pi))
+    th = rng.uniform(0, np.pi)
+    field = ax * np.cos(th) + ay * np.sin(th) + warp
+    return art_lines(field / 6.2, 1.6) * .95
+
+
+def pillar(seed):
+    """Columns of light of different widths (sun pillars), over a faint base, cut by fine diagonal etching."""
+    rng = np.random.default_rng(seed)
+    cols = np.zeros(AW)
+    xs = np.arange(AW)
+    for _ in range(11):
+        c, wdt, amp = rng.uniform(0, AW), rng.uniform(10, 46), rng.uniform(.5, 1)
+        d = np.minimum(np.abs(xs - c), AW - np.abs(xs - c))
+        cols = np.maximum(cols, amp * np.exp(-(d / wdt) ** 2))
+    cols = .18 + .82 * cols
+    etch = smooth(.15, .45, np.abs(((ax + ay) / 5.5) % 1 - .5) * 2)
+    return np.clip(cols[None, :] * (.6 + .4 * etch), 0, 1)
+
+
+def art_foil(card, style, seed=1):
+    pattern = {"bars": bars, "etched": lambda: etched(seed), "pillar": lambda: pillar(seed)}[style]()
+    alpha = np.clip(background(card) * pattern, 0, 1)
     img = Image.fromarray((alpha * 255).astype(np.uint8), "L")
-    Image.merge("RGBA", [Image.new("L", (n, n), 255)] * 3 + [img]).save(f"{name}.webp", "WEBP", quality=85, alpha_quality=100, method=6)
-    print(name, "tile", n, round(float(alpha.mean()), 3))
+    Image.merge("RGBA", [Image.new("L", (AW, AH), 255)] * 3 + [img]).save(f"art-{card}.webp", "WEBP", quality=80, alpha_quality=80, method=6)
+    print("art", card, style, round(float(alpha.mean()), 3))
 
 
-cosmos()
+ART_STYLE = {
+    "clifford": "bars", "layered": "bars", "symmetric": "bars", "gumowski": "bars", "harmonic": "bars",
+    "dejong": "etched", "simon": "etched", "julia": "etched", "mcmullen": "etched",
+    "ikeda": "pillar", "thomas": "pillar", "bedhead": "pillar",
+}
+for i, (card, style) in enumerate(ART_STYLE.items()):
+    art_foil(card, style, seed=40 + i)

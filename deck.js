@@ -130,12 +130,17 @@ const CARDS = [
   },
 ];
 
-// The kind of foil, as on printed holo cards: reverse holo (texture everywhere but the artwork), regular holo
-// (the artwork only) or full art. See deck.css.
+// The kind of foil on the frame, as on printed holo cards: reverse holo (texture everywhere but the artwork),
+// regular holo (matte frame, foil in the artwork only) or full art (gold). See deck.css.
 const KIND = { clifford: "reverse", dejong: "reverse", simon: "reverse", ikeda: "reverse", thomas: "reverse", bedhead: "reverse", layered: "regular", symmetric: "regular", gumowski: "regular", harmonic: "regular", julia: "full", mcmullen: "full" };
 
-// What lights the artwork window: cosmos dust (the default) or etched sun pillars. See deck.css.
-const ART = { clifford: "pillar", simon: "pillar", ikeda: "pillar" };
+// The artwork foil, as on printed cards: holo bars, an etched texture or sun pillars on the background around
+// the attractor. See deck.css and assets/deck/foil/generate.py.
+const ART = {
+  clifford: "bars", layered: "bars", symmetric: "bars", gumowski: "bars", harmonic: "bars",
+  dejong: "etched", simon: "etched", julia: "etched", mcmullen: "etched",
+  ikeda: "pillar", thomas: "pillar", bedhead: "pillar",
+};
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
@@ -167,7 +172,7 @@ function cardMarkup(card, index) {
   const [file, width, height] = card.id === "smoke" ? ["simon-smoke", 900, 1257] : [card.id, 1200, 900];
   return `
     <li class="deck__slot" style="--i: ${index}">
-      <div class="tcard tcard--${card.id}" data-foil="${card.id}" data-kind="${KIND[card.id] ?? ""}" data-art="${ART[card.id] ?? "dust"}" ${card.style ? `style="${card.style}"` : ""} role="button" tabindex="0" aria-pressed="false" aria-label="${card.name}${card.id === "smoke" ? " (alternate art)" : ""}: lift the card">
+      <div class="tcard tcard--${card.id}" data-foil="${card.id}" data-kind="${KIND[card.id] ?? ""}" data-art="${ART[card.id] ?? ""}" ${card.style ? `style="${card.style}"` : ""} role="button" tabindex="0" aria-pressed="false" aria-label="${card.name}${card.id === "smoke" ? " (alternate art)" : ""}: lift the card">
         <div class="tcard__rotator">
           <div class="tcard__face tcard__front">
             <div class="tcard__panel">
