@@ -185,36 +185,36 @@
           <article class="skill skill--learning reveal" data-spot>
             <div class="skill__main">
               <h3>Currently learning</h3>
-              <ul class="tags tags--soft">
+              <ul class="tags">
                 <li>C++ (OpenGL, numerics)</li><li>Zephyr RTOS</li><li>TanStack Query</li><li>GraphQL</li>
               </ul>
             </div>
-            <!-- Torn open like the footer: the stylesheet rules that colour these cards, running underneath. -->
-            <svg class="code-tear" viewBox="0 0 300 132" role="img" aria-label="A torn-open patch of the card, showing the CSS rules that give each toolbox card its colour">
+            <!-- The card is torn open along its lower edge, onto the stylesheet rules that colour these cards. -->
+            <svg class="code-tear" viewBox="0 0 600 128" preserveAspectRatio="xMinYMin slice" role="img" aria-label="The card torn open along its lower edge, showing the CSS rules that give each toolbox card its colour">
               <defs>
-                <path id="tear-edge" d="M8 22 22 16 15 7 58 11 70 3 108 9 124 2 160 8 178 2 206 10 232 5 247 13 280 8 288 18 294 30 286 44 296 62 288 78 295 96 284 104 290 122 258 118 244 127 210 121 194 128 160 122 130 127 112 119 78 124 64 116 26 121 14 110 6 96 13 78 4 62 12 46 5 34Z" />
-                <clipPath id="tear-cut"><use href="#tear-edge" /></clipPath>
+                <clipPath id="tear-cut"><path d="M0 16L26 8L40 26L47 5L57 19L67 13L81 24L91 5L117 19L143 11L150 21L169 8L179 24L189 13L199 26L225 5L235 21L242 13L252 21L262 11L276 22L286 2L296 21L306 5L320 19L334 5L344 21L358 13L372 22L398 2L405 26L419 13L433 22L447 5L461 21L480 5L490 19L504 13L518 24L525 2L544 22L563 2L570 24L577 11L600 15V128H0Z" /></clipPath>
                 <linearGradient id="tear-rim" x2="1" y2="1"><stop stop-color="#f46acb" /><stop offset=".5" stop-color="#8364e8" /><stop offset="1" stop-color="#59dce8" /></linearGradient>
-                <pattern id="tear-grid" width="8" height="8" patternUnits="userSpaceOnUse"><path class="code-tear__grid" d="M8 0H0V8" fill="none" stroke="#203440" stroke-width=".5" /></pattern>
+                <pattern id="tear-grid" width="10" height="10" patternUnits="userSpaceOnUse"><path class="code-tear__grid" d="M10 0H0V10" fill="none" stroke="#203440" stroke-width=".5" /></pattern>
               </defs>
               <g clip-path="url(#tear-cut)">
-                <path class="code-tear__bg" fill="#08151d" d="M0 0H300V132H0Z" />
-                <path fill="url(#tear-grid)" opacity=".45" d="M0 0H300V132H0Z" />
+                <path class="code-tear__bg" fill="#08151d" d="M0 0H600V128H0Z" />
+                <path fill="url(#tear-grid)" opacity=".45" d="M0 0H600V128H0Z" />
                 <!-- This card is the fifth: 3n + 2. -->
-                <rect class="code-tear__current" x="0" y="46" width="300" height="12.5" />
-                <text class="code-tear__code" x="20">
-                  <tspan x="20" y="27" class="c">/* A little light inside the toolbox, one accent per discipline. */</tspan>
-                  <tspan x="20" y="41"><tspan class="s">.skill</tspan> { <tspan class="p">--tool-tone</tspan>: <tspan class="v">var(</tspan><tspan class="a1">--accent</tspan><tspan class="v">)</tspan>; }</tspan>
-                  <tspan x="20" y="55"><tspan class="s">.skill:nth-child(3n + 2)</tspan> { <tspan class="p">--tool-tone</tspan>: <tspan class="v">var(</tspan><tspan class="a2">--accent-2</tspan><tspan class="v">)</tspan>; }</tspan>
-                  <tspan x="20" y="69"><tspan class="s">.skill:nth-child(3n)</tspan> { <tspan class="p">--tool-tone</tspan>: <tspan class="v">var(</tspan><tspan class="a3">--accent-3</tspan><tspan class="v">)</tspan>; }</tspan>
-                  <tspan x="20" y="83"><tspan class="s">.skill .tags li</tspan> {</tspan>
-                  <tspan x="30" y="97"><tspan class="p">border-color</tspan>: <tspan class="v">color-mix(in srgb, var(</tspan><tspan class="t">--tool-tone</tspan><tspan class="v">) 24%, var(--line))</tspan>;</tspan>
-                  <tspan x="20" y="111">}</tspan>
+                <rect class="code-tear__current" x="0" y="57" width="600" height="14" />
+                <text class="code-tear__code">
+                  <tspan x="22" y="41" class="c">/* A little light inside the toolbox, one accent per discipline. */</tspan>
+                  <tspan x="22" y="54"><tspan class="s">.skill</tspan> { <tspan class="p">--tool-tone</tspan>: <tspan class="v">var(</tspan><tspan class="a1">--accent</tspan><tspan class="v">)</tspan>; }</tspan>
+                  <tspan x="22" y="67"><tspan class="s">.skill:nth-child(3n + 2)</tspan> { <tspan class="p">--tool-tone</tspan>: <tspan class="v">var(</tspan><tspan class="a2">--accent-2</tspan><tspan class="v">)</tspan>; }</tspan>
+                  <tspan x="22" y="80"><tspan class="s">.skill:nth-child(3n)</tspan> { <tspan class="p">--tool-tone</tspan>: <tspan class="v">var(</tspan><tspan class="a3">--accent-3</tspan><tspan class="v">)</tspan>; }</tspan>
+                  <tspan x="22" y="93"><tspan class="s">.skill .tags li</tspan> {</tspan>
+                  <tspan x="34" y="106"><tspan class="p">border-color</tspan>: <tspan class="v">color-mix(in srgb, var(</tspan><tspan class="t">--tool-tone</tspan><tspan class="v">) 24%, var(--line))</tspan>;</tspan>
+                  <tspan x="22" y="119">}</tspan>
                 </text>
-                <rect class="code-tear__caret" x="27" y="103.5" width="4.6" height="9" />
-                <use class="code-tear__shade" href="#tear-edge" fill="none" stroke="#000" stroke-opacity=".55" stroke-width="5" transform="translate(1.6 2.2)" />
+                <rect class="code-tear__caret" x="29" y="111" width="5" height="9" />
+                <path class="code-tear__shade" d="M0 16L26 8L40 26L47 5L57 19L67 13L81 24L91 5L117 19L143 11L150 21L169 8L179 24L189 13L199 26L225 5L235 21L242 13L252 21L262 11L276 22L286 2L296 21L306 5L320 19L334 5L344 21L358 13L372 22L398 2L405 26L419 13L433 22L447 5L461 21L480 5L490 19L504 13L518 24L525 2L544 22L563 2L570 24L577 11L600 15" fill="none" stroke="#000" stroke-opacity=".55" stroke-width="7" transform="translate(0 3)" />
               </g>
-              <use href="#tear-edge" fill="none" stroke="url(#tear-rim)" stroke-width="1.2" opacity=".7" />
+              <path class="code-tear__lip" d="M0 16L26 8L40 26L47 5L57 19L67 13L81 24L91 5L117 19L143 11L150 21L169 8L179 24L189 13L199 26L225 5L235 21L242 13L252 21L262 11L276 22L286 2L296 21L306 5L320 19L334 5L344 21L358 13L372 22L398 2L405 26L419 13L433 22L447 5L461 21L480 5L490 19L504 13L518 24L525 2L544 22L563 2L570 24L577 11L600 15" fill="none" stroke-width="2.4" transform="translate(0 -2.6)" />
+              <path d="M0 16L26 8L40 26L47 5L57 19L67 13L81 24L91 5L117 19L143 11L150 21L169 8L179 24L189 13L199 26L225 5L235 21L242 13L252 21L262 11L276 22L286 2L296 21L306 5L320 19L334 5L344 21L358 13L372 22L398 2L405 26L419 13L433 22L447 5L461 21L480 5L490 19L504 13L518 24L525 2L544 22L563 2L570 24L577 11L600 15" fill="none" stroke="url(#tear-rim)" stroke-width="1.3" opacity=".85" />
             </svg>
           </article>
         </div>
@@ -600,12 +600,12 @@
           <div class="feed reveal" data-feed role="group" aria-labelledby="feed-title">
             <div class="feed__top"><span class="feed__status"><i class="feed__dot" aria-hidden="true"></i>Simulated · sensor prototype</span><time class="feed__clock" data-feed-clock>2026-10-18 12:04:52</time></div>
             <div class="feed__grid">
-              <div class="feed__item" data-sensor data-min="0" data-max="16" data-digits="2"><div class="feed__row"><span>TEMP</span><span class="feed__value"><b>8.38</b><small>°C</small></span></div><div class="feed__bar"><i style="width: 52%"></i></div></div>
-              <div class="feed__item" data-sensor data-min="5" data-max="9" data-digits="2"><div class="feed__row"><span>SAL</span><span class="feed__value"><b>7.23</b><small>PSU</small></span></div><div class="feed__bar"><i style="width: 56%"></i></div></div>
-              <div class="feed__item" data-sensor data-min="6" data-max="14" data-digits="2"><div class="feed__row"><span>O₂</span><span class="feed__value"><b>9.19</b><small>mg/L</small></span></div><div class="feed__bar"><i style="width: 40%"></i></div></div>
-              <div class="feed__item" data-sensor data-min="0" data-max="12" data-digits="2"><div class="feed__row"><span>CHL-a</span><span class="feed__value"><b>2.65</b><small>µg/L</small></span></div><div class="feed__bar"><i style="width: 22%"></i></div></div>
-              <div class="feed__item" data-sensor data-min="7.6" data-max="8.6" data-digits="2"><div class="feed__row"><span>pH</span><span class="feed__value"><b>8.14</b><small></small></span></div><div class="feed__bar"><i style="width: 54%"></i></div></div>
-              <div class="feed__item" data-sensor data-min="0" data-max="8" data-digits="2"><div class="feed__row"><span>TURB</span><span class="feed__value"><b>2.75</b><small>NTU</small></span></div><div class="feed__bar"><i style="width: 34%"></i></div></div>
+              <div class="feed__item" data-sensor data-min="7" data-max="10"><div class="feed__row"><span>TEMP</span><span class="feed__value"><b>8.38</b><small>°C</small></span></div><div class="feed__bar"><i style="width: 52%"></i></div></div>
+              <div class="feed__item" data-sensor data-min="7" data-max="7.6"><div class="feed__row"><span>SAL</span><span class="feed__value"><b>7.23</b><small>PSU</small></span></div><div class="feed__bar"><i style="width: 56%"></i></div></div>
+              <div class="feed__item" data-sensor data-min="8.5" data-max="10.5"><div class="feed__row"><span>O₂</span><span class="feed__value"><b>9.19</b><small>mg/L</small></span></div><div class="feed__bar"><i style="width: 40%"></i></div></div>
+              <div class="feed__item" data-sensor data-min="1" data-max="5"><div class="feed__row"><span>CHL-a</span><span class="feed__value"><b>2.65</b><small>µg/L</small></span></div><div class="feed__bar"><i style="width: 22%"></i></div></div>
+              <div class="feed__item" data-sensor data-min="7.95" data-max="8.2"><div class="feed__row"><span>pH</span><span class="feed__value"><b>8.14</b><small></small></span></div><div class="feed__bar"><i style="width: 54%"></i></div></div>
+              <div class="feed__item" data-sensor data-min="0.8" data-max="3.6"><div class="feed__row"><span>TURB</span><span class="feed__value"><b>2.75</b><small>NTU</small></span></div><div class="feed__bar"><i style="width: 34%"></i></div></div>
             </div>
             <div class="feed__foot"><span>SAMPLE #<span data-feed-sample>1058</span></span><span>Simulated values</span></div>
           </div>

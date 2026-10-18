@@ -291,31 +291,48 @@ document.getElementById("year").textContent = new Date().getFullYear();
   }
   if (!feed) return;
   const clock = feed.querySelector("[data-feed-clock]"), counter = feed.querySelector("[data-feed-sample]");
-  const sensors = [...feed.querySelectorAll("[data-sensor]")].map(el => ({
-    value: el.querySelector("b"), bar: el.querySelector("i"),
-    min: +el.dataset.min, max: +el.dataset.max, digits: +el.dataset.digits,
-    phase: Math.random() * 6.28, wobble: Math.random() * 6.28, rate: .12 + Math.random() * .2,
-  }));
+  // Values are kept in hundredths. A new sample only moves the goal; the readout then rolls towards it
+  // one hundredth at a time, fast at first and slowing down, like a digital speedometer.
+  const sensors = [...feed.querySelectorAll("[data-sensor]")].map(el => {
+    const min = +el.dataset.min * 100, max = +el.dataset.max * 100;
+    const start = Math.round(min + (.25 + Math.random() * .5) * (max - min));
+    return { value: el.querySelector("b"), bar: el.querySelector("i"), min, max, goal: start, shown: start };
+  });
   const pad = n => String(n).padStart(2, "0");
-  let sample = 1057, step = 0, timer = 0, visible = false;
-  // Two slow sines and a little noise: it wanders like a real sensor without leaving its range.
+  let sample = 1057, sampling = 0, rolling = 0, visible = false;
+  function render(s) {
+    s.value.textContent = (s.shown / 100).toFixed(2);
+    s.bar.style.width = (100 * (s.shown - s.min) / (s.max - s.min)).toFixed(1) + "%";
+  }
+  // A new sample: every goal takes a small random step, kept inside the sensor's range.
   function update() {
-    step++; sample++;
+    sample++;
     for (const s of sensors) {
-      const u = .5 + .3 * Math.sin(s.phase + step * s.rate) + .1 * Math.sin(s.wobble + step * s.rate * 3.1) + (Math.random() - .5) * .04;
-      s.value.textContent = (s.min + u * (s.max - s.min)).toFixed(s.digits);
-      s.bar.style.width = (u * 100).toFixed(1) + "%";
+      const step = (Math.random() + Math.random() - 1) * .1 * (s.max - s.min);
+      s.goal = Math.round(Math.min(s.max, Math.max(s.min, s.goal + step)));
     }
     const now = new Date();
     clock.textContent = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
     counter.textContent = sample;
   }
-  function schedule() {
-    clearInterval(timer);
-    timer = 0;
-    if (visible && !document.hidden && !reducedMotion) timer = setInterval(update, 1800);
+  function roll() {
+    for (const s of sensors) {
+      const gap = s.goal - s.shown;
+      if (!gap) continue;
+      s.shown += Math.sign(gap) * Math.max(1, Math.round(Math.abs(gap) / 5));
+      render(s);
+    }
   }
+  function schedule() {
+    clearInterval(sampling); clearInterval(rolling);
+    sampling = rolling = 0;
+    if (!visible || document.hidden || reducedMotion) return;
+    sampling = setInterval(update, 1400);
+    rolling = setInterval(roll, 45);
+  }
+  sensors.forEach(render);
   update();
+  sensors.forEach(s => { s.shown = s.goal; render(s); });
   document.addEventListener("visibilitychange", schedule);
   if ("IntersectionObserver" in window) {
     new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; schedule(); }).observe(feed);
