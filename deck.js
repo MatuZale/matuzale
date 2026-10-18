@@ -6,11 +6,14 @@
 // Each card reads like a trading card: a stage tag and dimension in the header, a Pokédex-style
 // strip under the art, an ability, the update rules as "attacks", the parameters in the
 // weakness / resistance bar and the description as flavour text.
+// The left-hand side of an update rule: the next value of a variable.
+const X = name => `<i>${name}</i><sub>n+1</sub>`;
+
 const CARDS = [
   {
     id: "clifford", name: "Clifford", stage: "2D map", dim: 2, symbol: "↻", rarity: "★",
     credit: "after Clifford A. Pickover", ability: "Four-number filigree",
-    eq: [["<i>x</i>′", "sin(<i>a y</i>) + <i>c</i> cos(<i>a x</i>)"], ["<i>y</i>′", "sin(<i>b x</i>) + <i>d</i> cos(<i>b y</i>)"]],
+    eq: [[X("x"), "sin(<i>a y</i><sub>n</sub>) + <i>c</i> cos(<i>a x</i><sub>n</sub>)"], [X("y"), "sin(<i>b x</i><sub>n</sub>) + <i>d</i> cos(<i>b y</i><sub>n</sub>)"]],
     stats: [["<i>a</i>", "−1.4"], ["<i>b</i>", "1.6"], ["<i>c</i>", "1.0"], ["<i>d</i>", "0.7"]],
     text: "Every orbit lands on the same filigree, so a histogram of 30 million hits reads like silk. The hero of this page runs this map live.",
     size: "4096² · 30.8 M points",
@@ -19,7 +22,7 @@ const CARDS = [
   {
     id: "dejong", name: "Peter de Jong", stage: "2D map", dim: 2, symbol: "↻", rarity: "★",
     credit: "after Peter de Jong", ability: "Folded veil",
-    eq: [["<i>x</i>′", "sin(<i>a y</i>) − cos(<i>b x</i>)"], ["<i>y</i>′", "sin(<i>c x</i>) − cos(<i>d y</i>)"]],
+    eq: [[X("x"), "sin(<i>a y</i><sub>n</sub>) − cos(<i>b x</i><sub>n</sub>)"], [X("y"), "sin(<i>c x</i><sub>n</sub>) − cos(<i>d y</i><sub>n</sub>)"]],
     stats: [["<i>a</i>", "1.4"], ["<i>b</i>", "−2.3"], ["<i>c</i>", "2.4"], ["<i>d</i>", "−2.1"]],
     text: "Clifford's sibling, with its own frequency for every term. Most parameter sets collapse onto a few points; a handful unfold into veils.",
     size: "4096² · 33 M points",
@@ -28,7 +31,7 @@ const CARDS = [
   {
     id: "simon", name: "Simon", stage: "2D map", dim: 2, symbol: "↻", rarity: "★",
     credit: "Clifford, with sine and cosine swapped", ability: "Swapped phase",
-    eq: [["<i>x</i>′", "cos(<i>b y</i>) + <i>c</i> sin(<i>b x</i>)"], ["<i>y</i>′", "cos(<i>a x</i>) + <i>d</i> sin(<i>a y</i>)"]],
+    eq: [[X("x"), "cos(<i>b y</i><sub>n</sub>) + <i>c</i> sin(<i>b x</i><sub>n</sub>)"], [X("y"), "cos(<i>a x</i><sub>n</sub>) + <i>d</i> sin(<i>a y</i><sub>n</sub>)"]],
     stats: [["<i>a</i>", "1.9"], ["<i>b</i>", "1.3"], ["<i>c</i>", "−1.6"], ["<i>d</i>", "0.8"]],
     text: "A tiny change to the formula, a different creature: translucent ribbons pinched into two bright cusps where the orbit lingers.",
     size: "4096² · 30 M points",
@@ -36,8 +39,8 @@ const CARDS = [
   },
   {
     id: "ikeda", name: "Ikeda", stage: "2D map", dim: 2, symbol: "◎", rarity: "★",
-    credit: "Kensuke Ikeda, 1979", ability: "Ring-cavity spiral",
-    eq: [["<i>t</i>", "0.4 − 6 / (1 + <i>x</i>² + <i>y</i>²)"], ["<i>x</i>′", "1 + <i>u</i>(<i>x</i> cos <i>t</i> − <i>y</i> sin <i>t</i>)"], ["<i>y</i>′", "<i>u</i>(<i>x</i> sin <i>t</i> + <i>y</i> cos <i>t</i>)"]],
+    credit: "Kensuke Ikeda, 1979", ability: "Ring-cavity spiral", style: "--eq: .86",
+    eq: [["<i>t</i><sub>n</sub>", "0.4 − 6 / (1 + <i>x</i><sub>n</sub>² + <i>y</i><sub>n</sub>²)"], [X("x"), "1 + <i>u</i>(<i>x</i><sub>n</sub> cos <i>t</i><sub>n</sub> − <i>y</i><sub>n</sub> sin <i>t</i><sub>n</sub>)"], [X("y"), "<i>u</i>(<i>x</i><sub>n</sub> sin <i>t</i><sub>n</sub> + <i>y</i><sub>n</sub> cos <i>t</i><sub>n</sub>)"]],
     stats: [["<i>u</i>", "0.9"], ["iterations", "160"], ["orbits", "220 k"]],
     text: "Light circling a nonlinear optical cavity. Each pass turns the field by an angle set by its intensity, winding the orbit into a spiral.",
     size: "4096² · 35 M points",
@@ -46,7 +49,7 @@ const CARDS = [
   {
     id: "julia", name: "Julia set", stage: "Fractal", dim: 2, symbol: "✣", rarity: "★★",
     credit: "Gaston Julia, 1918", ability: "Escape time",
-    eq: [["<i>z</i>′", "<i>z</i>² + <i>c</i>"], ["", "escape when |<i>z</i>| > 2"]],
+    eq: [[X("z"), "<i>z</i><sub>n</sub>² + <i>c</i>"], ["", "escape when |<i>z</i><sub>n</sub>| &gt; 2"]],
     stats: [["<i>c</i>", "−0.8 + 0.156<i>i</i>"], ["iterations", "220"]],
     text: "Not an attractor but its mirror image: the border between points that stay bounded and points that run to infinity. Colour is escape speed.",
     size: "4096² · every pixel iterated",
@@ -63,44 +66,45 @@ const CARDS = [
   },
   {
     id: "layered", name: "Layered Clifford", stage: "2D maps", dim: 2, symbol: "≋", rarity: "★★",
-    credit: "three Clifford maps, one exposure", ability: "Long exposure",
-    eq: [["<i>x</i>′", "sin(<i>a</i><sub>k</sub><i>y</i>) + <i>c</i><sub>k</sub> cos(<i>a</i><sub>k</sub><i>x</i>)"], ["<i>y</i>′", "sin(<i>b</i><sub>k</sub><i>x</i>) + <i>d</i><sub>k</sub> cos(<i>b</i><sub>k</sub><i>y</i>)"]],
+    credit: "three Clifford maps, one exposure", ability: "Long exposure", style: "--eq: .94",
+    eq: [[X("x"), "sin(<i>a</i><sub>k</sub><i>y</i><sub>n</sub>) + <i>c</i><sub>k</sub> cos(<i>a</i><sub>k</sub><i>x</i><sub>n</sub>)"], [X("y"), "sin(<i>b</i><sub>k</sub><i>x</i><sub>n</sub>) + <i>d</i><sub>k</sub> cos(<i>b</i><sub>k</sub><i>y</i><sub>n</sub>)"], ["", "layers <i>k</i> = 1, 2, 3 · weights 1, 0.8, 0.6"]],
     stats: [["<i>a</i>", "−1.4"], ["<i>b</i>", "1.7"], ["layers <i>k</i>", "3"]],
-    text: "Three Clifford maps with different weights, each nudged off the base parameters, blurred by different amounts and summed like layers of film.",
+    text: "Three Clifford maps, (<i>c</i>, <i>d</i>) = (1, 0.7), (−0.5, −1) and (1.6, 0.9), with <i>a</i> and <i>b</i> nudged by ×1.15 · ×0.92 and ×0.88 · ×1.12, blurred by different amounts and summed like layers of film.",
     size: "density composite",
     alt: "Layered Clifford attractors in cosmic-fire orange on deep blue",
   },
   {
     id: "symmetric", name: "Symmetric icon", stage: "2D map", dim: 2, symbol: "✺", rarity: "★★",
-    credit: "after Field &amp; Golubitsky", ability: "23-fold lace",
-    eq: [["<i>z</i>′", "(<i>λ</i> + <i>α</i>|<i>z</i>|² + <i>β</i> Re <i>z</i><sup>n</sup> + <i>iω</i>) <i>z</i>"], ["", "+ <i>γ</i> <i>z̄</i><sup>n−1</sup>"]],
-    stats: [["<i>λ</i>", "2.409"], ["<i>α</i>", "−2.5"], ["<i>γ</i>", "0.9"], ["<i>n</i>", "23"]],
-    text: "One complex map that mixes a polynomial, a conjugate and a radial term. It turns by 2π/23 and the picture follows: a lace rosette from a single orbit. (<i>β</i> = <i>ω</i> = 0.)",
+    credit: "after Field &amp; Golubitsky", ability: "23-fold lace", style: "--eq: .9",
+    eq: [[X("z"), "(<i>λ</i> + <i>α</i>|<i>z</i><sub>n</sub>|² + <i>iω</i>) <i>z</i><sub>n</sub>"], ["", "+ <i>β</i> Re(<i>z</i><sub>n</sub><sup>m</sup>) <i>z</i><sub>n</sub> + <i>γ</i> <i class=\"ol\">z</i><sub>n</sub><sup>m−1</sup>"]],
+    stats: [["<i>λ</i>", "2.409"], ["<i>α</i>", "−2.5"], ["<i>γ</i>", "0.9"], ["<i>m</i>", "23"]],
+    text: "One complex map mixing a polynomial, a conjugate and a radial term. It turns by 2π/<i>m</i>, so the picture does too: a lace rosette from a single orbit. (<i>β</i> = <i>ω</i> = 0.)",
     size: "1600 × 1200 · 64 M steps",
     alt: "Symmetric icon: a 23-fold lace rosette in pale blue on navy",
   },
   {
     id: "gumowski", name: "Gumowski–Mira", stage: "2D map", dim: 2, symbol: "❧", rarity: "★★",
-    credit: "after Gumowski &amp; Mira", ability: "Feather fan",
-    eq: [["<i>x</i>′", "<i>y</i> + <i>a y</i>(1 − <i>b y</i>²) + <i>G</i>(<i>x</i>)"], ["<i>y</i>′", "−<i>x</i> + <i>G</i>(<i>x</i>′)"], ["<i>G</i>(<i>x</i>)", "<i>μx</i> + 2(1 − <i>μ</i>)<i>x</i>² / (1 + <i>x</i>²)"]],
+    credit: "after Gumowski &amp; Mira", ability: "Feather fan", style: "--eq: .86",
+    eq: [[X("x"), "<i>y</i><sub>n</sub> + <i>a y</i><sub>n</sub>(1 − <i>b y</i><sub>n</sub>²) + <i>G</i>(<i>x</i><sub>n</sub>)"], [X("y"), "−<i>x</i><sub>n</sub> + <i>G</i>(<i>x</i><sub>n+1</sub>)"], ["<i>G</i>(<i>x</i>)", "<i>μx</i> + 2(1 − <i>μ</i>)<i>x</i>² / (1 + <i>x</i>²)"]],
     stats: [["<i>a</i>", "0.008"], ["<i>b</i>", "0.05"], ["<i>μ</i>", "−0.496"]],
-    text: "Two lines of algebra fold a bird out of one orbit, its wings thousands of nested curves. The catch: <i>y</i>′ must use the new <i>x</i>′, or the bird never takes off.",
+    text: "Two lines of algebra fold a bird out of one orbit, its wings thousands of nested curves. The catch: <i>y</i> must use the new <i>x</i><sub>n+1</sub>, or the bird never takes off.",
     size: "1600 × 1200 · 64 M steps",
     alt: "Gumowski–Mira attractor: a bird with fanned wings in indigo and teal",
   },
   {
     id: "bedhead", name: "Bedhead", stage: "2D map", dim: 2, symbol: "∾", rarity: "★",
     credit: "after Ivan Emrich", ability: "Tangled ribbons",
-    eq: [["<i>x</i>′", "<i>y</i> sin(<i>xy</i> / <i>b</i>) + cos(<i>a x</i> − <i>y</i>)"], ["<i>y</i>′", "<i>x</i> + sin <i>y</i> / <i>b</i>"]],
+    eq: [[X("x"), "<i>y</i><sub>n</sub> sin(<i>x</i><sub>n</sub><i>y</i><sub>n</sub> / <i>b</i>) + cos(<i>a x</i><sub>n</sub> − <i>y</i><sub>n</sub>)"], [X("y"), "<i>x</i><sub>n</sub> + sin(<i>y</i><sub>n</sub>) / <i>b</i>"]],
     stats: [["<i>a</i>", "−0.81"], ["<i>b</i>", "−0.92"]],
     text: "The product <i>x</i>·<i>y</i> inside the sine tangles the orbit into ribbons that fold back over themselves, like hair after a night's sleep.",
     size: "1600 × 1200 · 64 M steps",
     alt: "Bedhead attractor: twisted ribbons in violet, teal and yellow",
+    style: "--eq: .86",
   },
   {
     id: "mcmullen", name: "McMullen", stage: "Fractal", dim: 2, symbol: "◌", rarity: "★★",
-    credit: "after Curtis McMullen", ability: "Ring after ring",
-    eq: [["<i>F</i>(<i>z</i>)", "<i>z</i><sup>n</sup> + <i>λ</i> / <i>z</i><sup>n</sup>"], ["", "run backwards: 2<i>n</i> inverse branches"]],
+    credit: "after Curtis McMullen", ability: "Ring after ring", style: "--eq: .86",
+    eq: [["<i>F</i>(<i>z</i>)", "<i>z</i><sup>n</sup> + <i>λ</i> / <i>z</i><sup>n</sup>"], ["<i>z</i><sub>k+1</sub>", "<i>ω</i><sup>j</sup> ((<i>z</i><sub>k</sub> ± √(<i>z</i><sub>k</sub>² − 4<i>λ</i>)) / 2)<sup>1/n</sup>"], ["", "<i>ω</i> = e<sup>2π<i>i</i>/n</sup> · one of 2<i>n</i> branches, at random"]],
     stats: [["<i>λ</i>", "0.02"], ["<i>n</i>", "3"], ["branches", "6"]],
     text: "A Julia set once more, drawn by running the map in reverse: every step picks one of the 2<i>n</i> inverse branches at random and the orbit settles onto the set.",
     size: "1600 × 1200 · 64 M steps",
@@ -108,8 +112,8 @@ const CARDS = [
   },
   {
     id: "harmonic", name: "Harmonic", stage: "Chaos game", dim: 2, symbol: "✧", rarity: "★★",
-    credit: "an IFS of my own", ability: "Field lines",
-    eq: [["<i>z</i>′", "±<i>w</i> / (<i>A z</i> + <i>B z̄</i> + <i>C</i>)"], ["", "<i>w</i> = 0.995 or 1, chosen at random"]],
+    credit: "an IFS of my own", ability: "Field lines", style: "--eq: .92; --dd: 2.5cqw",
+    eq: [[X("z"), "<i>s</i> / (<i>A z</i><sub>n</sub> + <i>B</i> <i class=\"ol\">z</i><sub>n</sub> + <i>C</i>)"], ["", "<i>s</i> = +0.995 or −1, chosen at random"]],
     stats: [["<i>A</i> ≈", "2.7+0.7<i>i</i>"], ["<i>B</i> ≈", "−0.7−0.4<i>i</i>"], ["<i>C</i> ≈", "−0.5+0.4<i>i</i>"]],
     text: "One inversion with a conjugate in the denominator, played as a chaos game. Nothing in it is a magnet, yet the density settles into field lines around two poles.",
     size: "1600 × 1200 · 800 k orbits",
@@ -118,7 +122,7 @@ const CARDS = [
   {
     id: "smoke", name: "Simon", stage: "Alt art", dim: 2, symbol: "↻", rarity: "✦",
     credit: "smoke variant · heavier exposure", ability: "Smoke screen",
-    eq: [["<i>x</i>′", "cos(<i>b y</i>) + <i>c</i> sin(<i>b x</i>)"], ["<i>y</i>′", "cos(<i>a x</i>) + <i>d</i> sin(<i>a y</i>)"]],
+    eq: [[X("x"), "cos(<i>b y</i><sub>n</sub>) + <i>c</i> sin(<i>b x</i><sub>n</sub>)"], [X("y"), "cos(<i>a x</i><sub>n</sub>) + <i>d</i> sin(<i>a y</i><sub>n</sub>)"]],
     stats: [["<i>a</i>", "1.5"], ["<i>b</i>", "−1.8"], ["<i>c</i>", "1.6"], ["<i>d</i>", "0.9"]],
     text: "Alternate art. Twice the orbits, longer runs, a wider blur and a softer tone curve: 117 million hits dissolved into smoke.",
     size: "4096² · 117 M points",
@@ -156,7 +160,7 @@ function cardMarkup(card, index) {
   const [file, width, height] = card.id === "smoke" ? ["simon-smoke", 900, 1257] : [card.id, 1200, 900];
   return `
     <li class="deck__slot" style="--i: ${index}">
-      <div class="tcard tcard--${card.id}" role="button" tabindex="0" aria-pressed="false" aria-label="${card.name}${card.id === "smoke" ? " (alternate art)" : ""}: lift the card">
+      <div class="tcard tcard--${card.id}" data-foil="${card.id}" ${card.style ? `style="${card.style}"` : ""} role="button" tabindex="0" aria-pressed="false" aria-label="${card.name}${card.id === "smoke" ? " (alternate art)" : ""}: lift the card">
         <div class="tcard__rotator">
           <div class="tcard__face tcard__front">
             <div class="tcard__panel">
@@ -178,6 +182,7 @@ function cardMarkup(card, index) {
               <div class="tcard__foot"><span>Illus. Tomasz Młynik</span><span>${card.size}</span><span>${set} <span class="tcard__rarity" aria-hidden="true">${card.rarity}</span></span></div>
             </div>
             <span class="tcard__shine" aria-hidden="true"></span>
+            <span class="tcard__glitter" aria-hidden="true"></span>
             <span class="tcard__glare" aria-hidden="true"></span>
           </div>
           <div class="tcard__face tcard__back" aria-hidden="true">
@@ -250,6 +255,10 @@ export async function createDeck() {
       st.setProperty("--posx", (50 + (mx - 50) / 3.5).toFixed(2) + "%");
       st.setProperty("--posy", (50 + (my - 50) / 2.5).toFixed(2) + "%");
       st.setProperty("--hyp", clamp(Math.hypot(mx - 50, my - 50) / 50, 0, 1).toFixed(3));
+      // Unitless offsets (-1 … 1) and an angle, for parallax and for conic / sweeping foils.
+      st.setProperty("--px", ((mx - 50) / 50).toFixed(3));
+      st.setProperty("--py", ((my - 50) / 50).toFixed(3));
+      st.setProperty("--ang", (mx * 3.6 + my * .9).toFixed(1) + "deg");
       st.setProperty("--o", s.o.value.toFixed(3));
       st.setProperty("--tx", s.tx.value.toFixed(1) + "px");
       st.setProperty("--ty", s.ty.value.toFixed(1) + "px");

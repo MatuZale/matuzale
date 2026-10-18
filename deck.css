@@ -34,6 +34,16 @@ html.deck-open { overflow: hidden; }
   --panel-bg:
     radial-gradient(90% 55% at 50% 0%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%),
     linear-gradient(var(--panel), color-mix(in srgb, var(--panel) 80%, #000));
+  /* Holographic accents: the colours that sweep over the type, the orb and the edge. */
+  --holo-a: #ffb3e6;
+  --holo-b: #9ff5ff;
+  --holo-c: #fff0a0;
+  --holo-d: #caa8ff;
+  --ink-filter: drop-shadow(0 .3cqw .8cqw #0009);
+  --glitter-blend: screen;
+  --glitter-filter: brightness(1.25) saturate(1.1);
+  --gl-fill: linear-gradient(115deg, var(--spectrum));
+  --ring: #ff7a9a, #ffd56b, #a7ff8a, #6ff7ff, #7f9bff, #d38bff, #ff7a9a;
 }
 :root[data-theme="light"] .deck {
   --deck-scheme: light;
@@ -61,6 +71,13 @@ html.deck-open { overflow: hidden; }
   --panel-bg:
     radial-gradient(90% 55% at 50% 0%, color-mix(in srgb, var(--accent) 24%, transparent), transparent 70%),
     linear-gradient(color-mix(in srgb, var(--accent) 7%, #fbf9f4), color-mix(in srgb, var(--accent) 12%, #eee9df));
+  --holo-a: #d6249f;
+  --holo-b: #0a8fa8;
+  --holo-c: #c27a00;
+  --holo-d: #6d28d9;
+  --ink-filter: none;
+  --glitter-blend: normal;
+  --glitter-filter: brightness(.72) saturate(2.2);
 }
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) .deck {
@@ -88,7 +105,13 @@ html.deck-open { overflow: hidden; }
     --shine-blend: soft-light;
     --panel-bg:
       radial-gradient(90% 55% at 50% 0%, color-mix(in srgb, var(--accent) 24%, transparent), transparent 70%),
-      linear-gradient(color-mix(in srgb, var(--accent) 7%, #fbf9f4), color-mix(in srgb, var(--accent) 12%, #eee9df));
+      linear-gradient(color-mix(in srgb, var(--accent) 7%, #fbf9f4), color-mix(in srgb, var(--accent) 12%, #eee9df));    --holo-a: #d6249f;
+    --holo-b: #0a8fa8;
+    --holo-c: #c27a00;
+    --holo-d: #6d28d9;
+    --ink-filter: none;
+    --glitter-blend: normal;
+    --glitter-filter: brightness(.72) saturate(2.2);
   }
 }
 
@@ -307,9 +330,8 @@ html.deck-open { overflow: hidden; }
   letter-spacing: -.015em;
   white-space: nowrap;
   text-overflow: ellipsis;
-  text-shadow: var(--ink-shadow);
 }
-.tcard__hp { flex-shrink: 0; font: 700 6.2cqw/1 var(--font-head); text-shadow: var(--ink-shadow); }
+.tcard__hp { flex-shrink: 0; font: 700 6.2cqw/1 var(--font-head); }
 .tcard__hp small { margin-right: .5cqw; color: var(--ink-accent); font: 700 2.3cqw var(--font-body); letter-spacing: .04em; vertical-align: .35em; }
 .tcard__energy {
   display: inline-grid;
@@ -377,7 +399,7 @@ html.deck-open { overflow: hidden; }
   padding: 1cqw 0;
   border-bottom: .25cqw solid var(--rule);
   font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", "Times New Roman", Georgia, serif;
-  font-size: 4.15cqw;
+  font-size: calc(4.15cqw * var(--eq, 1));
   line-height: 1.2;
   white-space: nowrap;
 }
@@ -386,6 +408,8 @@ html.deck-open { overflow: hidden; }
 .tcard__eq b { display: inline-block; min-width: 4.4cqw; font-size: 1.1em; font-weight: 700; }
 .tcard__eq i, .tcard__stats i { font-family: "STIX Two Text", "Cambria", "Times New Roman", Georgia, serif; }
 .tcard__eq sub { font-size: .7em; line-height: 0; }
+.tcard__eq sup { font-size: .7em; line-height: 0; }
+.tcard__eq .ol, .tcard__flavor .ol { text-decoration: overline; }
 
 /* Parameters in the weakness / resistance / retreat bar. */
 .tcard__stats { display: flex; margin: 1.6cqw 0 0; }
@@ -393,7 +417,7 @@ html.deck-open { overflow: hidden; }
 .tcard__stats div + div { border-left: .25cqw solid var(--rule); }
 .tcard__stats dt { color: var(--ink-muted); font: 600 2.1cqw/1.2 var(--font-body); letter-spacing: .06em; text-transform: uppercase; }
 .tcard__stats dt i { color: var(--ink-soft); font-size: 1.45em; letter-spacing: 0; text-transform: none; }
-.tcard__stats dd { margin: .3cqw 0 0; color: var(--ink-value); font: 600 3.1cqw/1.2 var(--font-mono); white-space: nowrap; }
+.tcard__stats dd { margin: .3cqw 0 0; color: var(--ink-value); font: 600 var(--dd, 3.1cqw)/1.2 var(--font-mono); white-space: nowrap; }
 
 .tcard__flavor {
   flex-shrink: 1;
@@ -596,7 +620,7 @@ html.deck-open { overflow: hidden; }
   --foil:
     repeating-conic-gradient(from calc(var(--mx, 50%) * .4deg) at 50% 50%, #000 0deg, #fff 7.83deg, #000 15.652deg),
     linear-gradient(115deg, var(--spectrum));
-  --foil-size: 100% 100%, 300% 300%;
+  --foil-size: 100% 100%, 150% 150%;
   --foil-pos: center, var(--posx, 50%) var(--posy, 50%);
   --foil-o: .42;
 }
@@ -610,7 +634,7 @@ html.deck-open { overflow: hidden; }
   --foil:
     repeating-linear-gradient(32deg, #000 0 .9cqw, #fff 1.5cqw, #000 2.1cqw),
     linear-gradient(115deg, var(--spectrum));
-  --foil-size: 100% 100%, 300% 300%;
+  --foil-size: 100% 100%, 150% 150%;
   --foil-pos: calc(var(--posx, 50%) * .3) 0, var(--posx, 50%) var(--posy, 50%);
   --foil-o: .4;
 }
@@ -624,7 +648,7 @@ html.deck-open { overflow: hidden; }
   --foil:
     repeating-radial-gradient(ellipse 120% 70% at 20% 110%, #000 0 2cqw, #fff 3cqw, #000 4.4cqw),
     linear-gradient(115deg, var(--spectrum));
-  --foil-size: 100% 100%, 300% 300%;
+  --foil-size: 100% 100%, 150% 150%;
   --foil-pos: center, var(--posx, 50%) var(--posy, 50%);
   --foil-o: .42;
 }
@@ -708,6 +732,150 @@ html.deck-open { overflow: hidden; }
   mix-blend-mode: screen;
   filter: none;
 }
+
+/* ───────── Shared holographic layers ─────────
+   Beyond the shine / glare / window foil, every card gets four more things that react to the light:
+   glitter at two depths (rainbow sparkles that drift against each other), an iridescent edge ring, a
+   sweep of colour over the type, the stats and the type orb, and a gentle parallax of the artwork.
+   Per card, a few custom properties choose the texture etched into the foil (--etch-img), the glitter
+   sprite (--sprite) and the ring colours (--ring). */
+
+/* Glitter: two sparkle sprites, filled with the card's own spectrum, each lit only near the pointer. */
+.tcard__glitter { position: absolute; inset: 0; z-index: 2; pointer-events: none; border-radius: inherit; mix-blend-mode: var(--glitter-blend); filter: var(--glitter-filter); }
+.tcard__glitter::before, .tcard__glitter::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--gl-fill) var(--posx, 50%) var(--posy, 50%) / 300% 300%;
+  -webkit-mask: radial-gradient(farthest-corner circle at var(--mx, 50%) var(--my, 50%), #000 0, #000c 22%, #0004 50%, transparent 76%), var(--sprite, url("assets/holo/glitter.svg")) calc(var(--px, 0) * -8cqw) calc(var(--py, 0) * -8cqw) / var(--sprite-a, 26cqw);
+  mask: radial-gradient(farthest-corner circle at var(--mx, 50%) var(--my, 50%), #000 0, #000c 22%, #0004 50%, transparent 76%), var(--sprite, url("assets/holo/glitter.svg")) calc(var(--px, 0) * -8cqw) calc(var(--py, 0) * -8cqw) / var(--sprite-a, 26cqw);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  opacity: calc(var(--o, 0) * var(--glitter-o, .9));
+}
+/* The second sprite is larger, turned and shifted the other way, so the sparkles slide through each other. */
+.tcard__glitter::after {
+  -webkit-mask-position: 0 0, calc(var(--px, 0) * 12cqw) calc(var(--py, 0) * 10cqw);
+  mask-position: 0 0, calc(var(--px, 0) * 12cqw) calc(var(--py, 0) * 10cqw);
+  -webkit-mask-size: auto, var(--sprite-b, 41cqw);
+  mask-size: auto, var(--sprite-b, 41cqw);
+  background-position: calc(100% - var(--posx, 50%)) var(--posy, 50%);
+  opacity: calc(var(--o, 0) * var(--glitter-o, .9) * .75);
+}
+
+/* Etched lines in the foil: a second texture over the whole card, strongest where the card is lit. */
+.tcard__shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--etch-img, repeating-linear-gradient(0deg, #0000 0 .35cqw, #0000008c .35cqw .5cqw));
+  background-position: calc(var(--px, 0) * 3cqw) calc(var(--py, 0) * 3cqw);
+  opacity: var(--etch-o, .35);
+  mix-blend-mode: multiply;
+}
+
+/* An iridescent ring around the frame, turning with the pointer. */
+.tcard__front::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  padding: 3.4cqw;
+  pointer-events: none;
+  border-radius: inherit;
+  background: conic-gradient(from var(--ang, 0deg) at var(--mx, 50%) var(--my, 50%), var(--ring));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  mix-blend-mode: var(--ring-blend, overlay);
+  opacity: calc(var(--o, 0) * var(--ring-o, .85));
+}
+
+/* Colour sweeping over the type: the band sits where the light is, and fades with it. */
+.tcard__name, .tcard__hp, .tcard__stats dd {
+  --base: var(--ink);
+  background:
+    linear-gradient(105deg,
+      var(--base) calc(var(--posx, 50%) - 36%),
+      color-mix(in srgb, var(--holo-a) calc(var(--o, 0) * 100%), var(--base)) calc(var(--posx, 50%) - 22%),
+      color-mix(in srgb, var(--holo-b) calc(var(--o, 0) * 100%), var(--base)) calc(var(--posx, 50%) - 7%),
+      color-mix(in srgb, var(--holo-c) calc(var(--o, 0) * 100%), var(--base)) calc(var(--posx, 50%) + 8%),
+      color-mix(in srgb, var(--holo-d) calc(var(--o, 0) * 100%), var(--base)) calc(var(--posx, 50%) + 23%),
+      var(--base) calc(var(--posx, 50%) + 37%));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: var(--ink-filter);
+}
+.tcard__stats dd { --base: var(--ink-value); filter: none; }
+.tcard__hp small { -webkit-text-fill-color: initial; }
+
+/* The type orb is a little prism, the tags and the strip catch a sheen. */
+.tcard__energy {
+  background:
+    radial-gradient(circle at 34% 28%, #ffffffb0, transparent 42%),
+    conic-gradient(from var(--ang, 0deg), #ff7a9a80, #ffd56b80, #a7ff8a80, #6ff7ff80, #7f9bff80, #d38bff80, #ff7a9a80),
+    var(--frame);
+}
+.tcard__stage, .tcard__strip, .tcard__ability-tag { position: relative; overflow: hidden; }
+.tcard__stage::after, .tcard__strip::after, .tcard__ability-tag::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent calc(var(--posx, 50%) - 22%), #ffffffb3 var(--posx, 50%), transparent calc(var(--posx, 50%) + 22%));
+  mix-blend-mode: overlay;
+  opacity: calc(var(--o, 0) * .9);
+  pointer-events: none;
+}
+
+/* The artwork moves a little against the foil, which sits still: depth without any extra pixels. */
+.tcard__art img { transform: translate(calc(var(--px, 0) * -.7cqw), calc(var(--py, 0) * -.5cqw)) scale(1.05); }
+.tcard--smoke .tcard__art img { transform: translate(calc(var(--px, 0) * -1cqw), calc(var(--py, 0) * -.7cqw)) scale(1.06); }
+
+/* ── One signature per card: etched texture, glitter sprite, ring colours. ── */
+/* Clifford: sun pillars. Fine vertical bars over the foil. */
+.tcard--clifford { --etch-img: repeating-linear-gradient(90deg, #0000 0 1.6cqw, #00000080 1.6cqw 1.9cqw); --etch-o: .4; --sprite-a: 20cqw; --sprite-b: 33cqw; }
+/* Peter de Jong: cosmos. Faceted stars instead of glitter, a violet ring. */
+.tcard--dejong {
+  --sprite: url("assets/holo-stars.svg"); --sprite-a: 17cqw; --sprite-b: 28cqw; --glitter-o: 1;
+  --ring: #ff7ad8, #ffd56b, #7ef5c0, #6ecbff, #b28bff, #ff7ad8;
+  --etch-img: radial-gradient(circle at 50% 40%, #0000 0 30%, #0007 100%); --etch-o: .5;
+}
+/* Simon: reverse holo. A quiet ring and soft glitter. */
+.tcard--simon, .tcard--smoke { --glitter-o: .55; --ring-o: .6; --etch-o: .2; }
+/* Ikeda: a spiral, so a swirl etched into the foil and a quick ring. */
+.tcard--ikeda { --etch-img: repeating-conic-gradient(from 0deg at 72% 48%, #0000 0 5deg, #00000070 5deg 6.5deg); --etch-o: .4; --ring-o: 1; }
+/* Julia and McMullen: gold and copper secret rares. Metal glitter, a warm ring, engraved texture. */
+.tcard--julia, .tcard--mcmullen {
+  --gl-fill: linear-gradient(125deg, #fff3c0, #d9a441 25%, #fff 45%, #b37a1c 65%, #ffe6a0 85%);
+  --ring: #fff3c0, #d9a441, #fff, #b37a1c, #ffe6a0, #d9a441, #fff3c0; --ring-blend: color-dodge; --ring-o: .8;
+  --holo-a: #fff3c0; --holo-b: #ffd56b; --holo-c: #ffffff; --holo-d: #f3cf6b; --glitter-o: 1.1;
+}
+:root[data-theme="light"] .tcard--julia, :root[data-theme="light"] .tcard--mcmullen { --holo-a: #b7791f; --holo-b: #c27a00; --holo-c: #8d6316; --holo-d: #a86a14; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .tcard--julia, :root:not([data-theme="dark"]) .tcard--mcmullen { --holo-a: #b7791f; --holo-b: #c27a00; --holo-c: #8d6316; --holo-d: #a86a14; } }
+.tcard--mcmullen { --etch-img: repeating-radial-gradient(circle at 50% 38%, #0000 0 1.4cqw, #0000007a 1.4cqw 1.75cqw); --etch-o: .45; }
+/* Thomas: aurora. Cool ring, glitter in long vertical ribbons. */
+.tcard--thomas { --ring: #7ef5c0, #6ecbff, #b28bff, #ff7ad8, #7ef5c0; --sprite-a: 30cqw; --sprite-b: 50cqw; --etch-img: repeating-linear-gradient(80deg, #0000 0 2.2cqw, #00000066 2.2cqw 2.5cqw); --etch-o: .4; }
+/* Layered Clifford: a V-style lattice, so the ring runs hot and the glitter is coarse. */
+.tcard--layered { --ring: #ffd66b, #ff7a3b, #ff7ad8, #6ecbff, #ffd66b; --sprite-a: 30cqw; --sprite-b: 46cqw; --etch-o: .3; }
+/* Symmetric icon: radiant. Crossed diagonal bars, like a cut gem. */
+.tcard--symmetric {
+  --etch-img: repeating-linear-gradient(45deg, #0000 0 1.5cqw, #00000085 1.5cqw 1.8cqw), repeating-linear-gradient(-45deg, #0000 0 1.5cqw, #00000085 1.5cqw 1.8cqw);
+  --etch-o: .5; --ring: #e3f1ff, #8ec4ff, #ffffff, #7fe8ff, #b6a6ff, #e3f1ff; --ring-blend: color-dodge; --sprite-a: 16cqw; --sprite-b: 25cqw; --glitter-o: 1.1;
+}
+/* Gumowski–Mira: a feather fan, with fine hatching along the wing. */
+.tcard--gumowski { --etch-img: repeating-linear-gradient(32deg, #0000 0 .9cqw, #00000090 .9cqw 1.15cqw); --etch-o: .4; --ring: #9fb3ff, #7fe8ff, #c9d4ff, #ff9be8, #9fb3ff; }
+/* Bedhead: combed waves. */
+.tcard--bedhead { --etch-img: repeating-radial-gradient(ellipse 130% 70% at 20% 110%, #0000 0 1.6cqw, #00000080 1.6cqw 2cqw); --etch-o: .4; --ring: #8ff7e0, #ffe56b, #6d3fd6, #5be6cd, #8ff7e0; }
+/* Harmonic: two poles, rings between them. */
+.tcard--harmonic { --etch-img: repeating-radial-gradient(circle at 38% 50%, #0000 0 1.5cqw, #00000070 1.5cqw 1.8cqw), repeating-radial-gradient(circle at 62% 50%, #0000 0 1.5cqw, #00000070 1.5cqw 1.8cqw); --etch-o: .45; --ring: #ffb3f0, #a82dd0, #7fe8ff, #ffd0f7, #ffb3f0; }
+/* Light panels take less etching; the ring and glitter are deepened by the theme tokens above. */
+:root[data-theme="light"] .tcard:not(.tcard--smoke) { --etch-o: .18; --ring-blend: soft-light; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .tcard:not(.tcard--smoke) { --etch-o: .18; --ring-blend: soft-light; } }
+
+@media (prefers-reduced-motion: reduce) { .tcard__art img { transform: scale(1.05); } }
 
 /* ───────── Back ───────── */
 .tcard__back {
