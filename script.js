@@ -281,13 +281,13 @@ document.getElementById("year").textContent = new Date().getFullYear();
   new IntersectionObserver(([entry]) => horizon.classList.toggle("is-idle", !entry.isIntersecting)).observe(horizon);
 })();
 
-/* ───────── Journey: light bending round a black hole ─────────
+/* ───────── Journey: a black hole in a sheet of spacetime ─────────
    spacetime.js loads when the section is near. */
 (function journeySpacetime() {
-  const canvas = document.querySelector(".spacetime");
-  if (!canvas || !canvas.getContext) return;
+  const holder = document.querySelector(".spacetime");
+  if (!holder) return;
   const load = () => import("./spacetime.js")
-    .then(module => module.startSpacetime(canvas))
+    .then(module => module.startSpacetime(holder))
     .catch(error => console.error(error));
   if ("IntersectionObserver" in window) {
     const watcher = new IntersectionObserver(([entry]) => {
@@ -295,7 +295,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
       watcher.disconnect();
       load();
     }, { rootMargin: "400px" });
-    watcher.observe(canvas);
+    watcher.observe(holder);
   }
 })();
 
