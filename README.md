@@ -110,6 +110,7 @@ The source of the portfolio site: plain HTML, CSS and JavaScript, no build step,
 ```
 index.html   content (+ JSON-LD Person metadata)
 404.html     not-found page
+cards.html   the attractor card collection on its own page (shareable link)
 style.css    design tokens, layout, themes
 script.js    theme, nav, reveal-on-scroll, attractor, BENTOS visuals, horizon
 deck.js      attractor card collection (loaded on demand, with deck.css)

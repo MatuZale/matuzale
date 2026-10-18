@@ -234,7 +234,10 @@ document.querySelectorAll("[data-spot]").forEach((card) => {
   const opener = document.querySelector("[data-deck-open]");
   if (!opener) return;
   let deck;
-  opener.addEventListener("click", async () => {
+  opener.addEventListener("click", async event => {
+    // The opener links to cards.html, so the collection can be shared or opened in a new tab.
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
     opener.setAttribute("aria-busy", "true");
     try {
       deck ??= import("./deck.js").then(module => module.createDeck());

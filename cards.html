@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Attractor cards · Tomasz Młynik</title>
+  <meta name="description" content="A collection of strange-attractor and fractal trading cards: Clifford, Peter de Jong, Ikeda, Julia, Thomas and more, with their equations and parameters." />
+  <meta name="theme-color" content="#0b0a1a" />
+
+  <link rel="canonical" href="https://matuzale.github.io/matuzale/cards.html" />
+  <meta property="og:url" content="https://matuzale.github.io/matuzale/cards.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Attractor cards · Tomasz Młynik" />
+  <meta property="og:description" content="Strange attractors and fractals as holographic trading cards, with the maths behind each render." />
+  <meta property="og:image" content="https://matuzale.github.io/matuzale/assets/og.jpg" />
+  <meta property="og:image:alt" content="Tomasz Młynik, PhD: portfolio preview with a neon Clifford attractor" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0a1a'/%3E%3Ctext x='32' y='43' font-family='Arial' font-weight='700' font-size='30' text-anchor='middle' fill='%23ff5ecb'%3ETM%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" />
+  <link rel="stylesheet" href="style.css" />
+  <script>
+    // Apply saved theme before paint to avoid a flash.
+    try {
+      var t = localStorage.getItem("theme");
+      if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+    } catch (e) {}
+  </script>
+  <style>
+    .cards-page { min-height: 100vh; display: grid; place-content: center; text-align: center; gap: 1rem; padding: 2rem; }
+    .cards-page h1 { margin: 0; }
+    .cards-page__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; }
+  </style>
+</head>
+<body>
+  <!-- Shown behind the collection, and again once it is closed. -->
+  <main class="cards-page">
+    <h1>Strange attractors &amp; fractals</h1>
+    <p class="section__lead">A collection of trading cards for the renders behind the generative-art project.</p>
+    <p class="cards-page__actions">
+      <button type="button" class="btn btn--primary" data-deck-open aria-haspopup="dialog">Open the collection <span aria-hidden="true">✦</span></button>
+      <a class="btn btn--ghost" href="./#art">Back to the portfolio</a>
+    </p>
+  </main>
+  <script type="module">
+    import { createDeck } from "./deck.js";
+
+    const opener = document.querySelector("[data-deck-open]");
+    const deck = await createDeck();
+    opener.addEventListener("click", () => deck.open(opener));
+    deck.open(opener);
+  </script>
+</body>
+</html>
