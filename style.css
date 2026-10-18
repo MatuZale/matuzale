@@ -1272,6 +1272,21 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
     radial-gradient(ellipse at 0 50%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 60%),
     radial-gradient(ellipse at 100% 20%, color-mix(in srgb, var(--accent-2) 7%, transparent), transparent 65%);
 }
+/* An isometric surface plot of peaks(x, y) sits faintly to the right of the timeline (built in script.js). */
+#journey { overflow: hidden; }
+#journey > .wrap { position: relative; z-index: 1; }
+.surface-plot {
+  position: absolute; top: 50%; right: max(-7rem, (100% - var(--wrap)) / 2 - 9rem); width: min(720px, 54vw); height: auto;
+  transform: translateY(-46%); pointer-events: none; opacity: .3; overflow: visible;
+}
+.surface-plot__pane { fill: color-mix(in srgb, var(--accent-2) 6%, transparent); stroke: none; }
+.surface-plot__grid { fill: none; stroke: var(--muted); stroke-width: .8; opacity: .6; }
+.surface-plot__face { fill: color-mix(in srgb, var(--c) 42%, var(--bg)); stroke: var(--c); stroke-width: 1.1; stroke-linejoin: round; }
+.surface-plot__axis { fill: none; stroke: var(--text); stroke-width: 1.6; }
+.surface-plot text { fill: var(--text); font: 500 15px var(--font-mono); }
+:root[data-theme="light"] .surface-plot { opacity: .34; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .surface-plot { opacity: .34; } }
+@media (max-width: 800px) { .surface-plot { top: auto; bottom: 0; right: -15%; width: 115%; transform: none; opacity: .22; } }
 .timeline::before { opacity: .85; box-shadow: 0 0 16px color-mix(in srgb, var(--accent-2) 24%, transparent); }
 .tl { isolation: isolate; }
 .tl::before { left: -1.8rem; top: .35rem; width: 14px; height: 14px; border: 3px solid var(--bg); background: var(--grad) border-box; box-shadow: -3px 0 13px color-mix(in srgb, var(--accent) 40%, transparent), 3px 0 13px color-mix(in srgb, var(--accent-3) 40%, transparent); }
