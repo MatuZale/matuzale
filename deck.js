@@ -130,6 +130,10 @@ const CARDS = [
   },
 ];
 
+// The kind of foil, as on printed holo cards: reverse holo (texture everywhere but the artwork), regular holo
+// (the artwork only) or full art. See deck.css.
+const KIND = { clifford: "reverse", dejong: "reverse", simon: "reverse", ikeda: "reverse", thomas: "reverse", bedhead: "reverse", layered: "regular", symmetric: "regular", gumowski: "regular", harmonic: "regular", julia: "full", mcmullen: "full" };
+
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
 // A damped spring per animated value. Small steps feel like a card in the hand rather than a tween.
@@ -160,7 +164,7 @@ function cardMarkup(card, index) {
   const [file, width, height] = card.id === "smoke" ? ["simon-smoke", 900, 1257] : [card.id, 1200, 900];
   return `
     <li class="deck__slot" style="--i: ${index}">
-      <div class="tcard tcard--${card.id}" data-foil="${card.id}" ${card.style ? `style="${card.style}"` : ""} role="button" tabindex="0" aria-pressed="false" aria-label="${card.name}${card.id === "smoke" ? " (alternate art)" : ""}: lift the card">
+      <div class="tcard tcard--${card.id}" data-foil="${card.id}" data-kind="${KIND[card.id] ?? ""}" ${card.style ? `style="${card.style}"` : ""} role="button" tabindex="0" aria-pressed="false" aria-label="${card.name}${card.id === "smoke" ? " (alternate art)" : ""}: lift the card">
         <div class="tcard__rotator">
           <div class="tcard__face tcard__front">
             <div class="tcard__panel">
@@ -182,7 +186,6 @@ function cardMarkup(card, index) {
               <div class="tcard__foot"><span>Illus. Tomasz Młynik</span><span>${card.size}</span><span>${set} <span class="tcard__rarity" aria-hidden="true">${card.rarity}</span></span></div>
             </div>
             <span class="tcard__shine" aria-hidden="true"></span>
-            <span class="tcard__glitter" aria-hidden="true"></span>
             <span class="tcard__glare" aria-hidden="true"></span>
           </div>
           <div class="tcard__face tcard__back" aria-hidden="true">
