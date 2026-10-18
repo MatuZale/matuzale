@@ -1239,6 +1239,32 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
   .pub::before, .pub:last-child::after { left: .5rem; right: .5rem; }
 }
 
+/* The first page of each paper lies faintly behind its own entry, like a pile on a desk. Hover or focus an
+   entry and its page comes forward and straightens. Decorative only; the list stays the content. */
+#research { overflow: hidden; }
+.pub { isolation: isolate; }
+.pub:hover, .pub:focus-within { z-index: 1; }
+.pub__sheet {
+  position: absolute; z-index: -1; top: 50%; right: calc(var(--dx, 0px) - clamp(40px, 7.5vw, 115px)); width: clamp(130px, 14.5vw, 200px); margin: 0;
+  transform: translateY(-50%) rotate(var(--tilt, 0deg)); opacity: .3; pointer-events: none;
+  transition: opacity .35s, transform .5s cubic-bezier(.2, .8, .2, 1);
+}
+.pub__sheet img { width: 100%; height: auto; border-radius: 3px; box-shadow: 0 14px 30px -14px rgba(60, 30, 120, .4), 0 0 0 1px rgba(23, 21, 43, .08); }
+.pub__sheet figcaption { position: absolute; inset: 100% 0 auto; margin-top: .6rem; text-align: center; color: var(--muted); font: 400 .6rem var(--font-mono); letter-spacing: .08em; opacity: 0; transition: opacity .3s; }
+.pub:hover .pub__sheet, .pub:focus-within .pub__sheet { opacity: .75; transform: translateY(-50%) rotate(0deg) scale(1.04); }
+.pub:hover .pub__sheet figcaption, .pub:focus-within .pub__sheet figcaption { opacity: 1; }
+/* In the dark theme the page is inverted: pale type on a dark sheet, barely there. */
+:root[data-theme="dark"] .pub__sheet { opacity: .15; }
+:root[data-theme="dark"] .pub__sheet img { filter: invert(1) hue-rotate(180deg); box-shadow: 0 0 0 1px rgba(236, 233, 255, .1); }
+:root[data-theme="dark"] .pub:hover .pub__sheet, :root[data-theme="dark"] .pub:focus-within .pub__sheet { opacity: .4; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .pub__sheet { opacity: .15; }
+  :root:not([data-theme="light"]) .pub__sheet img { filter: invert(1) hue-rotate(180deg); box-shadow: 0 0 0 1px rgba(236, 233, 255, .1); }
+  :root:not([data-theme="light"]) .pub:hover .pub__sheet, :root:not([data-theme="light"]) .pub:focus-within .pub__sheet { opacity: .4; }
+}
+@media (max-width: 640px) { .pub__sheet { display: none; } }
+@media (prefers-reduced-motion: reduce) { .pub__sheet, .pub__sheet figcaption { transition: none; } }
+
 /* A lit thread through the journey, with space for the longer research entries. */
 #journey {
   background:
