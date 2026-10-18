@@ -1175,11 +1175,12 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
 .skill h3::before { content: ""; display: block; width: 36px; height: 3px; margin-bottom: 1rem; border-radius: 3px; background: var(--grad); box-shadow: 0 0 14px color-mix(in srgb, var(--tool-tone) 35%, transparent); }
 .skill .tags li { background: color-mix(in srgb, var(--tool-tone) 5%, var(--surface)); border-color: color-mix(in srgb, var(--tool-tone) 24%, var(--line)); }
 
-/* The learning card is an ordinary card whose lower edge has been torn open: underneath, the stylesheet that
-   colours these cards. The tags stay in front, as usual. */
-.skill--learning { display: flex; flex-direction: column; }
-.skill--learning .skill__main { flex: 1 0 auto; }
-.code-tear { display: block; flex: none; width: calc(100% + 2.8rem); max-width: none; height: 128px; margin: 1.2rem -1.4rem -1.4rem; font: 400 8.4px var(--font-mono); }
+/* The learning card is an ordinary card that has torn open from just under its title: the stylesheet that
+   colours these cards shows through at about 70 %, behind the tags, which stay in front as frosted chips. */
+.skill--learning { min-height: 12.5rem; }
+.skill--learning .skill__main { z-index: 1; }
+.skill--learning .tags li { background: color-mix(in srgb, var(--tool-tone) 6%, color-mix(in srgb, var(--surface) 78%, transparent)); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); }
+.code-tear { position: absolute; z-index: 0; inset: 3.6rem 0 0; display: block; width: 100%; max-width: none; height: calc(100% - 3.6rem); margin: 0; opacity: .72; font: 400 8.4px var(--font-mono); }
 .code-tear__bg { fill: var(--tear-bg); }
 .code-tear__grid { stroke: var(--tear-grid); }
 .code-tear__shade { stroke: var(--tear-shade); stroke-opacity: var(--tear-shade-o); }
