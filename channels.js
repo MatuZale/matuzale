@@ -1,14 +1,15 @@
 // Language channels, tuned like an old TV: 01 English, 02 Polish, 03 binary. English lives in the page;
 // Polish comes from lang/pl.js by key: data-i18n names an element's content (as HTML), data-i18n-attr its
-// attributes ("aria-label:key;title:key"). The binary channel writes each letter of the English text as one
-// bit of its own character code, so every block keeps its shape; pointing at or focusing a block decodes
-// it. Switching shows the channel on screen with a burst of static, and the visible text resolves out of
+// attributes ("aria-label:key;title:key"). The binary channel takes everything that reads as text, names,
+// titles, badges, papers and all, and writes each letter as one bit of its own character code, so every
+// block keeps its shape; pointing at or focusing a block decodes it. Switching shows the channel on screen with a burst of static, and the visible text resolves out of
 // noise. Nothing around it should jump meanwhile: the bits are spaced to the width of the text they stand
 // for, and a block that changes keeps its box, easing to the new size while its text settles.
-// The choice is remembered; ?lang=pl (or en, bin) opens a channel from a link.
+// The choice is remembered; ?lang=pl (or en, bin) opens a channel from a link. Like a remote, keys 1, 2 and 3
+// tune the channels and Backspace rewinds to the top.
 
 import { PL } from "./lang/pl.js";
-import { osd, staticBurst } from "./retro.js";
+import { osd, staticBurst, rewind } from "./retro.js";
 
 const CHANNELS = { en: ["CH 01", "EN"], pl: ["CH 02", "PL"], bin: ["CH 03", "01 · BIN"] };
 const root = document.documentElement;
@@ -32,14 +33,37 @@ const textNodes = el => {
   return nodes;
 };
 
+// The rest of the page's text has no translation but still goes binary: each of those text nodes keeps its
+// own words here, and the element holding it becomes a "plain" unit. Left alone: the channel keys (the way
+// back), text that is never drawn, and text that scripts keep rewriting (the sample feed, the footer game,
+// the year, the observer readout).
+const UNTOUCHED = ".channel, [data-i18n], title, desc, script, style, #observer-trace, [data-feed-clock], .feed__value b, [data-feed-sample], #year, #game-name, #game-toggle";
+const original = new Map();
+for (const node of textNodes(document.body)) {
+  if (node.data.trim() && !node.parentElement.closest(UNTOUCHED)) original.set(node, node.data);
+}
+const plain = [...new Set([...original.keys()].map(node => node.parentElement))];
+const ownText = el => [...el.childNodes].filter(node => original.has(node));
+const translated = el => el.dataset.i18n !== undefined;
+// Every unit of text, and the text it answers for: all of a translated block, a plain unit's own nodes.
+const units = [...blocks, ...plain];
+const runOf = el => translated(el) ? textNodes(el) : ownText(el);
+// Units inside a unit (read together with it) and units around it.
+const inside = new Map(units.map(el => [el, units.filter(other => other !== el && el.contains(other))]));
+const around = new Map(units.map(el => [el, units.filter(other => other !== el && other.contains(el))]));
+
 function tune(channel, animate) {
+  const was = current;
   current = channel;
   const pl = channel === "pl";
-  const visible = animate ? blocks.filter(onScreen) : [], before = measure(visible);
+  const changing = channel === "bin" || was === "bin" ? units : blocks;
+  const visible = animate ? changing.filter(onScreen) : [], before = measure(visible);
   for (const el of blocks) {
     el.style.letterSpacing = "";
+    delete el.dataset.encoded;
     write(el, (pl && PL[el.dataset.i18n]) || english.get(el));
   }
+  for (const el of plain) if ("encoded" in el.dataset) decode(el);
   for (const el of labelled) {
     const original = englishAttrs.get(el);
     pairs(el).forEach(([name, key], i) => el.setAttribute(name, (pl && PL[key]) || original[i]));
@@ -48,7 +72,7 @@ function tune(channel, animate) {
   document.title = pl ? PL["meta.title"] : englishMeta.title;
   if (description) description.content = pl ? PL["meta.description"] : englishMeta.description;
   root.classList.toggle("is-binary", channel === "bin");
-  if (channel === "bin") blocks.forEach(encode);
+  if (channel === "bin") units.forEach(encode);
   keys.forEach(key => key.setAttribute("aria-pressed", String(key.dataset.channel === channel)));
   if (animate) resolve(visible, channel === "bin", before);
   document.dispatchEvent(new CustomEvent("channelchange", { detail: { channel } }));
@@ -76,28 +100,42 @@ function spaceLike(el, text) {
   el.style.letterSpacing = `${(base + extra).toFixed(3)}px`;
 }
 function encode(el) {
-  spaceLike(el, el.textContent);
-  for (const node of textNodes(el)) node.data = bits(node.data);
+  if ("encoded" in el.dataset) return;
+  const run = runOf(el);
+  spaceLike(el, run.map(node => node.data).join(" "));
+  for (const node of run) node.data = bits(node.data);
   el.dataset.encoded = "";
 }
 function decode(el) {
   el.style.letterSpacing = "";
-  write(el, english.get(el));
+  if (translated(el)) write(el, english.get(el));
+  else for (const node of ownText(el)) node.data = original.get(node);
   delete el.dataset.encoded;
 }
-// Point at (or focus) a block to read it; it goes back to bits a moment after you leave.
-for (const el of blocks) {
+// Point at (or focus) a block to read it, with everything inside it; it goes back to bits a moment after
+// you leave, unless the block around it is still being read.
+const reading = el => el.matches(":hover, :focus-within");
+for (const el of units) {
   let timer;
+  const group = [el, ...inside.get(el)];
   const open = () => {
     clearTimeout(timer);
-    if (current === "bin" && "encoded" in el.dataset) { const before = measure([el]); decode(el); resolve([el], false, before); }
+    if (current !== "bin") return;
+    const shut = group.filter(unit => "encoded" in unit.dataset);
+    if (!shut.length) return;
+    const before = measure(shut);
+    shut.forEach(decode);
+    resolve(shut, false, before);
   };
   const close = () => {
     clearTimeout(timer);
     timer = setTimeout(() => {
-      if (current === "bin" && !("encoded" in el.dataset) && !el.matches(":hover, :focus-within")) {
-        const before = measure([el]); encode(el); resolve([el], true, before);
-      }
+      if (current !== "bin" || reading(el) || around.get(el).some(reading)) return;
+      const read = group.filter(unit => !("encoded" in unit.dataset) && !reading(unit));
+      if (!read.length) return;
+      const before = measure(read);
+      read.forEach(encode);
+      resolve(read, true, before);
     }, 700);
   };
   el.addEventListener("pointerenter", open);
@@ -117,7 +155,7 @@ function resolve(els, bitsOnly, before) {
   const run = {}, start = performance.now(), length = 650;
   if (before) for (const el of els) if (before.has(el)) hold(el, before.get(el), length + 80);
   const glyph = () => bitsOnly ? (Math.random() < .5 ? "0" : "1") : NOISE[Math.floor(Math.random() * NOISE.length)];
-  const jobs = els.flatMap(textNodes).filter(node => node.data.trim()).map(node => {
+  const jobs = els.flatMap(runOf).filter(node => node.data.trim()).map(node => {
     running.set(node, run);
     return { node, final: node.data, lag: Math.random() * .3 };
   });
@@ -173,6 +211,21 @@ for (const key of keys) {
     setTimeout(() => tune(channel, true), motion.matches ? 0 : 160);
   });
 }
+
+/* ───────── The remote ───────── */
+
+// 1, 2, 3 tune the channels; Backspace rewinds to the top when there is somewhere to rewind from. Left
+// alone while typing, with a modifier held (Ctrl/Cmd+1 switch browser tabs), while a dialog is open
+// (the card collection and the observer have keys of their own) and on key repeat.
+const typing = el => el instanceof Element && el.closest("input, textarea, select, [contenteditable]:not([contenteditable='false'])");
+document.addEventListener("keydown", event => {
+  if (event.defaultPrevented || event.repeat || event.isComposing) return;
+  if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
+  if (typing(event.target) || document.querySelector("dialog[open]")) return;
+  const key = keys[["1", "2", "3"].indexOf(event.key)];
+  if (key) { event.preventDefault(); key.click(); }
+  else if (event.key === "Backspace" && window.scrollY > 4) { event.preventDefault(); rewind(true); }
+});
 
 // Open on the channel from the link, or the one chosen last time.
 let saved = null;

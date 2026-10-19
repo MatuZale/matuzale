@@ -1,6 +1,7 @@
 // The retro layer: an on-screen display like an old TV set's, a burst of static between channels, a CRT
 // switching off and on for the theme, and a VCR rewinding to the top of the page. All of it is decoration
 // laid over the page (aria-hidden); with reduced motion the static and the power animation are skipped.
+// channels.js also rewinds from the keyboard (Backspace).
 // Loaded by channels.js; script.js's theme toggle calls window.crtPower when it is there.
 
 const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -97,8 +98,8 @@ const counter = () => {
   const s = Math.round(window.scrollY / 40);
   return `${Math.floor(s / 3600)}:${String(Math.floor(s / 60) % 60).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 };
-const back = document.getElementById("back-top");
-back?.addEventListener("click", () => {
+// The back-to-top link scrolls by itself; the remote's Backspace asks for the scroll too.
+export function rewind(scroll = false) {
   osd("◀◀ REW", counter(), Infinity);
   let quiet;
   const follow = () => {
@@ -115,4 +116,6 @@ back?.addEventListener("click", () => {
   };
   window.addEventListener("scroll", follow, { passive: true });
   quiet = setTimeout(stop, 1500);
-});
+  if (scroll) window.scrollTo({ top: 0, behavior: motion.matches ? "auto" : "smooth" });
+}
+document.getElementById("back-top")?.addEventListener("click", () => rewind());

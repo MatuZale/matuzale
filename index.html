@@ -78,9 +78,9 @@
       <!-- Language channels, tuned like an old TV (channels.js). -->
       <div class="channel" role="group" aria-label="Language" data-i18n-attr="aria-label:channel.label">
         <span class="channel__tag" aria-hidden="true">CH</span>
-        <button class="channel__key" type="button" data-channel="en" lang="en" title="English" aria-pressed="true">EN</button>
-        <button class="channel__key" type="button" data-channel="pl" lang="pl" title="Polski" aria-pressed="false">PL</button>
-        <button class="channel__key" type="button" data-channel="bin" title="Binary: point at a text to decode it" aria-label="01, binary" aria-pressed="false">01</button>
+        <button class="channel__key" type="button" data-channel="en" lang="en" title="English (key 1)" aria-keyshortcuts="1" aria-pressed="true">EN</button>
+        <button class="channel__key" type="button" data-channel="pl" lang="pl" title="Polski (klawisz 2)" aria-keyshortcuts="2" aria-pressed="false">PL</button>
+        <button class="channel__key" type="button" data-channel="bin" title="Binary: point at a text to decode it (key 3)" aria-label="01, binary" aria-keyshortcuts="3" aria-pressed="false">01</button>
       </div>
       <!-- A small CRT set: its screen glows in the light theme and goes dark in the dark one. -->
       <button class="icon-btn tv-btn" id="theme-toggle" type="button" aria-label="Toggle light / dark theme">
@@ -854,7 +854,7 @@
   </footer>
 
   <!-- A VCR key: rewinds to the top of the page (retro.js shows the tape counter on screen). -->
-  <a class="back-top" id="back-top" href="#top" aria-label="Rewind to the top" data-i18n-attr="aria-label:backtop" inert>
+  <a class="back-top" id="back-top" href="#top" aria-label="Rewind to the top" aria-keyshortcuts="Backspace" data-i18n-attr="aria-label:backtop" inert>
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5 6 10.5h12zM12 12.5l-6 6h12z" /></svg>
     <span class="back-top__label" aria-hidden="true">REW</span>
   </a>
