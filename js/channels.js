@@ -232,15 +232,15 @@ showAV();
 
 /* ───────── CH 04: Spacewar! (AV, desktop only) ───────── */
 
-// Tuned like any other channel: static, the channel on screen over the machine as it warms up and, when
-// it is switched off, static again, the channel you were on and the page's text resolving out of noise.
+// Tuned like any other channel: static, the channel on screen over the machine as it warms up and, as its
+// tube goes dark, static again, the channel you were on and the page's text resolving out of noise.
 function playSpacewar() {
   if (!crtOn() || !desktop.matches) return;
   staticBurst();
   import("./spacewar.js").then(module => module.openSpacewar()).then(machine => {
     staticBurst();
     osd("CH 04", "SPACEWAR!");
-    machine.addEventListener("close", backFromSpacewar, { once: true });
+    machine.addEventListener("poweroff", backFromSpacewar, { once: true });
   }).catch(error => console.error(error));
 }
 function backFromSpacewar() {

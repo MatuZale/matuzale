@@ -101,7 +101,7 @@ function makeShip(kind, x, y) {
 
 /* ───────── The game ───────── */
 
-let dialog, canvas, ctx, screen, picture, beam, panel, scopes, boxes, scoreEl, dpr = 1, closing = false;
+let dialog, canvas, ctx, screen, picture, beam, panel, scopes, boxes, scoreEl, dpr = 1, closing = false, tunedAway = false;
 let state = "title", players = 1, round = 1, score = 0, wins = [0, 0], roundTime = 0, timer = 0, message = "";
 let ships = [], torps = [], sparks = [], stars = [], paused = false, raf = 0, last = 0, acc = 0, refresh = 0;
 const held = new Set(), tapped = new Set();
@@ -535,41 +535,50 @@ function wireKnob() {
 
 // The tube switching on draws a bright line out and opens the picture from it; switching off folds the
 // picture into the line and the line into a dot, as the page's CRT does (retro.js).
+const OFF = 480, DOT = .75 * OFF;            // ms: the whole switch-off, and the moment the picture is a dot
 function tube(on) {
   const easing = "cubic-bezier(.6, 0, .4, 1)";
   [picture, beam].forEach(el => el.getAnimations().forEach(a => a.cancel()));
   sound.power(on, on && !motion.matches ? .3 : 0);
-  if (motion.matches) return Promise.resolve();
+  if (motion.matches) return;
   if (on) {
     const timing = { duration: 560, delay: 300, easing, fill: "backwards" };
     picture.animate([{ transform: "scaleY(.004)" }, { transform: "scaleY(.004)", offset: .4 }, { transform: "none" }], timing);
-    return beam.animate([
+    beam.animate([
       { opacity: 1, transform: "scaleX(0)" }, { opacity: 1, transform: "scaleX(1)", offset: .4 },
       { opacity: .9, transform: "scaleX(1) scaleY(6)", offset: .55 }, { opacity: 0, transform: "scaleX(1) scaleY(40)" },
-    ], timing).finished;
+    ], timing);
+    return;
   }
-  const timing = { duration: 620, easing, fill: "forwards" };
+  const timing = { duration: OFF, easing, fill: "forwards" };
   picture.animate([{ transform: "none" }, { transform: "scaleY(.004)", offset: .4 }, { transform: "scale(0, .004)" }], timing);
-  return beam.animate([
+  beam.animate([
     { opacity: 0, transform: "scaleX(1)" }, { opacity: 1, transform: "scaleX(1)", offset: .35 },
-    { opacity: 1, transform: "scaleX(.012)", offset: .75 }, { opacity: 0, transform: "scaleX(0)" },
-  ], timing).finished;
+    { opacity: 1, transform: "scaleX(.012)", offset: DOT / OFF }, { opacity: 0, transform: "scaleX(0)" },
+  ], timing);
 }
-// Power (or Esc): the tube and the scopes go dark, then the machine leaves and the page comes back into focus.
+// Power (or Esc): the tube and the scopes go dark and, the moment the dot is gone, the TV changes channel:
+// the static runs over the machine as it leaves and the page comes back into focus beneath it.
 function switchOff() {
   if (closing || !dialog.open) return;
   closing = true;
   paused = true;
   dialog.classList.add("is-shutting");
   sound.hush();
-  const off = () => { sound.staticHiss(); dialog.close(); };
-  tube(false)
-    .then(() => {
-      if (motion.matches) return;
-      dialog.classList.add("is-off");
-      return new Promise(done => setTimeout(done, 300));
-    })
-    .then(off, off);
+  tube(false);
+  if (motion.matches) { tuneAway(); dialog.close(); return; }
+  setTimeout(() => {
+    tuneAway();
+    dialog.classList.add("is-off");
+    setTimeout(() => dialog.close(), 420);    // as long as the static lasts
+  }, DOT);
+}
+// Once per session, also when the dialog is closed some other way.
+function tuneAway() {
+  if (tunedAway) return;
+  tunedAway = true;
+  sound.staticHiss();
+  dialog.dispatchEvent(new Event("poweroff"));
 }
 
 /* ───────── The console ───────── */
@@ -679,6 +688,8 @@ function build() {
   });
   dialog.addEventListener("cancel", event => { event.preventDefault(); switchOff(); });
   dialog.addEventListener("close", () => {
+    tuneAway();
+    tunedAway = false;
     cancelAnimationFrame(raf); raf = 0;
     held.clear(); tapped.clear();
     panel.hidden = true; paused = false;
@@ -691,7 +702,7 @@ function build() {
   });
 }
 
-// Opens the console and returns it; it fires "close" when switched off.
+// Opens the console and returns it; switched off, it fires "poweroff" as its tube goes dark, then "close".
 export async function openSpacewar() {
   await loadStyles();
   if (!dialog) build();

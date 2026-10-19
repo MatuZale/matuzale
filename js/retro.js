@@ -14,10 +14,12 @@ function layer(className) {
   return el;
 }
 // An open modal (the Spacewar! console) sits in the top layer, over everything else on the page, so the
-// display and the static move into it while it is open.
+// display and the static move into it while it is open, and back to the page when it closes.
 const lift = el => {
   const host = document.querySelector("dialog:modal") ?? document.body;
-  if (el.parentNode !== host) host.append(el);
+  if (el.parentNode === host) return;
+  host.append(el);
+  if (host !== document.body) host.addEventListener("close", () => el.parentNode === host && document.body.append(el), { once: true });
 };
 
 /* ───────── On-screen display ───────── */
