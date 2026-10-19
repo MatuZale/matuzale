@@ -6,8 +6,9 @@
 // noise. Nothing around it should jump meanwhile: the bits are spaced to the width of the text they stand
 // for, and a block that changes keeps its box, easing to the new size while its text settles.
 // The choice is remembered; ?lang=pl (or en, bin) opens a channel from a link. AV, beside them, puts the
-// whole page on a worn CRT with any of the channels. Like a remote, keys 1, 2 and 3 tune the channels,
-// 0 switches AV and Backspace rewinds to the top.
+// whole page on a worn CRT with any of the channels; on a computer, AV also brings CH 04, Spacewar!
+// (spacewar.js, loaded when first played). Like a remote, keys 1, 2 and 3 tune the channels, 0 switches AV,
+// 4 plays Spacewar! on AV and Backspace rewinds to the top.
 
 import { PL } from "./lang/pl.js";
 import { osd, staticBurst, rewind, crtOn, setCRT } from "./retro.js";
@@ -18,6 +19,8 @@ const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const description = document.querySelector('meta[name="description"]');
 const keys = [...document.querySelectorAll("[data-channel]")];
 const av = document.querySelector("[data-av]");
+const gameKey = document.querySelector("[data-game]");
+const desktop = window.matchMedia("(hover: hover) and (pointer: fine) and (min-width: 900px)");
 const blocks = [...document.querySelectorAll("[data-i18n]")];
 const labelled = [...document.querySelectorAll("[data-i18n-attr]")];
 const pairs = el => el.dataset.i18nAttr.split(";").map(pair => pair.split(":"));
@@ -227,6 +230,15 @@ av?.addEventListener("click", switchAV);
 document.addEventListener("crtchange", showAV);
 showAV();
 
+/* ───────── CH 04: Spacewar! (AV, desktop only) ───────── */
+
+function playSpacewar() {
+  if (!crtOn() || !desktop.matches) return;
+  osd("CH 04", "SPACEWAR!");
+  import("./spacewar.js").then(module => module.openSpacewar()).catch(error => console.error(error));
+}
+gameKey?.addEventListener("click", playSpacewar);
+
 /* ───────── The remote ───────── */
 
 // 1, 2, 3 tune the channels, 0 switches AV; Backspace rewinds to the top when there is somewhere to go. Left
@@ -240,6 +252,7 @@ document.addEventListener("keydown", event => {
   const key = keys[["1", "2", "3"].indexOf(event.key)];
   if (key) { event.preventDefault(); key.click(); }
   else if (event.key === "0" && av) { event.preventDefault(); switchAV(); }
+  else if (event.key === "4" && crtOn() && desktop.matches) { event.preventDefault(); playSpacewar(); }
   else if (event.key === "Backspace" && window.scrollY > 4) { event.preventDefault(); rewind(true); }
 });
 

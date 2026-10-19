@@ -77,6 +77,12 @@ html[data-channel-pending] body { visibility: hidden; }
 /* AV sits apart from the language channels: a different input, not another station. */
 .channel__key--av { margin-left: 5px; position: relative; }
 .channel__key--av::before { content: ""; position: absolute; left: -5px; top: 3px; bottom: 3px; width: 1px; background: var(--retro-bezel-edge); }
+/* CH 04 (Spacewar!) only shows up on the AV input, on a computer with a keyboard and mouse. */
+.channel__key--game { display: none; }
+@media (hover: hover) and (pointer: fine) and (min-width: 900px) {
+  html.is-crt .channel__key--game { display: inline-block; animation: game-key-in .8s steps(2, end) 1; }
+}
+@keyframes game-key-in { 0%, 50% { opacity: 0; } 25%, 75%, 100% { opacity: 1; } }
 @media (max-width: 420px) { .channel__tag { display: none; } .channel { padding-left: 5px; } }
 
 /* ───────── The theme switch: a small CRT set ───────── */
