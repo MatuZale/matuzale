@@ -14,11 +14,13 @@
 // ripple, a cartoon of a gravitational wave slowed right down so it can be seen.
 //
 // And, very rarely, a culmination: more and more matter gathers into a disk round the hole, the view sinks
-// to 10° above it and closes in, the sheet falls away and the picture becomes Jean-Pierre Luminet's 1979
-// image of a black hole, computed his way (luminet.js) and plotted dot by dot as he drew it; then everything
-// settles back as it was. Loaded by script.js when Journey comes near; it animates only on screen.
+// to 10° above it and closes in, and the sheet falls away while every particle of the disk is shown where
+// its light reaches us round the hole (luminet.js): the disk's far side rises over the hole, a thin ring
+// hugs the shadow, the side turning towards us shines. Left to glow like an exposure as they orbit, the
+// particles build up Jean-Pierre Luminet's 1979 picture of a black hole; then everything settles back.
+// Loaded by script.js when Journey comes near; it animates only on screen.
 
-import { makePlate, PLATE } from "./luminet.js";
+import { makeLens } from "./luminet.js";
 
 const M = .5;
 const SHEET = 32;                     // the sheet runs to ±SHEET rₛ; it has faded out by r ≈ 30
@@ -42,12 +44,14 @@ const PLANET_MASS = .08, HEAVY_MASS = .3, SOFT = .5, SWAY = .35;
 // far below light, so the ripple can be watched), period of its ringing (seconds) and height.
 const HEAVY_DEPTH = 2.6, HEAVY_SIZE = .7, WAVE_SPEED = 6, WAVE_PERIOD = .9, WAVE_HEIGHT = .9;
 // The culmination: seconds on screen before the first and between them; the low view, 10° above the sheet,
-// closer in and moved a little to the right, away from the timeline's text; and its timeline in seconds:
-// matter gathers, the view sinks and closes in, the plate is plotted, held and faded, and the view rises.
+// closer in and moved a little to the right, away from the timeline's text; how many grains of fine matter
+// make the disk; and its timeline in seconds: matter gathers, the view sinks and closes in while the lens
+// takes over, the picture holds, and the view rises again.
 const SHOW_FIRST = [200, 330], SHOW_AGAIN = [700, 1200];
-const LOW = 10 * Math.PI / 180, CLOSE = 1.3, PAN = .06;
-const T = { gather: 16, dive: [11, 17], sheetOut: [13, 17], dim: [16, 19.5], plot: [16.5, 20], caption: [20, 21.5],
-  fade: [27, 30], rise: [28.5, 34], sheetIn: [30, 34], undim: [30, 33], end: 34 };
+const LOW = 10 * Math.PI / 180, CLOSE = 1.3, PAN = .07, DUST = 1300;
+const T = { gather: 16, dive: [11, 17], lens: [12, 17], sheetOut: [13, 17], dim: [15, 18], caption: [18.5, 20],
+  captionOut: [26.5, 28], unlens: [28, 33], rise: [28.5, 34], dustOut: [30.5, 33.5], sheetIn: [30, 34],
+  undim: [30, 33], end: 34 };
 
 const fade = r => { const t = Math.min(1, Math.max(0, (r - 7) / 23)); return 1 - t * t * (3 - 2 * t); };
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -186,8 +190,8 @@ export function startSpacetime(holder) {
   let ripple = [];                                  // what the heavy visitor sends out: {t, amp, phi}
   let flashes = [];                                 // something swallowed by a planet or the visitor: {by, t, body}
   let clock = 0, nextSpawn = 0, nextPlanet = 4, nextComet = rand(12, 25), nextHeavy = rand(...HEAVY_FIRST);
-  let show = null, nextShow = rand(...SHOW_FIRST), dim = 1;     // the culmination: {t, plate, spawnAt}
-  let plateCanvas = null, plateDrawn = 0;
+  let show = null, nextShow = rand(...SHOW_FIRST), dim = 1;     // the culmination: {t, lens, ready, spawnAt}
+  let dust = [], exposure = null, peak = 0;                       // its fine matter, and the plate it glows on
   const heavy = () => bodies.find(b => b.alive && b.kind === "heavy");
   const absolute = b => [b.pos[0] + hole.pos[0], b.pos[1] + hole.pos[1], b.pos[2] + CENTRE];
 
@@ -318,8 +322,10 @@ export function startSpacetime(holder) {
   function step(dt) {
     clock += dt;
     const alive = kind => bodies.some(b => b.alive && b.kind === kind);
-    if (show) gather();
-    else {
+    if (show) {
+      gather();
+      for (const d of dust) d.a += d.w * dt * PACE;
+    } else {
       if (clock >= nextSpawn && bodies.filter(b => b.alive && (b.kind === "matter" || b.kind === "light")).length < MOST) {
         bodies.push(spawnParticle()); nextSpawn = clock + SPAWN * rand(.7, 1.3);
       }
@@ -373,20 +379,29 @@ export function startSpacetime(holder) {
 
   function beginShow() {
     if (show) return;
-    show = { t: 0, plate: makePlate(), spawnAt: 0 };
-    plateCanvas = null;
+    show = { t: 0, lens: makeLens(), ready: false, spawnAt: 0 };
+    dust = []; peak = 0;
   }
-  // Matter arrives faster and faster, from every 1.2 s to every 0.08 s (some 65 in all); the disk's matter
-  // lasts until the picture has taken its place.
+  // Matter arrives faster and faster, from every 1.2 s to every 0.08 s (some 65 bodies in all), and the fine
+  // matter with it, up to DUST grains; the disk's bodies last until the lens has taken over.
   function gather() {
+    const t = Math.min(show.t, T.gather), q = .07;
+    const due = Math.round(DUST * (q ** (-t / T.gather) - 1) / (1 / q - 1));
+    while (dust.length < due) dust.push(grain());
     if (show.t >= T.gather || show.t < show.spawnAt) return;
     bodies.push(spawnGathering(T.dim[1] + 1 - show.t + rand(0, 1)));
-    show.spawnAt = show.t + 1.2 * .07 ** (show.t / T.gather);
+    show.spawnAt = show.t + 1.2 * q ** (show.t / T.gather);
   }
-  // The show's clock, in seconds; it waits for the plate if tracing it took longer than gathering.
+  // A grain of the disk on a circular orbit (an exact solution of the equations of motion above), even over
+  // the disk's area, turning the same way as the gathering matter.
+  function grain() {
+    const r = Math.sqrt(rand(3.2 ** 2, 10.5 ** 2));
+    return { r, a: rand(0, 2 * Math.PI), w: -Math.sqrt(M / (r - 3 * M)) / r, z: rand(-.03, .03) * r, born: show.t };
+  }
+  // The show's clock, in seconds; it waits for the lens's table if tracing it took longer than gathering.
   function runShow(dt) {
-    const ready = show.plate.work(show.t < T.plot[0] ? 4 : 12);
-    if (show.t < T.plot[0] || ready) show.t = Math.min(show.t + dt, ready ? Infinity : T.plot[0]);
+    if (!show.ready) show.ready = show.lens.work(4);
+    if (show.t < T.lens[0] || show.ready) show.t = Math.min(show.t + dt, show.ready ? Infinity : T.lens[0]);
     const t = show.t, low = ease(t, T.dive) - ease(t, T.rise);
     cam.tilt = ISO + (LOW - ISO) * low;
     cam.zoom = 1 + (CLOSE - 1) * low;
@@ -397,43 +412,76 @@ export function startSpacetime(holder) {
     if (t >= T.end) endShow();
   }
   function endShow() {
-    show = null; plateCanvas = null; dim = 1;
+    show = null; dust = []; exposure = null; dim = 1;
     cam.tilt = ISO; cam.zoom = 1; cam.pan = 0; aim();
     still.style.opacity = "";
     nextShow = clock + rand(...SHOW_AGAIN);
   }
   const viewMoving = () => !!show && (show.t > T.dive[0] && show.t < T.sheetOut[1] || show.t > T.rise[0]);
 
-  // The plate, plotted dot by dot into its own canvas at the low view's scale (luminet.js gives it in M).
-  const perM = () => COS30 * Math.SQRT2 * S * CLOSE / 2;
-  function plot(count) {
-    const dots = show.plate.dots, k = perM(), size = Math.max(1, 1.3 * dpr);
-    if (!plateCanvas) {
-      plateCanvas = Object.assign(document.createElement("canvas"), {
-        width: Math.ceil((PLATE.right - PLATE.left) * k), height: Math.ceil((PLATE.top - PLATE.bottom) * k) });
-      plateDrawn = 0;
+  // The disk's fine matter. From the usual view, dots where the grains are; as the view sinks, each moves to
+  // where its light reaches us round the hole, with a second image beyond it, drawn as often as its light
+  // and the lens's spreading of it allow (a squeezed image gets few dots, as its light is spread thin), and
+  // left to glow a while like an exposure on a plate, so the picture builds up as the grains orbit.
+  const sky = new Float64Array(6), skyR = new Float64Array(6), skyA = new Float64Array(6);
+  function drawDust(dt) {
+    const t = show.t, lensed = show.ready ? ease(t, T.lens) - ease(t, T.unlens) : 0, gone = 1 - ease(t, T.dustOut);
+    if (!exposure || exposure.width !== live.width || exposure.height !== live.height) {
+      exposure = Object.assign(document.createElement("canvas"), { width: live.width, height: live.height });
     }
-    const c = plateCanvas.getContext("2d");
-    c.fillStyle = colours.text;
-    for (; plateDrawn < count; plateDrawn++) {
-      const x = (dots[2 * plateDrawn] - PLATE.left) * k, y = (PLATE.top - dots[2 * plateDrawn + 1]) * k;
-      c.fillRect(x - size / 2, y - size / 2, size, size);
+    const g = exposure.getContext("2d");
+    if (lensed < .02) g.clearRect(0, 0, exposure.width, exposure.height);
+    else {
+      g.globalCompositeOperation = "destination-out";
+      g.fillStyle = `rgba(0,0,0,${1 - Math.exp(-dt / (.9 * lensed))})`;
+      g.fillRect(0, 0, exposure.width, exposure.height);
+      g.globalCompositeOperation = "source-over";
     }
-  }
-  function drawPlate() {
-    const t = show.t, dots = show.plate.dots;
-    if (!dots || t < T.plot[0]) return;
-    const p = Math.min(1, (t - T.plot[0]) / (T.plot[1] - T.plot[0]));
-    plot(Math.round(dots.length / 2 * (1 - (1 - p) ** 1.6)));
-    const c = ctx, k = perM() * cam.zoom / CLOSE, [hx, hy] = px(0, 0, CENTRE);
-    c.globalAlpha = 1 - ease(t, T.fade);
-    c.drawImage(plateCanvas, hx + PLATE.left * k, hy - PLATE.top * k, (PLATE.right - PLATE.left) * k, (PLATE.top - PLATE.bottom) * k);
+    g.fillStyle = colours.text;
+    const ct = Math.cos(cam.tilt), st = Math.sin(cam.tilt), R2 = Math.SQRT2, size = Math.max(1.2, 1.5 * dpr);
+    const [hx, hy] = px(hole.pos[0], hole.pos[1], CENTRE), perM = COS30 * R2 * unit / 2;
+    // The lens works in M (rₛ = 2M), on the sky as seen down the camera's line of sight; the disk spins
+    // clockwise seen from above (ŵ = −z).
+    const look = (rM, a, out) => {
+      const c = Math.cos(a), s = Math.sin(a);
+      return show.lens.images(rM, ct * (c + s) / R2, (c - s) / R2, -st * (c + s) / R2, -(ct / R2) * (c - s), out);
+    };
+    let brightest = 0;
+    for (const d of dust) {
+      const born = Math.min(1, (t - d.born) / 1.5) * gone;
+      const at = [d.r * Math.cos(d.a) + hole.pos[0], d.r * Math.sin(d.a) + hole.pos[1], d.z + CENTRE], [sx, sy] = px(...at);
+      const plain = (1 - lensed) * .55 * visibility(at);
+      if (lensed < .02) { g.globalAlpha = born * plain; g.fillRect(sx - size / 2, sy - size / 2, size, size); continue; }
+      const rM = 2 * d.r, seen = look(rM, d.a, sky), seenR = look(rM + .1, d.a, skyR), seenA = look(rM, d.a + .004, skyA);
+      for (const [bit, i] of [[1, 0], [2, 3]]) {
+        if (!(seen & bit)) { if (bit === 1) { g.globalAlpha = born * plain; g.fillRect(sx - size / 2, sy - size / 2, size, size); } continue; }
+        brightest = Math.max(brightest, sky[i + 2]);
+        let p = 0;
+        if (seenR & seenA & bit && peak) {
+          const ux = skyR[i] - sky[i], uy = skyR[i + 1] - sky[i + 1], vx = skyA[i] - sky[i], vy = skyA[i + 1] - sky[i + 1];
+          const spread = Math.abs(ux * vy - uy * vx) / (rM * .1 * .004) / st;   // sky area per disk area, against plain projection
+          p = Math.min(1, .45 * spread * Math.sqrt(sky[i + 2] / peak));
+        }
+        const lit = Math.random() < p ? .9 : 0, lx = hx + sky[i] * perM, ly = hy - sky[i + 1] * perM;
+        const x = bit === 1 ? sx + (lx - sx) * lensed : lx, y = bit === 1 ? sy + (ly - sy) * lensed : ly;
+        g.globalAlpha = born * (bit === 1 ? plain + lensed * lit : lensed * lit);
+        if (g.globalAlpha > .01) g.fillRect(x - size / 2, y - size / 2, size, size);
+      }
+    }
+    peak = Math.max(peak * .995, brightest);
+    g.globalAlpha = 1;
+    ctx.drawImage(exposure, 0, 0);
+
     const caption = document.documentElement.lang === "pl"
-      ? "J.-P. Luminet, 1979 · pierwszy obraz czarnej dziury" : "J.-P. Luminet, 1979 · the first picture of a black hole";
-    c.globalAlpha = .55 * ease(t, T.caption) * (1 - ease(t, [T.fade[0] - .5, T.fade[1] - 1.5]));
-    c.fillStyle = colours.text; c.font = `500 ${11 * dpr}px ${colours.font}`; c.textAlign = "center"; c.textBaseline = "middle";
-    c.fillText(caption, hx, hy - PLATE.bottom * k + 18 * dpr);
-    c.globalAlpha = 1;
+      ? "te cząstki w soczewce dziury · jak u J.-P. Luminet'a, 1979"
+      : "these particles through the hole's lens · after J.-P. Luminet, 1979";
+    ctx.globalAlpha = .55 * ease(t, T.caption) * (1 - ease(t, T.captionOut));
+    if (ctx.globalAlpha > .01) {
+      ctx.fillStyle = colours.text; ctx.font = `500 ${11 * dpr}px ${colours.font}`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      const half = ctx.measureText(caption).width / 2 + 16 * dpr;
+      ctx.fillText(caption, Math.min(hx, live.width - half), hy + 11.5 * perM + 12 * dpr);
+    }
+    ctx.globalAlpha = 1;
   }
 
   /* ───────── Drawing the bodies ───────── */
@@ -509,7 +557,7 @@ export function startSpacetime(holder) {
     c.beginPath(); c.arc(x, y, r * 1.08, 0, 2 * Math.PI); c.stroke();
   }
 
-  function drawLive() {
+  function drawLive(dt = 0) {
     const c = ctx, { dark } = colours;
     c.clearRect(0, 0, live.width, live.height);
     c.lineCap = "round";
@@ -536,7 +584,7 @@ export function startSpacetime(holder) {
       }
     }
     c.globalAlpha = 1;
-    if (show) drawPlate();
+    if (show && dust.length) drawDust(dt);
   }
 
   // Start with a particle and a planet already some way round, so the first view has paths in it.
@@ -554,14 +602,14 @@ export function startSpacetime(holder) {
     // While the visitor is about, or the view moves, the sheet is redrawn every frame; then once more.
     const moving = lively() || viewMoving();
     if (moving || !settled) { drawStill(); settled = !moving; }
-    drawLive();
+    drawLive(dt);
   }
   function update() {
     const run = visible && !motion.matches;
     if (run && !raf) { last = performance.now(); raf = requestAnimationFrame(frame); }
     if (!run && raf) { cancelAnimationFrame(raf); raf = 0; }
   }
-  function rebuild() { readColours(); layout(); plateCanvas = null; drawStill(); drawLive(); }
+  function rebuild() { readColours(); layout(); exposure = null; drawStill(); drawLive(); }
 
   // For trying things out from the console: document.querySelector(".spacetime").summon("heavy"), or
   // summon("luminet") for the culmination.
