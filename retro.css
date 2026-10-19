@@ -1,0 +1,137 @@
+/* The retro layer (channels.js, retro.js): language channels keyed like an old TV set's, a small CRT for the
+   theme switch, a VCR key for back-to-top, and the on-screen display, static and power effects laid over the
+   page. Dark plastic with a green phosphor light in the dark theme; beige plastic and an amber lamp in the
+   light one. */
+
+:root {
+  --retro-bezel: linear-gradient(#efe8d6, #dcd1b6);
+  --retro-bezel-edge: #c4b896;
+  --retro-key: linear-gradient(#f8f3e6, #e3d9bf);
+  --retro-key-edge: #cdbf9c;
+  --retro-key-text: #6e6553;
+  --retro-key-drop: #b3a581;
+  --retro-lit: #b4530a;
+  --retro-lit-glow: #ff9a3c66;
+  --retro-lit-key: linear-gradient(#fcebd0, #f2d6a8);
+  --retro-lit-edge: #d8a463;
+  --retro-screen: #fff2c8;
+  --retro-screen-glow: #ffcf6e;
+}
+:root[data-theme="dark"] {
+  --retro-bezel: linear-gradient(#1c1b26, #0d0c14);
+  --retro-bezel-edge: #2d2b3b;
+  --retro-key: linear-gradient(#2a2838, #191823);
+  --retro-key-edge: #312f42;
+  --retro-key-text: #8f8bab;
+  --retro-key-drop: #07060c;
+  --retro-lit: #8dffb0;
+  --retro-lit-glow: #4dff8a99;
+  --retro-lit-key: linear-gradient(#13241a, #0b160f);
+  --retro-lit-edge: #2e5b3b;
+  --retro-screen: #08070f;
+  --retro-screen-glow: #4dff8a;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --retro-bezel: linear-gradient(#1c1b26, #0d0c14);
+    --retro-bezel-edge: #2d2b3b;
+    --retro-key: linear-gradient(#2a2838, #191823);
+    --retro-key-edge: #312f42;
+    --retro-key-text: #8f8bab;
+    --retro-key-drop: #07060c;
+    --retro-lit: #8dffb0;
+    --retro-lit-glow: #4dff8a99;
+    --retro-lit-key: linear-gradient(#13241a, #0b160f);
+    --retro-lit-edge: #2e5b3b;
+    --retro-screen: #08070f;
+    --retro-screen-glow: #4dff8a;
+  }
+}
+
+/* Held back while the page opens on another channel (see the inline script in <head>). */
+html[data-channel-pending] body { visibility: hidden; }
+
+/* ───────── Channel keys ───────── */
+
+.channel {
+  display: inline-flex; align-items: center; gap: 3px; padding: 4px 5px 4px 7px; border-radius: 10px;
+  background: var(--retro-bezel); border: 1px solid var(--retro-bezel-edge);
+  box-shadow: inset 0 1px 0 #ffffff1f, inset 0 -2px 5px #0000002e, 0 1px 2px #0000002e;
+  font: 400 1.15rem/1 "VT323", var(--font-mono);
+}
+.channel__tag { margin-right: 2px; color: var(--retro-key-text); opacity: .75; font-size: .95rem; letter-spacing: .06em; }
+.channel__key {
+  min-width: 31px; height: 27px; padding: 1px 5px 0; border-radius: 5px; cursor: pointer;
+  background: var(--retro-key); border: 1px solid var(--retro-key-edge); color: var(--retro-key-text);
+  font: inherit; letter-spacing: .05em;
+  box-shadow: 0 2px 0 var(--retro-key-drop), inset 0 1px 0 #ffffff1c;
+  transition: transform .08s, box-shadow .08s, color .2s;
+}
+.channel__key:hover { color: var(--text); }
+.channel__key:active { transform: translateY(2px); box-shadow: 0 0 0 var(--retro-key-drop); }
+.channel__key[aria-pressed="true"] {
+  color: var(--retro-lit); text-shadow: 0 0 6px var(--retro-lit-glow);
+  background: var(--retro-lit-key); border-color: var(--retro-lit-edge);
+  transform: translateY(1px); box-shadow: 0 1px 0 var(--retro-key-drop), inset 0 0 9px var(--retro-lit-glow);
+}
+@media (max-width: 420px) { .channel__tag { display: none; } .channel { padding-left: 5px; } }
+
+/* ───────── The theme switch: a small CRT set ───────── */
+
+.tv-btn .tv { width: 22px; height: 22px; stroke-width: 1.6; }
+.tv__screen { fill: var(--retro-screen); transition: fill .3s; }
+.tv .i-moon, .tv .i-sun { fill: currentColor; stroke: none; }
+.tv .i-sun { fill: var(--retro-screen-glow); filter: drop-shadow(0 0 2px var(--retro-screen-glow)); }
+@media (hover: hover) { .tv-btn:hover .tv__screen { animation: tv-flicker .5s steps(2, end) 1; } }
+@keyframes tv-flicker { 0% { opacity: 1; } 30% { opacity: .55; } 60% { opacity: .9; } 100% { opacity: 1; } }
+
+/* ───────── Back to top: a VCR key ───────── */
+
+.back-top {
+  width: 50px; height: 46px; border-radius: 10px; gap: 0; align-content: center;
+  background: var(--retro-key); border: 1px solid var(--retro-key-edge); color: var(--retro-key-text);
+  box-shadow: 0 3px 0 var(--retro-key-drop), 0 8px 20px -10px #0000008c, inset 0 1px 0 #ffffff1c;
+}
+.back-top:hover { background: var(--retro-key); border-color: var(--retro-lit-edge); color: var(--retro-lit); box-shadow: 0 3px 0 var(--retro-key-drop), 0 0 14px -4px var(--retro-lit-glow), inset 0 1px 0 #ffffff1c; }
+.back-top:active { translate: 0 2px; box-shadow: 0 1px 0 var(--retro-key-drop); }
+.back-top svg { width: 16px; height: 16px; fill: currentColor; stroke: none; }
+.back-top__label { font: 400 .95rem/.8 "VT323", var(--font-mono); letter-spacing: .12em; }
+
+/* ───────── On-screen display ───────── */
+
+.osd {
+  position: fixed; z-index: 90; top: calc(var(--nav-height, 64px) + clamp(16px, 4vh, 40px)); left: clamp(16px, 4vw, 56px);
+  display: grid; gap: .1em; pointer-events: none; opacity: 0; transition: opacity .18s;
+  font: 400 clamp(2.2rem, 4.6vw, 3.4rem)/.9 "VT323", var(--font-mono); letter-spacing: .06em; color: #f4f4f0;
+  text-shadow: 2px 0 #ff2a5a8c, -2px 0 #28dcff8c, 0 0 2px #000, 0 2px 0 #0009, 0 0 18px #ffffff40;
+}
+.osd.is-on { opacity: 1; animation: osd-jitter 1.2s steps(1, end) infinite; }
+.osd__sub { font-size: .55em; letter-spacing: .12em; }
+.osd__sub:empty { display: none; }
+@keyframes osd-jitter { 0%, 100% { translate: 0 0; } 20% { translate: 1px 0; } 40% { translate: 0 1px; } 70% { translate: -1px 0; } }
+
+/* ───────── Static between channels ───────── */
+
+.vhs { position: fixed; inset: 0; z-index: 95; pointer-events: none; opacity: 0; transition: opacity .12s; overflow: hidden; }
+.vhs.is-on { opacity: .42; }
+.vhs canvas { width: 100%; height: 100%; image-rendering: pixelated; }
+.vhs::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(#0000 0 2px, #00000059 2px 3px); }
+.vhs__band { position: absolute; left: 0; right: 0; top: -20%; height: 16%; background: linear-gradient(#fff0, #ffffffa6 45%, #fff 50%, #ffffffa6 55%, #fff0); filter: blur(1px); }
+.vhs.is-on .vhs__band { animation: vhs-roll .42s linear; }
+@keyframes vhs-roll { to { top: 105%; } }
+
+/* ───────── The theme switch as a CRT: shutters fold the picture, a bright line closes to a dot ───────── */
+
+.crt { position: fixed; inset: 0; z-index: 96; pointer-events: none; display: none; }
+.crt.is-on { display: block; }
+.crt__shutter { position: absolute; left: 0; right: 0; height: 50.5%; background: #05040c; transform: scaleY(0); }
+.crt__shutter--top { top: 0; transform-origin: top; }
+.crt__shutter--bottom { bottom: 0; transform-origin: bottom; }
+.crt__line {
+  position: absolute; left: 0; right: 0; top: 50%; height: 2px; margin-top: -1px; opacity: 0; background: #fff;
+  box-shadow: 0 0 10px 2px #ffffffd9, 0 0 36px 8px #b4c8ff80;
+}
+
+/* ───────── Binary channel ───────── */
+
+html.is-binary [data-encoded] { font-variant-numeric: tabular-nums; }

@@ -2,6 +2,8 @@ document.documentElement.classList.add("js");
 
 const root = document.documentElement;
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+// Labels set from here follow the language channel (channels.js sets <html lang> and fires "channelchange").
+const say = (en, pl) => root.lang === "pl" ? pl : en;
 
 /* ───────── Theme toggle ───────── */
 const themeBtn = document.getElementById("theme-toggle");
@@ -13,16 +15,24 @@ function currentTheme() {
 
 themeBtn.addEventListener("click", () => {
   const next = currentTheme() === "dark" ? "light" : "dark";
-  root.setAttribute("data-theme", next);
-  try { localStorage.setItem("theme", next); } catch (e) { /* storage unavailable */ }
-  updateThemeLabel();
+  const apply = () => {
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("theme", next); } catch (e) { /* storage unavailable */ }
+    updateThemeLabel();
+  };
+  // The little CRT on the button switches the page off (dark) or on (light) when retro.js is loaded.
+  if (window.crtPower) window.crtPower(next === "light", apply);
+  else apply();
 });
 
 function updateThemeLabel() {
-  themeBtn.setAttribute("aria-label", `Switch to ${currentTheme() === "dark" ? "light" : "dark"} theme`);
+  themeBtn.setAttribute("aria-label", currentTheme() === "dark"
+    ? say("Switch to light theme", "Przełącz na jasny motyw")
+    : say("Switch to dark theme", "Przełącz na ciemny motyw"));
 }
 updateThemeLabel();
 systemDark.addEventListener("change", updateThemeLabel);
+document.addEventListener("channelchange", updateThemeLabel);
 
 /* ───────── Nav: section tracking and an accessible mobile disclosure ───────── */
 const nav = document.getElementById("nav");
@@ -40,7 +50,7 @@ function setMenu(open, restoreFocus = false) {
   nav.classList.toggle("is-menu-open", open);
   links.inert = mobileNav.matches && !open;
   burger.setAttribute("aria-expanded", String(open));
-  burger.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+  burger.setAttribute("aria-label", open ? say("Close menu", "Zamknij menu") : say("Open menu", "Otwórz menu"));
   if (restoreFocus) burger.focus();
 }
 
@@ -77,6 +87,7 @@ mobileNav.addEventListener("change", () => {
   updateNavSize();
 });
 setMenu(false);
+document.addEventListener("channelchange", () => setMenu(burger.getAttribute("aria-expanded") === "true"));
 
 function updateNavigation() {
   scrollPending = false;

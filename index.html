@@ -19,8 +19,9 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0a1a'/%3E%3Ctext x='32' y='43' font-family='Arial' font-weight='700' font-size='30' text-anchor='middle' fill='%23ff5ecb'%3ETM%3C/text%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&family=VT323&display=swap" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="retro.css" />
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -48,26 +49,49 @@
       var t = localStorage.getItem("theme");
       if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
     } catch (e) {}
+    // Hold the page back for a moment when it will open on another language channel, so the English
+    // underneath does not flash; channels.js lets it go (or the timeout does).
+    try {
+      var ch = new URLSearchParams(location.search).get("lang") || localStorage.getItem("channel");
+      if (ch === "pl" || ch === "bin") {
+        document.documentElement.setAttribute("data-channel-pending", "");
+        setTimeout(function () { document.documentElement.removeAttribute("data-channel-pending"); }, 2500);
+      }
+    } catch (e) {}
   </script>
 </head>
 <body>
-  <a class="skip" href="#main">Skip to content</a>
+  <a data-i18n="skip" class="skip" href="#main">Skip to content</a>
 
   <header class="nav" id="nav">
-    <a class="nav__brand" href="#top" aria-label="Tomasz Młynik, home" data-text="TM." title="Sometimes the signal slips. Focus here and press G.">TM<span>.</span></a>
-    <nav class="nav__links" id="nav-links" aria-label="Main">
-      <a href="#about">About</a>
-      <a href="#skills">Toolbox</a>
-      <a href="#projects">Projects</a>
+    <a data-i18n-attr="aria-label:nav.home;title:nav.brandHint" class="nav__brand" href="#top" aria-label="Tomasz Młynik, home" data-text="TM." title="Sometimes the signal slips. Focus here and press G.">TM<span>.</span></a>
+    <nav data-i18n-attr="aria-label:nav.label" class="nav__links" id="nav-links" aria-label="Main">
+      <a data-i18n="nav.about" href="#about">About</a>
+      <a data-i18n="nav.skills" href="#skills">Toolbox</a>
+      <a data-i18n="nav.projects" href="#projects">Projects</a>
       <a href="#bentos">BENTOS</a>
-      <a href="#research">Research</a>
-      <a href="#journey">Journey</a>
-      <a href="#contact">Contact</a>
+      <a data-i18n="nav.research" href="#research">Research</a>
+      <a data-i18n="nav.journey" href="#journey">Journey</a>
+      <a data-i18n="nav.contact" href="#contact">Contact</a>
     </nav>
     <div class="nav__actions">
-      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Toggle light / dark theme">
-        <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
-        <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      <!-- Language channels, tuned like an old TV (channels.js). -->
+      <div class="channel" role="group" aria-label="Language" data-i18n-attr="aria-label:channel.label">
+        <span class="channel__tag" aria-hidden="true">CH</span>
+        <button class="channel__key" type="button" data-channel="en" lang="en" title="English" aria-pressed="true">EN</button>
+        <button class="channel__key" type="button" data-channel="pl" lang="pl" title="Polski" aria-pressed="false">PL</button>
+        <button class="channel__key" type="button" data-channel="bin" title="Binary: point at a text to decode it" aria-label="01, binary" aria-pressed="false">01</button>
+      </div>
+      <!-- A small CRT set: its screen glows in the light theme and goes dark in the dark one. -->
+      <button class="icon-btn tv-btn" id="theme-toggle" type="button" aria-label="Toggle light / dark theme">
+        <svg class="tv" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M8.5 2.5 12 6l3.5-3.5" />
+          <rect x="2.5" y="6" width="19" height="14.5" rx="3" />
+          <rect class="tv__screen" x="5" y="8.5" width="11" height="9.5" rx="1.8" />
+          <path d="M19 10.5v.01M19 13.5v.01" />
+          <path class="i-moon" d="M12.2 15.6a2.7 2.7 0 1 1-1.9-4.9 2.1 2.1 0 0 0 1.9 4.9Z" />
+          <circle class="i-sun" cx="10.5" cy="13.25" r="1.6" />
+        </svg>
       </button>
       <button class="icon-btn nav__burger" id="burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
@@ -82,25 +106,25 @@
       <canvas id="attractor" aria-hidden="true"></canvas>
       <div class="hero__shade" aria-hidden="true"></div>
       <div class="wrap hero__inner">
-        <p class="eyebrow reveal"><span class="dot" aria-hidden="true"></span><span>Lead Software Engineer · <a href="https://embeddedsystems.do/" target="_blank" rel="noopener">EmbeddedSystems.do ↗</a> · Gdańsk, Poland</span></p>
+        <p class="eyebrow reveal"><span class="dot" aria-hidden="true"></span><span data-i18n="hero.eyebrow">Lead Software Engineer · <a href="https://embeddedsystems.do/" target="_blank" rel="noopener">EmbeddedSystems.do ↗</a> · Gdańsk, Poland</span></p>
         <h1 class="hero__title reveal">
           Tomasz<br />Młynik<span class="phd">, PhD</span>
         </h1>
-        <p class="hero__lead reveal">
+        <p data-i18n="hero.lead" class="hero__lead reveal">
           Physicist turned <strong>data &amp; software engineer</strong>. I take messy scientific and sensor
           data and turn it into pipelines, dashboards and tools that people actually use. So far that has
           taken me from quantum-information theory to an open-source buoy in the Baltic Sea.
         </p>
         <div class="hero__cta reveal">
-          <a class="btn btn--primary" href="#contact">Get in touch</a>
-          <a class="btn btn--ghost" href="#projects">See my work</a>
+          <a data-i18n="hero.cta.contact" class="btn btn--primary" href="#contact">Get in touch</a>
+          <a data-i18n="hero.cta.work" class="btn btn--ghost" href="#projects">See my work</a>
         </div>
-        <ul class="hero__stats reveal" aria-label="Highlights">
-          <li><strong>PhD</strong><span>Physics, Univ. of Gdańsk, 2024</span></li>
-          <li><strong>5</strong><span>papers &amp; preprints, 4 in quantum information</span></li>
-          <li><strong>Python · SQL · AWS</strong><span>day-to-day toolbox</span></li>
+        <ul data-i18n-attr="aria-label:hero.statsLabel" class="hero__stats reveal" aria-label="Highlights">
+          <li><strong>PhD</strong><span data-i18n="hero.stat1">Physics, Univ. of Gdańsk, 2024</span></li>
+          <li><strong>5</strong><span data-i18n="hero.stat2">papers &amp; preprints, 4 in quantum information</span></li>
+          <li><strong>Python · SQL · AWS</strong><span data-i18n="hero.stat3">day-to-day toolbox</span></li>
         </ul>
-        <p class="hero__hint">The background is a live <a href="#art">Clifford attractor</a>. Move your mouse to bend it.</p>
+        <p data-i18n="hero.hint" class="hero__hint">The background is a live <a href="#art">Clifford attractor</a>. Move your mouse to bend it.</p>
       </div>
     </section>
 
@@ -114,35 +138,35 @@
       <div class="wrap about">
         <div class="about__aside">
           <figure class="about__photo reveal">
-            <img src="assets/profile.jpg" alt="Portrait of Tomasz Młynik" width="720" height="720" loading="lazy" />
+            <img data-i18n-attr="alt:about.alt" src="assets/profile.jpg" alt="Portrait of Tomasz Młynik" width="720" height="720" loading="lazy" />
           </figure>
-          <div class="about-terminal reveal" role="group" aria-label="A few things about me, in terminal form">
+          <div data-i18n-attr="aria-label:about.terminal" class="about-terminal reveal" role="group" aria-label="A few things about me, in terminal form">
             <div class="about-terminal__bar"><span class="about-terminal__lights" aria-hidden="true"><i></i><i></i><i></i></span><span>tomasz@gdansk: ~</span><span aria-hidden="true">⌘</span></div>
             <div class="about-terminal__body">
               <p class="about-terminal__command"><span aria-hidden="true">❯</span> whoami</p>
-              <p>PhD in Physics <span class="about-terminal__arrow">→</span> software engineer<br />Python-first. Environmental &amp; IoT data.</p>
+              <p data-i18n="about.whoami">PhD in Physics <span class="about-terminal__arrow">→</span> software engineer<br />Python-first. Environmental &amp; IoT data.</p>
               <p class="about-terminal__command"><span aria-hidden="true">❯</span> cat after-hours.txt</p>
-              <p>Fractals. Strange attractors.<br />Mathematical rabbit holes.</p>
+              <p data-i18n="about.hours">Fractals. Strange attractors.<br />Mathematical rabbit holes.</p>
               <span class="about-terminal__prompt" aria-hidden="true">❯ <span class="about-terminal__cursor"></span></span>
             </div>
           </div>
         </div>
         <div class="about__text">
-          <p class="kicker reveal">About</p>
-          <h2 class="reveal">From <em>Hilbert spaces</em> to production data<span class="end-dot">.</span></h2>
-          <p class="reveal">
+          <p data-i18n="about.kicker" class="kicker reveal">About</p>
+          <h2 data-i18n="about.title" class="reveal">From <em>Hilbert spaces</em> to production data<span class="end-dot">.</span></h2>
+          <p data-i18n="about.p1" class="reveal">
             I spent five years in quantum-information research at the University of Gdańsk, learning to turn
             abstract questions into results that anyone can reproduce. Along the way I wrote tools in Python
             and MATLAB, solved a lot of semidefinite programs and presented my work in Seoul and Kyoto.
           </p>
-          <p class="reveal">
+          <p data-i18n="about.p2" class="reveal">
             Today I lead the software team at <a href="https://embeddedsystems.do/" target="_blank" rel="noopener">EmbeddedSystems.do</a>,
             where we build environmental and IoT monitoring products: data pipelines, dashboards, cloud services
             and automation. I like making complex systems genuinely useful, and I always leave a little room for curiosity.
           </p>
           <a class="workplace reveal" href="https://embeddedsystems.do/" target="_blank" rel="noopener" data-spot>
             <span class="workplace__logo"><img src="assets/brand/embeddedsystems.svg" alt="EmbeddedSystems.do" width="194" height="51" loading="lazy" /></span>
-            <span class="workplace__text"><small>Where I build</small><strong>Lead Software Engineer</strong><span>Environmental &amp; IoT software · Gdynia</span></span>
+            <span class="workplace__text"><small data-i18n="about.where">Where I build</small><strong>Lead Software Engineer</strong><span data-i18n="about.whereText">Environmental &amp; IoT software · Gdynia</span></span>
             <span class="workplace__arrow" aria-hidden="true">↗</span>
           </a>
         </div>
@@ -152,45 +176,45 @@
     <!-- ───────── SKILLS ───────── -->
     <section class="section section--tight" id="skills">
       <div class="wrap">
-        <p class="kicker reveal">Toolbox</p>
-        <h2 class="reveal">What I work with</h2>
+        <p data-i18n="skills.kicker" class="kicker reveal">Toolbox</p>
+        <h2 data-i18n="skills.title" class="reveal">What I work with</h2>
         <div class="skills">
           <article class="skill reveal" data-spot>
-            <h3>Data &amp; Python</h3>
+            <h3 data-i18n="skills.h.data">Data &amp; Python</h3>
             <ul class="tags">
               <li>Python</li><li>NumPy</li><li>pandas</li><li>scikit-learn</li><li>Matplotlib</li>
-              <li>Numba</li><li>SQL</li><li>Streamlit</li><li>Excel (advanced)</li>
+              <li>Numba</li><li>SQL</li><li>Streamlit</li><li data-i18n="skills.excel">Excel (advanced)</li>
             </ul>
           </article>
           <article class="skill reveal" data-spot>
-            <h3>Cloud &amp; data engineering</h3>
+            <h3 data-i18n="skills.h.cloud">Cloud &amp; data engineering</h3>
             <ul class="tags">
               <li>AWS S3</li><li>Lambda</li><li>Glue</li><li>Athena</li><li>DynamoDB</li>
               <li>Metabase</li><li>Docker</li><li>GitHub Actions</li>
             </ul>
           </article>
           <article class="skill reveal" data-spot>
-            <h3>Web &amp; front-end</h3>
+            <h3 data-i18n="skills.h.web">Web &amp; front-end</h3>
             <ul class="tags">
               <li>React</li><li>TypeScript</li><li>Vite</li><li>Leaflet</li><li>HTML / CSS / JS</li><li>Recharts</li>
             </ul>
           </article>
           <article class="skill reveal" data-spot>
-            <h3>Science &amp; maths</h3>
+            <h3 data-i18n="skills.h.science">Science &amp; maths</h3>
             <ul class="tags">
-              <li>Quantum information</li><li>Semidefinite programming (CVX)</li><li>Representation theory</li>
+              <li data-i18n="skills.qi">Quantum information</li><li data-i18n="skills.sdp">Semidefinite programming (CVX)</li><li data-i18n="skills.rep">Representation theory</li>
               <li>Monte Carlo</li><li>MATLAB</li><li>SageMath</li><li>LaTeX</li>
             </ul>
           </article>
           <article class="skill skill--learning reveal" data-spot>
             <div class="skill__main">
-              <h3>Currently learning</h3>
+              <h3 data-i18n="skills.h.learning">Currently learning</h3>
               <ul class="tags">
-                <li>C++ (OpenGL, numerics)</li><li>Zephyr RTOS</li><li>TanStack Query</li><li>GraphQL</li>
+                <li data-i18n="skills.cpp">C++ (OpenGL, numerics)</li><li>Zephyr RTOS</li><li>TanStack Query</li><li>GraphQL</li>
               </ul>
             </div>
             <!-- The card is torn open along its lower edge, onto the stylesheet rules that colour these cards. -->
-            <svg class="code-tear" viewBox="0 0 600 128" preserveAspectRatio="xMinYMin slice" role="img" aria-label="The card torn open along its lower edge, showing the CSS rules that give each toolbox card its colour">
+            <svg data-i18n-attr="aria-label:skills.tear" class="code-tear" viewBox="0 0 600 128" preserveAspectRatio="xMinYMin slice" role="img" aria-label="The card torn open along its lower edge, showing the CSS rules that give each toolbox card its colour">
               <defs>
                 <clipPath id="tear-cut"><path d="M0 16L26 8L40 26L47 5L57 19L67 13L81 24L91 5L117 19L143 11L150 21L169 8L179 24L189 13L199 26L225 5L235 21L242 13L252 21L262 11L276 22L286 2L296 21L306 5L320 19L334 5L344 21L358 13L372 22L398 2L405 26L419 13L433 22L447 5L461 21L480 5L490 19L504 13L518 24L525 2L544 22L563 2L570 24L577 11L600 15V128H0Z" /></clipPath>
                 <linearGradient id="tear-rim" x2="1" y2="1"><stop stop-color="#f46acb" /><stop offset=".5" stop-color="#8364e8" /><stop offset="1" stop-color="#59dce8" /></linearGradient>
@@ -224,23 +248,23 @@
     <!-- ───────── PROJECTS (bento grid) ───────── -->
     <section class="section" id="projects">
       <div class="wrap">
-        <p class="kicker reveal">Selected work</p>
-        <h2 class="reveal">Projects</h2>
-        <p class="section__lead reveal">A mix of production work, open source, learning projects and generative art.
+        <p data-i18n="projects.kicker" class="kicker reveal">Selected work</p>
+        <h2 data-i18n="projects.title" class="reveal">Projects</h2>
+        <p data-i18n="projects.lead" class="section__lead reveal">A mix of production work, open source, learning projects and generative art.
           Most of it lives on <a href="https://github.com/MatuZale" target="_blank" rel="noopener">GitHub</a>.</p>
 
         <div class="bento">
           <!-- BENTOS -->
           <article class="card card--xl card--bentos reveal" data-spot>
             <div class="card__body">
-              <span class="badge">Open source · In development</span>
-              <h3>BENTOS: a water-quality buoy for the Gulf of Gdańsk</h3>
-              <p>A system in development that brings in-situ sensors, satellite data and predictive modelling
+              <span data-i18n="bentosCard.badge" class="badge">Open source · In development</span>
+              <h3 data-i18n="bentosCard.title">BENTOS: a water-quality buoy for the Gulf of Gdańsk</h3>
+              <p data-i18n="bentosCard.text">A system in development that brings in-situ sensors, satellite data and predictive modelling
                 together in a public water-quality platform for the Gulf of Gdańsk.
                 I build the software side: data pipelines and dashboards.</p>
               <div class="card__links">
-                <a href="#bentos">Read the story →</a>
-                <a href="https://embeddedsystems-do.github.io/bentos-satbaltyk-dashboard/" target="_blank" rel="noopener">Dashboard demo ↗</a>
+                <a data-i18n="bentosCard.story" href="#bentos">Read the story →</a>
+                <a data-i18n="bentosCard.demo" href="https://embeddedsystems-do.github.io/bentos-satbaltyk-dashboard/" target="_blank" rel="noopener">Dashboard demo ↗</a>
               </div>
             </div>
             <svg class="card__art" viewBox="0 0 320 220" aria-hidden="true">
@@ -276,17 +300,17 @@
           <div class="project-slot project-slot--tall reveal" data-holo>
             <article class="card card--tall card--art card--holo" id="art">
               <div class="card__media card__print">
-                <img src="assets/attractor.jpg" alt="Neon Clifford strange attractor rendered in purple and orange" loading="lazy" width="900" height="900" />
+                <img data-i18n-attr="alt:art.alt" src="assets/attractor.jpg" alt="Neon Clifford strange attractor rendered in purple and orange" loading="lazy" width="900" height="900" />
               </div>
               <div class="card__body">
-                <span class="badge">Generative art · Python</span>
-                <h3>Strange attractors &amp; fractals</h3>
-                <p>Chaotic maps sped up with Numba, rendered as density histograms in custom neon colormaps and
+                <span data-i18n="art.badge" class="badge">Generative art · Python</span>
+                <h3 data-i18n="art.title">Strange attractors &amp; fractals</h3>
+                <p data-i18n="art.text">Chaotic maps sped up with Numba, rendered as density histograms in custom neon colormaps and
                   animated into 1080p60 videos. The background at the top of this page runs the same maths live in your browser.</p>
                 <div class="card__links">
-                  <a href="https://github.com/MatuZale/color_recursive_maps" target="_blank" rel="noopener">Code ↗</a>
+                  <a href="https://github.com/MatuZale/color_recursive_maps" target="_blank" rel="noopener" data-i18n="common.code">Code ↗</a>
                   <a href="https://www.instagram.com/mathuzaleh/" target="_blank" rel="noopener">Instagram ↗</a>
-                  <a class="card__deck" href="cards.html" data-deck-open aria-haspopup="dialog">See examples <span aria-hidden="true">✦</span></a>
+                  <a data-i18n="art.examples" class="card__deck" href="cards.html" data-deck-open aria-haspopup="dialog">See examples <span aria-hidden="true">✦</span></a>
                 </div>
               </div>
             </article>
@@ -299,10 +323,10 @@
               <div class="card__body">
                 <span class="badge">Python · PyPI</span>
                 <h3>coldchain-mcp</h3>
-                <p>An MCP server that lets AI assistants analyse cold-chain sensor data locally, finding threshold
+                <p data-i18n="coldchain.text">An MCP server that lets AI assistants analyse cold-chain sensor data locally, finding threshold
                   breaches and anomalies and splitting journeys into segments. Published on PyPI.</p>
                 <div class="card__links">
-                  <a href="https://github.com/MatuZale/coldchain-mcp" target="_blank" rel="noopener">Code ↗</a>
+                  <a href="https://github.com/MatuZale/coldchain-mcp" target="_blank" rel="noopener" data-i18n="common.code">Code ↗</a>
                 </div>
               </div>
             </article>
@@ -315,10 +339,10 @@
               <div class="card__body">
                 <span class="badge">Python · Streamlit</span>
                 <h3>Personal Finance Analyzer</h3>
-                <p>Cleans up Polish bank CSV exports (odd encodings, <code>1 234,56 zł</code>), sorts
+                <p data-i18n="finance.text">Cleans up Polish bank CSV exports (odd encodings, <code>1 234,56 zł</code>), sorts
                   transactions into categories with JSON rules and charts spending in a CLI and a Streamlit app.</p>
                 <div class="card__links">
-                  <a href="https://github.com/MatuZale/personal-finance-analyzer" target="_blank" rel="noopener">Code ↗</a>
+                  <a href="https://github.com/MatuZale/personal-finance-analyzer" target="_blank" rel="noopener" data-i18n="common.code">Code ↗</a>
                 </div>
               </div>
             </article>
@@ -330,8 +354,8 @@
               <div class="card__holo card__holo--streams" aria-hidden="true"><span class="card__latent"></span></div>
               <div class="card__body">
                 <span class="badge">AWS · ML</span>
-                <h3>Student-performance data pipeline</h3>
-                <p>S3 → Lambda → Glue → Athena → Metabase, all scripted with boto3, followed by a
+                <h3 data-i18n="aws.title">Student-performance data pipeline</h3>
+                <p data-i18n="aws.text">S3 → Lambda → Glue → Athena → Metabase, all scripted with boto3, followed by a
                   gradient-boosting model, PCA/t-SNE/HDBSCAN analysis and a careful look at feature leakage.</p>
               </div>
             </article>
@@ -344,10 +368,10 @@
               <div class="card__body">
                 <span class="badge">Web Audio · Canvas</span>
                 <h3>Pendulum Wave Chimes</h3>
-                <p>A small browser toy in a single file. A pendulum-wave simulation plays a bell synthesiser and
+                <p data-i18n="pendulum.text">A small browser toy in a single file. A pendulum-wave simulation plays a bell synthesiser and
                   a chord pad under a starry canvas: polyrhythm you can watch.</p>
                 <div class="card__links">
-                  <a href="https://github.com/MatuZale/pendulum-wave-chimes" target="_blank" rel="noopener">Code ↗</a>
+                  <a href="https://github.com/MatuZale/pendulum-wave-chimes" target="_blank" rel="noopener" data-i18n="common.code">Code ↗</a>
                 </div>
               </div>
             </article>
@@ -359,11 +383,11 @@
               <div class="card__holo card__holo--blackhole" aria-hidden="true"><span class="card__latent"></span></div>
               <div class="card__body">
                 <span class="badge">C++ · OpenGL</span>
-                <h3>N-body simulator</h3>
-                <p>3D gravity in C++20 with a symplectic leapfrog integrator, an orbital camera and energy
+                <h3 data-i18n="nbody.title">N-body simulator</h3>
+                <p data-i18n="nbody.text">3D gravity in C++20 with a symplectic leapfrog integrator, an orbital camera and energy
                   tracking to keep the numerics honest. Next stop: molecular dynamics.</p>
                 <div class="card__links">
-                  <a href="https://github.com/MatuZale/Projekt-n-bodies" target="_blank" rel="noopener">Code ↗</a>
+                  <a href="https://github.com/MatuZale/Projekt-n-bodies" target="_blank" rel="noopener" data-i18n="common.code">Code ↗</a>
                 </div>
               </div>
             </article>
@@ -374,9 +398,9 @@
             <article class="card card--m card--outreach card--holo">
               <div class="card__holo card__holo--interference" aria-hidden="true"><span class="card__latent"></span></div>
               <div class="card__body">
-                <span class="badge">Science outreach · HTML / JS</span>
-                <h3>Interactive physics for the public</h3>
-                <p>Browser demos made for Centrum Nauki Experyment and public events: a quantum lab
+                <span data-i18n="outreach.badge" class="badge">Science outreach · HTML / JS</span>
+                <h3 data-i18n="outreach.title">Interactive physics for the public</h3>
+                <p data-i18n="outreach.text">Browser demos made for Centrum Nauki Experyment and public events: a quantum lab
                   (double slit, photoelectric effect, Planck's constant from LEDs, BB84 key exchange)
                   and a genetic algorithm that tackles the travelling-salesman problem.</p>
               </div>
@@ -386,15 +410,15 @@
           <!-- Research code -->
           <div class="project-slot project-slot--wide reveal" data-holo>
             <article class="card card--wide card--research card--holo">
-              <div class="card__print card__print--research"><span class="print__suits" aria-hidden="true"></span><span class="print__latent" aria-hidden="true"></span><img src="assets/young-yamanouchi.png" alt="Lattice of Young diagrams used in the Young–Yamanouchi basis" loading="lazy" width="1354" height="628" /></div>
+              <div class="card__print card__print--research"><span class="print__suits" aria-hidden="true"></span><span class="print__latent" aria-hidden="true"></span><img data-i18n-attr="alt:phd.alt" src="assets/young-yamanouchi.png" alt="Lattice of Young diagrams used in the Young–Yamanouchi basis" loading="lazy" width="1354" height="628" /></div>
               <div class="card__body">
-                <span class="badge">Research code · MATLAB / Sage</span>
-                <h3>Tools from my PhD</h3>
-                <p>An SDP-based test for the decomposability of positive maps, and a generator of the
+                <span data-i18n="phd.badge" class="badge">Research code · MATLAB / Sage</span>
+                <h3 data-i18n="phd.title">Tools from my PhD</h3>
+                <p data-i18n="phd.text">An SDP-based test for the decomposability of positive maps, and a generator of the
                   Young–Yamanouchi basis for Schur–Weyl decompositions. Both are building blocks for studying
                   entanglement, teleportation and symmetric quantum channels.</p>
                 <div class="card__links">
-                  <a href="https://github.com/MatuZale/Test-decomposability-of-positive-maps" target="_blank" rel="noopener">Decomposability test ↗</a>
+                  <a data-i18n="phd.link" href="https://github.com/MatuZale/Test-decomposability-of-positive-maps" target="_blank" rel="noopener">Decomposability test ↗</a>
                   <a href="https://github.com/MatuZale/Young-Yamanouchi-basis" target="_blank" rel="noopener">Young–Yamanouchi ↗</a>
                 </div>
               </div>
@@ -409,8 +433,8 @@
       <div class="bentos__water" aria-hidden="true"></div>
       <div class="wrap bentos__inner">
         <div class="bentos__masthead reveal">
-          <p class="kicker">Featured project / Environmental monitoring</p>
-          <a class="bentos__brand" href="https://www.bentos.info/" target="_blank" rel="noopener" aria-label="Visit the BENTOS project website">
+          <p data-i18n="bentos.kicker" class="kicker">Featured project / Environmental monitoring</p>
+          <a data-i18n-attr="aria-label:bentos.brand" class="bentos__brand" href="https://www.bentos.info/" target="_blank" rel="noopener" aria-label="Visit the BENTOS project website">
             <img src="assets/brand/bentos-white.png" alt="BENTOS" width="2000" height="635" loading="lazy" />
             <span aria-hidden="true">↗</span>
           </a>
@@ -418,35 +442,35 @@
 
         <div class="bentos__grid">
           <div class="bentos__story">
-            <p class="bentos__location reveal"><span aria-hidden="true">◎</span> Gulf of Gdańsk · Baltic Sea</p>
-            <h2 class="reveal" id="bentos-title">A sea of data<span class="end-dot">.</span><br /><em>A clearer picture<span class="end-dot">.</span></em></h2>
-            <p class="bentos__intro reveal">What's happening beneath the surface? We're building the tools to find out.</p>
-            <p class="reveal">
+            <p data-i18n="bentos.location" class="bentos__location reveal"><span aria-hidden="true">◎</span> Gulf of Gdańsk · Baltic Sea</p>
+            <h2 data-i18n="bentos.title" class="reveal" id="bentos-title">A sea of data<span class="end-dot">.</span><br /><em>A clearer picture<span class="end-dot">.</span></em></h2>
+            <p data-i18n="bentos.intro" class="bentos__intro reveal">What's happening beneath the surface? We're building the tools to find out.</p>
+            <p data-i18n="bentos.p1" class="reveal">
               BENTOS brings together in-situ water-quality sensors, satellite observations and predictive
               modelling to help people understand the Gulf of Gdańsk, from everyday conditions to risks
               such as cyanobacteria blooms.
             </p>
-            <p class="reveal">
+            <p data-i18n="bentos.p2" class="reveal">
               Developed by <a href="https://embeddedsystems.do/" target="_blank" rel="noopener">EmbeddedSystems.do</a>
               with the <a href="https://www.iopan.pl/" target="_blank" rel="noopener">Institute of Oceanology, Polish Academy of Sciences</a>.
               Designed around open data, open code and open hardware.
             </p>
             <div class="bentos__role reveal">
-              <span class="bentos__label">My contribution</span>
-              <p>Data pipelines, APIs &amp; dashboards.<br /><strong>Turning scientific data into something people can use.</strong></p>
+              <span data-i18n="bentos.roleLabel" class="bentos__label">My contribution</span>
+              <p data-i18n="bentos.role">Data pipelines, APIs &amp; dashboards.<br /><strong>Turning scientific data into something people can use.</strong></p>
             </div>
             <div class="bentos__actions reveal">
-              <a class="btn bentos__btn" href="https://embeddedsystems-do.github.io/bentos-satbaltyk-dashboard/" target="_blank" rel="noopener">Explore the dashboard ↗</a>
-              <a class="bentos__text-link" href="https://www.bentos.info/" target="_blank" rel="noopener">Meet BENTOS ↗</a>
+              <a data-i18n="bentos.explore" class="btn bentos__btn" href="https://embeddedsystems-do.github.io/bentos-satbaltyk-dashboard/" target="_blank" rel="noopener">Explore the dashboard ↗</a>
+              <a data-i18n="bentos.meet" class="bentos__text-link" href="https://www.bentos.info/" target="_blank" rel="noopener">Meet BENTOS ↗</a>
             </div>
           </div>
 
           <aside class="bentos__panel reveal" aria-labelledby="bentos-dashboard-title">
-            <div class="bentos__panel-heading"><span class="bentos__label">From sea to screen</span><span class="bentos__status">In development</span></div>
+            <div class="bentos__panel-heading"><span data-i18n="bentos.panelLabel" class="bentos__label">From sea to screen</span><span data-i18n="bentos.status" class="bentos__status">In development</span></div>
             <figure class="bentos__diagram">
               <svg viewBox="0 0 360 280" role="img" aria-labelledby="cad-title cad-desc">
-              <title id="cad-title">BENTOS technical schematic</title>
-              <desc id="cad-desc">A satellite and a measurement buoy with an underwater camera both send data to the BENTOS platform at the centre.</desc>
+              <title data-i18n="bentos.svgTitle" id="cad-title">BENTOS technical schematic</title>
+              <desc data-i18n="bentos.svgDesc" id="cad-desc">A satellite and a measurement buoy with an underwater camera both send data to the BENTOS platform at the centre.</desc>
               <defs>
               <pattern id="cad-grid-fine" width="10" height="10" patternUnits="userSpaceOnUse">
               <path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(170,255,0,0.08)" stroke-width="0.5" />
@@ -514,7 +538,7 @@
               </g>
               <g font-family="ui-monospace, monospace" font-size="8" fill="rgba(255,255,255,0.9)">
               <line x1="90" y1="46" x2="110" y2="28" stroke="rgba(170,255,0,0.35)" stroke-width="0.5" />
-              <text x="112" y="26" letter-spacing="0.5">SATELLITE IMAGERY</text>
+              <text data-i18n="bentos.svgSat" x="112" y="26" letter-spacing="0.5">SATELLITE IMAGERY</text>
               </g>
               <g stroke="#aaff00" stroke-width="1" fill="none">
               <line x1="270" y1="90" x2="270" y2="106" />
@@ -537,7 +561,7 @@
               </g>
               <g font-family="ui-monospace, monospace" font-size="8" fill="rgba(255,255,255,0.9)">
               <line x1="270" y1="88" x2="270" y2="74" stroke="rgba(170,255,0,0.35)" stroke-width="0.5" />
-              <text x="270" y="72" text-anchor="middle" letter-spacing="0.5">MEASUREMENT BUOY</text>
+              <text data-i18n="bentos.svgBuoy" x="270" y="72" text-anchor="middle" letter-spacing="0.5">MEASUREMENT BUOY</text>
               </g>
               <g clip-path="url(#underwater)">
               <g>
@@ -556,7 +580,7 @@
               </g>
               <g font-family="ui-monospace, monospace" font-size="7.5" fill="rgba(255,255,255,0.9)">
               <line x1="270" y1="176" x2="270" y2="184" stroke="rgba(170,255,0,0.35)" stroke-width="0.5" />
-              <text x="270" y="194" text-anchor="middle" letter-spacing="0.5">UNDERWATER CAMERA</text>
+              <text data-i18n="bentos.svgCam" x="270" y="194" text-anchor="middle" letter-spacing="0.5">UNDERWATER CAMERA</text>
               </g>
               <circle cx="180" cy="130" r="38" fill="url(#hub-glow)">
               <animate attributeName="r" values="34;42;34" dur="3.6s" repeatCount="indefinite" />
@@ -575,30 +599,30 @@
               </g></svg>
             </figure>
             <div class="bentos__dashboard">
-              <span class="bentos__label">The software I build</span>
-              <h3 id="bentos-dashboard-title">SatBałtyk dashboard</h3>
-              <p>A Python pipeline turns gigabyte-scale GeoTIFF exports into lightweight map layers.
+              <span data-i18n="bentos.dashLabel" class="bentos__label">The software I build</span>
+              <h3 data-i18n="bentos.dashTitle" id="bentos-dashboard-title">SatBałtyk dashboard</h3>
+              <p data-i18n="bentos.dashText">A Python pipeline turns gigabyte-scale GeoTIFF exports into lightweight map layers.
                 A React app makes them explorable: time playback, layer comparison and point charts.</p>
-              <ul class="tags" aria-label="Dashboard technologies">
+              <ul data-i18n-attr="aria-label:bentos.tags" class="tags" aria-label="Dashboard technologies">
                 <li>Python</li><li>NumPy</li><li>React</li><li>Leaflet</li><li>GeoTIFF</li>
               </ul>
-              <a class="bentos__text-link" href="https://github.com/embeddedsystems-do/bentos-satbaltyk-dashboard" target="_blank" rel="noopener">Explore the source on GitHub ↗</a>
-              <p class="note">The public demo uses satellite and model layers. Its buoy markers are simulated placeholders.</p>
+              <a data-i18n="bentos.source" class="bentos__text-link" href="https://github.com/embeddedsystems-do/bentos-satbaltyk-dashboard" target="_blank" rel="noopener">Explore the source on GitHub ↗</a>
+              <p data-i18n="bentos.note" class="note">The public demo uses satellite and model layers. Its buoy markers are simulated placeholders.</p>
             </div>
           </aside>
         </div>
 
         <div class="bentos__feed">
           <div class="bentos__feed-copy reveal">
-            <span class="bentos__label">What the data looks like</span>
-            <h3 id="feed-title">One sample, six readings</h3>
-            <p>Whatever the final sensors measure, the software meets the same shape: a numbered, timestamped
+            <span data-i18n="bentos.feedLabel" class="bentos__label">What the data looks like</span>
+            <h3 data-i18n="bentos.feedTitle" id="feed-title">One sample, six readings</h3>
+            <p data-i18n="bentos.feedText">Whatever the final sensors measure, the software meets the same shape: a numbered, timestamped
               sample, and a handful of readings that each have a unit and a plausible range. The buoy is still
               in development, so this panel is a simulation: values wander through typical Baltic ranges.
               It is not buoy data.</p>
           </div>
           <div class="feed reveal" data-feed role="group" aria-labelledby="feed-title">
-            <div class="feed__top"><span class="feed__status"><i class="feed__dot" aria-hidden="true"></i>Simulated · sensor prototype</span><time class="feed__clock" data-feed-clock>2026-10-18 12:04:52</time></div>
+            <div class="feed__top"><span data-i18n="bentos.feedStatus" class="feed__status"><i class="feed__dot" aria-hidden="true"></i>Simulated · sensor prototype</span><time class="feed__clock" data-feed-clock>2026-10-18 12:04:52</time></div>
             <div class="feed__grid">
               <div class="feed__item" data-sensor data-min="7" data-max="10"><div class="feed__row"><span>TEMP</span><span class="feed__value"><b>8.38</b><small>°C</small></span></div><div class="feed__bar"><i style="width: 52%"></i></div></div>
               <div class="feed__item" data-sensor data-min="7" data-max="7.6"><div class="feed__row"><span>SAL</span><span class="feed__value"><b>7.23</b><small>PSU</small></span></div><div class="feed__bar"><i style="width: 56%"></i></div></div>
@@ -607,26 +631,26 @@
               <div class="feed__item" data-sensor data-min="7.95" data-max="8.2"><div class="feed__row"><span>pH</span><span class="feed__value"><b>8.14</b><small></small></span></div><div class="feed__bar"><i style="width: 54%"></i></div></div>
               <div class="feed__item" data-sensor data-min="0.8" data-max="3.6"><div class="feed__row"><span>TURB</span><span class="feed__value"><b>2.75</b><small>NTU</small></span></div><div class="feed__bar"><i style="width: 34%"></i></div></div>
             </div>
-            <div class="feed__foot"><span>SAMPLE #<span data-feed-sample>1058</span></span><span>Simulated values</span></div>
+            <div class="feed__foot"><span>SAMPLE #<span data-feed-sample>1058</span></span><span data-i18n="bentos.feedFoot">Simulated values</span></div>
           </div>
         </div>
 
-        <ol class="bentos__flow" aria-label="The planned BENTOS data flow">
-          <li class="reveal"><span>01 / Sense</span><h3>Below the surface</h3><p>In-situ sensors collect water-quality measurements.</p></li>
-          <li class="reveal"><span>02 / Combine</span><h3>The wider picture</h3><p>Satellite and model layers add context from SatBałtyk.</p></li>
-          <li class="reveal"><span>03 / Predict</span><h3>From data to insight</h3><p>Modelling with IO PAN aims to forecast conditions and risks.</p></li>
-          <li class="reveal"><span>04 / Share</span><h3>Open to everyone</h3><p>A public platform is being developed to make the data useful.</p></li>
+        <ol data-i18n-attr="aria-label:bentos.flowLabel" class="bentos__flow" aria-label="The planned BENTOS data flow">
+          <li class="reveal"><span data-i18n="bentos.flow1">01 / Sense</span><h3 data-i18n="bentos.flow1Title">Below the surface</h3><p data-i18n="bentos.flow1Text">In-situ sensors collect water-quality measurements.</p></li>
+          <li class="reveal"><span data-i18n="bentos.flow2">02 / Combine</span><h3 data-i18n="bentos.flow2Title">The wider picture</h3><p data-i18n="bentos.flow2Text">Satellite and model layers add context from SatBałtyk.</p></li>
+          <li class="reveal"><span data-i18n="bentos.flow3">03 / Predict</span><h3 data-i18n="bentos.flow3Title">From data to insight</h3><p data-i18n="bentos.flow3Text">Modelling with IO PAN aims to forecast conditions and risks.</p></li>
+          <li class="reveal"><span data-i18n="bentos.flow4">04 / Share</span><h3 data-i18n="bentos.flow4Title">Open to everyone</h3><p data-i18n="bentos.flow4Text">A public platform is being developed to make the data useful.</p></li>
         </ol>
-        <p class="bentos__footnote reveal">A project in development · Co-financed by the EU programme Fundusze Europejskie dla Pomorza.</p>
+        <p data-i18n="bentos.footnote" class="bentos__footnote reveal">A project in development · Co-financed by the EU programme Fundusze Europejskie dla Pomorza.</p>
       </div>
     </section>
 
     <!-- ───────── RESEARCH ───────── -->
     <section class="section" id="research">
       <div class="wrap">
-        <p class="kicker reveal">Research</p>
-        <h2 class="reveal">Publications</h2>
-        <p class="section__lead reveal">
+        <p data-i18n="research.kicker" class="kicker reveal">Research</p>
+        <h2 data-i18n="research.title" class="reveal">Publications</h2>
+        <p data-i18n="research.lead" class="section__lead reveal">
           Research on positive maps, entanglement and higher-order quantum transformations.
           Full list on <a href="https://scholar.google.com/citations?user=Fzdweu4AAAAJ&hl=en" target="_blank" rel="noopener">Google Scholar ↗</a>.
         </p>
@@ -701,51 +725,51 @@
       <!-- A black hole in a sheet of spacetime behind the timeline, drawn by spacetime.js. -->
       <div class="spacetime" aria-hidden="true"></div>
       <div class="wrap">
-        <p class="kicker reveal">Journey</p>
-        <h2 class="reveal">Experience &amp; education</h2>
+        <p data-i18n="journey.kicker" class="kicker reveal">Journey</p>
+        <h2 data-i18n="journey.title" class="reveal">Experience &amp; education</h2>
 
         <div class="timeline">
           <article class="tl reveal">
             <span class="tl__when">04/2026 →</span>
             <h3>Lead Software Engineer · <a href="https://embeddedsystems.do/" target="_blank" rel="noopener">EmbeddedSystems.do ↗</a></h3>
-            <p class="tl__where">Gdynia, Poland</p>
-            <p>Joined as a software engineer and data analyst, and have led the software team since 10/2026.
+            <p class="tl__where" data-i18n="place.gdynia">Gdynia, Poland</p>
+            <p data-i18n="tl1.text">Joined as a software engineer and data analyst, and have led the software team since 10/2026.
               I build Python and React web applications on AWS, along with data pipelines, dashboards and cloud
               tooling for IoT and environmental monitoring (BENTOS, cold-chain products).</p>
           </article>
           <article class="tl reveal">
             <span class="tl__when">08/2025 – 04/2026</span>
-            <h3>Junior specialist, events &amp; scientific programmes · Centrum Nauki Experyment</h3>
-            <p class="tl__where">Gdynia, Poland</p>
-            <p>Partnerships with universities and student organisations, science events across Poland and Europe,
+            <h3 data-i18n="tl2.title">Junior specialist, events &amp; scientific programmes · Centrum Nauki Experyment</h3>
+            <p class="tl__where" data-i18n="place.gdynia">Gdynia, Poland</p>
+            <p data-i18n="tl2.text">Partnerships with universities and student organisations, science events across Poland and Europe,
               and procurement. I also used Python and scikit-learn to streamline internal processes.</p>
           </article>
           <article class="tl reveal">
             <span class="tl__when">2019 – 2024</span>
-            <h3>PhD, Physics · University of Gdańsk</h3>
-            <p class="tl__where">Thesis: <em>k-positive maps in physics</em></p>
-            <p>Positive maps and k-entanglement witnesses; higher-order transformations of unitary operations,
+            <h3 data-i18n="tl3.title">PhD, Physics · University of Gdańsk</h3>
+            <p data-i18n="tl3.where" class="tl__where">Thesis: <em>k-positive maps in physics</em></p>
+            <p data-i18n="tl3.text">Positive maps and k-entanglement witnesses; higher-order transformations of unitary operations,
               port-based teleportation, symmetry-reduction methods. Talks at AQIS 2023 (Seoul) and YITP 2023 (Kyoto).
               Principal investigator of two small grants (UGrants-start 2 and an academic-exchange grant); team member of NCN Sonata 16.
               Taught algebra, stochastic processes, functional analysis and Python with algorithms.</p>
           </article>
           <article class="tl reveal">
             <span class="tl__when">2016 – 2018</span>
-            <h3>Administrative assistant · Translation agency</h3>
-            <p class="tl__where">Gdynia, Poland</p>
-            <p>Data-quality checks on client documents, Excel pipelines for translation workflows, invoicing.</p>
+            <h3 data-i18n="tl4.title">Administrative assistant · Translation agency</h3>
+            <p class="tl__where" data-i18n="place.gdynia">Gdynia, Poland</p>
+            <p data-i18n="tl4.text">Data-quality checks on client documents, Excel pipelines for translation workflows, invoicing.</p>
           </article>
           <article class="tl reveal">
             <span class="tl__when">2015 – 2016</span>
-            <h3>Physics &amp; robotics lecturer · Roboty i Spółka</h3>
-            <p class="tl__where">Gdańsk, Poland</p>
-            <p>Taught robotics with LEGO Mindstorms EV3 and the basics of programming.</p>
+            <h3 data-i18n="tl5.title">Physics &amp; robotics lecturer · Roboty i Spółka</h3>
+            <p data-i18n="place.gdansk" class="tl__where">Gdańsk, Poland</p>
+            <p data-i18n="tl5.text">Taught robotics with LEGO Mindstorms EV3 and the basics of programming.</p>
           </article>
           <article class="tl reveal">
             <span class="tl__when">2012 – 2019</span>
-            <h3>BSc &amp; MSc, Physics · University of Gdańsk</h3>
-            <p class="tl__where">Theses: <em>Study of the galaxy's rotation curve</em> · <em>k-positive indecomposable maps on matrix algebras</em></p>
-            <p>Exploratory data analysis and Monte Carlo simulations on satellite data of stars; first steps into
+            <h3 data-i18n="tl6.title">BSc &amp; MSc, Physics · University of Gdańsk</h3>
+            <p data-i18n="tl6.where" class="tl__where">Theses: <em>Study of the galaxy's rotation curve</em> · <em>k-positive indecomposable maps on matrix algebras</em></p>
+            <p data-i18n="tl6.text">Exploratory data analysis and Monte Carlo simulations on satellite data of stars; first steps into
               semidefinite programming and quantum information.</p>
           </article>
         </div>
@@ -755,9 +779,9 @@
     <!-- ───────── CONTACT ───────── -->
     <section class="section contact" id="contact">
       <div class="wrap contact__inner">
-        <p class="kicker reveal">Contact</p>
-        <h2 class="contact__title reveal">Let's build something<br />useful together<span class="end-dot">.</span></h2>
-        <p class="section__lead reveal">
+        <p data-i18n="contact.kicker" class="kicker reveal">Contact</p>
+        <h2 data-i18n="contact.title" class="contact__title reveal">Let's build something<br />useful together<span class="end-dot">.</span></h2>
+        <p data-i18n="contact.lead" class="section__lead reveal">
           Want to collaborate, have an open-source idea or a question about BENTOS, or simply fancy a chat
           about data and software? I'd love to hear from you. I'm based in Gdańsk, Poland.
         </p>
@@ -798,7 +822,7 @@
     <div class="wrap footer__inner">
       <p>© <span id="year">2026</span> Tomasz Młynik</p>
       <div class="footer__secrets">
-        <button class="footer__trace" id="observer-unlock" type="button" aria-haspopup="dialog" aria-controls="observer-trace" hidden><span aria-hidden="true">◎</span> observer detected ↗</button>
+        <button data-i18n="footer.observer" class="footer__trace" id="observer-unlock" type="button" aria-haspopup="dialog" aria-controls="observer-trace" hidden><span aria-hidden="true">◎</span> observer detected ↗</button>
       </div>
       <figure class="footer__circuit">
         <svg class="circuit-window" id="footer-game" viewBox="0 0 384 128" role="img" aria-label="A little Snake game playing itself beneath a torn-open circuit board">
@@ -824,13 +848,15 @@
           </g>
           <use href="#circuit-edge" fill="none" stroke="url(#circuit-rim)" stroke-width="1.2" opacity=".65" />
         </svg>
-        <figcaption class="circuit-caption"><span><span class="circuit-caption__dot" aria-hidden="true"></span>background process: <strong id="game-name">snake</strong></span><button class="circuit-caption__pause" id="game-toggle" type="button" aria-label="Pause Snake animation" aria-pressed="false" hidden>pause <span aria-hidden="true">Ⅱ</span></button></figcaption>
+        <figcaption class="circuit-caption"><span><span class="circuit-caption__dot" aria-hidden="true"></span><span data-i18n="footer.process">background process:</span> <strong id="game-name">snake</strong></span><button class="circuit-caption__pause" id="game-toggle" type="button" aria-label="Pause Snake animation" aria-pressed="false" hidden>pause <span aria-hidden="true">Ⅱ</span></button></figcaption>
       </figure>
     </div>
   </footer>
 
-  <a class="back-top" id="back-top" href="#top" aria-label="Back to top" inert>
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 12 6-6 6 6M12 6v14" /></svg>
+  <!-- A VCR key: rewinds to the top of the page (retro.js shows the tape counter on screen). -->
+  <a class="back-top" id="back-top" href="#top" aria-label="Rewind to the top" data-i18n-attr="aria-label:backtop" inert>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5 6 10.5h12zM12 12.5l-6 6h12z" /></svg>
+    <span class="back-top__label" aria-hidden="true">REW</span>
   </a>
 
   <dialog class="observer" id="observer-trace" aria-labelledby="observer-title" aria-describedby="observer-intro">
@@ -854,5 +880,6 @@
     <footer class="observer__footer"><span>ACCESS: browser sandbox</span><span>Observation changes the observer.</span></footer>
   </dialog>
   <script src="script.js"></script>
+  <script type="module" src="channels.js"></script>
 </body>
 </html>
