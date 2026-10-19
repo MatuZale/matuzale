@@ -35,7 +35,13 @@ const FRAME = 1000 / 30;
 
 // Who turns up and how often (seconds), and how long a path stays behind each.
 const SPAWN = 7, MOST = 3;
-const PLANETS = [24, 42], COMETS = [28, 50], HEAVY_FIRST = [60, 100], HEAVY_AGAIN = [160, 260];
+const PLANETS = [24, 42], COMETS = [28, 50];
+// The rare ones come at random, like decays: at every moment the same small chance, so anyone may be lucky
+// early, and the longer Journey is watched the likelier they get. Mean waits in seconds of watching. The
+// heavy visitor: 15 s for the first (three in four who stay 20 s see it), then 150 s. The culmination:
+// 480 s (a 6% chance in the first 30 s), and none for 120 s after one.
+const HEAVY_FIRST = 15, HEAVY_AGAIN = 150, SHOW_MEAN = 480, SHOW_REST = 120;
+const chance = (mean, dt) => Math.random() < 1 - Math.exp(-dt / mean);
 const KEEP = { matter: 18, light: 3.5, planet: 12, comet: 10, heavy: 14 };
 // Masses that pull on the rest (the hole is M = 0.5), softened so a close pass flings rather than spikes.
 // The hole answers the heavy visitor at about a third of the pull: it is heavier, so it only sways.
@@ -43,11 +49,9 @@ const PLANET_MASS = .08, HEAVY_MASS = .3, SOFT = .5, SWAY = .35;
 // The heavy visitor's dip in the sheet, its drawn size, and its ripple: speed on screen (rₛ per second,
 // far below light, so the ripple can be watched), period of its ringing (seconds) and height.
 const HEAVY_DEPTH = 2.6, HEAVY_SIZE = .7, WAVE_SPEED = 6, WAVE_PERIOD = .9, WAVE_HEIGHT = .9;
-// The culmination: seconds on screen before the first and between them; the low view, 10° above the sheet,
-// closer in and moved a little to the right, away from the timeline's text; how many grains of fine matter
-// make the disk; and its timeline in seconds: matter gathers, the view sinks and closes in while the lens
-// takes over, the picture holds, and the view rises again.
-const SHOW_FIRST = [200, 330], SHOW_AGAIN = [700, 1200];
+// The culmination: the low view, 10° above the sheet, closer in and moved a little to the right, away from
+// the timeline's text; how many grains of fine matter make the disk; and its timeline in seconds: matter
+// gathers, the view sinks and closes in while the lens takes over, the picture holds, and the view rises.
 const LOW = 10 * Math.PI / 180, CLOSE = 1.3, PAN = .07, DUST = 1300;
 const T = { gather: 16, dive: [11, 17], lens: [12, 17], sheetOut: [13, 17], dim: [15, 18], caption: [18.5, 20],
   captionOut: [26.5, 28], unlens: [28, 33], rise: [28.5, 34], dustOut: [30.5, 33.5], sheetIn: [30, 34],
@@ -189,8 +193,8 @@ export function startSpacetime(holder) {
   const hole = { pos: [0, 0], vel: [0, 0] };       // the hole's sway off the middle, in the sheet's plane
   let ripple = [];                                  // what the heavy visitor sends out: {t, amp, phi}
   let flashes = [];                                 // something swallowed by a planet or the visitor: {by, t, body}
-  let clock = 0, nextSpawn = 0, nextPlanet = 4, nextComet = rand(12, 25), nextHeavy = rand(...HEAVY_FIRST);
-  let show = null, nextShow = rand(...SHOW_FIRST), dim = 1;     // the culmination: {t, lens, ready, spawnAt}
+  let clock = 0, nextSpawn = 0, nextPlanet = 4, nextComet = rand(12, 25), heavySeen = false;
+  let show = null, showDue = false, restUntil = 0, dim = 1;    // the culmination: {t, lens, ready, spawnAt}
   let dust = [], exposure = null, peak = 0;                       // its fine matter, and the plate it glows on
   const heavy = () => bodies.find(b => b.alive && b.kind === "heavy");
   const absolute = b => [b.pos[0] + hole.pos[0], b.pos[1] + hole.pos[1], b.pos[2] + CENTRE];
@@ -319,7 +323,8 @@ export function startSpacetime(holder) {
 
   /* ───────── Time ───────── */
 
-  function step(dt) {
+  // `roll` is false while the scene warms up unseen: the rare ones are only drawn for while someone watches.
+  function step(dt, roll = true) {
     clock += dt;
     const alive = kind => bodies.some(b => b.alive && b.kind === kind);
     if (show) {
@@ -331,8 +336,12 @@ export function startSpacetime(holder) {
       }
       if (clock >= nextPlanet && !alive("planet")) { bodies.push(spawnPlanet()); nextPlanet = clock + rand(...PLANETS); }
       if (clock >= nextComet && !alive("comet")) { bodies.push(spawnComet()); nextComet = clock + rand(...COMETS); }
-      if (clock >= nextHeavy && !alive("heavy") && !lively()) { bodies.push(spawnHeavy()); nextHeavy = clock + rand(...HEAVY_AGAIN); }
-      if (clock >= nextShow && !lively() && W >= 800) beginShow();
+      // A culmination drawn while the sheet is busy waits for it to settle; no visitor comes meanwhile.
+      if (roll && !showDue && clock >= restUntil && W >= 800 && chance(SHOW_MEAN, dt)) showDue = true;
+      if (roll && !showDue && !alive("heavy") && !lively() && chance(heavySeen ? HEAVY_AGAIN : HEAVY_FIRST, dt)) {
+        bodies.push(spawnHeavy()); heavySeen = true;
+      }
+      if (showDue && !lively() && W >= 800) { showDue = false; beginShow(); }
     }
 
     const pullers = bodies.filter(b => b.alive && b.mass);
@@ -415,7 +424,7 @@ export function startSpacetime(holder) {
     show = null; dust = []; exposure = null; dim = 1;
     cam.tilt = ISO; cam.zoom = 1; cam.pan = 0; aim();
     still.style.opacity = "";
-    nextShow = clock + rand(...SHOW_AGAIN);
+    restUntil = clock + SHOW_REST;
   }
   const viewMoving = () => !!show && (show.t > T.dive[0] && show.t < T.sheetOut[1] || show.t > T.rise[0]);
 
@@ -588,7 +597,7 @@ export function startSpacetime(holder) {
   }
 
   // Start with a particle and a planet already some way round, so the first view has paths in it.
-  for (let i = 0; i < 300; i++) step(1 / 30);
+  for (let i = 0; i < 300; i++) step(1 / 30, false);
 
   let raf = 0, last = 0, visible = false, settled = true;
   const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
