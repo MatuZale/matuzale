@@ -6,10 +6,10 @@
 //   light:   r̈ = −3M h² r⃗/r⁵            (u″ + u = 3M u²)
 // with h = |r⃗ × v⃗|, so bound orbits precess into rosettes, close flybys are flung round and slow or
 // near-head-on ones fall in. On top of that, planets and a rare heavy visitor pull on the rest with softened
-// Newtonian gravity.
+// Newtonian gravity, and swallow whatever runs into them.
 //
 // The cast: plain particles (most of the time), light (a short wake that winds up behind it), planets on
-// wide slow orbits, comets on long ones with a tail turned away from the hole, and very rarely a heavy,
+// wide slow orbits, comets on long ones with a tail streaming back along their path, and very rarely a heavy,
 // compact visitor. It digs its own dip in the sheet, sways the hole off centre and sends out a quadrupole
 // ripple, a cartoon of a gravitational wave slowed right down so it can be seen. Loaded by script.js when
 // Journey comes near; it animates only on screen.
@@ -79,11 +79,11 @@ function spawnParticle() {
   return launch("light", fromAfar(rand(2.9, 6), 1), .5);
 }
 const spawnPlanet = () => launch("planet", bound(rand(8, 10.5), rand(11.5, 14.5)), .3, {
-  life: rand(45, 60), mass: PLANET_MASS,
-  look: { size: rand(3.4, 5), tone: Math.floor(rand(0, 3)), ring: Math.random() < .4, tilt: rand(-.45, -.15) },
+  life: rand(45, 60), mass: PLANET_MASS, radius: rand(.32, .45),
+  look: { tone: Math.floor(rand(0, 3)), ring: Math.random() < .4, tilt: rand(-.45, -.15) },
 });
 const spawnComet = () => launch("comet", bound(rand(4.5, 6), rand(24, 29)), .6, { life: rand(40, 55) });
-const spawnHeavy = () => launch("heavy", fromAfar(rand(9, 12), rand(.3, .36)), .25, { mass: HEAVY_MASS });
+const spawnHeavy = () => launch("heavy", fromAfar(rand(9, 12), rand(.3, .36)), .25, { mass: HEAVY_MASS, radius: HEAVY_SIZE });
 
 // Acceleration of a body at p with velocity v (relative to the hole): the hole, then the other masses.
 function accel(body, p, v, pullers) {
@@ -101,7 +101,9 @@ function accel(body, p, v, pullers) {
   return a;
 }
 
-// RK4 in steps short enough for the tightest pass, against the hole or any of the masses.
+// RK4 in steps short enough for the tightest pass, against the hole or any of the masses. A body that runs
+// into a planet or the visitor is swallowed (the visitor only by the hole, a planet only by the visitor).
+const swallows = (q, body) => q !== body && body.kind !== "heavy" && !(q.kind === "planet" && body.kind === "planet");
 function advance(body, time, pullers) {
   for (let left = time, n = 0; left > 1e-9 && n < 400; n++) {
     let reach = norm(body.pos);
@@ -117,6 +119,12 @@ function advance(body, time, pullers) {
     left -= dt;
     const r = norm(body.pos);
     if (r < HOLE || r > 34) { body.alive = false; return; }
+    for (const q of pullers) {
+      if (!swallows(q, body)) continue;
+      if (Math.hypot(q.pos[0] - body.pos[0], q.pos[1] - body.pos[1], q.pos[2] - body.pos[2]) < q.radius) {
+        body.alive = false; body.swallowedBy = q; return;
+      }
+    }
   }
 }
 
@@ -132,6 +140,7 @@ export function startSpacetime(holder) {
   const bodies = [];
   const hole = { pos: [0, 0], vel: [0, 0] };       // the hole's sway off the middle, in the sheet's plane
   let ripple = [];                                  // what the heavy visitor sends out: {t, amp, phi}
+  let flashes = [];                                 // something swallowed by a planet or the visitor: {by, t, body}
   let clock = 0, nextSpawn = 0, nextPlanet = 4, nextComet = rand(12, 25), nextHeavy = rand(...HEAVY_FIRST);
   const heavy = () => bodies.find(b => b.alive && b.kind === "heavy");
   const absolute = b => [b.pos[0] + hole.pos[0], b.pos[1] + hole.pos[1], b.pos[2] + CENTRE];
@@ -274,7 +283,9 @@ export function startSpacetime(holder) {
       advance(b, dt * PACE, pullers);
       b.age += dt;
       if (b.age > b.life) b.alive = false;
+      if (b.swallowedBy) { flashes.push({ by: b.swallowedBy, t: clock, body: b }); b.swallowedBy = null; }
     }
+    flashes = flashes.filter(f => clock - f.t < .9);
     swayHole(dt * PACE);
     for (const b of bodies) {
       if (b.alive) b.trail.push({ at: absolute(b), t: clock });
@@ -337,9 +348,10 @@ export function startSpacetime(holder) {
     });
   }
 
-  // A small sphere lit from the upper left; some have a thin ring, its far half behind the planet.
-  function drawPlanet(look, x, y, seen) {
-    const c = ctx, r = look.size * dpr, base = planetColour(look);
+  // A sphere lit from the upper left, a few times the size of a particle; some have a thin ring, its far
+  // half behind the planet.
+  function drawPlanet(b, x, y, seen) {
+    const c = ctx, look = b.look, r = b.radius * S, base = planetColour(look);
     const ring = (from, to) => {
       c.beginPath(); c.ellipse(x, y, r * 2.1, r * .6, look.tilt, from, to);
       c.strokeStyle = base; c.lineWidth = dpr * .9; c.globalAlpha = seen * .55; c.stroke();
@@ -352,14 +364,16 @@ export function startSpacetime(holder) {
     if (look.ring) ring(0, Math.PI);
   }
 
-  // A bright point with a tail turned away from the hole, longer the closer it passes.
+  // A bright point with a tail streaming back along its path: the hole has no solar wind to blow it aside.
+  // The tail grows as the comet speeds up past the hole.
   function drawComet(b, at, seen) {
-    const c = ctx, r = norm(b.pos), out = b.pos.map(v => v / r), length = Math.min(4, 18 / r);
+    const c = ctx, length = Math.min(5, Math.max(1.2, norm(b.vel) * 9));
     c.strokeStyle = cometColour(); c.lineCap = "round";
-    for (let i = 0; i < 6; i++) {
-      const from = along(at, out, length * i / 6), to = along(at, out, length * (i + 1) / 6);
-      c.globalAlpha = seen * .6 * (1 - i / 6) ** 1.5; c.lineWidth = dpr * (1.8 - i * .22);
-      c.beginPath(); c.moveTo(...px(...from)); c.lineTo(...px(...to)); c.stroke();
+    for (let i = b.trail.length - 1, gone = 0; i > 0 && gone < length; i--) {
+      const a = b.trail[i].at, z = b.trail[i - 1].at, u = gone / length;
+      gone += Math.hypot(a[0] - z[0], a[1] - z[1], a[2] - z[2]);
+      c.globalAlpha = seen * .7 * (1 - u) ** 1.6; c.lineWidth = dpr * (2.4 - 1.9 * u);
+      c.beginPath(); c.moveTo(...px(...a)); c.lineTo(...px(...z)); c.stroke();
     }
     const [x, y] = px(...at);
     c.globalAlpha = seen * .9; c.fillStyle = colours.dark ? "#fff" : colours.a3;
@@ -380,13 +394,19 @@ export function startSpacetime(holder) {
     c.clearRect(0, 0, live.width, live.height);
     c.lineCap = "round";
     for (const b of bodies) drawPath(b);
+    // A brief ring where something was swallowed, following the planet or visitor that took it.
+    for (const f of flashes) {
+      const u = (clock - f.t) / .9, [x, y] = px(...absolute(f.by));
+      c.globalAlpha = .55 * (1 - u) ** 2; c.strokeStyle = pathColour(f.body); c.lineWidth = dpr;
+      c.beginPath(); c.arc(x, y, f.by.radius * S + u * 9 * dpr, 0, 2 * Math.PI); c.stroke();
+    }
     // Heads, far ones first.
     const heads = bodies.filter(b => b.alive && b.trail.length).map(b => ({ b, at: b.trail[b.trail.length - 1].at }));
     heads.sort((p, q) => depthOf(...p.at) - depthOf(...q.at));
     for (const { b, at } of heads) {
       const born = { planet: 4, comet: 3, heavy: 3 }[b.kind] || 1.5, dying = b.kind === "planet" ? 5 : 3;
       const seen = Math.min(1, b.age / born) * Math.min(1, (b.life - b.age) / dying) * visibility(at), [x, y] = px(...at);
-      if (b.kind === "planet") drawPlanet(b.look, x, y, seen);
+      if (b.kind === "planet") drawPlanet(b, x, y, seen);
       else if (b.kind === "comet") drawComet(b, at, seen);
       else if (b.kind === "heavy") drawHeavy(x, y, Math.min(1, b.age / born));
       else {
