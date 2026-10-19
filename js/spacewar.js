@@ -3,8 +3,11 @@
 // torpedoes, three jumps into hyperspace, each riskier than the last, stars drifting behind, and space
 // wrapping round the edges of a square field seen through a round tube (the corners fall outside it, as on
 // the original display). One player flies the needle against the computer for a high score; two share the
-// keyboard. Drawn as a vector display with phosphor afterglow under AV glass. High scores stay in this
-// browser and can be saved to a file. Desktop only; opened by channels.js (key 4, or CH 04, in AV).
+// keyboard. Drawn as a vector display with phosphor afterglow, in a console after the original display,
+// with wooden control boxes whose levers move with the keys (and with the computer's moves), oscilloscope
+// readouts and latching piano keys; the whole scene is seen through the AV glass, as if on an old TV.
+// High scores stay in this browser and can be saved to a file. Desktop only; opened by channels.js
+// (key 4, or CH 04, in AV).
 
 const GM = .06;                 // the hole's pull (screen half-width = 1)
 const HOLE = .045;              // fall closer than this and the ship is gone
@@ -28,8 +31,9 @@ const GAME_KEYS = new Set(Object.values(SOLO).flat());
 
 const TEXT = {
   en: {
-    model: "CH 04 · after MIT, 1962", help: "? How to play", scores: "High scores", exit: "✕ Exit",
-    mode: n => `Players: ${n}`, cpu: "WEDGE · CPU", wedge: "WEDGE", needle: "NEEDLE",
+    model: "Precision CRT display · CH 04", help: "How to play", scores: "Scores", exit: "Power",
+    one: "1 player", two: "2 players", cpu: "WEDGE · CPU", wedge: "WEDGE", needle: "NEEDLE",
+    ctl: ["Rotate", "Thrust", "Fire", "Hyper"], fuel: "FUEL", torp: "TORP", jump: "JUMP",
     start: "PRESS ENTER TO START", hint: "M  1 / 2 PLAYERS   ·   ?  HOW TO PLAY", paused: "PAUSED",
     round: n => `ROUND ${n}`, score: "SCORE", cleared: n => `ROUND ${n} CLEARED`, draw: "DRAW",
     needleWins: "NEEDLE WINS", wedgeWins: "WEDGE WINS", over: "GAME OVER", best: "HI",
@@ -49,8 +53,9 @@ const TEXT = {
       <p class="sw__credit">After Spacewar! (1962), conceived by the Hingham Institute Study Group on Space Warfare and first realized on the PDP-1 at MIT by Stephen Russell, Peter Samson, Dan Edwards and Martin Graetz, with Alan Kotok, Steve Piner and Robert A. Saunders. This version is written from scratch, with a black hole for the star.</p>`,
   },
   pl: {
-    model: "CH 04 · wg MIT, 1962", help: "? Jak grać", scores: "Wyniki", exit: "✕ Wyjdź",
-    mode: n => `Graczy: ${n}`, cpu: "WEDGE · KOMPUTER", wedge: "WEDGE", needle: "NEEDLE",
+    model: "Precyzyjny wyświetlacz CRT · CH 04", help: "Jak grać", scores: "Wyniki", exit: "Zasilanie",
+    one: "1 gracz", two: "2 graczy", cpu: "WEDGE · KOMPUTER", wedge: "WEDGE", needle: "NEEDLE",
+    ctl: ["Obrót", "Ciąg", "Strzał", "Skok"], fuel: "PALIWO", torp: "TORP", jump: "SKOK",
     start: "ENTER, ŻEBY ZACZĄĆ", hint: "M  1 / 2 GRACZY   ·   ?  JAK GRAĆ", paused: "PAUZA",
     round: n => `RUNDA ${n}`, score: "WYNIK", cleared: n => `RUNDA ${n} WYGRANA`, draw: "REMIS",
     needleWins: "WYGRYWA NEEDLE", wedgeWins: "WYGRYWA WEDGE", over: "KONIEC GRY", best: "REKORD",
@@ -92,7 +97,7 @@ function makeShip(kind, x, y) {
 
 /* ───────── The game ───────── */
 
-let dialog, canvas, ctx, screen, panel, readouts, scoreEl, modeBtn, dpr = 1;
+let dialog, canvas, ctx, screen, panel, scopes, boxes, scoreEl, dpr = 1;
 let state = "title", players = 1, round = 1, score = 0, wins = [0, 0], roundTime = 0, timer = 0, message = "";
 let ships = [], torps = [], sparks = [], stars = [], paused = false, raf = 0, last = 0, acc = 0, refresh = 0;
 const held = new Set(), tapped = new Set();
@@ -192,7 +197,7 @@ function update(dt) {
 
   if (state === "play" || state === "ending") {
     const controls = players === 1 ? [pad(SOLO), think(ships[1], ships[0], dt)] : [pad(PADS.needle), pad(PADS.wedge)];
-    ships.forEach((s, i) => fly(s, controls[i], dt));
+    ships.forEach((s, i) => { fly(s, controls[i], dt); s.ctl = controls[i]; });
     tapped.clear();
     for (const t of torps) {
       const [gx, gy] = pull(t.x, t.y);
@@ -320,14 +325,26 @@ function draw() {
   ctx.globalAlpha = 1;
 }
 
+// The oscilloscopes in the control boxes: fuel as a trace across the graticule, torpedoes and jumps left.
 function showReadouts() {
-  const t = say(), bar = f => "▮".repeat(Math.ceil(f * 8)).padEnd(8, "·");
-  ships.forEach((s, i) => {
-    const name = i ? (players === 1 ? t.cpu : t.wedge) : t.needle;
-    readouts[i].textContent = state === "title" ? name : `${name}\nT${String(s.torps).padStart(2, "0")} F${bar(s.fuel)} H${s.jumps}`;
+  const t = say();
+  scopes.forEach((scope, i) => {
+    const s = ships[i], live = s && state !== "title";
+    scope.name.textContent = i ? (players === 1 ? t.cpu : t.wedge) : t.needle;
+    scope.el.style.setProperty("--fuel", live ? s.fuel.toFixed(3) : 1);
+    scope.data.textContent = `${t.torp} ${live ? String(s.torps).padStart(2, "0") : TORPS}   ${t.jump} ${live ? s.jumps : JUMPS}`;
+    scope.fuel.textContent = t.fuel;
   });
-  if (!ships.length) readouts.forEach((el, i) => { el.textContent = i ? (players === 1 ? t.cpu : t.wedge) : t.needle; });
-  scoreEl.textContent = players === 1 ? `${t.score} ${String(score).padStart(6, "0")}\n${t.round(round)}` : `${wins[0]} : ${wins[1]}`;
+  scoreEl.textContent = players === 1 ? `${t.score} ${String(score).padStart(6, "0")}  ·  ${t.round(round)}` : `${t.needle} ${wins[0]} : ${wins[1]} ${t.wedge}`;
+}
+// The levers in the control boxes follow the keys, or the computer's hands.
+function showControls() {
+  boxes.forEach((box, i) => {
+    const c = (state === "play" || state === "ending") && !paused && ships[i]?.alive ? ships[i].ctl || {} : {};
+    const tilt = c.left && !c.right ? "left" : c.right && !c.left ? "right" : "";
+    if (box.rotate.dataset.tilt !== tilt) box.rotate.dataset.tilt = tilt;
+    for (const name of ["thrust", "fire", "hyper"]) box[name].classList.toggle("is-on", !!c[name]);
+  });
 }
 
 function frame(now) {
@@ -336,6 +353,7 @@ function frame(now) {
   last = now;
   while (acc >= STEP) { update(STEP); acc -= STEP; }
   draw();
+  showControls();
   if (now > refresh) { showReadouts(); refresh = now + 150; }
 }
 
@@ -346,12 +364,14 @@ function openPanel(html, kind) {
   panel.dataset.kind = kind;
   panel.hidden = false;
   paused = state === "play" || state === "ending";
+  latchKeys();
   panel.querySelector("input, button")?.focus() ?? panel.focus();
 }
 function closePanel() {
   if (panel.hidden) return;
   panel.hidden = true;
   paused = false;
+  latchKeys();
   canvas.focus();
 }
 const toggleHelp = () => panel.dataset.kind === "help" && !panel.hidden ? closePanel() : openPanel(say().helpHTML, "help");
@@ -389,12 +409,22 @@ function saveFile() {
 
 /* ───────── Keys ───────── */
 
-function toggleMode() {
-  if (state !== "title" && state !== "done") return;
-  players = players === 1 ? 2 : 1;
+function toggleMode(to = players === 1 ? 2 : 1) {
+  if ((state !== "title" && state !== "done") || to === players) return;
+  players = to;
   ships = []; wins = [0, 0]; score = 0; round = 1;
   state = "title";
-  modeBtn.textContent = say().mode(players);
+  latchKeys();
+}
+// Piano keys latch like an old radio's: the chosen player count stays down, an open panel keeps its key down.
+function latchKeys() {
+  const kind = panel.hidden ? "" : panel.dataset.kind;
+  dialog.querySelectorAll("[data-sw]").forEach(key => {
+    const on = key.dataset.sw === "mode" ? +key.dataset.players === players : key.dataset.sw === kind;
+    key.setAttribute("aria-pressed", String(on));
+  });
+  boxes[1].el.classList.toggle("is-cpu", players === 1);
+  dialog.querySelectorAll(".sw__keyhint--wedge").forEach(hint => { hint.hidden = players === 1; });
 }
 function onKey(event) {
   const down = event.type === "keydown", code = event.code;
@@ -430,28 +460,54 @@ function build() {
   dialog = document.createElement("dialog");
   dialog.className = "sw";
   dialog.setAttribute("aria-label", "Spacewar!");
-  dialog.innerHTML = `
-    <div class="sw__cabinet">
-      <div class="sw__plate"><span class="sw__brand">SPACEWAR!</span><span class="sw__model"></span></div>
-      <div class="sw__screen">
-        <canvas class="sw__canvas" tabindex="-1" aria-label="Spacewar!"></canvas>
-        <div class="sw__glass" aria-hidden="true"></div>
-        <div class="sw__panel" tabindex="-1" hidden></div>
+  const box = (side, keys) => `
+    <div class="sw__box sw__box--${side}">
+      <div class="sw__scope"><span class="sw__scope-name"></span><span class="sw__scope-fuel"></span><i class="sw__trace"></i><span class="sw__scope-data"></span></div>
+      <div class="sw__levers">
+        ${["rotate", "thrust", "fire", "hyper"].map((name, i) => `
+        <div class="sw__lever sw__lever--${name}" data-ctl="${name}">
+          ${name === "fire" ? '<i class="sw__button"></i>' : '<i class="sw__nut"></i><i class="sw__stick"></i>'}
+          <span class="sw__engrave" data-ctl-label="${i}"></span>
+          <kbd class="sw__keyhint sw__keyhint--${side}">${keys[i]}</kbd>
+        </div>`).join("")}
       </div>
-      <div class="sw__readouts"><div class="sw__readout"></div><div class="sw__score" aria-live="polite"></div><div class="sw__readout sw__readout--right"></div></div>
-      <div class="sw__controls">
-        <button type="button" data-sw="help"></button><button type="button" data-sw="mode"></button>
-        <button type="button" data-sw="scores"></button><button type="button" data-sw="close"></button>
-      </div>
+      <span class="sw__box-plate">${side === "needle" ? "1" : "2"}</span>
     </div>`;
+  dialog.innerHTML = `
+    <div class="sw__scene">
+      ${box("needle", ["A D", "W", "S", "Q"])}
+      <div class="sw__cabinet">
+        <div class="sw__trim"><span class="sw__brand">SPACEWAR!</span><span class="sw__model"></span></div>
+        <div class="sw__face">
+          <i class="sw__screw"></i><i class="sw__screw"></i><i class="sw__screw"></i><i class="sw__screw"></i>
+          <div class="sw__screen">
+            <canvas class="sw__canvas" tabindex="-1" aria-label="Spacewar!"></canvas>
+            <div class="sw__glass" aria-hidden="true"></div>
+            <div class="sw__panel" tabindex="-1" hidden></div>
+          </div>
+        </div>
+        <div class="sw__scope sw__scope--score"><span class="sw__score" aria-live="polite"></span></div>
+        <div class="sw__keys">
+          <button type="button" class="sw__key" data-sw="mode" data-players="1"></button>
+          <button type="button" class="sw__key" data-sw="mode" data-players="2"></button>
+          <button type="button" class="sw__key" data-sw="help"></button>
+          <button type="button" class="sw__key" data-sw="scores"></button>
+          <button type="button" class="sw__key sw__key--power" data-sw="close"></button>
+        </div>
+      </div>
+      ${box("wedge", ["← →", "↑", "↓", "Enter"])}
+    </div>
+    <div class="crt-screen sw__tv" aria-hidden="true"><i class="crt-screen__grain"></i><i class="crt-screen__roll"></i></div>`;
   document.body.append(dialog);
   canvas = dialog.querySelector("canvas");
   ctx = canvas.getContext("2d");
   screen = dialog.querySelector(".sw__screen");
   panel = dialog.querySelector(".sw__panel");
-  readouts = [...dialog.querySelectorAll(".sw__readout")];
   scoreEl = dialog.querySelector(".sw__score");
-  modeBtn = dialog.querySelector('[data-sw="mode"]');
+  scopes = [...dialog.querySelectorAll(".sw__box .sw__scope")].map(el => ({
+    el, name: el.querySelector(".sw__scope-name"), fuel: el.querySelector(".sw__scope-fuel"), data: el.querySelector(".sw__scope-data") }));
+  boxes = [...dialog.querySelectorAll(".sw__box")].map(el => ({
+    el, ...Object.fromEntries([...el.querySelectorAll("[data-ctl]")].map(lever => [lever.dataset.ctl, lever])) }));
   stars = Array.from({ length: 150 }, () => ({ x: rand(-1, 1), y: rand(-1, 1), b: rand(.2, 1) ** 2 }));
 
   new ResizeObserver(() => {
@@ -464,7 +520,7 @@ function build() {
   dialog.addEventListener("click", event => {
     const action = event.target.closest("[data-sw]")?.dataset.sw;
     if (action === "help") toggleHelp();
-    else if (action === "mode") toggleMode();
+    else if (action === "mode") toggleMode(+event.target.closest("[data-sw]").dataset.players);
     else if (action === "scores") panel.dataset.kind === "scores" && !panel.hidden ? closePanel() : showScores();
     else if (action === "close") dialog.close();
     else if (action === "file") saveFile();
@@ -490,11 +546,17 @@ export async function openSpacewar() {
   if (!dialog) build();
   const t = say();
   dialog.querySelector(".sw__model").textContent = t.model;
+  dialog.querySelector('[data-players="1"]').textContent = t.one;
+  dialog.querySelector('[data-players="2"]').textContent = t.two;
   dialog.querySelector('[data-sw="help"]').textContent = t.help;
   dialog.querySelector('[data-sw="scores"]').textContent = t.scores;
   dialog.querySelector('[data-sw="close"]').textContent = t.exit;
-  modeBtn.textContent = t.mode(players);
+  dialog.querySelectorAll("[data-ctl-label]").forEach(label => { label.textContent = t.ctl[label.dataset.ctlLabel]; });
+  // The TV glass over the scene shares the page's grain.
+  const grain = document.querySelector("body > .crt-screen")?.style.getPropertyValue("--grain");
+  if (grain) dialog.querySelector(".sw__tv").style.setProperty("--grain", grain);
   state = "title"; ships = []; score = 0; round = 1; wins = [0, 0];
+  latchKeys(); showReadouts();
   document.documentElement.classList.add("sw-open");
   dialog.showModal();
   canvas.focus();
