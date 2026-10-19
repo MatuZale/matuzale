@@ -542,51 +542,51 @@ html.deck-open { overflow: hidden; }
    Julia, flow lines for Thomas, ripples for Bedhead and level sets for McMullen. */
 
 .tcard--clifford { /* reverse holo */
-  --art-mask: url("assets/deck/foil/art-clifford.webp");
+  --art-mask: url("../assets/deck/foil/art-clifford.webp");
   --frame: linear-gradient(140deg, #8f7dff, #3b2bb8 30%, #b9a8ff 52%, #2a7bdc 78%, #7ef0ff);
   --accent: #9d8cff;
   --panel: #0d0b22;
   --spectrum: #9d8cff, #6ff7ff, #ff8fd8, #ffe08a, #9d8cff;
   --ring: #ff7a9a, #ffd56b, #a7ff8a, #6ff7ff, #7f9bff, #d38bff, #ff7a9a;
-  --foil-mask: url("assets/deck/foil/clifford.webp");
+  --foil-mask: url("../assets/deck/foil/clifford.webp");
 }
 .tcard--dejong { /* reverse holo */
-  --art-mask: url("assets/deck/foil/art-dejong.webp");
+  --art-mask: url("../assets/deck/foil/art-dejong.webp");
   --frame: linear-gradient(140deg, #ff6fd0, #9b1f88 34%, #ffb2ec 55%, #6c2bd9 80%, #ff7ad8);
   --accent: #ff6fd0;
   --panel: #1a0a1d;
   --spectrum: #ff7ad8, #b28bff, #7ec7ff, #ffd0f2, #ff7ad8;
   --ring: #ff7ad8, #ffd56b, #7ef5c0, #6ecbff, #b28bff, #ff7ad8;
-  --foil-mask: url("assets/deck/foil/dejong.webp");
+  --foil-mask: url("../assets/deck/foil/dejong.webp");
 }
 .tcard--simon { /* reverse holo */
-  --art-mask: url("assets/deck/foil/art-simon.webp");
+  --art-mask: url("../assets/deck/foil/art-simon.webp");
   --frame: linear-gradient(140deg, #7ff8e4, #0d8a8f 32%, #c8fff5 54%, #1758c9 80%, #86f0ff);
   --accent: #4fe6d2;
   --panel: #04161e;
   --spectrum: #7ff8e4, #6ecbff, #b28bff, #9bffd0, #7ff8e4;
   --ring: #7ff8e4, #6ecbff, #b28bff, #9bffd0, #7ff8e4;
-  --foil-mask: url("assets/deck/foil/simon.webp");
+  --foil-mask: url("../assets/deck/foil/simon.webp");
   --shine-o: .7;
   --ring-o: .5;
 }
 .tcard--ikeda { /* reverse holo */
-  --art-mask: url("assets/deck/foil/art-ikeda.webp");
+  --art-mask: url("../assets/deck/foil/art-ikeda.webp");
   --frame: linear-gradient(140deg, #ffd0b0, #c4566f 34%, #ffe1cf 56%, #a14277 80%, #ffb48f);
   --accent: #ffad8f;
   --panel: #1b0d12;
   --spectrum: #ffb48f, #ff7a9a, #ffd56b, #ffa6d8, #ffb48f;
   --ring: #ffb48f, #ff7a9a, #ffd56b, #ffa6d8, #ffb48f;
-  --foil-mask: url("assets/deck/foil/ikeda.webp");
+  --foil-mask: url("../assets/deck/foil/ikeda.webp");
 }
 .tcard--julia { /* full holo */
-  --art-mask: url("assets/deck/foil/art-julia.webp");
+  --art-mask: url("../assets/deck/foil/art-julia.webp");
   --frame: linear-gradient(140deg, #fff1b0, #b88a2b 30%, #ffe28a 50%, #8d6316 74%, #ffe9a6);
   --accent: #f3cf6b;
   --panel: #15110a;
   --spectrum: #fff1b0, #e0a93a, #fff7d0, #c18a2a, #fff1b0;
   --ring: #fff3c0, #d9a441, #fff, #b37a1c, #ffe6a0, #d9a441, #fff3c0;
-  --foil-mask: url("assets/deck/foil/julia.webp");
+  --foil-mask: url("../assets/deck/foil/julia.webp");
   --shine-o: .85;
   --ring-blend: color-dodge;
   --ring-o: .8;
@@ -596,16 +596,16 @@ html.deck-open { overflow: hidden; }
   --holo-d: #f3cf6b;
 }
 .tcard--thomas { /* reverse holo */
-  --art-mask: url("assets/deck/foil/art-thomas.webp");
+  --art-mask: url("../assets/deck/foil/art-thomas.webp");
   --frame: linear-gradient(140deg, #d7fbff, #4bb7d6 30%, #ffb3ec 52%, #6a5bd8 76%, #e0fdff);
   --accent: #74e3ff;
   --panel: #070a17;
   --spectrum: #7ef5c0, #6ecbff, #b28bff, #ff7ad8, #7ef5c0;
   --ring: #7ef5c0, #6ecbff, #b28bff, #ff7ad8, #7ef5c0;
-  --foil-mask: url("assets/deck/foil/thomas.webp");
+  --foil-mask: url("../assets/deck/foil/thomas.webp");
 }
 .tcard--layered { /* regular holo */
-  --art-mask: url("assets/deck/foil/art-layered.webp");
+  --art-mask: url("../assets/deck/foil/art-layered.webp");
   --frame: linear-gradient(140deg, #ffd66b, #e2530f 32%, #ffb347 54%, #1b3a9e 82%, #ffcf6b);
   --accent: #ffad3b;
   --panel: #0a0d22;
@@ -614,7 +614,7 @@ html.deck-open { overflow: hidden; }
   --shine-o: .9;
 }
 .tcard--symmetric { /* regular holo */
-  --art-mask: url("assets/deck/foil/art-symmetric.webp");
+  --art-mask: url("../assets/deck/foil/art-symmetric.webp");
   --frame: linear-gradient(140deg, #e3f1ff, #5d8fd6 32%, #f4faff 54%, #2e56a8 80%, #bfe0ff);
   --accent: #8ec4ff;
   --panel: #060b18;
@@ -624,7 +624,7 @@ html.deck-open { overflow: hidden; }
   --ring-blend: color-dodge;
 }
 .tcard--gumowski { /* regular holo */
-  --art-mask: url("assets/deck/foil/art-gumowski.webp");
+  --art-mask: url("../assets/deck/foil/art-gumowski.webp");
   --frame: linear-gradient(140deg, #9fb3ff, #3a3fc0 32%, #c9d4ff 54%, #1b6ec8 80%, #7fe8ff);
   --accent: #7f94ff;
   --panel: #070920;
@@ -633,22 +633,22 @@ html.deck-open { overflow: hidden; }
   --shine-o: .9;
 }
 .tcard--bedhead { /* reverse holo */
-  --art-mask: url("assets/deck/foil/art-bedhead.webp");
+  --art-mask: url("../assets/deck/foil/art-bedhead.webp");
   --frame: linear-gradient(140deg, #8ff7e0, #6d3fd6 32%, #d7fff2 54%, #1aa39b 80%, #ffe56b);
   --accent: #5be6cd;
   --panel: #070b17;
   --spectrum: #8ff7e0, #ffe56b, #b28bff, #5be6cd, #8ff7e0;
   --ring: #8ff7e0, #ffe56b, #6d3fd6, #5be6cd, #8ff7e0;
-  --foil-mask: url("assets/deck/foil/bedhead.webp");
+  --foil-mask: url("../assets/deck/foil/bedhead.webp");
 }
 .tcard--mcmullen { /* full holo */
-  --art-mask: url("assets/deck/foil/art-mcmullen.webp");
+  --art-mask: url("../assets/deck/foil/art-mcmullen.webp");
   --frame: linear-gradient(140deg, #ffe0b0, #b8742b 30%, #ffd59a 50%, #8a4f18 74%, #ffe7bf);
   --accent: #f0b268;
   --panel: #120d0c;
   --spectrum: #ffe0b0, #e0903a, #fff0cc, #b8742b, #ffe0b0;
   --ring: #fff3c0, #d9a441, #fff, #b37a1c, #ffe6a0, #d9a441, #fff3c0;
-  --foil-mask: url("assets/deck/foil/mcmullen.webp");
+  --foil-mask: url("../assets/deck/foil/mcmullen.webp");
   --shine-o: .85;
   --ring-blend: color-dodge;
   --ring-o: .8;
@@ -658,7 +658,7 @@ html.deck-open { overflow: hidden; }
   --holo-d: #f3cf6b;
 }
 .tcard--harmonic { /* regular holo */
-  --art-mask: url("assets/deck/foil/art-harmonic.webp");
+  --art-mask: url("../assets/deck/foil/art-harmonic.webp");
   --frame: linear-gradient(140deg, #ffb3f0, #a82dd0 32%, #ffd0f7 52%, #2b8fd8 78%, #7fe8ff);
   --accent: #ff7fe0;
   --panel: #0e0820;
@@ -702,8 +702,8 @@ html.deck-open { overflow: hidden; }
   background: linear-gradient(115deg, #d9efff, #9fdcff 18%, #f7b8e6 36%, #ffe39a 54%, #a8f0d2 72%, #c6b5ff 90%);
   background-size: 300% 300%;
   background-position: var(--posx) var(--posy);
-  -webkit-mask: url("assets/holo/guilloche.svg") 110% 0 / 85% auto no-repeat, linear-gradient(#000 30%, transparent 48%);
-  mask: url("assets/holo/guilloche.svg") 110% 0 / 85% auto no-repeat, linear-gradient(#000 30%, transparent 48%);
+  -webkit-mask: url("../assets/holo/guilloche.svg") 110% 0 / 85% auto no-repeat, linear-gradient(#000 30%, transparent 48%);
+  mask: url("../assets/holo/guilloche.svg") 110% 0 / 85% auto no-repeat, linear-gradient(#000 30%, transparent 48%);
   -webkit-mask-composite: source-in;
   mask-composite: intersect;
   mix-blend-mode: screen;
@@ -793,8 +793,8 @@ html.deck-open { overflow: hidden; }
   background-size: 300% 300%;
   background-position: var(--posx, 50%) var(--posy, 50%);
   opacity: .55;
-  -webkit-mask: url("assets/holo/harmonograph.svg") center / 115% auto no-repeat;
-  mask: url("assets/holo/harmonograph.svg") center / 115% auto no-repeat;
+  -webkit-mask: url("../assets/holo/harmonograph.svg") center / 115% auto no-repeat;
+  mask: url("../assets/holo/harmonograph.svg") center / 115% auto no-repeat;
 }
 .tcard__back-mark {
   position: relative;

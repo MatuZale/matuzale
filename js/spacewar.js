@@ -419,7 +419,7 @@ function onKey(event) {
 /* ───────── The console ───────── */
 
 const loadStyles = () => new Promise(resolve => {
-  const href = new URL("spacewar.css", import.meta.url).href;
+  const href = new URL("../css/spacewar.css", import.meta.url).href;
   if (document.querySelector(`link[href="${href}"]`)) return resolve();
   const link = Object.assign(document.createElement("link"), { rel: "stylesheet", href });
   link.onload = link.onerror = () => resolve();

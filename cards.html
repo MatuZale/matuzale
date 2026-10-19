@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="css/style.css" />
   <script>
     // Apply saved theme before paint to avoid a flash.
     try {
@@ -45,7 +45,7 @@
     </p>
   </main>
   <script type="module">
-    import { createDeck } from "./deck.js";
+    import { createDeck } from "./js/deck.js";
 
     const opener = document.querySelector("[data-deck-open]");
     const deck = await createDeck();

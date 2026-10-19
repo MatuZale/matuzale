@@ -208,7 +208,7 @@ function cardMarkup(card, index) {
 }
 
 function loadStyles() {
-  const href = new URL("deck.css", import.meta.url).href;
+  const href = new URL("../css/deck.css", import.meta.url).href;
   if (document.querySelector(`link[href="${href}"]`)) return Promise.resolve();
   return new Promise(resolve => {
     const link = Object.assign(document.createElement("link"), { rel: "stylesheet", href });

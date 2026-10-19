@@ -906,7 +906,7 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
 .card.card--holo::before {
   z-index: 4;
   opacity: .36;
-  background: url("assets/card-grain.svg") 0 0 / 192px 192px repeat;
+  background: url("../assets/card-grain.svg") 0 0 / 192px 192px repeat;
   mix-blend-mode: soft-light;
 }
 .card.card--holo::after {
@@ -928,8 +928,8 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
   background: repeating-linear-gradient(var(--foil-angle, 122deg), #d9499e, #c79f44 18%, #3caa99 36%, #398dc2 54%, #9274d0 72%, #d9499e);
   background-size: 350% 350%;
   background-position: var(--foil-x, 50%) var(--foil-y, 50%);
-  -webkit-mask-image: url("assets/holo-stars.svg"), radial-gradient(ellipse at var(--light-x, 50%) var(--light-y, 30%), #000 10%, #0009 45%, transparent 85%);
-  mask-image: url("assets/holo-stars.svg"), radial-gradient(ellipse at var(--light-x, 50%) var(--light-y, 30%), #000 10%, #0009 45%, transparent 85%);
+  -webkit-mask-image: url("../assets/holo-stars.svg"), radial-gradient(ellipse at var(--light-x, 50%) var(--light-y, 30%), #000 10%, #0009 45%, transparent 85%);
+  mask-image: url("../assets/holo-stars.svg"), radial-gradient(ellipse at var(--light-x, 50%) var(--light-y, 30%), #000 10%, #0009 45%, transparent 85%);
   -webkit-mask-size: 164px 164px, 100% 100%;
   mask-size: 164px 164px, 100% 100%;
   -webkit-mask-position: 8px 0, center;
@@ -963,7 +963,7 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
   z-index: 1;
   opacity: .3;
   background-image:
-    url("assets/card-grain.svg"),
+    url("../assets/card-grain.svg"),
     linear-gradient(var(--foil-angle, 122deg), #e06e9c, #e5c36e 17%, #88c699 33%, #6ecdd5 50%, #867bd8 67%, #d47bc8 83%, #e06e9c),
     radial-gradient(ellipse at var(--light-x, 50%) var(--light-y, 30%), #e0eee5, #536777 42%, #111521 85%);
   background-size: 128px 128px, 400% 400%, 100% 100%;
@@ -982,8 +982,8 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
   background-size: 100% 100%, 250% 250%;
   background-position: center, var(--foil-x, 50%) var(--foil-y, 50%);
   background-blend-mode: overlay;
-  -webkit-mask: url("assets/holo-stars.svg") var(--stars-x, 0px) var(--stars-y, 0px) / 164px 164px repeat;
-  mask: url("assets/holo-stars.svg") var(--stars-x, 0px) var(--stars-y, 0px) / 164px 164px repeat;
+  -webkit-mask: url("../assets/holo-stars.svg") var(--stars-x, 0px) var(--stars-y, 0px) / 164px 164px repeat;
+  mask: url("../assets/holo-stars.svg") var(--stars-x, 0px) var(--stars-y, 0px) / 164px 164px repeat;
   mix-blend-mode: color-dodge;
   filter: contrast(1.2) brightness(1.1);
   transition: opacity .45s;
@@ -1000,7 +1000,7 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
   min-height: 180px;
   margin: 10px 0 10px 10px;
   background:
-    url("assets/holo/paper.svg") 0 0 / 160px 160px,
+    url("../assets/holo/paper.svg") 0 0 / 160px 160px,
     radial-gradient(ellipse 90% 80% at calc(35% + var(--holo-x) * 40%) calc(25% + var(--holo-y) * 30%), #fdfcf7, #ebe7dc 55%, #d8d3c7);
   background-blend-mode: overlay, normal;
 }
@@ -1011,15 +1011,15 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
   z-index: 0;
   opacity: .5;
   background:
-    url("assets/holo/suits.svg") 0 0 / var(--tile) var(--tile),
+    url("../assets/holo/suits.svg") 0 0 / var(--tile) var(--tile),
     linear-gradient(-45deg, transparent 38%, #ffffffd9 50%, transparent 62%),
     repeating-linear-gradient(calc(var(--foil-angle) - 60deg), #ff6ec766, #ffd27a66 8%, #7ef5c066 16%, #6ecbff66 24%, #a98bff66 32%, #ff6ec766 40%),
     repeating-linear-gradient(118deg, #fbfbf7 0, #858b97 13px, #f1f2ef 24px, #545b69 38px, #e6e9ec 50px, #fbfbf7 62px);
   background-size: var(--tile) var(--tile), 300% 300%, 240% 240%, auto;
   background-position: 0 0, var(--foil-x) var(--foil-y), var(--foil-x) var(--foil-y), calc(var(--holo-x) * 180px) calc(var(--holo-y) * 120px);
   background-blend-mode: overlay, screen, color, normal;
-  -webkit-mask: url("assets/holo/suits.svg") 0 0 / var(--tile) var(--tile) repeat;
-  mask: url("assets/holo/suits.svg") 0 0 / var(--tile) var(--tile) repeat;
+  -webkit-mask: url("../assets/holo/suits.svg") 0 0 / var(--tile) var(--tile) repeat;
+  mask: url("../assets/holo/suits.svg") 0 0 / var(--tile) var(--tile) repeat;
   /* The foil sits a hair deeper than the ink printed over it. */
   transform: translate(calc(var(--holo-x) * -7px), calc(var(--holo-y) * -6px));
   filter: contrast(1.2) saturate(calc(.35 + var(--holo-on) * .55));
@@ -1036,8 +1036,8 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
   background: linear-gradient(var(--foil-angle), #9fb4c9, #d9a5c9 25%, #e2c98f 50%, #8fcab3 75%, #a99fd8);
   background-size: 200% 200%;
   background-position: var(--foil-x) var(--foil-y);
-  -webkit-mask: url("assets/holo/latent-psi.svg") center / contain no-repeat, radial-gradient(circle 110px at calc(var(--light-x) / .36) var(--light-y), #000, #0009 45%, transparent);
-  mask: url("assets/holo/latent-psi.svg") center / contain no-repeat, radial-gradient(circle 110px at calc(var(--light-x) / .36) var(--light-y), #000, #0009 45%, transparent);
+  -webkit-mask: url("../assets/holo/latent-psi.svg") center / contain no-repeat, radial-gradient(circle 110px at calc(var(--light-x) / .36) var(--light-y), #000, #0009 45%, transparent);
+  mask: url("../assets/holo/latent-psi.svg") center / contain no-repeat, radial-gradient(circle 110px at calc(var(--light-x) / .36) var(--light-y), #000, #0009 45%, transparent);
   -webkit-mask-composite: source-in;
   mask-composite: intersect;
   mix-blend-mode: multiply;
@@ -1146,12 +1146,12 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
   mask-composite: intersect;
   filter: var(--card-foil-tone);
 }
-.card__holo--isotherms { --motif: url("assets/holo/isotherms.svg"); --latent: url("assets/holo/latent-isotherms.svg"); --motif-size: 705px; --motif-pos: right -268px bottom -298px; --holo-tint: var(--accent-3); }
-.card__holo--guilloche { --motif: url("assets/holo/guilloche.svg"); --latent: url("assets/holo/latent-guilloche.svg"); --motif-size: 360px; --motif-pos: right -135px bottom -130px; --holo-tint: #c79f44; }
-.card__holo--streams { --motif: url("assets/holo/streams.svg"); --latent: url("assets/holo/latent-streams.svg"); --motif-size: 540px; --motif-pos: right -150px bottom -225px; --holo-tint: var(--accent-2); --glow-x: 62%; --glow-y: 88%; }
-.card__holo--harmonograph { --motif: url("assets/holo/harmonograph.svg"); --latent: url("assets/holo/latent-harmonograph.svg"); --motif-size: 400px; --motif-pos: right -110px bottom -120px; --holo-tint: var(--accent); }
-.card__holo--blackhole { --motif: url("assets/holo/blackhole.svg"); --latent: url("assets/holo/latent-blackhole.svg"); --motif-size: 390px; --motif-pos: right -97px bottom -117px; --holo-tint: var(--accent-2); --glow-x: 58%; --glow-y: 88%; }
-.card__holo--interference { --motif: url("assets/holo/interference.svg"); --latent: url("assets/holo/latent-interference.svg"); --motif-size: 540px; --motif-pos: right -80px bottom -150px; --holo-tint: var(--accent-3); --glow-x: 62%; --glow-y: 100%; }
+.card__holo--isotherms { --motif: url("../assets/holo/isotherms.svg"); --latent: url("../assets/holo/latent-isotherms.svg"); --motif-size: 705px; --motif-pos: right -268px bottom -298px; --holo-tint: var(--accent-3); }
+.card__holo--guilloche { --motif: url("../assets/holo/guilloche.svg"); --latent: url("../assets/holo/latent-guilloche.svg"); --motif-size: 360px; --motif-pos: right -135px bottom -130px; --holo-tint: #c79f44; }
+.card__holo--streams { --motif: url("../assets/holo/streams.svg"); --latent: url("../assets/holo/latent-streams.svg"); --motif-size: 540px; --motif-pos: right -150px bottom -225px; --holo-tint: var(--accent-2); --glow-x: 62%; --glow-y: 88%; }
+.card__holo--harmonograph { --motif: url("../assets/holo/harmonograph.svg"); --latent: url("../assets/holo/latent-harmonograph.svg"); --motif-size: 400px; --motif-pos: right -110px bottom -120px; --holo-tint: var(--accent); }
+.card__holo--blackhole { --motif: url("../assets/holo/blackhole.svg"); --latent: url("../assets/holo/latent-blackhole.svg"); --motif-size: 390px; --motif-pos: right -97px bottom -117px; --holo-tint: var(--accent-2); --glow-x: 58%; --glow-y: 88%; }
+.card__holo--interference { --motif: url("../assets/holo/interference.svg"); --latent: url("../assets/holo/latent-interference.svg"); --motif-size: 540px; --motif-pos: right -80px bottom -150px; --holo-tint: var(--accent-3); --glow-x: 62%; --glow-y: 100%; }
 @media (prefers-reduced-motion: reduce) {
   .project-slot > .card--holo, .card__holo::before, .card__holo::after, .card__latent, .print__suits, .print__latent { transform: none; }
 }
