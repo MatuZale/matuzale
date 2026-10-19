@@ -1,7 +1,7 @@
 // The retro layer: an on-screen display like an old TV set's, a burst of static between channels, a CRT
 // switching off and on for the theme, and a VCR rewinding to the top of the page. All of it is decoration
 // laid over the page (aria-hidden); with reduced motion the static and the power animation are skipped.
-// channels.js also rewinds from the keyboard (Backspace).
+// channels.js also rewinds from the keyboard (Backspace). Very rarely the tape shows its wear.
 // Loaded by channels.js; script.js's theme toggle calls window.crtPower when it is there.
 
 const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -53,6 +53,36 @@ export function staticBurst(duration = 420) {
     else snow.classList.remove("is-on");
   })(start);
 }
+
+/* ───────── Worn tape ───────── */
+
+// Minutes apart, the picture shows its tape for about a second: a faint tracking band rolls down the screen
+// and a few dropout streaks flick across it. Faint and rare on purpose, and never with reduced motion,
+// in a hidden tab or while a dialog is open.
+const between = (a, b) => a + Math.random() * (b - a);
+let tape;
+export function tapeWear() {
+  if (motion.matches) return;
+  tape ??= layer("tape");
+  const from = between(-5, 45);
+  const streaks = Array.from({ length: 3 + Math.floor(Math.random() * 4) }, () =>
+    `<i class="tape__dropout" style="top: ${between(4, 96).toFixed(1)}%; left: ${between(0, 85).toFixed(1)}%; width: ${between(3, 16).toFixed(1)}%; animation-delay: ${between(.05, .8).toFixed(2)}s"></i>`);
+  tape.innerHTML = `<i class="tape__band" style="--from: ${from.toFixed(1)}%; --to: ${(from + between(35, 65)).toFixed(1)}%"></i>${streaks.join("")}`;
+  tape.classList.add("is-on");
+  setTimeout(() => tape.classList.remove("is-on"), 1300);
+}
+(function nowAndThen() {
+  let timer;
+  const plan = first => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      if (!document.hidden && !document.querySelector("dialog[open]")) tapeWear();
+      plan(false);
+    }, (first ? between(90, 180) : between(150, 330)) * 1000);
+  };
+  document.addEventListener("visibilitychange", () => document.hidden ? clearTimeout(timer) : plan(true));
+  plan(true);
+})();
 
 /* ───────── The theme switch as a CRT ───────── */
 
