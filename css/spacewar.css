@@ -1,19 +1,31 @@
 /* CH 04: Spacewar! (js/spacewar.js), loaded with the game. A console after the 1962 original: a light grey
    metal display with a blue trim and a round tube behind a black bezel, wooden control boxes with levers
-   either side, oscilloscope readouts and latching piano keys; the scene is seen through the AV glass. */
+   either side, oscilloscope readouts and latching piano keys. Only the screens are under the AV glass; the
+   machine stands in front of the page, which goes out of focus behind it. */
 
 html.sw-open { overflow: hidden; }
+/* Behind the machine the page is itself again, off the AV glass and out of focus, until the machine leaves. */
+html.sw-open:not(:has(.sw.is-off)) body > .crt-screen { display: none; }
+html.is-crt.sw-open:not(:has(.sw.is-off)) body { animation: none; text-shadow: none; }
 .sw {
   width: 100vw; height: 100vh; max-width: none; max-height: none; margin: 0; padding: 24px; border: 0;
-  display: grid; place-items: center; overflow: auto; color: #2a3036;
-  /* A dim room behind the machine. */
-  background: radial-gradient(ellipse at 50% 38%, #2a2f36 0%, #15181c 55%, #08090b 100%);
+  display: grid; place-items: center; overflow: auto; color: #2a3036; background: none;
 }
 .sw:not([open]) { display: none; }
-.sw::backdrop { background: #000; }
+.sw::backdrop {
+  background: radial-gradient(ellipse at 50% 48%, #06080b26 25%, #06080b99 100%);
+  backdrop-filter: blur(12px) saturate(1.2) brightness(.85);
+  animation: sw-fade .45s ease-out both;
+}
+.sw .sw__scene { animation: sw-rise .45s cubic-bezier(.2, .7, .2, 1) both; }
+/* Switching off: the machine goes and the page comes back into focus. */
+.sw.is-off::backdrop { animation: sw-fade .3s ease-in reverse both; }
+.sw.is-off .sw__scene { animation: sw-rise .3s ease-in reverse both; }
+@keyframes sw-fade { from { opacity: 0; } }
+@keyframes sw-rise { from { opacity: 0; transform: translateY(14px) scale(.985); } }
 
 .sw__scene {
-  --tube: min(calc(100vh - 300px), 40vw, 600px);
+  --tube: min(calc(100vh - 322px), 40vw, 600px);
   position: relative; z-index: 1; display: flex; align-items: flex-end; gap: clamp(14px, 2vw, 30px);
   font: 400 1.1rem/1 "VT323", var(--font-mono);
 }
@@ -50,16 +62,43 @@ html.sw-open { overflow: hidden; }
   background: #010402;
   box-shadow: 0 0 0 10px #0e0f11, 0 0 0 12px #2a2d31, 0 0 0 15px #0b0c0d, 0 3px 0 15px #00000059, inset 0 0 40px #000;
 }
+/* The picture: what the beam draws, and the panels written over it. It folds away when the tube switches off. */
+.sw__picture { position: absolute; inset: 0; z-index: 0; }
 .sw__canvas {
   display: block; width: 100%; height: 100%; outline: none;
   /* A colour fringe in the site's accents. */
   filter: drop-shadow(1px 0 0 color-mix(in srgb, var(--accent-3) 55%, transparent)) drop-shadow(-1px 0 0 color-mix(in srgb, var(--accent) 45%, transparent));
 }
-/* The curved glass of the tube: a highlight and a dark rim (the TV glass over the scene adds the scanlines). */
+/* The curved glass of the tube: a highlight and a dark rim. */
 .sw__glass {
   position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
   background: radial-gradient(circle at 32% 24%, #ffffff1c, transparent 28%), radial-gradient(circle, transparent 60%, #000000b8 100%);
 }
+/* The bright line the tube switches on from, and off into. */
+.sw__beam {
+  position: absolute; left: 0; right: 0; top: 50%; height: 2px; margin-top: -1px; opacity: 0; pointer-events: none;
+  background: #f2fff8; box-shadow: 0 0 10px 2px #d8fff0d9, 0 0 32px 7px #5dffb080;
+}
+
+/* ───────── The AV glass, on the screens only: scanlines, an RGB phosphor mask, flicker, grain, a refresh band ───────── */
+
+.sw__crt { position: absolute; inset: 0; border-radius: 50%; overflow: hidden; pointer-events: none; }
+.sw__crt::before, .sw__scope::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(#12101000 50%, #00000047 50%), linear-gradient(90deg, #ff00000f, #00ff0008, #0000ff0f);
+  background-size: 100% 3px, 3px 100%;
+}
+.sw__crt::after { content: ""; position: absolute; inset: 0; background: #1210101f; opacity: 0; animation: crt-flicker .15s infinite; }
+.sw__grain, .sw__scope::after {
+  content: ""; position: absolute; inset: -64px; pointer-events: none;
+  background: var(--grain); opacity: .07; animation: crt-grain .6s steps(6, end) infinite;
+}
+.sw__roll {
+  position: absolute; left: 0; right: 0; top: -25%; height: 22%;
+  background: linear-gradient(#fff0, #ffffff0d 45%, #ffffff14 50%, #ffffff0d 55%, #fff0);
+  animation: sw-roll 7.5s linear infinite;
+}
+@keyframes sw-roll { to { transform: translateY(600%); } }
 
 /* ───────── Oscilloscopes: a graticule, green phosphor, fuel as a trace ───────── */
 
@@ -85,6 +124,12 @@ html.sw-open { overflow: hidden; }
 .sw__scope-data { font-size: .95rem; white-space: pre; }
 .sw__scope--score { margin: 2px 22px 0; width: calc(100% - 44px); text-align: center; padding: 9px 12px; }
 .sw__score { font-size: 1.3rem; letter-spacing: .1em; color: #e9fff2; white-space: pre; }
+/* The scopes warm up with the machine, flickering, and go dark when it switches off. */
+.sw .sw__scope { animation: sw-scope-on .8s .35s steps(1, end) backwards; transition: filter .25s; }
+.sw.is-shutting .sw__scope { filter: brightness(.25) saturate(.4); }
+@keyframes sw-scope-on {
+  0% { filter: brightness(.2); } 30% { filter: brightness(1.5); } 42% { filter: brightness(.45); } 60%, 100% { filter: brightness(1); }
+}
 
 /* ───────── The control boxes: wood, a dark top plate, levers that follow the keys ───────── */
 
@@ -148,6 +193,32 @@ html.sw-open { overflow: hidden; }
 .sw__key--power { margin-left: 10px; color: #f6efe2; background: linear-gradient(#c8473a, #a3322a 70%, #8a2821); box-shadow: inset 0 1px 0 #ff9d92, inset 0 -6px 0 #6f1d17, 0 2px 0 #0b0c0d; }
 .sw__key--power:hover { color: #fff; }
 
+/* ───────── The volume knob: knurled bakelite with an aluminium cap, over a scale engraved in the metal ───────── */
+
+.sw__deck { display: flex; align-items: center; gap: 18px; }
+.sw__volume { position: relative; flex: none; width: 72px; height: 72px; border-radius: 50%; cursor: grab; touch-action: none; outline: none; }
+.sw__volume:active { cursor: grabbing; }
+.sw__scale {
+  position: absolute; inset: 0; overflow: visible;
+  stroke: #3b444b; stroke-width: 1.3; stroke-linecap: round; fill: #3b444b;
+  font: 400 9px "VT323", var(--font-mono); letter-spacing: .1em; text-anchor: middle;
+}
+.sw__scale text { stroke: none; }
+.sw__knob {
+  position: absolute; inset: 17px; border-radius: 50%;
+  background: radial-gradient(circle, #dfe4e7 0 30%, #9aa3a9 36%, #3a3d42 38%, transparent 39%), repeating-conic-gradient(#2e3035 0 5deg, #131417 5deg 10deg);
+  box-shadow: 0 3px 0 #0b0c0d, 0 6px 7px #0007, inset 0 0 0 1px #000;
+  transform: rotate(var(--turn, 27deg)); transition: transform .12s ease-out;
+}
+/* The pointer line, turning with the knob. */
+.sw__knob::before { content: ""; position: absolute; left: calc(50% - 1px); top: 3px; width: 2px; height: 10px; border-radius: 1px; background: #f6f8f9; }
+/* Light from above stays put as the knob turns. */
+.sw__volume::after {
+  content: ""; position: absolute; inset: 17px; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle at 36% 26%, #ffffff47, transparent 52%);
+}
+.sw__volume:focus-visible .sw__knob { box-shadow: 0 3px 0 #0b0c0d, 0 6px 7px #0007, inset 0 0 0 1px #000, 0 0 0 3px #5b7c99; }
+
 /* ───────── Panels over the tube: how to play, high scores, initials ───────── */
 
 .sw__panel {
@@ -177,8 +248,7 @@ html.sw-open { overflow: hidden; }
 .sw__panel button:disabled { opacity: .45; cursor: default; }
 .sw__panel button:not(:disabled):hover { background: #0b2a18; color: #fff; }
 
-/* ───────── The TV glass over the whole scene (the page's AV glass, inside the game's own layer) ───────── */
-
-.sw__tv { z-index: 3; }
-
-@media (prefers-reduced-motion: reduce) { .sw__trace, .sw__stick, .sw__button, .sw__key { transition: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .sw__trace, .sw__stick, .sw__button, .sw__key, .sw .sw__scope, .sw__knob { transition: none; }
+  .sw::backdrop, .sw .sw__scene, .sw .sw__scope, .sw__crt::after, .sw__grain, .sw__roll, .sw__scope::after { animation: none; }
+}

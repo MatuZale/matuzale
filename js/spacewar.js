@@ -5,9 +5,12 @@
 // the original display). One player flies the needle against the computer for a high score; two share the
 // keyboard. Drawn as a vector display with phosphor afterglow, in a console after the original display,
 // with wooden control boxes whose levers move with the keys (and with the computer's moves), oscilloscope
-// readouts and latching piano keys; the whole scene is seen through the AV glass, as if on an old TV.
-// High scores stay in this browser and can be saved to a file. Desktop only; opened by channels.js
-// (key 4, or CH 04, in AV).
+// readouts and latching piano keys. The screens are under the AV glass; the machine stands in front of the
+// page, out of focus behind it. The tube switches on from a bright line and off into a dot.
+// Sound (spacewar-sound.js) has a volume knob on the console. High scores stay in this browser and can be
+// saved to a file. Desktop only; opened by channels.js (key 4, or CH 04, in AV).
+
+import * as sound from "./spacewar-sound.js";
 
 const GM = .06;                 // the hole's pull (screen half-width = 1)
 const HOLE = .045;              // fall closer than this and the ship is gone
@@ -16,6 +19,7 @@ const TORPS = 32, TORP_SPEED = .75, TORP_LIFE = 1.9, RELOAD = .22;
 const JUMPS = 3, SHIP_R = .034, STEP = 1 / 120, ROUND_LIMIT = 120;
 const PHOSPHOR = "#d8f6ff", GLOW = "#5dffb0";
 const STORE = "spacewar-scores", INITIALS = "spacewar-initials";
+const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 // Outlines, nose along +x.
 const NEEDLE = [[.065, 0], [.005, .01], [-.044, .01], [-.06, .02], [-.06, -.02], [-.044, -.01], [.005, -.01]];
@@ -31,7 +35,7 @@ const GAME_KEYS = new Set(Object.values(SOLO).flat());
 
 const TEXT = {
   en: {
-    model: "Precision CRT display · CH 04", help: "How to play", scores: "Scores", exit: "Power",
+    model: "Precision CRT display · CH 04", help: "How to play", scores: "Scores", exit: "Power", volume: "Volume", off: "off",
     one: "1 player", two: "2 players", cpu: "WEDGE · CPU", wedge: "WEDGE", needle: "NEEDLE",
     ctl: ["Rotate", "Thrust", "Fire", "Hyper"], fuel: "FUEL", torp: "TORP", jump: "JUMP",
     start: "PRESS ENTER TO START", hint: "M  1 / 2 PLAYERS   ·   ?  HOW TO PLAY", paused: "PAUSED",
@@ -48,12 +52,12 @@ const TEXT = {
       <tr><td>Hyperspace</td><td><kbd>Q</kbd></td><td><kbd>Enter</kbd></td></tr></table>
       <p>Alone, you fly the needle with either set of keys against the computer's wedge, round after round; it gets sharper each time. A round is worth 1000 × its number, plus whatever fuel, torpedoes and jumps you have left. Lose one and the game is over.</p>
       <p>Fuel and torpedoes (32) are limited. Hyperspace has three jumps and each is riskier than the last: the ship may break up on the way back.</p>
-      <p><kbd>P</kbd> pause · <kbd>M</kbd> 1 / 2 players · <kbd>Esc</kbd> back, then exit</p>
+      <p><kbd>P</kbd> pause · <kbd>M</kbd> 1 / 2 players · <kbd>V</kbd> sound off / on (or turn the volume knob) · <kbd>Esc</kbd> back, then exit</p>
       <p class="sw__note">High scores are kept only in this browser (local storage) and are never sent anywhere. To keep them elsewhere, use “Save to file” under High scores.</p>
-      <p class="sw__credit">After Spacewar! (1962), conceived by the Hingham Institute Study Group on Space Warfare and first realized on the PDP-1 at MIT by Stephen Russell, Peter Samson, Dan Edwards and Martin Graetz, with Alan Kotok, Steve Piner and Robert A. Saunders. This version is written from scratch, with a black hole for the star.</p>`,
+      <p class="sw__credit">After Spacewar! (1962), conceived by the Hingham Institute Study Group on Space Warfare and first realized on the PDP-1 at MIT by Stephen Russell, Peter Samson, Dan Edwards and Martin Graetz, with Alan Kotok, Steve Piner and Robert A. Saunders. This version is written from scratch, with a black hole for the star. The original was silent; the sounds here are made in the browser from square waves and noise, as the PDP-1 played music.</p>`,
   },
   pl: {
-    model: "Precyzyjny wyświetlacz CRT · CH 04", help: "Jak grać", scores: "Wyniki", exit: "Zasilanie",
+    model: "Precyzyjny wyświetlacz CRT · CH 04", help: "Jak grać", scores: "Wyniki", exit: "Zasilanie", volume: "Głośność", off: "wyłączona",
     one: "1 gracz", two: "2 graczy", cpu: "WEDGE · KOMPUTER", wedge: "WEDGE", needle: "NEEDLE",
     ctl: ["Obrót", "Ciąg", "Strzał", "Skok"], fuel: "PALIWO", torp: "TORP", jump: "SKOK",
     start: "ENTER, ŻEBY ZACZĄĆ", hint: "M  1 / 2 GRACZY   ·   ?  JAK GRAĆ", paused: "PAUZA",
@@ -70,9 +74,9 @@ const TEXT = {
       <tr><td>Hiperprzestrzeń</td><td><kbd>Q</kbd></td><td><kbd>Enter</kbd></td></tr></table>
       <p>W pojedynkę sterujesz needle dowolnym zestawem klawiszy przeciw wedge komputera, runda po rundzie; z każdą rundą komputer gra lepiej. Runda jest warta 1000 × jej numer plus to, co zostało z paliwa, torped i skoków. Jedna przegrana kończy grę.</p>
       <p>Paliwo i torpedy (32) się kończą. Hiperprzestrzeń ma trzy skoki, każdy bardziej ryzykowny: statek może rozpaść się w drodze powrotnej.</p>
-      <p><kbd>P</kbd> pauza · <kbd>M</kbd> 1 / 2 graczy · <kbd>Esc</kbd> wstecz, potem wyjście</p>
+      <p><kbd>P</kbd> pauza · <kbd>M</kbd> 1 / 2 graczy · <kbd>V</kbd> dźwięk wył. / wł. (albo pokrętło głośności) · <kbd>Esc</kbd> wstecz, potem wyjście</p>
       <p class="sw__note">Wyniki zapisują się tylko w tej przeglądarce (local storage) i nigdzie nie są wysyłane. Żeby je zachować gdzie indziej, użyj „Zapisz do pliku” w Wynikach.</p>
-      <p class="sw__credit">Według Spacewar! (1962), wymyślonej przez Hingham Institute Study Group on Space Warfare i pierwszy raz uruchomionej na PDP-1 w MIT przez Stephena Russella, Petera Samsona, Dana Edwardsa i Martina Graetza wraz z Alanem Kotokiem, Steve'em Pinerem i Robertem A. Saundersem. Ta wersja jest napisana od zera, z czarną dziurą zamiast gwiazdy.</p>`,
+      <p class="sw__credit">Według Spacewar! (1962), wymyślonej przez Hingham Institute Study Group on Space Warfare i pierwszy raz uruchomionej na PDP-1 w MIT przez Stephena Russella, Petera Samsona, Dana Edwardsa i Martina Graetza wraz z Alanem Kotokiem, Steve'em Pinerem i Robertem A. Saundersem. Ta wersja jest napisana od zera, z czarną dziurą zamiast gwiazdy. Oryginał był niemy; dźwięki powstają w przeglądarce z fal prostokątnych i szumu, tak jak PDP-1 grał muzykę.</p>`,
   },
 };
 const say = () => TEXT[document.documentElement.lang === "pl" ? "pl" : "en"];
@@ -97,7 +101,7 @@ function makeShip(kind, x, y) {
 
 /* ───────── The game ───────── */
 
-let dialog, canvas, ctx, screen, panel, scopes, boxes, scoreEl, dpr = 1;
+let dialog, canvas, ctx, screen, picture, beam, panel, scopes, boxes, scoreEl, dpr = 1, closing = false;
 let state = "title", players = 1, round = 1, score = 0, wins = [0, 0], roundTime = 0, timer = 0, message = "";
 let ships = [], torps = [], sparks = [], stars = [], paused = false, raf = 0, last = 0, acc = 0, refresh = 0;
 const held = new Set(), tapped = new Set();
@@ -110,6 +114,7 @@ function newRound() {
   ships = [makeShip("needle", .6, .35), makeShip("wedge", -.6, -.35)];
   torps = []; roundTime = 0; brain.cool = 1.2; tapped.clear();
   state = "play";
+  sound.roundStart();
 }
 function start() {
   closePanel();
@@ -153,15 +158,17 @@ function burst(x, y, n, speed, life) {
     sparks.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: rand(.4, 1) * life });
   }
 }
-function explode(s) {
+function explode(s, intoHole = false) {
   if (!s.alive) return;
   s.alive = false;
   burst(s.x, s.y, 46, .3, 1.4);
+  if (intoHole) sound.swallowed(s.x); else sound.crash(s.x);
 }
 function reenter(s) {
   const a = rand(0, 2 * Math.PI), r = rand(.45, .85), heading = rand(0, 2 * Math.PI);
   s.x = Math.cos(a) * r; s.y = Math.sin(a) * r; s.vx = Math.cos(heading) * .1; s.vy = Math.sin(heading) * .1;
   burst(s.x, s.y, 10, .08, .5);
+  sound.jump(s.x, false);
   // Each jump is riskier than the last: 4 %, then 16 %, then 28 %.
   if (Math.random() < .04 + .12 * (JUMPS - 1 - s.jumps)) explode(s);
 }
@@ -184,9 +191,10 @@ function fly(s, c, dt) {
     s.torps--; s.reload = RELOAD;
     const cx = Math.cos(s.a), cy = Math.sin(s.a);
     torps.push({ x: s.x + cx * .068, y: s.y + cy * .068, vx: s.vx + cx * TORP_SPEED, vy: s.vy + cy * TORP_SPEED, life: TORP_LIFE, owner: s, age: 0 });
+    sound.fire(s.kind, s.x);
   }
-  if (c.hyper && s.jumps > 0) { s.jumps--; s.gone = .8; s.burn = false; burst(s.x, s.y, 10, .08, .5); }
-  if (Math.hypot(s.x, s.y) < HOLE) explode(s);
+  if (c.hyper && s.jumps > 0) { s.jumps--; s.gone = .8; s.burn = false; burst(s.x, s.y, 10, .08, .5); sound.jump(s.x, true); }
+  if (Math.hypot(s.x, s.y) < HOLE) explode(s, true);
 }
 
 function update(dt) {
@@ -234,18 +242,22 @@ function settle() {
     if (w && !n) wins[1]++;
     message = n === w ? t.draw : n ? t.needleWins : t.wedgeWins;
     state = "between";
+    if (n === w) sound.roundDrawn(); else sound.roundWon();
   } else if (n && !w) {
     const s = ships[0], gain = 1000 * round + 20 * s.torps + Math.round(500 * s.fuel) + 100 * s.jumps;
     score += gain;
     message = `${t.cleared(round)}  +${gain}`;
     round++;
     state = "between";
+    sound.roundWon();
   } else if (n === w) {
     message = t.draw;
     state = "between";
+    sound.roundDrawn();
   } else {
     message = t.over;
     state = "over";
+    sound.gameOver();
   }
 }
 function finish() {
@@ -354,6 +366,11 @@ function frame(now) {
   while (acc >= STEP) { update(STEP); acc -= STEP; }
   draw();
   showControls();
+  const live = (state === "play" || state === "ending") && !paused;
+  for (let i = 0; i < 2; i++) {
+    const s = ships[i];
+    sound.engine(i, !!(live && s?.alive && s.gone <= 0 && s.burn), s?.x ?? 0);
+  }
   if (now > refresh) { showReadouts(); refresh = now + 150; }
 }
 
@@ -416,27 +433,32 @@ function toggleMode(to = players === 1 ? 2 : 1) {
   state = "title";
   latchKeys();
 }
-// Piano keys latch like an old radio's: the chosen player count stays down, an open panel keeps its key down.
-function latchKeys() {
+// Piano keys latch like an old radio's, with a clack: the chosen player count stays down, an open panel
+// keeps its key down.
+function latchKeys(audible = true) {
   const kind = panel.hidden ? "" : panel.dataset.kind;
-  dialog.querySelectorAll("[data-sw]").forEach(key => {
-    const on = key.dataset.sw === "mode" ? +key.dataset.players === players : key.dataset.sw === kind;
-    key.setAttribute("aria-pressed", String(on));
+  let moved = false;
+  dialog.querySelectorAll(".sw__key[data-sw]").forEach(key => {
+    const on = String(key.dataset.sw === "mode" ? +key.dataset.players === players : key.dataset.sw === kind);
+    if (key.getAttribute("aria-pressed") !== on) { key.setAttribute("aria-pressed", on); moved = true; }
   });
+  if (moved && audible) sound.clack();
   boxes[1].el.classList.toggle("is-cpu", players === 1);
   dialog.querySelectorAll(".sw__keyhint--wedge").forEach(hint => { hint.hidden = players === 1; });
 }
 function onKey(event) {
   const down = event.type === "keydown", code = event.code;
-  if (event.target.closest?.("input")) return;
+  if (closing || event.target.closest?.("input")) return;
   if (down && code === "Escape") {
     if (!panel.hidden) { event.preventDefault(); event.stopPropagation(); closePanel(); }
-    return;                                          // otherwise the dialog closes as usual
+    return;                                          // otherwise the console switches off (the dialog's cancel)
   }
   // Buttons keep their own Enter and Space outside play.
   if (event.target.closest?.("button") && state !== "play" && state !== "ending") return;
+  if (down) sound.wake();
   if (down && !event.repeat) {
     if (event.key === "?" || code === "KeyI") { event.preventDefault(); toggleHelp(); return; }
+    if (code === "KeyV") { toggleMute(); return; }
     if (code === "KeyP" && state !== "title" && state !== "done" && panel.hidden) { paused = !paused; return; }
     if (code === "KeyM") { toggleMode(); return; }
     if ((state === "title" || state === "done") && (code === "Enter" || code === "Space") && panel.hidden) { event.preventDefault(); start(); return; }
@@ -444,6 +466,110 @@ function onKey(event) {
   }
   if (GAME_KEYS.has(code)) event.preventDefault();
   if (down) held.add(code); else held.delete(code);
+}
+
+/* ───────── The volume knob ───────── */
+
+// A detented pot, 0 to 10 over three quarters of a turn, with the switch at 0. Drag it up or right to turn
+// it up, roll the wheel over it, or use the arrow keys on it; V turns it down to 0 and back.
+const turnOf = n => -135 + 27 * n;
+let dial, knob, before = 6;
+const scale = () => Array.from({ length: 11 }, (_, i) => {
+  const a = turnOf(i) * Math.PI / 180, at = r => `${(36 + r * Math.sin(a)).toFixed(2)} ${(36 - r * Math.cos(a)).toFixed(2)}`;
+  return `<path d="M${at(23)}L${at(i % 5 ? 26.5 : 29)}"/>`;
+}).join("");
+function showLevel() {
+  const n = sound.level();
+  knob.style.setProperty("--turn", `${turnOf(n)}deg`);
+  dial.setAttribute("aria-valuenow", n);
+  dial.setAttribute("aria-valuetext", n ? `${n} / 10` : say().off);
+}
+function turnTo(n) {
+  n = Math.min(10, Math.max(0, Math.round(n)));
+  if (n === sound.level()) return;
+  sound.wake();
+  sound.setLevel(n);
+  sound.detent();
+  showLevel();
+}
+function toggleMute() {
+  if (sound.level()) { before = sound.level(); turnTo(0); }
+  else turnTo(before || 6);
+}
+function wireKnob() {
+  dial.addEventListener("pointerdown", event => {
+    if (event.button) return;
+    event.preventDefault();
+    dial.setPointerCapture(event.pointerId);
+    const x0 = event.clientX, y0 = event.clientY, from = sound.level();
+    const move = e => turnTo(from + ((e.clientX - x0) + (y0 - e.clientY)) / 14);
+    const drop = () => {
+      dial.removeEventListener("pointermove", move);
+      dial.removeEventListener("pointerup", drop);
+      dial.removeEventListener("pointercancel", drop);
+    };
+    dial.addEventListener("pointermove", move);
+    dial.addEventListener("pointerup", drop);
+    dial.addEventListener("pointercancel", drop);
+  });
+  // A notch of a mouse wheel is a detent; a trackpad's small rolls add up to one.
+  let roll = 0;
+  dial.addEventListener("wheel", event => {
+    event.preventDefault();
+    roll -= event.deltaMode ? event.deltaY * 40 : event.deltaY;
+    if (Math.abs(roll) < 50) return;
+    turnTo(sound.level() + Math.sign(roll));
+    roll = 0;
+  }, { passive: false });
+  dial.addEventListener("keydown", event => {
+    const step = { ArrowUp: 1, ArrowRight: 1, ArrowDown: -1, ArrowLeft: -1, PageUp: 3, PageDown: -3 }[event.key];
+    const to = event.key === "Home" ? 0 : event.key === "End" ? 10 : step && sound.level() + step;
+    if (to === undefined) return;
+    event.preventDefault();
+    event.stopPropagation();
+    turnTo(to);
+  });
+}
+
+/* ───────── Power ───────── */
+
+// The tube switching on draws a bright line out and opens the picture from it; switching off folds the
+// picture into the line and the line into a dot, as the page's CRT does (retro.js).
+function tube(on) {
+  const easing = "cubic-bezier(.6, 0, .4, 1)";
+  [picture, beam].forEach(el => el.getAnimations().forEach(a => a.cancel()));
+  sound.power(on, on && !motion.matches ? .3 : 0);
+  if (motion.matches) return Promise.resolve();
+  if (on) {
+    const timing = { duration: 560, delay: 300, easing, fill: "backwards" };
+    picture.animate([{ transform: "scaleY(.004)" }, { transform: "scaleY(.004)", offset: .4 }, { transform: "none" }], timing);
+    return beam.animate([
+      { opacity: 1, transform: "scaleX(0)" }, { opacity: 1, transform: "scaleX(1)", offset: .4 },
+      { opacity: .9, transform: "scaleX(1) scaleY(6)", offset: .55 }, { opacity: 0, transform: "scaleX(1) scaleY(40)" },
+    ], timing).finished;
+  }
+  const timing = { duration: 620, easing, fill: "forwards" };
+  picture.animate([{ transform: "none" }, { transform: "scaleY(.004)", offset: .4 }, { transform: "scale(0, .004)" }], timing);
+  return beam.animate([
+    { opacity: 0, transform: "scaleX(1)" }, { opacity: 1, transform: "scaleX(1)", offset: .35 },
+    { opacity: 1, transform: "scaleX(.012)", offset: .75 }, { opacity: 0, transform: "scaleX(0)" },
+  ], timing).finished;
+}
+// Power (or Esc): the tube and the scopes go dark, then the machine leaves and the page comes back into focus.
+function switchOff() {
+  if (closing || !dialog.open) return;
+  closing = true;
+  paused = true;
+  dialog.classList.add("is-shutting");
+  sound.hush();
+  const off = () => { sound.staticHiss(); dialog.close(); };
+  tube(false)
+    .then(() => {
+      if (motion.matches) return;
+      dialog.classList.add("is-off");
+      return new Promise(done => setTimeout(done, 300));
+    })
+    .then(off, off);
 }
 
 /* ───────── The console ───────── */
@@ -481,28 +607,42 @@ function build() {
         <div class="sw__face">
           <i class="sw__screw"></i><i class="sw__screw"></i><i class="sw__screw"></i><i class="sw__screw"></i>
           <div class="sw__screen">
-            <canvas class="sw__canvas" tabindex="-1" aria-label="Spacewar!"></canvas>
+            <div class="sw__picture">
+              <canvas class="sw__canvas" tabindex="-1" aria-label="Spacewar!"></canvas>
+              <div class="sw__panel" tabindex="-1" hidden></div>
+            </div>
+            <i class="sw__beam" aria-hidden="true"></i>
+            <div class="sw__crt" aria-hidden="true"><i class="sw__grain"></i><i class="sw__roll"></i></div>
             <div class="sw__glass" aria-hidden="true"></div>
-            <div class="sw__panel" tabindex="-1" hidden></div>
           </div>
         </div>
         <div class="sw__scope sw__scope--score"><span class="sw__score" aria-live="polite"></span></div>
-        <div class="sw__keys">
-          <button type="button" class="sw__key" data-sw="mode" data-players="1"></button>
-          <button type="button" class="sw__key" data-sw="mode" data-players="2"></button>
-          <button type="button" class="sw__key" data-sw="help"></button>
-          <button type="button" class="sw__key" data-sw="scores"></button>
-          <button type="button" class="sw__key sw__key--power" data-sw="close"></button>
+        <div class="sw__deck">
+          <div class="sw__keys">
+            <button type="button" class="sw__key" data-sw="mode" data-players="1"></button>
+            <button type="button" class="sw__key" data-sw="mode" data-players="2"></button>
+            <button type="button" class="sw__key" data-sw="help"></button>
+            <button type="button" class="sw__key" data-sw="scores"></button>
+            <button type="button" class="sw__key sw__key--power" data-sw="close"></button>
+          </div>
+          <div class="sw__volume" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="10">
+            <svg class="sw__scale" viewBox="0 0 72 72" aria-hidden="true">${scale()}<text x="13" y="62">0</text><text x="59" y="62">10</text><text class="sw__scale-name" x="36" y="70"></text></svg>
+            <i class="sw__knob"></i>
+          </div>
         </div>
       </div>
       ${box("wedge", ["← →", "↑", "↓", "Enter"])}
-    </div>
-    <div class="crt-screen sw__tv" aria-hidden="true"><i class="crt-screen__grain"></i><i class="crt-screen__roll"></i></div>`;
+    </div>`;
   document.body.append(dialog);
   canvas = dialog.querySelector("canvas");
   ctx = canvas.getContext("2d");
   screen = dialog.querySelector(".sw__screen");
+  picture = dialog.querySelector(".sw__picture");
+  beam = dialog.querySelector(".sw__beam");
   panel = dialog.querySelector(".sw__panel");
+  dial = dialog.querySelector(".sw__volume");
+  knob = dialog.querySelector(".sw__knob");
+  wireKnob();
   scoreEl = dialog.querySelector(".sw__score");
   scopes = [...dialog.querySelectorAll(".sw__box .sw__scope")].map(el => ({
     el, name: el.querySelector(".sw__scope-name"), fuel: el.querySelector(".sw__scope-fuel"), data: el.querySelector(".sw__scope-data") }));
@@ -518,11 +658,12 @@ function build() {
   dialog.addEventListener("keydown", onKey);
   dialog.addEventListener("keyup", onKey);
   dialog.addEventListener("click", event => {
+    sound.wake();
     const action = event.target.closest("[data-sw]")?.dataset.sw;
     if (action === "help") toggleHelp();
     else if (action === "mode") toggleMode(+event.target.closest("[data-sw]").dataset.players);
     else if (action === "scores") panel.dataset.kind === "scores" && !panel.hidden ? closePanel() : showScores();
-    else if (action === "close") dialog.close();
+    else if (action === "close") { sound.clack(); switchOff(); }
     else if (action === "file") saveFile();
     else if (action === "back") closePanel();
   });
@@ -531,16 +672,26 @@ function build() {
     saveScore(new FormData(event.target).get("name") || "");
   });
   window.addEventListener("blur", () => { held.clear(); if (state === "play") paused = true; });
-  document.addEventListener("visibilitychange", () => { if (document.hidden && state === "play") paused = true; });
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) return;
+    sound.hush();
+    if (state === "play") paused = true;
+  });
+  dialog.addEventListener("cancel", event => { event.preventDefault(); switchOff(); });
   dialog.addEventListener("close", () => {
     cancelAnimationFrame(raf); raf = 0;
     held.clear(); tapped.clear();
     panel.hidden = true; paused = false;
     state = "title"; ships = [];
+    closing = false;
+    sound.rest();
+    dialog.classList.remove("is-shutting", "is-off");
+    [picture, beam].forEach(el => el.getAnimations().forEach(a => a.cancel()));
     document.documentElement.classList.remove("sw-open");
   });
 }
 
+// Opens the console and returns it; it fires "close" when switched off.
 export async function openSpacewar() {
   await loadStyles();
   if (!dialog) build();
@@ -552,14 +703,21 @@ export async function openSpacewar() {
   dialog.querySelector('[data-sw="scores"]').textContent = t.scores;
   dialog.querySelector('[data-sw="close"]').textContent = t.exit;
   dialog.querySelectorAll("[data-ctl-label]").forEach(label => { label.textContent = t.ctl[label.dataset.ctlLabel]; });
-  // The TV glass over the scene shares the page's grain.
+  dialog.querySelector(".sw__scale-name").textContent = t.volume.toUpperCase();
+  dial.setAttribute("aria-label", t.volume);
+  showLevel();
+  // The glass on the screens shares the page's grain.
   const grain = document.querySelector("body > .crt-screen")?.style.getPropertyValue("--grain");
-  if (grain) dialog.querySelector(".sw__tv").style.setProperty("--grain", grain);
+  if (grain) dialog.style.setProperty("--grain", grain);
   state = "title"; ships = []; score = 0; round = 1; wins = [0, 0];
-  latchKeys(); showReadouts();
+  latchKeys(false); showReadouts();
   document.documentElement.classList.add("sw-open");
   dialog.showModal();
   canvas.focus();
+  sound.wake();
+  sound.staticHiss();
+  tube(true);
   last = performance.now(); acc = 0;
   if (!raf) raf = requestAnimationFrame(frame);
+  return dialog;
 }

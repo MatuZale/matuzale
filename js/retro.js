@@ -13,6 +13,12 @@ function layer(className) {
   document.body.append(el);
   return el;
 }
+// An open modal (the Spacewar! console) sits in the top layer, over everything else on the page, so the
+// display and the static move into it while it is open.
+const lift = el => {
+  const host = document.querySelector("dialog:modal") ?? document.body;
+  if (el.parentNode !== host) host.append(el);
+};
 
 /* ───────── On-screen display ───────── */
 
@@ -24,6 +30,7 @@ export function osd(main, sub = "", hold = 1600) {
     display.append(Object.assign(document.createElement("span"), { className: "osd__main" }),
       Object.assign(document.createElement("span"), { className: "osd__sub" }));
   }
+  lift(display);
   display.firstChild.textContent = main;
   display.lastChild.textContent = sub;
   display.classList.add("is-on");
@@ -34,8 +41,9 @@ export const osdSub = text => { if (display) display.lastChild.textContent = tex
 
 /* ───────── Static between channels ───────── */
 
-// Coarse snow and a tracking band rolling down, for a fraction of a second.
-let snow;
+// Coarse snow and a tracking band rolling down, for a fraction of a second. A new burst takes over from
+// one still running.
+let snow, burst;
 export function staticBurst(duration = 420) {
   if (motion.matches) return;
   if (!snow) {
@@ -43,10 +51,12 @@ export function staticBurst(duration = 420) {
     const canvas = Object.assign(document.createElement("canvas"), { width: 160, height: 90 });
     snow.append(canvas, Object.assign(document.createElement("span"), { className: "vhs__band" }));
   }
+  lift(snow);
   const ctx = snow.firstChild.getContext("2d"), image = ctx.createImageData(160, 90), px = image.data;
-  const start = performance.now();
+  const start = performance.now(), run = burst = {};
   snow.classList.add("is-on");
   (function frame(now) {
+    if (burst !== run) return;
     for (let i = 0; i < px.length; i += 4) { px[i] = px[i + 1] = px[i + 2] = Math.random() * 255; px[i + 3] = 255; }
     ctx.putImageData(image, 0, 0);
     if (now - start < duration) requestAnimationFrame(frame);
