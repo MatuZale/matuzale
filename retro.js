@@ -1,7 +1,7 @@
 // The retro layer: an on-screen display like an old TV set's, a burst of static between channels, a CRT
 // switching off and on for the theme, and a VCR rewinding to the top of the page. All of it is decoration
 // laid over the page (aria-hidden); with reduced motion the static and the power animation are skipped.
-// channels.js also rewinds from the keyboard (Backspace). Very rarely the tape shows its wear.
+// channels.js also rewinds from the keyboard (Backspace) and switches AV: the whole page on a worn CRT.
 // Loaded by channels.js; script.js's theme toggle calls window.crtPower when it is there.
 
 const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -54,36 +54,6 @@ export function staticBurst(duration = 420) {
   })(start);
 }
 
-/* ───────── Worn tape ───────── */
-
-// Minutes apart, the picture shows its tape for about a second: a faint tracking band rolls down the screen
-// and a few dropout streaks flick across it. Faint and rare on purpose, and never with reduced motion,
-// in a hidden tab or while a dialog is open.
-const between = (a, b) => a + Math.random() * (b - a);
-let tape;
-export function tapeWear() {
-  if (motion.matches) return;
-  tape ??= layer("tape");
-  const from = between(-5, 45);
-  const streaks = Array.from({ length: 3 + Math.floor(Math.random() * 4) }, () =>
-    `<i class="tape__dropout" style="top: ${between(4, 96).toFixed(1)}%; left: ${between(0, 85).toFixed(1)}%; width: ${between(3, 16).toFixed(1)}%; animation-delay: ${between(.05, .8).toFixed(2)}s"></i>`);
-  tape.innerHTML = `<i class="tape__band" style="--from: ${from.toFixed(1)}%; --to: ${(from + between(35, 65)).toFixed(1)}%"></i>${streaks.join("")}`;
-  tape.classList.add("is-on");
-  setTimeout(() => tape.classList.remove("is-on"), 1300);
-}
-(function nowAndThen() {
-  let timer;
-  const plan = first => {
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-      if (!document.hidden && !document.querySelector("dialog[open]")) tapeWear();
-      plan(false);
-    }, (first ? between(90, 180) : between(150, 330)) * 1000);
-  };
-  document.addEventListener("visibilitychange", () => document.hidden ? clearTimeout(timer) : plan(true));
-  plan(true);
-})();
-
 /* ───────── The theme switch as a CRT ───────── */
 
 // Switching off folds the picture into a bright line and the line into a dot; switching on draws the line
@@ -120,6 +90,37 @@ export function power(on, swap) {
   setTimeout(() => crt.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160 }).finished.then(() => crt.classList.remove("is-on")), total);
 }
 window.crtPower = power;
+
+/* ───────── AV: the whole page on a worn CRT ───────── */
+
+// A sheet of glass over the page: scanlines, an RGB phosphor mask, flicker, grain, a slow refresh band,
+// a dark rim and rounded corners; the text gets a slight colour fringe in the site's accents (retro.css).
+// It stays on until switched off, and is remembered.
+let glass;
+export const crtOn = () => document.documentElement.classList.contains("is-crt");
+export function setCRT(on, animate = true) {
+  const apply = () => {
+    if (on && !glass) {
+      glass = layer("crt-screen");
+      glass.append(...["crt-screen__grain", "crt-screen__roll"].map(className => Object.assign(document.createElement("i"), { className })));
+      // Grain from a small tile of noise, shifted a few times a second.
+      const tile = Object.assign(document.createElement("canvas"), { width: 128, height: 128 }), ctx = tile.getContext("2d");
+      const image = ctx.createImageData(128, 128);
+      for (let i = 0; i < image.data.length; i += 4) {
+        image.data[i] = image.data[i + 1] = image.data[i + 2] = Math.random() * 255;
+        image.data[i + 3] = 255;
+      }
+      ctx.putImageData(image, 0, 0);
+      glass.style.setProperty("--grain", `url(${tile.toDataURL()})`);
+    }
+    document.documentElement.classList.toggle("is-crt", on);
+    try { localStorage.setItem("crt", on ? "1" : "0"); } catch (e) { /* storage unavailable */ }
+    document.dispatchEvent(new CustomEvent("crtchange", { detail: { on } }));
+  };
+  if (animate) power(on, apply);
+  else apply();
+}
+try { if (localStorage.getItem("crt") === "1") setCRT(true, false); } catch (e) { /* storage unavailable */ }
 
 /* ───────── Back to top as a VCR rewind ───────── */
 

@@ -16,7 +16,7 @@ export const PL = {
   "nav.research": "Badania",
   "nav.journey": "Ścieżka",
   "nav.contact": "Kontakt",
-  "channel.label": "Język",
+  "channel.label": "Kanały",
   "backtop": "Przewiń na początek",
 
   "hero.eyebrow": "Lead Software Engineer · <a href=\"https://embeddedsystems.do/\" target=\"_blank\" rel=\"noopener\">EmbeddedSystems.do ↗</a> · Gdańsk",
