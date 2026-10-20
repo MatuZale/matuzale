@@ -2,7 +2,8 @@
 // Snake is the usual guest; Tetris and Pac-Man drop in now and then. Each game is plain state with a
 // tick() that returns the delay until the next tick and a draw() that returns SVG nodes, so the board
 // only ever has one set of pixels to replace. Colours come from CSS classes (see style.css), which is
-// how the games follow the light / dark theme. Loaded on first sight of the footer by script.js.
+// how the games follow the light / dark theme. Now and then, at random, the game crashes and breaks out
+// of the board (crash.js). Loaded on first sight of the footer by script.js.
 
 const SVG = "http://www.w3.org/2000/svg";
 function node(tag, attributes, text) {
@@ -398,6 +399,12 @@ export function createPacman() {
 const GAMES = { snake: createSnake, tetris: createTetris, pacman: createPacman };
 const WEIGHTS = [["snake", 6], ["tetris", 2], ["pacman", 2]];
 const TITLES = { snake: "Snake", tetris: "Tetris", pacman: "Pac-Man" };
+const label = name => name === "pacman" ? "pac-man" : name;            // as the caption shows it
+
+// The crash comes at random, like the rare events above Journey: at every moment of play the same small
+// chance, on average once in 90 s of play (about one in four sees it within 30 s), never in a game's first
+// seconds. document.getElementById("footer-game").crash() brings it on from the console.
+const CRASH_MEAN = 90000, CRASH_AFTER = 4000;
 
 function chooseGame() {
   let roll = Math.random() * WEIGHTS.reduce((sum, [, w]) => sum + w, 0);
@@ -408,7 +415,7 @@ function chooseGame() {
 export function startFooterGames({ board, pixels, toggle, caption }) {
   const figure = board.closest("figure");
   const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  let name, game, runtime = 0, delay = 110, timer = 0, visible = false, paused = motion.matches;
+  let name, game, runtime = 0, delay = 110, timer = 0, visible = false, paused = motion.matches, crashing = false;
 
   function draw() { pixels.replaceChildren(...game.draw()); }
   function start(next) {
@@ -418,7 +425,7 @@ export function startFooterGames({ board, pixels, toggle, caption }) {
     delay = 110;
     // Reduced motion shows one still frame, so give it a game already under way.
     if (paused) for (let i = 0; i < game.preview; i++) game.tick();
-    caption.textContent = name === "pacman" ? "pac-man" : name;
+    caption.textContent = label(name);
     board.setAttribute("aria-label", `A little ${TITLES[name]} game playing itself beneath a torn-open circuit board`);
     updateToggle();
     draw();
@@ -428,14 +435,26 @@ export function startFooterGames({ board, pixels, toggle, caption }) {
     runtime += delay;
     // A session ends when the game does, or after a while; the next one is drawn by the same weights.
     if (game.over || runtime > 70000) start(chooseGame());
+    else if (runtime > CRASH_AFTER && Math.random() < 1 - Math.exp(-delay / CRASH_MEAN)) { breakDown(); return; }
     else draw();
     schedule();
   }
+  function breakDown() {
+    if (crashing || motion.matches) return;
+    crashing = true;
+    schedule();
+    draw();
+    import("./crash.js")
+      .then(module => module.crash({ figure, board, pixels, caption, name: label(name) }))
+      .catch(error => console.error(error))
+      .finally(() => { crashing = false; start(chooseGame()); });
+  }
+  board.crash = breakDown;
   function schedule() {
     clearTimeout(timer);
     timer = 0;
-    const running = visible && !document.hidden && !paused;
-    figure.classList.toggle("is-paused", !running);
+    const running = visible && !document.hidden && !paused && !crashing;
+    figure.classList.toggle("is-paused", !running && !crashing);
     if (running) timer = setTimeout(step, delay);
   }
   function updateToggle() {

@@ -786,6 +786,15 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
 .g-ghost--scared { fill: var(--ghost-scared); } .g-ghost--scared.is-ending { fill: var(--text); }
 .g-ghost-eye { fill: #fff; }
 .g-ghost-pupil { fill: #1b1c4a; }
+/* The game crashing (crash.js): the picture judders with its colours split, the pixels that break out fly in
+   a layer over the page, and the core dump is written in the food's colour. */
+.footer__circuit.is-crashing #game-pixels { animation: crash-judder .14s steps(2, end) infinite; filter: drop-shadow(1.2px 0 0 #ff2a5acc) drop-shadow(-1.2px 0 0 #28dcffcc); }
+@keyframes crash-judder { 50% { transform: translate(1.4px, -.6px); } }
+.circuit-burst { position: fixed; inset: 0; z-index: 80; overflow: hidden; pointer-events: none; perspective: 700px; font-family: var(--font-mono); }
+.circuit-burst svg { position: absolute; overflow: visible; }
+.g-crash { fill: var(--snake-food); font-size: 7px; }
+.g-cursor { fill: var(--tear-prop); animation: cursor-blink 1s steps(1, end) infinite; }
+@keyframes cursor-blink { 50% { opacity: 0; } }
 .circuit-caption { display: flex; align-items: center; justify-content: space-between; gap: .25rem; padding-inline: .5rem; font: 400 .58rem/1.7 var(--font-mono); }
 .circuit-caption strong { font-weight: 500; color: var(--link); }
 .circuit-caption__dot { display: inline-block; width: 4px; height: 4px; margin-right: .45rem; border-radius: 50%; background: var(--accent-3); box-shadow: 0 0 5px color-mix(in srgb, var(--accent-3) 45%, transparent); }
