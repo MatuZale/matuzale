@@ -1,9 +1,9 @@
-// The footer game crashing, now and then (games.js decides when, and starts a new game afterwards). The
+// The footer game crashing, now and then (games.js decides when; the board then stays down). The
 // picture glitches: bands slip sideways, pixels turn the wrong colour, garbage appears and the caption's
 // letters scramble. Then every pixel breaks out of the flat board, lifts off the page towards the viewer,
 // tumbles and falls away under gravity; the large pieces (the well, the maze, the text) tip forward out
-// of the board like panes. A core dump is left written on the board. Decoration only; loaded on the first
-// crash.
+// of the board like panes. A core dump is left written on the board, over an idle prompt. Decoration only;
+// loaded on the first crash.
 
 const SVG = "http://www.w3.org/2000/svg";
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -18,7 +18,6 @@ export async function crash({ figure, board, pixels, caption, name }) {
   await sleep(900);
   dump(pixels, name);
   figure.classList.remove("is-crashing");
-  await sleep(2600);
 }
 
 // Corrupted frames, a dozen or so, from the picture as it was.
@@ -104,7 +103,7 @@ function tip() {
   });
 }
 
-// The core dump, written on the empty board, and the restart.
+// The core dump, written on the empty board: the process is gone (128 + signal 11) and the shell waits.
 function dump(pixels, name) {
   const line = (y, cls, text) => {
     const t = document.createElementNS(SVG, "text");
@@ -112,14 +111,15 @@ function dump(pixels, name) {
     t.textContent = text;
     return t;
   };
-  const prompt = line(85, "g-text g-text--value", `$ restarting ${name}…`);
+  const prompt = line(92, "g-text g-text--value", "$");
   const cursor = document.createElementNS(SVG, "rect");
-  cursor.setAttribute("y", 79); cursor.setAttribute("width", 3.5); cursor.setAttribute("height", 6.5); cursor.setAttribute("class", "g-cursor");
+  cursor.setAttribute("y", 86); cursor.setAttribute("width", 3.5); cursor.setAttribute("height", 6.5); cursor.setAttribute("class", "g-cursor");
   pixels.replaceChildren(
     line(50, "g-crash", "Segmentation fault (core dumped)"),
     line(63, "g-text", `pid ${Math.floor(rand(1200, 9800))} · ${name} · signal 11 (SIGSEGV)`),
+    line(74, "g-text", "[process exited with code 139]"),
     prompt,
     cursor,
   );
-  cursor.setAttribute("x", (44 + prompt.getComputedTextLength() + 1.5).toFixed(1));
+  cursor.setAttribute("x", (44 + prompt.getComputedTextLength() + 2.5).toFixed(1));
 }

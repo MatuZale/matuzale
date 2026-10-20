@@ -3,7 +3,8 @@
 // tick() that returns the delay until the next tick and a draw() that returns SVG nodes, so the board
 // only ever has one set of pixels to replace. Colours come from CSS classes (see style.css), which is
 // how the games follow the light / dark theme. Now and then, at random, the game crashes and breaks out
-// of the board (crash.js). Loaded on first sight of the footer by script.js.
+// of the board (crash.js), and the board stays down until the page is loaded again. Loaded on first sight
+// of the footer by script.js.
 
 const SVG = "http://www.w3.org/2000/svg";
 function node(tag, attributes, text) {
@@ -439,15 +440,20 @@ export function startFooterGames({ board, pixels, toggle, caption }) {
     else draw();
     schedule();
   }
+  // A crash is final: no more ticks, nothing to pause, and the core dump stays on the board.
   function breakDown() {
     if (crashing || motion.matches) return;
     crashing = true;
     schedule();
     draw();
+    toggle.hidden = true;
     import("./crash.js")
       .then(module => module.crash({ figure, board, pixels, caption, name: label(name) }))
       .catch(error => console.error(error))
-      .finally(() => { crashing = false; start(chooseGame()); });
+      .finally(() => {
+        figure.classList.add("is-crashed");
+        board.setAttribute("aria-label", `The little ${TITLES[name]} game beneath the circuit board has crashed`);
+      });
   }
   board.crash = breakDown;
   function schedule() {

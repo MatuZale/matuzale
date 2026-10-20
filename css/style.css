@@ -793,6 +793,7 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
 .circuit-burst { position: fixed; inset: 0; z-index: 80; overflow: hidden; pointer-events: none; perspective: 700px; font-family: var(--font-mono); }
 .circuit-burst svg { position: absolute; overflow: visible; }
 .g-crash { fill: var(--snake-food); font-size: 7px; }
+.footer__circuit.is-crashed .circuit-caption__dot { background: var(--snake-food); box-shadow: 0 0 5px color-mix(in srgb, var(--snake-food) 50%, transparent); }
 .g-cursor { fill: var(--tear-prop); animation: cursor-blink 1s steps(1, end) infinite; }
 @keyframes cursor-blink { 50% { opacity: 0; } }
 .circuit-caption { display: flex; align-items: center; justify-content: space-between; gap: .25rem; padding-inline: .5rem; font: 400 .58rem/1.7 var(--font-mono); }
