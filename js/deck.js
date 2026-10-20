@@ -143,6 +143,8 @@ const ART = {
 };
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+// Whether a spring has all but arrived: within eps of its target and hardly moving.
+const near = eps => spring => Math.abs(spring.target - spring.value) < eps && Math.abs(spring.velocity) < eps / 4;
 
 // A damped spring per animated value. Small steps feel like a card in the hand rather than a tween.
 class Spring {
@@ -254,7 +256,7 @@ export async function createDeck() {
       mx: new Spring(50), my: new Spring(50), o: new Spring(0, .05, .3),
       tx: new Spring(0, .06, .28), ty: new Spring(0, .06, .28), scale: new Spring(1, .06, .28),
     };
-    let raf = 0;
+    let raf = 0, returning = false;
     function render() {
       const mx = s.mx.value, my = s.my.value;
       const st = el.style;
@@ -276,9 +278,12 @@ export async function createDeck() {
       st.setProperty("--s", s.scale.value.toFixed(4));
     }
     function tick() {
+      // On its way home a card follows its place in the grid, which may scroll meanwhile, and drops back
+      // into the grid as soon as it is over it; its tilt and light settle there.
+      if (returning) { const to = slotOffset(); s.tx.set(to.x); s.ty.set(to.y); s.scale.set(to.scale); }
       let moving = false;
       for (const spring of Object.values(s)) moving = spring.step() || moving;
-      if (!moving && !el.classList.contains("is-active")) unstage();
+      if (returning && [s.tx, s.ty].every(near(.5)) && near(.002)(s.scale)) { returning = false; unstage(); }
       render();
       raf = moving ? requestAnimationFrame(tick) : 0;
     }
@@ -315,9 +320,10 @@ export async function createDeck() {
       el.parentElement.classList.add("is-raised");
     }
     function unstage() {
+      returning = false;
       if (!el.classList.contains("is-staged")) return;
       el.classList.remove("is-staged");
-      el.parentElement.classList.remove("is-raised");
+      el.parentElement.classList.remove("is-raised", "is-returning");
       s.tx.jump(0); s.ty.jump(0); s.scale.jump(1);
     }
     // Offset and scale that draw the staged card exactly over its place in the grid.
@@ -332,6 +338,8 @@ export async function createDeck() {
     function place() { stage(); }
     function lift() {
       const flying = el.classList.contains("is-staged");
+      returning = false;
+      el.parentElement.classList.remove("is-returning");
       el.classList.add("is-active");
       el.setAttribute("aria-pressed", "true");
       el.setAttribute("aria-label", el.getAttribute("aria-label").replace("lift the card", "put the card back"));
@@ -350,8 +358,8 @@ export async function createDeck() {
       el.classList.remove("is-active");
       el.setAttribute("aria-pressed", "false");
       el.setAttribute("aria-label", el.getAttribute("aria-label").replace("put the card back", "lift the card"));
-      const to = slotOffset();
-      s.tx.set(to.x); s.ty.set(to.y); s.scale.set(to.scale);
+      returning = true;
+      el.parentElement.classList.add("is-returning");
       s.spin.set(Math.round(s.spin.target / 360) * 360, .04, .2);
       rest();
     }
@@ -361,7 +369,8 @@ export async function createDeck() {
       else s.spin.set(value, .2, .45);
       wake();
     }
-    return { el, rotator, s, aim, rest, place, lift, drop, flip, spinTo, render, unstage };
+    const staged = () => el.classList.contains("is-staged");
+    return { el, rotator, s, aim, rest, place, lift, drop, flip, spinTo, render, unstage, staged };
   }
 
   function lift(card) {
@@ -382,7 +391,7 @@ export async function createDeck() {
   for (const card of cards) {
     card.render();
     card.el.addEventListener("pointermove", event => {
-      if (card === active || event.pointerType === "touch" || motion.matches) return;
+      if (card === active || card.staged() || event.pointerType === "touch" || motion.matches) return;
       const r = card.el.getBoundingClientRect();
       card.aim(clamp((event.clientX - r.left) / r.width, 0, 1), clamp((event.clientY - r.top) / r.height, 0, 1), 26);
     });

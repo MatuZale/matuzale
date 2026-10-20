@@ -185,6 +185,8 @@ html.deck-open { overflow: hidden; }
 @media (max-width: 560px) { .deck__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem .8rem; } }
 .deck__slot { position: relative; z-index: 1; min-width: 0; aspect-ratio: 63 / 88; }
 .deck__slot.is-raised { z-index: 6; }
+/* A card on its way home steps back under the veil when another is lifted. */
+.deck.has-active .deck__slot.is-returning { z-index: 3; }
 .deck.is-dealt .deck__slot { animation: deal .7s cubic-bezier(.2, .9, .25, 1.1) backwards; animation-delay: calc(var(--i) * 65ms + 80ms); }
 @keyframes deal {
   from { opacity: 0; transform: translate(calc((var(--i) - var(--mid, 3.5)) * -14%), 55vh) rotate(calc((var(--i) - var(--mid, 3.5)) * 5deg)) scale(.7); }
@@ -202,6 +204,8 @@ html.deck-open { overflow: hidden; }
   transition: opacity .35s, visibility 0s .35s;
 }
 .deck.has-active .deck__veil { opacity: 1; visibility: visible; transition: opacity .35s; }
+/* While it fades out the veil lets clicks through, so the next card can be taken at once. */
+.deck:not(.has-active) .deck__veil { pointer-events: none; }
 .deck__tools {
   position: fixed;
   left: 50%;
