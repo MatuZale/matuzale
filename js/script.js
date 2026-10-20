@@ -285,11 +285,16 @@ document.getElementById("year").textContent = new Date().getFullYear();
   } else load();
 })();
 
-/* ───────── The About horizon only drives while it is on screen ───────── */
+/* ───────── The About horizon only drives while it is on screen ─────────
+   nightfall.js, its rare night, loads when it is first in sight. */
 (function horizonIdle() {
   const horizon = document.querySelector(".horizon");
   if (!horizon || !("IntersectionObserver" in window)) return;
-  new IntersectionObserver(([entry]) => horizon.classList.toggle("is-idle", !entry.isIntersecting)).observe(horizon);
+  let night = null;
+  new IntersectionObserver(([entry]) => {
+    horizon.classList.toggle("is-idle", !entry.isIntersecting);
+    if (entry.isIntersecting) night ??= import("./nightfall.js").then(module => module.startNightfall(horizon)).catch(error => console.error(error));
+  }).observe(horizon);
 })();
 
 /* ───────── Journey: a black hole in a sheet of spacetime ─────────

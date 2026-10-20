@@ -496,6 +496,33 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
 .horizon.is-idle .horizon__grid { animation-play-state: paused; }
 @keyframes horizon-drive { to { background-position: 0 0, 0 56px; } }
 @media (prefers-reduced-motion: reduce) { .horizon__grid { animation: none; } }
+/* Nightfall, now and then (nightfall.js): night on the grid, pixel stars, a crescent moon striped like the
+   sun, and a shooting star, in the horizon's own palette. */
+.horizon { --moon: color-mix(in srgb, var(--accent-3) 45%, #f2f6ff); --star: #eef3ff; }
+:root[data-theme="light"] .horizon { --moon: color-mix(in srgb, var(--accent-3) 70%, var(--accent-2)); --star: var(--accent-2); }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .horizon { --moon: color-mix(in srgb, var(--accent-3) 70%, var(--accent-2)); --star: var(--accent-2); }
+}
+.horizon__floor { transition: filter 2.2s; }
+.horizon.is-night .horizon__floor { filter: hue-rotate(-55deg) brightness(1.25); }
+.horizon__stars { position: absolute; inset: 0 0 6%; opacity: 0; transition: opacity 1.8s; }
+.horizon.is-night .horizon__stars { opacity: 1; }
+.horizon__stars i { position: absolute; width: 2px; height: 2px; background: var(--star); box-shadow: 0 0 4px var(--star); animation: star-twinkle var(--d, 2s) steps(1, end) var(--w, 0s) infinite; }
+.horizon__stars i.is-big { width: 3px; height: 3px; }
+@keyframes star-twinkle { 0%, 100% { opacity: 1; } 40% { opacity: .25; } 70% { opacity: .7; } }
+.horizon__moon {
+  position: absolute; bottom: 0; left: calc(var(--vanish) + var(--sun) * .5); width: calc(var(--sun) * .3); aspect-ratio: 1; border-radius: 50%;
+  box-shadow: inset calc(var(--sun) * .08) 0 0 0 var(--moon);
+  filter: drop-shadow(0 0 calc(var(--sun) * .04) var(--moon));
+  -webkit-mask: linear-gradient(#000 56%, #0000 56% 59%, #000 59% 68%, #0000 68% 72.5%, #000 72.5% 81%, #0000 81% 87%, #000 87%);
+  mask: linear-gradient(#000 56%, #0000 56% 59%, #000 59% 68%, #0000 68% 72.5%, #000 72.5% 81%, #0000 81% 87%, #000 87%);
+  transform: translateY(110%);
+}
+.horizon__meteor {
+  position: absolute; top: 12%; left: 82%; width: calc(var(--sun) * .3); height: 2px; border-radius: 2px; opacity: 0;
+  background: linear-gradient(90deg, var(--star), transparent); filter: drop-shadow(0 0 3px var(--star));
+}
+.about-terminal__typed { color: var(--term-text); }
 
 /* The employer keeps its own mark, on the white field it was designed for. */
 .workplace { display: grid; grid-template-columns: 170px minmax(0, 1fr) 20px; gap: 1rem; align-items: center; padding: 1rem; margin: 1.5rem 0; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--text); transition: border-color .2s, transform .2s; }
