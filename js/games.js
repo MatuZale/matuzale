@@ -456,6 +456,14 @@ export function startFooterGames({ board, pixels, toggle, caption }) {
       });
   }
   board.crash = breakDown;
+  // The service remote (remote.js) picks a game: it starts afresh and plays, even if it was paused. A
+  // crashed board stays down.
+  board.play = next => {
+    if (crashing || !GAMES[next]) return false;
+    if (!motion.matches) paused = false;
+    start(next);
+    return true;
+  };
   function schedule() {
     clearTimeout(timer);
     timer = 0;

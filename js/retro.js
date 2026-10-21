@@ -137,7 +137,7 @@ try { if (localStorage.getItem("crt") === "1") setCRT(true, false); } catch (e) 
 /* ───────── Back to top as a VCR rewind ───────── */
 
 // The tape counter follows the page: a few hundred pixels of scrolling make a second of tape.
-const counter = () => {
+export const counter = () => {
   const s = Math.round(window.scrollY / 40);
   return `${Math.floor(s / 3600)}:${String(Math.floor(s / 60) % 60).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 };

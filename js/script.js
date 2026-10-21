@@ -169,6 +169,25 @@ document.querySelectorAll("[data-spot]").forEach((card) => {
   });
 });
 
+/* ───────── "Currently learning" is not screwed down very well ─────────
+   Three knocks and it falls off, onto a service remote. remote.js loads at the first knock. */
+(function looseCard() {
+  const card = document.querySelector(".skill--learning");
+  if (!card || reducedMotion) return;
+  let remote;
+  card.addEventListener("click", async event => {
+    // Selecting the text on it is not a knock.
+    if (event.button !== 0 || String(window.getSelection()).trim()) return;
+    try {
+      remote ??= import("./remote.js").then(module => module.startRemote(card));
+      (await remote).knock();
+    } catch (error) {
+      remote = undefined;
+      console.error(error);
+    }
+  });
+})();
+
 /* ───────── Holographic project cards ───────── */
 (function holographicProjects() {
   const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
