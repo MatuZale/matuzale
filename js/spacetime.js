@@ -482,13 +482,13 @@ export function startSpacetime(holder) {
     ctx.drawImage(exposure, 0, 0);
 
     const caption = document.documentElement.lang === "pl"
-      ? "te cząstki w soczewce dziury · jak u J.-P. Luminet'a, 1979"
-      : "these particles through the hole's lens · after J.-P. Luminet, 1979";
+      ? ["pierwszy symulowany obraz czarnej dziury (J.-P. Luminet, 1979)", "odtworzony na żywo z cząstek tej symulacji"]
+      : ["the first simulated image of a black hole (J.-P. Luminet, 1979)", "recreated live from the particles of this simulation"];
     ctx.globalAlpha = .55 * ease(t, T.caption) * (1 - ease(t, T.captionOut));
     if (ctx.globalAlpha > .01) {
       ctx.fillStyle = colours.text; ctx.font = `500 ${11 * dpr}px ${colours.font}`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-      const half = ctx.measureText(caption).width / 2 + 16 * dpr;
-      ctx.fillText(caption, Math.min(hx, live.width - half), hy + 11.5 * perM + 12 * dpr);
+      const half = Math.max(...caption.map(line => ctx.measureText(line).width)) / 2 + 16 * dpr;
+      caption.forEach((line, i) => ctx.fillText(line, Math.min(hx, live.width - half), hy + 11.5 * perM + (12 + 15 * i) * dpr));
     }
     ctx.globalAlpha = 1;
   }
