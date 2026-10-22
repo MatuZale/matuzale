@@ -119,6 +119,71 @@ const CARDS = [
     size: "1600 × 1200 · 800 k orbits",
     alt: "Harmonic IFS: magenta and cyan field lines with golden poles on deep violet",
   },
+  // From here on, renders of chaos_cards.py (2048 × 1536, scaled to 1200 × 900), in three foils after printed
+  // cards: reverse holo (◆), holo rare with vertical beams (★) and amazing rare (★★★). See HOLO below.
+  {
+    id: "chirikov", name: "Chirikov", stage: "2D map", dim: 2, symbol: "⊙", rarity: "◆",
+    credit: "Boris Chirikov, 1969", ability: "Islands in a chaotic sea",
+    eq: [[X("p"), "<i>p</i><sub>n</sub> + <i>K</i> sin <i>θ</i><sub>n</sub>"], [X("θ"), "<i>θ</i><sub>n</sub> + <i>p</i><sub>n+1</sub>"], ["", "both mod 2π"]],
+    stats: [["<i>K</i>", "0.9716"], ["orbits", "12 800"], ["iterations", "12 000"]],
+    text: "A rotor kicked once a turn. Regular orbits wind round islands, coloured by mean |<i>p</i>|; the rest roam a navy chaotic sea. At Greene's <i>K</i> the last golden torus is about to break.",
+    size: "2048 × 1536 · 154 M points",
+    alt: "Chirikov standard map: rainbow rings of islands in a navy chaotic sea",
+  },
+  {
+    id: "hopalong", name: "Hopalong", stage: "2D map", dim: 2, symbol: "✿", rarity: "◆",
+    credit: "Barry Martin, 1986", ability: "Mandala", style: "--eq: .9",
+    eq: [[X("x"), "<i>y</i><sub>n</sub> − sgn(<i>x</i><sub>n</sub>) √|<i>b x</i><sub>n</sub> − <i>c</i>|"], [X("y"), "<i>a</i> − <i>x</i><sub>n</sub>"]],
+    stats: [["<i>a</i>", "−55"], ["<i>b</i>", "−1"], ["<i>c</i>", "−42"]],
+    text: "A square root and a sign. One orbit from (0, 0) hops round the plane and lays down a mandala, ring after ring. Colour is when the orbit first reached each pixel.",
+    size: "2048 × 1536 · 300 M iterations",
+    alt: "Hopalong orbit: a mandala of rings of dark disks in teal and gold",
+  },
+  {
+    id: "popcorn", name: "Popcorn", stage: "2D map", dim: 2, symbol: "❋", rarity: "◆",
+    credit: "after Clifford A. Pickover", ability: "Popping kernels", style: "--eq: .86",
+    eq: [[X("x"), "<i>x</i><sub>n</sub> − <i>h</i> sin(<i>y</i><sub>n</sub> + tan 3<i>y</i><sub>n</sub>)"], [X("y"), "<i>y</i><sub>n</sub> − <i>h</i> sin(<i>x</i><sub>n</sub> + tan 3<i>x</i><sub>n</sub>)"]],
+    stats: [["<i>h</i>", "0.05"], ["iterations", "60"], ["starts", "2048²"]],
+    text: "Every point of a grid takes sixty small steps. Near their poles the tangents swing each step round, and the tracks curl into a lattice of kernels. Colour is the direction of the starting point from the centre.",
+    size: "2048 × 1536 · 252 M points",
+    alt: "Pickover popcorn: a lattice of curled kernels in rainbow quadrants",
+  },
+  {
+    id: "halvorsen", name: "Halvorsen", stage: "3D flow", dim: 3, symbol: "✇", rarity: "★",
+    credit: "after Arne Dehli Halvorsen", ability: "Three-fold propeller", style: "--eq: .9",
+    eq: [["<i>ẋ</i>", "−<i>a x</i> − 4<i>y</i> − 4<i>z</i> − <i>y</i>²"], ["<i>ẏ</i>", "−<i>a y</i> − 4<i>z</i> − 4<i>x</i> − <i>z</i>²"], ["<i>ż</i>", "−<i>a z</i> − 4<i>x</i> − 4<i>y</i> − <i>x</i>²"]],
+    stats: [["<i>a</i>", "1.4"], ["<i>dt</i>", "0.002"], ["view", "(1, 1, 1)"]],
+    text: "One equation three times, round <i>x</i> → <i>y</i> → <i>z</i>; seen down the diagonal, the lobes make a propeller. The usual <i>a</i> = 1.89 settles onto a cycle in this form, so this one runs at 1.4.",
+    size: "2048 × 1536 · 400 M RK4 steps",
+    alt: "Halvorsen attractor seen along its diagonal: a three-lobed propeller in green and blue",
+  },
+  {
+    id: "logistic", name: "Logistic map", stage: "1D map", dim: 1, symbol: "⋔", rarity: "★",
+    credit: "Robert May, 1976", ability: "Period doubling",
+    eq: [[X("x"), "<i>r x</i><sub>n</sub>(1 − <i>x</i><sub>n</sub>)"], ["<i>λ</i>", "mean of ln |<i>r</i>(1 − 2<i>x</i><sub>n</sub>)|"]],
+    stats: [["<i>r</i>", "2.9 – 4"], ["burn-in", "2000"], ["iterations", "5000"]],
+    text: "One parabola, iterated. As <i>r</i> grows, a steady value splits into 2, 4, 8, … states, each split about 4.669 times sooner than the last (Feigenbaum's <i>δ</i>), then chaos with windows of order. Colour is <i>λ</i>: blue below zero, red above.",
+    size: "2048 × 1536 · 82 M points",
+    alt: "Logistic map bifurcation diagram: one branch splitting into a fan of orange and red chaos",
+  },
+  {
+    id: "lorenz", name: "Lorenz", stage: "3D flow", dim: 3, symbol: "∞", rarity: "★★★",
+    credit: "Edward N. Lorenz, 1963", ability: "Butterfly effect",
+    eq: [["<i>ẋ</i>", "<i>σ</i>(<i>y</i> − <i>x</i>)"], ["<i>ẏ</i>", "<i>x</i>(<i>ρ</i> − <i>z</i>) − <i>y</i>"], ["<i>ż</i>", "<i>x y</i> − <i>β z</i>"]],
+    stats: [["<i>σ</i>", "10"], ["<i>ρ</i>", "28"], ["<i>β</i>", "8/3"]],
+    text: "Convection in a layer of fluid, cut down to three equations. Two orbits a hair apart soon part company, yet both trace the same two wings. Colour is speed.",
+    size: "2048 × 1536 · 16 orbits · 3.2 M RK4 steps",
+    alt: "Lorenz attractor: two wings of fine red and orange threads on black",
+  },
+  {
+    id: "aizawa", name: "Aizawa", stage: "3D flow", dim: 3, symbol: "◍", rarity: "★★★",
+    credit: "after Yoji Aizawa", ability: "Through the axis", style: "--eq: .78; --dd: 2.6cqw",
+    eq: [["<i>ẋ</i>", "(<i>z</i> − <i>b</i>)<i>x</i> − <i>d y</i>"], ["<i>ẏ</i>", "<i>d x</i> + (<i>z</i> − <i>b</i>)<i>y</i>"], ["<i>ż</i>", "<i>c</i> + <i>a z</i> − <i>z</i>³/3 − (<i>x</i>² + <i>y</i>²)(1 + <i>e z</i>) + <i>f z x</i>³"]],
+    stats: [["<i>a</i>", ".95"], ["<i>b</i>", ".7"], ["<i>c</i>", ".6"], ["<i>d</i>", "3.5"], ["<i>e</i>", ".25"], ["<i>f</i>", ".1"]],
+    text: "A sphere wound round its axis: the orbit rises up the central tube, spirals out over the top, down the surface and back in at the bottom. <i>d</i> sets the spin; colour is depth.",
+    size: "2048 × 1536 · 400 M RK4 steps",
+    alt: "Aizawa attractor: a translucent green sphere pierced by a twisted teal tube",
+  },
   {
     id: "smoke", name: "Simon", stage: "Alt art", dim: 2, symbol: "↻", rarity: "✦",
     credit: "smoke variant · heavier exposure", ability: "Smoke screen",
@@ -141,6 +206,13 @@ const ART = {
   dejong: "etched", simon: "etched", julia: "etched", mcmullen: "etched",
   ikeda: "pillar", thomas: "pillar", bedhead: "pillar",
 };
+
+// The chaos_cards.py renders carry the foils of three printed rarities instead (see deck.css, "Three printed
+// foils", and assets/deck/foil/generate_holo.py):
+//   reverse  reverse holo: an etched foil all over the card but the artwork, under a glare of its own
+//   beam     holo rare: rainbow foil with vertical beams, in the artwork window only
+//   amazing  amazing rare: the attractor breaks out of its window in a splash of glitter
+const HOLO = { chirikov: "reverse", hopalong: "reverse", popcorn: "reverse", halvorsen: "beam", logistic: "beam", lorenz: "amazing", aizawa: "amazing" };
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 // Whether a spring has all but arrived: within eps of its target and hardly moving.
@@ -170,11 +242,13 @@ function cardMarkup(card, index) {
   const number = String(index + 1).padStart(3, "0");
   const set = String(index + 1).padStart(2, "0") + "/" + String(CARDS.length).padStart(2, "0");
   const energy = `<span class="tcard__energy" aria-hidden="true">${card.symbol}</span>`;
-  // The alternate art is a portrait full-bleed render; the others sit in a landscape window.
-  const [file, width, height] = card.id === "smoke" ? ["simon-smoke", 900, 1257] : [card.id, 1200, 900];
+  // The alternate art is a portrait full-bleed render; the others sit in a landscape window. An amazing rare
+  // shows its render cut out of the dark background, so it can spill over the card (generate_holo.py).
+  const [file, width, height] = card.id === "smoke" ? ["simon-smoke", 900, 1257]
+    : HOLO[card.id] === "amazing" ? [`foil/cut-${card.id}`, 1200, 900] : [card.id, 1200, 900];
   return `
     <li class="deck__slot" style="--i: ${index}">
-      <div class="tcard tcard--${card.id}" data-foil="${card.id}" data-kind="${KIND[card.id] ?? ""}" data-art="${ART[card.id] ?? ""}" ${card.style ? `style="${card.style}"` : ""} role="button" tabindex="0" aria-pressed="false" aria-label="${card.name}${card.id === "smoke" ? " (alternate art)" : ""}: lift the card">
+      <div class="tcard tcard--${card.id}" data-foil="${card.id}" data-kind="${KIND[card.id] ?? ""}" data-art="${ART[card.id] ?? ""}" data-holo="${HOLO[card.id] ?? ""}" ${card.style ? `style="${card.style}"` : ""} role="button" tabindex="0" aria-pressed="false" aria-label="${card.name}${card.id === "smoke" ? " (alternate art)" : ""}: lift the card">
         <div class="tcard__rotator">
           <div class="tcard__face tcard__front">
             <div class="tcard__panel">
@@ -187,6 +261,7 @@ function cardMarkup(card, index) {
               <div class="tcard__art">
                 <img src="assets/deck/${file}.webp" alt="${card.alt}" width="${width}" height="${height}" decoding="async" draggable="false" />
                 <span class="tcard__foil" aria-hidden="true"></span>
+                ${HOLO[card.id] === "amazing" ? `<span class="tcard__glitter" aria-hidden="true"></span>` : ""}
               </div>
               <p class="tcard__strip"><span>NO. ${number}</span>${card.credit}</p>
               <p class="tcard__ability"><span class="tcard__ability-tag">Ability</span>${card.ability}</p>
