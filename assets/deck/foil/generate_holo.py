@@ -1,8 +1,10 @@
 """Foils for the cards in the three printed rarities (deck.js HOLO, deck.css "Three printed foils").
 
-  reverse  reverse holo: an etched foil all over the card but the artwork window, drawn from the map itself
-           (Chirikov: its invariant curves, the chaotic sea as dust; Hopalong: its mandala as sparkle;
-           Popcorn: the tracks of its little steps)            -> reverse-<card>.webp, 560 x 782
+  reverse  reverse holo: a foil all over the panel but the artwork window, as on the Sword & Shield cards: columns
+           of chevron tiles in different shades, each with the card's energy symbol, and in every tile the
+           map's own texture faintly etched (Chirikov: its invariant curves, the chaotic sea as dust;
+           Hopalong: its mandala as sparkle; Popcorn: the tracks of its little steps)
+                                                               -> reverse-<card>.webp, 560 x 782 (the card)
   amazing  amazing rare: the attractor breaks out of its window, so the card shows a cut-out of the render (the
            attractor without its dark background, in colour, fading out with the distance from the window)
                                                                -> cut-<card>.webp, 1200 x 900
@@ -11,6 +13,7 @@
   beam     holo rare: the beams are gradients, nothing to draw for them.
   window   for both rares on a dark background: the dark round the attractor, which carries the window's foil
                                                                -> art-<card>.webp, 720 x 540
+  paper    for every card: the mottled card stock under the print -> paper.webp, 512 x 512, a tile
 
 Apart from the cut-outs, each image is white, its alpha the foil, like the masks of generate.py. That script
 makes the foils of the first cards; this one only these, so neither rewrites the other's files. Sources are
@@ -66,9 +69,68 @@ def outside_window(feather=1.5):
     return smooth(-feather * S, feather * S, d)
 
 
-def reverse(name, texture, wash=.06):
-    region = outside_window()
-    save(f"reverse-{name}", np.maximum(texture, wash) * region, (W, H))
+def edge(d):
+    """Anti-aliased fill of a signed distance in pixels (negative inside)."""
+    return 1 - smooth(-.75 * S, .75 * S, d)
+
+
+# The card's energy symbol (deck.js), as the reverse holo of the Sword & Shield cards prints its type's symbol:
+# signed distances in pixels from a tile's centre, R the symbol's radius.
+def ring_dot(dx, dy, R):                                  # ⊙ Chirikov
+    r = np.hypot(dx, dy)
+    return np.minimum(np.abs(r - .7 * R) - .12 * R, r - .26 * R)
+
+
+def florette(dx, dy, R):                                  # ✿ Hopalong: five petals round a hole
+    d = np.full(dx.shape, np.inf)
+    for k in range(5):
+        a = 2 * np.pi * k / 5 - np.pi / 2
+        u = (dx * np.cos(a) + dy * np.sin(a)) - .5 * R
+        v = -dx * np.sin(a) + dy * np.cos(a)
+        d = np.minimum(d, (np.hypot(u / (.46 * R), v / (.3 * R)) - 1) * .3 * R)
+    return np.maximum(d, .17 * R - np.hypot(dx, dy))
+
+
+def propeller(dx, dy, R):                                 # ❋ Popcorn: eight teardrop spokes
+    d = np.full(dx.shape, np.inf)
+    for k in range(8):
+        a = 2 * np.pi * k / 8
+        u = dx * np.cos(a) + dy * np.sin(a)
+        v = -dx * np.sin(a) + dy * np.cos(a)
+        t = np.clip((u - .14 * R) / (.86 * R), 0, 1)
+        half = .19 * R * np.sin(np.pi * t) ** .7
+        inside = (u > .14 * R) & (u < R)
+        d = np.minimum(d, np.where(inside, np.abs(v) - half, np.inf))
+    return d
+
+
+def mosaic(symbol, seed, cols=8):
+    """Columns of chevron tiles across the panel, every other column half a tile lower, each tile its own shade
+    with the symbol in the middle, set off by a dark gap; a light bevel and a shadow along each chevron."""
+    rs = np.random.default_rng(seed)
+    x0, width = .034 * w, .932 * w                        # the panel, inside the frame (deck.css: 3.4cqw)
+    cw = width / cols
+    th, dip, R = cw * 1.05, .3 * cw, .28 * cw
+    col = np.clip((xx - x0) // cw, 0, cols - 1)
+    cx = x0 + (col + .5) * cw
+    off = (col % 2) * th / 2 - dip
+    t = (yy - off + dip * (1 - np.abs(xx - cx) / (cw / 2))) / th
+    row = np.floor(t)
+    frac = t - row
+    shades = rs.uniform(.15, 1, (cols, int(h / th) + 4))
+    value = shades[col.astype(int), (row + 2).astype(int)]
+    value = np.where(frac < .03, .95, np.where(frac > .975, .05, value))
+    value = np.where(np.abs(xx - x0 - col * cw) < .6 * S, .05, value)
+    d = symbol(xx - cx, yy - ((row + .5) * th + off), R)
+    gap = edge(d - 1.8 * S)
+    value = value * (1 - gap) + .03 * gap
+    return np.maximum(value, edge(d))
+
+
+def reverse(name, texture, symbol, seed):
+    # The map's own texture stays in each tile, faintly etched.
+    foil = mosaic(symbol, seed) * (.62 + .38 * np.clip(texture, 0, 1))
+    save(f"reverse-{name}", foil * outside_window(), (W, H))
 
 
 # Chirikov: the phase portrait of the standard map itself, at the card's K. Regular orbits (small Lyapunov
@@ -138,9 +200,9 @@ def popcorn(hstep=.05, iters=60, span=2.2):
     return np.clip(np.log1p(dens) / np.log1p(5), 0, 1) * .9
 
 
-reverse("chirikov", chirikov())
-reverse("hopalong", hopalong())
-reverse("popcorn", popcorn())
+reverse("chirikov", chirikov(), ring_dot, 101)
+reverse("hopalong", hopalong(), florette, 102)
+reverse("popcorn", popcorn(), propeller, 103)
 
 
 # ───────── Amazing rare: the attractor out of its window ─────────
@@ -239,3 +301,24 @@ for card in ZOOM:
 glitter()
 for card in ("halvorsen", "logistic", "lorenz", "aizawa"):
     art_background(card)
+
+
+# ───────── Paper: the card stock under every card's print ─────────
+# Soft clouds, as printed cards' coloured panels are mottled, and a fine grain over them. Noise filtered to a
+# 1/f spectrum in Fourier space wraps round, so the tile repeats without seams. Lighter patches are white and
+# darker ones black, both faint, so the same tile works on a dark panel and a light one.
+def paper(size=512, seed=11):
+    rs = np.random.default_rng(seed)
+    f = np.fft.fftfreq(size)
+    k = np.hypot(*np.meshgrid(f, f))
+    k[0, 0] = 1
+    clouds = np.real(np.fft.ifft2(np.fft.fft2(rs.normal(size=(size, size))) / k ** 1.5))
+    clouds = (clouds - clouds.mean()) / clouds.std()
+    n = np.clip(clouds * .5 + rs.normal(size=(size, size)) * .22, -2.2, 2.2) / 2.2
+    colour = np.where(n > 0, 255, 0).astype(np.uint8)
+    alpha = (np.abs(n) * .26 * 255 + .5).astype(np.uint8)
+    Image.fromarray(np.dstack([colour, colour, colour, alpha]), "RGBA").save("paper.webp", "WEBP", quality=82, alpha_quality=80, method=6)
+    print("paper", (size, size), round(float(alpha.mean()) / 255, 3))
+
+
+paper()

@@ -245,6 +245,8 @@ html.deck-open { overflow: hidden; }
   --shine-o: .3;
   --foil-o: .55;
   --radius: 4.6cqw;
+  /* Card stock: soft clouds and a grain over the panel's colour, as printed panels are mottled, not flat. */
+  --paper: url("../assets/deck/foil/paper.webp") 0 0 / 46cqw 46cqw;
   position: absolute;
   inset: 0;
   display: block;
@@ -303,7 +305,7 @@ html.deck-open { overflow: hidden; }
   height: 100%;
   padding: 2.6cqw 3.2cqw 2.2cqw;
   border-radius: calc(var(--radius) - 2cqw);
-  background: var(--panel-bg);
+  background: var(--paper), var(--panel-bg);
   box-shadow: inset 0 0 0 .5cqw #00000059, inset 0 .6cqw 1.2cqw #00000080;
   color: var(--ink);
 }
@@ -795,25 +797,35 @@ html.deck-open { overflow: hidden; }
   --flakes: url("../assets/deck/foil/glitter.webp");
 }
 
-/* Reverse holo: an etched foil all over the card but the artwork (--foil-mask, drawn from the map itself),
-   lit by a diagonal glint that slides with the light and a ring round it; strongest face-on, as the foil
-   turns away from the light it fades. The matte artwork takes a soft light of its own. */
-.tcard[data-holo="reverse"] .tcard__shine {
+/* Reverse holo, as on the Sword & Shield cards: the panel is foil all over but the artwork, a mosaic of chevron
+   tiles in different shades with the card's energy symbol on each (--foil-mask, with the map's own texture
+   etched into the tiles; mapped from the card onto the panel). It lies in the panel under the type, as the
+   print lies over the foil, so the words stay clean; the frame stays plain. A diagonal glint slides with the
+   light, with a ring round it; strongest face-on, as the foil turns away from the light it fades. The matte
+   artwork takes a soft light of its own. */
+.tcard[data-holo="reverse"] .tcard__shine { display: none; }
+.tcard[data-holo="reverse"] .tcard__panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
   opacity: clamp(0, calc(var(--o, 0) * 1.5 - var(--hyp, 0) * .55), 1);
   background:
     radial-gradient(circle at var(--mx, 50%) var(--my, 50%), #fff 4%, #000 48%, #fff 82%),
     linear-gradient(-45deg, #000 18%, #fff 50%, #000 82%) var(--mx, 50%) var(--my, 50%) / 220% 220%,
     linear-gradient(115deg, var(--spectrum)) var(--posx, 50%) var(--posy, 50%) / 280% 280%;
   background-blend-mode: soft-light, difference, normal;
-  -webkit-mask: var(--foil-mask) center / 100% 100% no-repeat;
-  mask: var(--foil-mask) center / 100% 100% no-repeat;
+  -webkit-mask: var(--foil-mask) -3.4cqw -3.4cqw / calc(100% + 6.8cqw) calc(100% + 6.8cqw) no-repeat;
+  mask: var(--foil-mask) -3.4cqw -3.4cqw / calc(100% + 6.8cqw) calc(100% + 6.8cqw) no-repeat;
   mix-blend-mode: var(--holo-blend);
   filter: brightness(.85) contrast(1.4) saturate(1.3);
 }
 /* On a light panel the foil multiplies like ink, so it has no dark rings: the colours alone, the glint paling
-   them as it passes, and a lighter hand over the type. */
-:root[data-theme="light"] .tcard[data-holo="reverse"] .tcard__shine {
-  opacity: clamp(0, calc((var(--o, 0) * 1.5 - var(--hyp, 0) * .55) * .7), 1);
+   them as it passes. */
+:root[data-theme="light"] .tcard[data-holo="reverse"] .tcard__panel::before {
+  opacity: clamp(0, calc((var(--o, 0) * 1.5 - var(--hyp, 0) * .55) * .8), 1);
   background:
     linear-gradient(-45deg, #fff0 32%, #ffffffd9 50%, #fff0 68%) var(--mx, 50%) var(--my, 50%) / 220% 220%,
     linear-gradient(115deg, var(--spectrum)) var(--posx, 50%) var(--posy, 50%) / 280% 280%;
@@ -821,8 +833,8 @@ html.deck-open { overflow: hidden; }
   filter: saturate(1.6) brightness(.9);
 }
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) .tcard[data-holo="reverse"] .tcard__shine {
-    opacity: clamp(0, calc((var(--o, 0) * 1.5 - var(--hyp, 0) * .55) * .7), 1);
+  :root:not([data-theme="dark"]) .tcard[data-holo="reverse"] .tcard__panel::before {
+    opacity: clamp(0, calc((var(--o, 0) * 1.5 - var(--hyp, 0) * .55) * .8), 1);
     background:
       linear-gradient(-45deg, #fff0 32%, #ffffffd9 50%, #fff0 68%) var(--mx, 50%) var(--my, 50%) / 220% 220%,
       linear-gradient(115deg, var(--spectrum)) var(--posx, 50%) var(--posy, 50%) / 280% 280%;
