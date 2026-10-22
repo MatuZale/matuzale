@@ -47,15 +47,20 @@
 .remote__head { display: flex; align-items: center; gap: .9rem; }
 .remote__brand { letter-spacing: .18em; text-transform: uppercase; color: var(--text); opacity: .7; }
 .remote__hint { flex: 1; font: 400 .68rem/1.3 var(--font-mono); opacity: .8; }
-/* The IR window: dark red glass that lights up while a key sends. */
+/* The IR diode: a small red LED, labelled on the case like the groups, that flickers while a key sends.
+   Flat and small, so it reads as a light, not as one more key. */
 .remote__ir {
-  flex: none; width: 20px; height: 10px; margin-left: auto; border-radius: 10px 10px 3px 3px;
-  background: radial-gradient(circle at 50% 30%, #6a141a, #2a0508); box-shadow: inset 0 1px 1px #ffffff2e, 0 0 0 1px #00000040;
+  flex: none; display: flex; align-items: center; gap: .45rem; margin-left: auto;
+  font-size: .92rem; letter-spacing: .14em; opacity: .85;
 }
-.remote__ir.is-sending { animation: ir-send .5s steps(1, end); }
+.remote__ir::before {
+  content: ""; width: 7px; height: 7px; border-radius: 50%;
+  background: #5a1418; box-shadow: 0 0 0 1.5px #0000002e;
+}
+.remote__ir.is-sending::before { animation: ir-send .5s steps(1, end); }
 @keyframes ir-send {
-  0%, 40%, 80% { background: #ff4040; box-shadow: 0 0 10px 2px #ff4040b3, 0 0 0 1px #00000040; }
-  20%, 60%, 100% { background: radial-gradient(circle at 50% 30%, #6a141a, #2a0508); }
+  0%, 40%, 80% { background: #ff4040; box-shadow: 0 0 8px 2px #ff4040b3, 0 0 0 1.5px #0000002e; }
+  20%, 60%, 100% { background: #5a1418; box-shadow: 0 0 0 1.5px #0000002e; }
 }
 
 .remote__pad { display: flex; flex-wrap: wrap; gap: .8rem 1.4rem; }

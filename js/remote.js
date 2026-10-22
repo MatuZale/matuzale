@@ -336,8 +336,9 @@ const PAD = [
 
 function buildRemote() {
   const remote = el("div", "remote"), head = el("div", "remote__head"), pad = el("div", "remote__pad");
-  const brand = el("span", "remote__brand"), hint = el("span", "remote__hint"), ir = el("span", "remote__ir");
+  const brand = el("span", "remote__brand"), hint = el("span", "remote__hint"), ir = el("span", "remote__ir", "IR");
   remote.setAttribute("role", "group");
+  ir.setAttribute("aria-hidden", "true");
   head.append(brand, hint, ir);
   const printed = [], keys = [];
   for (const { group, name, keys: row } of PAD) {
@@ -366,7 +367,7 @@ function buildRemote() {
   relabel();
   document.addEventListener("channelchange", relabel);
 
-  // The little IR window flickers with every press; the key stays lit until its moment has come.
+  // The little IR LED flickers with every press; the key stays lit until its moment has come.
   let playing = null;
   const send = () => { ir.classList.remove("is-sending"); void ir.offsetWidth; ir.classList.add("is-sending"); };
   const light = key => keys.forEach(([other]) => other.classList.toggle("is-lit", other === key));
