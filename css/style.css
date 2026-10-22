@@ -404,8 +404,11 @@ main[tabindex="-1"]:focus, main [tabindex="-1"]:focus { outline: none; }
 }
 .eyebrow a { color: inherit; text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; }
 .eyebrow a:hover { color: var(--text); text-decoration-color: var(--accent); }
-.dot { flex-shrink: 0; width: 8px; height: 8px; border-radius: 50%; background: #1fbf7f; box-shadow: 0 0 0 0 rgba(31, 191, 127, 0.6); animation: pulse 2s infinite; }
-@keyframes pulse { 70% { box-shadow: 0 0 0 10px rgba(31, 191, 127, 0); } 100% { box-shadow: 0 0 0 0 rgba(31, 191, 127, 0); } }
+.dot { flex-shrink: 0; position: relative; width: 8px; height: 8px; border-radius: 50%; background: #1fbf7f; }
+/* The pulse is a copy of the dot that grows and fades: a transform the compositor runs alone. A growing
+   box-shadow had the page repainted every frame, wherever the visitor was. */
+.dot::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: rgba(31, 191, 127, 0.6); animation: pulse 2s infinite; }
+@keyframes pulse { 70% { transform: scale(3.5); opacity: 0; } 100% { transform: none; opacity: 0; } }
 .hero__title {
   font-size: clamp(3.2rem, 11vw, 8rem); font-weight: 700; margin: 1.2rem 0 1.4rem; letter-spacing: -0.045em; line-height: 0.95; color: var(--text);
 }
@@ -467,11 +470,14 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
 #about > .wrap { position: relative; z-index: 1; }
 .horizon {
   --sun: clamp(240px, 32vw, 440px); --floor: clamp(200px, 26vw, 320px); --vanish: 62%;
-  position: absolute; inset: 0; pointer-events: none; opacity: .36;
+  position: absolute; inset: 0; pointer-events: none; --faint: .36;
   --horizon-line: color-mix(in srgb, var(--accent) 55%, var(--accent-2));
 }
-:root[data-theme="light"] .horizon { opacity: .34; }
-@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .horizon { opacity: .34; } }
+:root[data-theme="light"] .horizon { --faint: .34; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .horizon { --faint: .34; } }
+/* Sky and floor never overlap, so each fades on its own: faded as one, the moving floor had the whole
+   section recomposited every frame. */
+.horizon__sky, .horizon__floor { opacity: var(--faint); }
 /* Only the lower edge is clipped: the sun sets behind the horizon, its glow may spill around the rest. */
 .horizon__sky { position: absolute; inset: 0 0 var(--floor); display: flex; justify-content: center; align-items: flex-end; padding-left: calc((var(--vanish) - 50%) * 2); clip-path: inset(-100% -100% 0); }
 .horizon__sun {
@@ -494,7 +500,10 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
   animation: horizon-drive 3.4s linear infinite;
 }
 .horizon.is-idle .horizon__grid { animation-play-state: paused; }
-@keyframes horizon-drive { to { background-position: 0 0, 0 56px; } }
+/* The plane drives one square towards the reader and starts over. Moving it, not its background, keeps
+   it a picture the compositor slides: a moving background repainted a plane three screens wide every
+   frame, which without a GPU took several CPU cores. */
+@keyframes horizon-drive { from { transform: rotateX(68deg) translateY(-56px); } }
 @media (prefers-reduced-motion: reduce) { .horizon__grid { animation: none; } }
 /* Nightfall, now and then (nightfall.js): night on the grid, pixel stars, a crescent moon striped like the
    sun, and a shooting star, in the horizon's own palette. */
@@ -639,6 +648,8 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
 .buoy__sensor { fill: var(--accent-3); }
 .ping { fill: none; stroke: var(--accent); transform-origin: 160px 36px; animation: ping 2.4s ease-out infinite; }
 @keyframes ping { from { transform: scale(1); opacity: 0.9; } to { transform: scale(4.5); opacity: 0; } }
+/* SVG moves on the main thread, so the buoy only rocks while it is on screen (script.js). */
+.card__art.is-idle .wave, .card__art.is-idle .buoy, .card__art.is-idle .ping { animation-play-state: paused; }
 
 /* ───────────────────────── BENTOS: project-scoped brand ─────────────────────────
    Colours from bentos.info. These tokens stop at the project boundary. */

@@ -316,6 +316,13 @@ document.getElementById("year").textContent = new Date().getFullYear();
   }).observe(horizon);
 })();
 
+/* ───────── The BENTOS card's buoy only rocks while it is on screen ───────── */
+(function buoyIdle() {
+  const art = document.querySelector(".card__art");
+  if (!art || !("IntersectionObserver" in window)) return;
+  new IntersectionObserver(([entry]) => art.classList.toggle("is-idle", !entry.isIntersecting)).observe(art);
+})();
+
 /* ───────── Journey: a black hole in a sheet of spacetime ─────────
    spacetime.js loads when the section is near. */
 (function journeySpacetime() {
@@ -511,9 +518,16 @@ document.getElementById("year").textContent = new Date().getFullYear();
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
   const PARTICLES = 26000, STEPS = 3, DECAY = .86, RECYCLE = 64;
+  // A frame's work is held to a budget, in ms: a machine that takes longer draws fewer particles, each a
+  // little brighter so the cloud keeps its look, and if even the fewest are too many, half the frames.
+  // Never more than 60 frames a second, also on faster screens.
+  const BUDGET = 8, FEWEST = .35;
   const px = new Float64Array(PARTICLES), py = new Float64Array(PARTICLES);
   const occupied = new Uint8Array(40 * 40);
   const lut = new Uint32Array(256);
+  // Density to colour in one lookup, in steps of 1/64 up to where the log scale saturates (110): a
+  // Math.log for each of half a million pixels was a third of the frame.
+  const SHADES = 64, DENSEST = 110, shade = new Uint32Array(DENSEST * SHADES + 1);
   const colours = {
     dark: [[0,11,10,26],[.18,38,12,98],[.4,132,24,160],[.62,245,70,150],[.82,255,160,70],[1,255,240,214]],
     light: [[0,251,250,255],[.15,222,208,252],[.4,165,115,238],[.65,214,36,159],[.85,112,20,124],[1,34,10,66]],
@@ -524,6 +538,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
   // The parameters drift on their own clock, so a hidden tab never makes them jump, and the clock can
   // be run fast to get out of a periodic window (see watch).
   let clock = 20000, speed = 1, last = 0, lowSamples = 0, ticks = 0, cursor = 0;
+  let live = PARTICLES, weight = 1, interval = 1000 / 60, cost = 0, judged = 0;
   function seed() {
     for (let i = 0; i < PARTICLES; i++) {
       px[i] = (Math.random() - .5) * 2;
@@ -547,10 +562,10 @@ document.getElementById("year").textContent = new Date().getFullYear();
     schedule();
   }
   function paint() {
-    const gain = 255 / Math.log(111);
+    const top = shade.length - 1;
     for (let i = 0; i < density.length; i++) {
-      const value = Math.log(1 + density[i]) * gain;
-      pixels[i] = lut[value > 255 ? 255 : value | 0];
+      const k = density[i] * SHADES + .5 | 0;
+      pixels[i] = shade[k > top ? top : k];
     }
     ctx.putImageData(img, 0, 0);
   }
@@ -560,9 +575,9 @@ document.getElementById("year").textContent = new Date().getFullYear();
   // frame from a random neighbour, plus a hair of noise, lets the cloud open up again once the window
   // has passed.
   function recycle() {
-    for (let k = 0; k < RECYCLE; k++) {
-      const donor = (Math.random() * PARTICLES) | 0;
-      cursor = (cursor + 1) % PARTICLES;
+    for (let k = Math.ceil(RECYCLE * live / PARTICLES); k > 0; k--) {
+      const donor = (Math.random() * live) | 0;
+      cursor = (cursor + 1) % live;
       px[cursor] = px[donor] + (Math.random() - .5) * 6e-3;
       py[cursor] = py[donor] + (Math.random() - .5) * 6e-3;
     }
@@ -571,7 +586,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
   function watch() {
     occupied.fill(0);
     let cells = 0;
-    for (let i = 0; i < PARTICLES; i += 3) {
+    for (let i = 0; i < live; i += 3) {
       const cell = ((px[i] + 2.4) * 6.6 | 0) * 40 + ((py[i] + 2.4) * 6.6 | 0);
       if (!occupied[cell]) { occupied[cell] = 1; cells++; }
     }
@@ -587,18 +602,35 @@ document.getElementById("year").textContent = new Date().getFullYear();
     const d = .7 + .06 * Math.cos(clock * .00017);
     // Below 1e-3 a pixel is invisible; zeroing it keeps the buffer clear of denormal floats.
     for (let i = 0; i < density.length; i++) { const v = density[i]; density[i] = v > 1e-3 ? v * DECAY : 0; }
-    for (let i = 0; i < PARTICLES; i++) {
+    for (let i = 0; i < live; i++) {
       let x = px[i], y = py[i];
       for (let s = 0; s < STEPS; s++) {
         const nx = Math.sin(a * y) + c * Math.cos(a * x);
         y = Math.sin(b * x) + d * Math.cos(b * y); x = nx;
         const ix = (cx + x * scale) | 0, iy = (cy + y * scale) | 0;
-        if (ix >= 0 && ix < W && iy >= 0 && iy < H) density[iy * W + ix]++;
+        if (ix >= 0 && ix < W && iy >= 0 && iy < H) density[iy * W + ix] += weight;
       }
       px[i] = x; py[i] = y;
     }
     recycle();
     if (++ticks % 10 === 0) watch();
+  }
+  // The time a frame took, smoothed; about every 30 frames, fewer particles (then frames), or more when a
+  // quarter more would still fit the budget.
+  function adapt(ms) {
+    cost += (ms - cost) * .1;
+    if (++judged < 30) return;
+    judged = 0;
+    let share = live / PARTICLES;
+    if (cost > BUDGET) {
+      if (share > FEWEST) share = Math.max(FEWEST, share * .8);
+      else interval = 1000 / 30;
+    } else if (cost < BUDGET * .6) {
+      if (interval > 1000 / 60) interval = 1000 / 60;
+      else share = Math.min(1, share / .8);
+    }
+    live = Math.round(PARTICLES * share);
+    weight = PARTICLES / live;
   }
   function schedule() {
     if (!raf && visible && !document.hidden) raf = requestAnimationFrame(loop);
@@ -606,6 +638,9 @@ document.getElementById("year").textContent = new Date().getFullYear();
   function loop(time) {
     raf = 0;
     if (!visible || document.hidden) { last = 0; return; }
+    // A screen faster than the interval skips frames (the 3 ms let a 60 Hz screen through every time).
+    if (last && !dirty && time - last < interval - 3) { schedule(); return; }
+    const start = performance.now(), steady = !dirty;
     if (dirty) {
       seed(); density.fill(0);
       clock = 20000; speed = 1; lowSamples = 0;
@@ -614,6 +649,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
     } else if (!reducedMotion) frame(last ? Math.min(time - last, 100) : 16);
     last = time;
     paint();
+    if (steady && !reducedMotion) adapt(performance.now() - start);
     if (!reducedMotion) schedule();
   }
   function themeChange() {
@@ -627,6 +663,11 @@ document.getElementById("year").textContent = new Date().getFullYear();
       const r = r0 + (r1 - r0) * u, g = g0 + (g1 - g0) * u, b = b0 + (b1 - b0) * u;
       lut[i] = (255 << 24) | (b << 16) | (g << 8) | r;
     }
+    const gain = 255 / Math.log(DENSEST + 1);
+    for (let k = 0; k < shade.length; k++) {
+      const value = Math.log(1 + k / SHADES) * gain;
+      shade[k] = lut[value > 255 ? 255 : value | 0];
+    }
     paint();
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute("content", currentTheme() === "dark" ? "#0b0a1a" : "#fbfaff");
@@ -637,11 +678,12 @@ document.getElementById("year").textContent = new Date().getFullYear();
   window.addEventListener("resize", () => {
     clearTimeout(resizeTimer); resizeTimer = setTimeout(resize, 150);
   });
+  // The hero's bottom fades into the page: once only that is left, under the nav, the cloud rests.
   if ("IntersectionObserver" in window) new IntersectionObserver(([entry]) => {
     visible = entry.isIntersecting;
     if (visible) schedule();
     else { cancelAnimationFrame(raf); raf = 0; }
-  }, { threshold: 0 }).observe(hero);
+  }, { threshold: 0, rootMargin: "-20% 0px 0px 0px" }).observe(hero);
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) { cancelAnimationFrame(raf); raf = 0; }
     else schedule();
