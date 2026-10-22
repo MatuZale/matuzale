@@ -31,9 +31,10 @@ html.deck-open { overflow: hidden; }
   --rule: #ffffff1c;
   --flavor-bg: transparent;
   --shine-blend: color-dodge;
+  /* The panel takes the card's own colour, as each type has its colour on printed cards: deep, under light ink. */
   --panel-bg:
-    radial-gradient(90% 55% at 50% 0%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%),
-    linear-gradient(var(--panel), color-mix(in srgb, var(--panel) 80%, #000));
+    radial-gradient(90% 55% at 50% 0%, color-mix(in srgb, var(--accent) 24%, transparent), transparent 70%),
+    linear-gradient(color-mix(in srgb, var(--accent) 30%, var(--panel)), color-mix(in srgb, var(--accent) 15%, color-mix(in srgb, var(--panel) 80%, #000)));
   /* Holographic accents: the colours that sweep over the type, the orb and the edge. */
   --holo-a: #ffb3e6;
   --holo-b: #9ff5ff;
@@ -68,8 +69,8 @@ html.deck-open { overflow: hidden; }
   --flavor-bg: #ffffff8c;
   --shine-blend: soft-light;
   --panel-bg:
-    radial-gradient(90% 55% at 50% 0%, color-mix(in srgb, var(--accent) 24%, transparent), transparent 70%),
-    linear-gradient(color-mix(in srgb, var(--accent) 7%, #fbf9f4), color-mix(in srgb, var(--accent) 12%, #eee9df));
+    radial-gradient(90% 55% at 50% 0%, color-mix(in srgb, var(--accent) 30%, transparent), transparent 70%),
+    linear-gradient(color-mix(in srgb, var(--accent) 17%, #fbf9f4), color-mix(in srgb, var(--accent) 26%, #eee9df));
   --holo-a: #d6249f;
   --holo-b: #0a8fa8;
   --holo-c: #c27a00;
@@ -103,8 +104,8 @@ html.deck-open { overflow: hidden; }
     --flavor-bg: #ffffff8c;
     --shine-blend: soft-light;
     --panel-bg:
-      radial-gradient(90% 55% at 50% 0%, color-mix(in srgb, var(--accent) 24%, transparent), transparent 70%),
-      linear-gradient(color-mix(in srgb, var(--accent) 7%, #fbf9f4), color-mix(in srgb, var(--accent) 12%, #eee9df));    --holo-a: #d6249f;
+      radial-gradient(90% 55% at 50% 0%, color-mix(in srgb, var(--accent) 30%, transparent), transparent 70%),
+      linear-gradient(color-mix(in srgb, var(--accent) 17%, #fbf9f4), color-mix(in srgb, var(--accent) 26%, #eee9df));    --holo-a: #d6249f;
     --holo-b: #0a8fa8;
     --holo-c: #c27a00;
     --holo-d: #6d28d9;
@@ -247,6 +248,8 @@ html.deck-open { overflow: hidden; }
   --radius: 4.6cqw;
   /* Card stock: soft clouds and a grain over the panel's colour, as printed panels are mottled, not flat. */
   --paper: url("../assets/deck/foil/paper.webp") 0 0 / 46cqw 46cqw;
+  /* An etched pattern in an amazing rare's window, besides the glitter: none unless the card sets one. */
+  --etch: linear-gradient(#0000, #0000);
   position: absolute;
   inset: 0;
   display: block;
@@ -910,7 +913,8 @@ html.deck-open { overflow: hidden; }
    the metal rim and the panel, fading as it goes, under the type. It floats a little in front of the card:
    as the card turns it moves against the window, the other way from a picture behind glass. The dark round
    it is the foil, lying flat in the window: glitter in sun-pillar colours, cut round the attractor
-   (--art-mask, kept in register with the floating picture). On the attractor its own sheen, the card's
+   (--art-mask, kept in register with the floating picture), and on Halvorsen, as on the Jirachi amazing rare,
+   an etched swirl whirling round it (--etch). On the attractor its own sheen, the card's
    spectrum dodging its threads into colour where the light falls, and beyond the window a light splash of
    glitter (--splash). The frame stays matte. */
 .tcard[data-holo="amazing"] .tcard__shine { display: none; }
@@ -942,13 +946,15 @@ html.deck-open { overflow: hidden; }
     repeating-linear-gradient(-22deg, var(--pillar), #ff8a8a 16.7%) calc(50% + (50% - var(--posx, 50%)) * 3) calc(50% + (50% - var(--posy, 50%)) * 3) / 300% 600%;
   background-blend-mode: soft-light, normal;
   -webkit-mask:
+    var(--etch) calc(50% + var(--px, 0) * .9cqw) calc(50% + var(--py, 0) * .7cqw) / calc(100% * var(--zoom)) auto no-repeat,
     var(--art-mask) calc(50% + var(--px, 0) * .9cqw) calc(50% + var(--py, 0) * .7cqw) / calc(100% * var(--zoom)) auto no-repeat,
     var(--flakes) 0 0 / 12cqw 12cqw repeat;
-  -webkit-mask-composite: source-in;
+  -webkit-mask-composite: source-over, source-in;
   mask:
+    var(--etch) calc(50% + var(--px, 0) * .9cqw) calc(50% + var(--py, 0) * .7cqw) / calc(100% * var(--zoom)) auto no-repeat,
     var(--art-mask) calc(50% + var(--px, 0) * .9cqw) calc(50% + var(--py, 0) * .7cqw) / calc(100% * var(--zoom)) auto no-repeat,
     var(--flakes) 0 0 / 12cqw 12cqw repeat;
-  mask-composite: intersect;
+  mask-composite: add, intersect;
   mix-blend-mode: screen;
   filter: none;
   transform: none;
@@ -980,8 +986,8 @@ html.deck-open { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .tcard[data-holo="amazing"] .tcard__art img, .tcard[data-holo="amazing"] .tcard__glitter, .tcard[data-holo="amazing"] .tcard__art::after { transform: translate(-50%, -50%); }
   .tcard[data-holo="amazing"] .tcard__foil {
-    -webkit-mask-position: center, 0 0;
-    mask-position: center, 0 0;
+    -webkit-mask-position: center, center, 0 0;
+    mask-position: center, center, 0 0;
   }
 }
 
@@ -1012,13 +1018,17 @@ html.deck-open { overflow: hidden; }
   --ring: #7ff0d8, #ffc86b, #ff7ab8, #8a6cff, #7ff0d8;
   --foil-mask: url("../assets/deck/foil/reverse-popcorn.webp");
 }
-.tcard--halvorsen { /* holo rare */
+.tcard--halvorsen { /* amazing rare */
   --frame: linear-gradient(140deg, #dcff94, #1d8a68 32%, #ecfff3 54%, #2a4fb8 80%, #9ff0ff);
   --accent: #8ff0a8;
   --panel: #050d12;
   --spectrum: #dcff94, #7ff0c0, #6ecbff, #8a8cff, #dcff94;
   --ring: #dcff94, #7ff0c0, #6ecbff, #8a8cff, #dcff94;
+  --zoom: 1.3;
   --art-mask: url("../assets/deck/foil/art-halvorsen.webp");
+  --etch: url("../assets/deck/foil/etch-halvorsen.webp");
+  --cut: url("../assets/deck/foil/cut-halvorsen.webp");
+  --splash: url("../assets/deck/foil/splash-halvorsen.webp");
 }
 .tcard--logistic { /* holo rare */
   --frame: linear-gradient(140deg, #ffd38f, #bb3a2c 32%, #ffeacd 54%, #4f3fb0 80%, #8fd0ff);

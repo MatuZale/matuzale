@@ -13,6 +13,8 @@
   beam     holo rare: the beams are gradients, nothing to draw for them.
   window   for both rares on a dark background: the dark round the attractor, which carries the window's foil
                                                                -> art-<card>.webp, 720 x 540
+           and for Halvorsen, an etched swirl in it, as on the Jirachi amazing rare
+                                                               -> etch-halvorsen.webp, 1200 x 900
   paper    for every card: the mottled card stock under the print -> paper.webp, 512 x 512, a tile
 
 Apart from the cut-outs, each image is white, its alpha the foil, like the masks of generate.py. That script
@@ -210,7 +212,7 @@ reverse("popcorn", popcorn(), propeller, 103)
 # centred on it at ZOOM times its width, so it overflows the window on every side. Distances below are in cqw.
 CW, CH = 85.2, 50.48
 AW, AH = 600, 450
-ZOOM = {"lorenz": 1.32, "aizawa": 1.36}
+ZOOM = {"lorenz": 1.32, "aizawa": 1.36, "halvorsen": 1.3}
 BG = np.array([5, 5, 14]) / 255                          # the renders' background (chaos_cards.py)
 
 
@@ -301,6 +303,41 @@ for card in ZOOM:
 glitter()
 for card in ("halvorsen", "logistic", "lorenz", "aizawa"):
     art_background(card)
+
+
+# ───────── An etched swirl in the window, as on the Jirachi amazing rare ─────────
+# The amazing rare's foil there is etched: fine lines whirling round the subject, cut out round it. Here they
+# whirl round Halvorsen's axis, the way the orbit turns on screen (clockwise in this view, from the equations
+# integrated and projected as in chaos_cards.py), in arms that trail behind it, waving with its three-fold
+# symmetry, broken here and there like an etching; not in the hole round the axis, where they would crowd.
+# The centre is the attractor's centroid: the picture is three-fold symmetric about the axis, so its centroid
+# lies on it.
+def etched_swirl(name, size=(1200, 900), arms=110, wind=1.3, wave=.07):
+    rgb = np.asarray(Image.open(f"../{name}.webp").convert("RGB").resize(size, Image.LANCZOS), np.float64) / 255
+    lum = (rgb - BG).clip(0).max(axis=2)
+    gy, gx = np.mgrid[0:size[1], 0:size[0]].astype(np.float64)
+    cx, cy = (gx * lum).sum() / lum.sum(), (gy * lum).sum() / lum.sum()
+    r = np.hypot(gx - cx, gy - cy) + 1e-6
+    th = np.arctan2(gy - cy, gx - cx)                    # y down: increasing clockwise on screen
+    # Arms trailing a clockwise turn fall back (anticlockwise) as they go out.
+    phase = arms * (th + wind * np.log(r / size[1]) + wave * np.sin(3 * th)) / (2 * np.pi)
+    z = np.exp(2j * np.pi * phase)
+    gyz, gxz = np.gradient(z)
+    grad = np.hypot(np.abs(gxz), np.abs(gyz)) / (2 * np.pi) + 1e-9   # cycles per pixel
+    dist = np.abs(np.angle(z)) / (2 * np.pi) / grad                   # pixels to the nearest line
+    lines = (1 - smooth(.35, 1.35, dist)) * smooth(3.5, 7, 1 / grad)  # fade where the lines crowd
+    lines *= smooth(.12 * size[1], .22 * size[1], r)  # and leave the hole round the axis to the glitter
+    rs = np.random.default_rng(19)
+    breaks = ndimage.gaussian_filter(rs.normal(size=(size[1], size[0])), 6)
+    breaks = smooth(-.35, .25, breaks / breaks.std())
+    subject = smooth(.04, .18, ndimage.gaussian_filter(lum, 1.2 * size[0] / 720))
+    subject = ndimage.gaussian_filter(ndimage.grey_dilation(subject, size=(9, 9)), 2.5)
+    background = 1 - np.clip(subject * 1.15, 0, 1)
+    save(f"etch-{name}", lines * (.35 + .65 * breaks) * background, size)
+    print("  swirl centre", round(cx / size[0], 3), round(cy / size[1], 3))
+
+
+etched_swirl("halvorsen")
 
 
 # ───────── Paper: the card stock under every card's print ─────────

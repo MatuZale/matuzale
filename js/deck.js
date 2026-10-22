@@ -149,15 +149,6 @@ const CARDS = [
     alt: "Pickover popcorn: a lattice of curled kernels in rainbow quadrants",
   },
   {
-    id: "halvorsen", name: "Halvorsen", stage: "3D flow", dim: 3, symbol: "✇", rarity: "★",
-    credit: "after Arne Dehli Halvorsen", ability: "Three-fold propeller", style: "--eq: .9",
-    eq: [["<i>ẋ</i>", "−<i>a x</i> − 4<i>y</i> − 4<i>z</i> − <i>y</i>²"], ["<i>ẏ</i>", "−<i>a y</i> − 4<i>z</i> − 4<i>x</i> − <i>z</i>²"], ["<i>ż</i>", "−<i>a z</i> − 4<i>x</i> − 4<i>y</i> − <i>x</i>²"]],
-    stats: [["<i>a</i>", "1.4"], ["<i>dt</i>", "0.002"], ["view", "(1, 1, 1)"]],
-    text: "One equation three times, round <i>x</i> → <i>y</i> → <i>z</i>; seen down the diagonal, the lobes make a propeller. The usual <i>a</i> = 1.89 settles onto a cycle in this form, so this one runs at 1.4.",
-    size: "2048 × 1536 · 400 M RK4 steps",
-    alt: "Halvorsen attractor seen along its diagonal: a three-lobed propeller in green and blue",
-  },
-  {
     id: "logistic", name: "Logistic map", stage: "1D map", dim: 1, symbol: "⋔", rarity: "★",
     credit: "Robert May, 1976", ability: "Period doubling",
     eq: [[X("x"), "<i>r x</i><sub>n</sub>(1 − <i>x</i><sub>n</sub>)"], ["<i>λ</i>", "mean of ln |<i>r</i>(1 − 2<i>x</i><sub>n</sub>)|"]],
@@ -165,6 +156,15 @@ const CARDS = [
     text: "One parabola, iterated. As <i>r</i> grows, a steady value splits into 2, 4, 8, … states, each split about 4.669 times sooner than the last (Feigenbaum's <i>δ</i>), then chaos with windows of order. Colour is <i>λ</i>: blue below zero, red above.",
     size: "2048 × 1536 · 82 M points",
     alt: "Logistic map bifurcation diagram: one branch splitting into a fan of orange and red chaos",
+  },
+  {
+    id: "halvorsen", name: "Halvorsen", stage: "3D flow", dim: 3, symbol: "✇", rarity: "★★★",
+    credit: "after Arne Dehli Halvorsen", ability: "Three-fold propeller", style: "--eq: .9",
+    eq: [["<i>ẋ</i>", "−<i>a x</i> − 4<i>y</i> − 4<i>z</i> − <i>y</i>²"], ["<i>ẏ</i>", "−<i>a y</i> − 4<i>z</i> − 4<i>x</i> − <i>z</i>²"], ["<i>ż</i>", "−<i>a z</i> − 4<i>x</i> − 4<i>y</i> − <i>x</i>²"]],
+    stats: [["<i>a</i>", "1.4"], ["<i>dt</i>", "0.002"], ["view", "(1, 1, 1)"]],
+    text: "One equation three times, round <i>x</i> → <i>y</i> → <i>z</i>; seen down the diagonal, the lobes make a propeller. The usual <i>a</i> = 1.89 settles onto a cycle in this form, so this one runs at 1.4.",
+    size: "2048 × 1536 · 400 M RK4 steps",
+    alt: "Halvorsen attractor seen along its diagonal: a three-lobed propeller in green and blue",
   },
   {
     id: "lorenz", name: "Lorenz", stage: "3D flow", dim: 3, symbol: "∞", rarity: "★★★",
@@ -211,8 +211,9 @@ const ART = {
 // foils", and assets/deck/foil/generate_holo.py):
 //   reverse  reverse holo: an etched foil all over the card but the artwork, under a glare of its own
 //   beam     holo rare: rainbow foil with vertical beams, in the artwork window only
-//   amazing  amazing rare: the attractor breaks out of its window in a splash of glitter
-const HOLO = { chirikov: "reverse", hopalong: "reverse", popcorn: "reverse", halvorsen: "beam", logistic: "beam", lorenz: "amazing", aizawa: "amazing" };
+//   amazing  amazing rare: the attractor breaks out of its window in a splash of glitter (Halvorsen's window
+//            also an etched swirl, after the Jirachi amazing rare)
+const HOLO = { chirikov: "reverse", hopalong: "reverse", popcorn: "reverse", logistic: "beam", halvorsen: "amazing", lorenz: "amazing", aizawa: "amazing" };
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 // Whether a spring has all but arrived: within eps of its target and hardly moving.
