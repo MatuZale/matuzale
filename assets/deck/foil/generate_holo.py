@@ -8,7 +8,9 @@
                                                                -> cut-<card>.webp, 1200 x 900
            the splash that carries the glitter                 -> splash-<card>.webp, 600 x 450
            and one tile of glitter for all of them             -> glitter.webp, 256 x 256
-  beam     holo rare: gradients only, nothing to draw here.
+  beam     holo rare: the beams are gradients, nothing to draw for them.
+  window   for both rares on a dark background: the dark round the attractor, which carries the window's foil
+                                                               -> art-<card>.webp, 720 x 540
 
 Apart from the cut-outs, each image is white, its alpha the foil, like the masks of generate.py. That script
 makes the foils of the first cards; this one only these, so neither rewrites the other's files. Sources are
@@ -217,6 +219,23 @@ def glitter(size=256, flakes=520, stars=18):
     save("glitter", canvas, (size, size))
 
 
+# ───────── The artwork window's foil: the dark space round the attractor ─────────
+# For the cards on a dark background (holo rare and amazing rare). As on the first cards' regular holo
+# (generate.py), the foil in the window lies on the background and the attractor is cut out of it, widened
+# and softened a little; unlike there, its holes (Lorenz's eyes, the lens between the logistic branches, the
+# inside of Aizawa's shell) keep their foil, so the window is filled. The mask covers the whole render (4:3):
+# deck.css lays it over the picture as the picture is drawn (cover, or the amazing rares' zoom) and paints the
+# card's pattern through it.
+def art_background(name, size=(720, 540)):
+    small = Image.open(f"../{name}.webp").convert("RGB").resize(size, Image.LANCZOS)
+    lum = ((np.asarray(small, np.float64) / 255) - BG).clip(0).max(axis=2)
+    subject = smooth(.04, .18, ndimage.gaussian_filter(lum, 1.2))
+    subject = ndimage.gaussian_filter(ndimage.grey_dilation(subject, size=(7, 7)), 2)
+    save(f"art-{name}", 1 - np.clip(subject * 1.15, 0, 1), size)
+
+
 for card in ZOOM:
     amazing(card)
 glitter()
+for card in ("halvorsen", "logistic", "lorenz", "aizawa"):
+    art_background(card)

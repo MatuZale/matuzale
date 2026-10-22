@@ -276,9 +276,10 @@ html.deck-open { overflow: hidden; }
   border-radius: var(--radius);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  /* The shadow falls away from the light, so it swings round as the card turns. */
   box-shadow:
     0 0 0 1px #ffffff1f,
-    0 calc(2px + var(--o, 0) * 10px) calc(10px + var(--o, 0) * 30px) -6px #000c,
+    calc(var(--o, 0) * var(--px, 0) * -14px) calc(2px + var(--o, 0) * (10px - var(--py, 0) * 10px)) calc(10px + var(--o, 0) * 30px) -6px #000c,
     0 0 calc(var(--o, 0) * 26px) calc(var(--o, 0) * -4px) color-mix(in srgb, var(--accent) 55%, transparent);
 }
 .tcard:focus-visible .tcard__face { box-shadow: 0 0 0 2px #07060f, 0 0 0 4px var(--accent), 0 14px 30px -8px #000c; }
@@ -451,7 +452,8 @@ html.deck-open { overflow: hidden; }
 /* Shine: the foil on the frame and panel. A slow rainbow that shows only through the card's own texture
    (--foil-mask, drawn from its mathematics by assets/deck/foil/generate.py), brightest around the light: reverse
    holo, or the stronger gold of the full-art cards. Regular holo cards have none (see the artwork foil).
-   Glare: a soft hotspot that follows the pointer. */
+   Glare: the base every card has, as a plain common or uncommon does: under the turn that follows the pointer,
+   a gloss with a hotspot where the light is and the far side darkening away from it. The foils lie beneath. */
 .tcard__shine, .tcard__glare, .tcard__foil { position: absolute; inset: 0; z-index: 2; pointer-events: none; border-radius: inherit; }
 .tcard__shine {
   opacity: calc(var(--o, 0) * var(--shine-o, .75));
@@ -465,8 +467,8 @@ html.deck-open { overflow: hidden; }
 }
 .tcard__glare {
   z-index: 3;
-  opacity: calc(var(--o, 0) * .75);
-  background: radial-gradient(farthest-corner circle at var(--mx, 50%) var(--my, 50%), #ffffffc0 6%, #ffffff40 25%, #0000004d 90%);
+  opacity: var(--o, 0);
+  background: radial-gradient(farthest-corner circle at var(--mx, 50%) var(--my, 50%), #ffffffcc 8%, #ffffff8c 20%, #00000073 90%);
   mix-blend-mode: overlay;
 }
 /* Foil inside the artwork window: dodge flares the bright filaments into colour, and a faint screen
@@ -781,21 +783,21 @@ html.deck-open { overflow: hidden; }
 /* ───────── Three printed foils ─────────
    The cards rendered by chaos_cards.py carry the foils of three printed rarities instead (deck.js HOLO), after
    the techniques of Simon Goellner's pokemon-cards-css (poke-holo.simey.me): reverse holo, holo rare with its
-   vertical beams, and amazing rare. Their textures come from assets/deck/foil/generate_holo.py.
+   vertical beams, and amazing rare. They lie on the base every card has (the turn and the glare above); their
+   patterns move with --posx / --posy, the light's position damped as on printed foil, so a small move of the
+   pointer shifts them a little. Their textures come from assets/deck/foil/generate_holo.py.
    The artwork window, as fractions of the card: with its metal rim (--window-rim) and the picture alone. */
 .tcard[data-holo="reverse"], .tcard[data-holo="beam"], .tcard[data-holo="amazing"] {
   --window: inset(11.108% 7.392% 52.748% 7.392% round .9cqw);
   --window-rim: inset(10.535% 6.592% 52.176% 6.592% round 1.6cqw);
-  --around-window: polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0, 6.592% 10.535%, 93.408% 10.535%, 93.408% 47.824%, 6.592% 47.824%, 6.592% 10.535%);
   /* Sun-pillar colours: the soft rainbow of printed foil. */
   --pillar: #ff8a8a, #ffe680, #b4ff80, #80fff2, #8aa6ff, #d98aff;
+  --flakes: url("../assets/deck/foil/glitter.webp");
 }
-.tcard[data-holo="reverse"] .tcard__foil, .tcard[data-holo="amazing"] .tcard__foil { display: none; }
 
 /* Reverse holo: an etched foil all over the card but the artwork (--foil-mask, drawn from the map itself),
    lit by a diagonal glint that slides with the light and a ring round it; strongest face-on, as the foil
-   turns away from the light it fades. The glare treats the two apart: crisp on the foil, soft on the
-   matte artwork. */
+   turns away from the light it fades. The matte artwork takes a soft light of its own. */
 .tcard[data-holo="reverse"] .tcard__shine {
   opacity: clamp(0, calc(var(--o, 0) * 1.5 - var(--hyp, 0) * .55), 1);
   background:
@@ -828,37 +830,44 @@ html.deck-open { overflow: hidden; }
     filter: saturate(1.6) brightness(.9);
   }
 }
-.tcard[data-holo="reverse"] .tcard__glare { z-index: auto; opacity: 1; background: none; mix-blend-mode: normal; }
-.tcard[data-holo="reverse"] .tcard__glare::before,
-.tcard[data-holo="reverse"] .tcard__glare::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  border-radius: inherit;
+.tcard[data-holo="reverse"] .tcard__foil {
+  inset: .8cqw;
+  border-radius: .9cqw;
   opacity: var(--o, 0);
-  mix-blend-mode: overlay;
-}
-.tcard[data-holo="reverse"] .tcard__glare::before {
-  clip-path: var(--around-window);
-  background: radial-gradient(farthest-corner circle at var(--mx, 50%) var(--my, 50%), #ffffffd9 8%, #ffffff80 20%, #000000a6 88%);
-  filter: brightness(.8) contrast(1.6);
-}
-.tcard[data-holo="reverse"] .tcard__glare::after {
-  clip-path: var(--window);
   background: radial-gradient(farthest-corner circle at var(--mx, 50%) var(--my, 50%), #ffffffb3 0%, #ffffff33 30%, #00000040 110%);
+  -webkit-mask: none;
+  mask: none;
   mix-blend-mode: soft-light;
+  filter: none;
+  transform: none;
 }
 
-/* Holo rare: a matte frame, and in the artwork window a rainbow foil over fine scan lines, crossed by vertical
-   beams. Each layer runs at its own pace as the card turns, so the beams slide across the bands of colour.
-   The foil dodges the picture, flaring its bright filaments; a faint second pass lets the beams show in the
-   dark around them. */
+/* Holo rare: a matte frame and a holo artwork. The dark round the attractor is the foil (--art-mask, the
+   attractor cut out of it as on the regular holo cards): sun-pillar colours, faint all over and bright in the
+   vertical beams. On the attractor itself lies another foil, a rainbow over fine scan lines crossed by beams of
+   their own, dodging its bright threads into colour. Each layer runs at its own pace as the card turns, so the
+   beams slide across the bands of colour. */
+.tcard[data-holo="beam"] .tcard__foil {
+  opacity: calc(var(--o, 0) * .7);
+  background:
+    radial-gradient(farthest-corner circle at var(--mx, 50%) var(--my, 50%), #ffffff4d 0%, #fff0 38%),
+    repeating-linear-gradient(110deg, var(--pillar), #ff8a8a 16.7%, var(--pillar), #ff8a8a 33.3%) calc(50% + (50% - var(--posx, 50%)) * 2.6) calc(50% + (50% - var(--posy, 50%)) * 3.4) / 400% 400%;
+  -webkit-mask:
+    var(--art-mask) center / cover no-repeat,
+    repeating-linear-gradient(90deg, #0003 0 6%, #000 9%, #0003 10.5%, #000 12%, #0003 15%, #0003 42%) calc(50% + (50% - var(--posx, 50%)) * 1.7 + var(--posy, 50%) * .5) 0 / 200% 100%;
+  -webkit-mask-composite: source-in;
+  mask:
+    var(--art-mask) center / cover no-repeat,
+    repeating-linear-gradient(90deg, #0003 0 6%, #000 9%, #0003 10.5%, #000 12%, #0003 15%, #0003 42%) calc(50% + (50% - var(--posx, 50%)) * 1.7 + var(--posy, 50%) * .5) 0 / 200% 100%;
+  mask-composite: intersect;
+  mix-blend-mode: screen;
+  filter: saturate(1.2);
+}
 .tcard[data-holo="beam"] .tcard__shine {
   opacity: var(--o, 0);
   clip-path: var(--window);
   background:
-    repeating-linear-gradient(110deg, var(--pillar), #ff8a8a 16.7%, var(--pillar), #ff8a8a 33.3%) calc(50% + (50% - var(--mx, 50%)) * 2.6) calc(50% + (50% - var(--my, 50%)) * 3.4) / 400% 400%,
+    repeating-linear-gradient(110deg, var(--pillar), #ff8a8a 16.7%, var(--pillar), #ff8a8a 33.3%) calc(50% + (50% - var(--posx, 50%)) * 2.6) calc(50% + (50% - var(--posy, 50%)) * 3.4) / 400% 400%,
     repeating-linear-gradient(90deg, #000 0 .25cqw, #6a6a6a .25cqw .5cqw);
   background-blend-mode: overlay, normal;
   -webkit-mask: none;
@@ -871,8 +880,8 @@ html.deck-open { overflow: hidden; }
 /* The beams: two combs of bars of different pitch, drifting apart as the card turns. */
 .tcard[data-holo="beam"] .tcard__shine::before {
   background:
-    repeating-linear-gradient(90deg, #000 0 6%, #8f8f8f 9%, #000 10.5%, #8f8f8f 12%, #000 15%, #000 42%) calc(50% + (50% - var(--mx, 50%)) * 1.7 + var(--my, 50%) * .5) 0 / 200% 100%,
-    repeating-linear-gradient(90deg, #000 0 6%, #8f8f8f 9%, #000 10.5%, #8f8f8f 12%, #000 15%, #000 30%) calc(50% - (50% - var(--mx, 50%)) * .9 - var(--my, 50%) * .7) 0 / 200% 100%;
+    repeating-linear-gradient(90deg, #000 0 6%, #8f8f8f 9%, #000 10.5%, #8f8f8f 12%, #000 15%, #000 42%) calc(50% + (50% - var(--posx, 50%)) * 1.7 + var(--posy, 50%) * .5) 0 / 200% 100%,
+    repeating-linear-gradient(90deg, #000 0 6%, #8f8f8f 9%, #000 10.5%, #8f8f8f 12%, #000 15%, #000 30%) calc(50% - (50% - var(--posx, 50%)) * .9 - var(--posy, 50%) * .7) 0 / 200% 100%;
   background-blend-mode: screen;
   mix-blend-mode: hard-light;
   filter: brightness(1.15) contrast(1.1);
@@ -883,40 +892,22 @@ html.deck-open { overflow: hidden; }
   mix-blend-mode: luminosity;
   filter: brightness(.6) contrast(4);
 }
-.tcard[data-holo="beam"] .tcard__foil {
-  display: block;
-  inset: .8cqw;
-  border-radius: .9cqw;
-  opacity: calc(var(--o, 0) * .3);
-  background: repeating-linear-gradient(110deg, var(--pillar), #ff8a8a 16.7%, var(--pillar), #ff8a8a 33.3%) calc(50% + (50% - var(--mx, 50%)) * 2.6) calc(50% + (50% - var(--my, 50%)) * 3.4) / 400% 400%;
-  -webkit-mask: repeating-linear-gradient(90deg, transparent 0 6%, #000 9%, transparent 10.5%, #000 12%, transparent 15%, transparent 42%) calc(50% + (50% - var(--mx, 50%)) * 1.7 + var(--my, 50%) * .5) 0 / 200% 100%;
-  mask: repeating-linear-gradient(90deg, transparent 0 6%, #000 9%, transparent 10.5%, #000 12%, transparent 15%, transparent 42%) calc(50% + (50% - var(--mx, 50%)) * 1.7 + var(--my, 50%) * .5) 0 / 200% 100%;
-  mix-blend-mode: screen;
-  filter: none;
-  transform: none;
-}
-.tcard[data-holo="beam"] .tcard__glare { opacity: calc(var(--o, 0) * .8); filter: brightness(.8) contrast(1.5); }
-.tcard[data-holo="beam"] .tcard__glare::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  clip-path: var(--window);
-  background: radial-gradient(farthest-corner circle at var(--mx, 50%) var(--my, 50%), #f0ffff 5%, #6363633f 55%, #0000005c 110%);
-  mix-blend-mode: overlay;
-  filter: brightness(.6) contrast(3);
-}
 
 /* Amazing rare: the attractor breaks out of its window. The picture is the render cut out of its dark
    background (deck.js), drawn larger than the window (--zoom) over the window's own dark, so it spills over
-   the metal rim and the panel, fading as it goes, under the type. Over it lies a splash of glitter
-   (--splash): flakes catching sun-pillar colours, bright where the light falls and fading away from it,
-   lightening what lies beneath. The frame stays matte. */
+   the metal rim and the panel, fading as it goes, under the type. It floats a little in front of the card:
+   as the card turns it moves against the window, the other way from a picture behind glass. The dark round
+   it is the foil, lying flat in the window: glitter in sun-pillar colours, cut round the attractor
+   (--art-mask, kept in register with the floating picture). On the attractor its own sheen, the card's
+   spectrum dodging its threads into colour where the light falls, and beyond the window a light splash of
+   glitter (--splash). The frame stays matte. */
 .tcard[data-holo="amazing"] .tcard__shine { display: none; }
 .tcard[data-holo="amazing"] .tcard__panel > :not(.tcard__art) { position: relative; z-index: 1; }
 .tcard[data-holo="amazing"] .tcard__art { z-index: 0; overflow: visible; }
 .tcard[data-holo="amazing"] .tcard__art::before { content: ""; position: absolute; inset: .8cqw; border-radius: .9cqw; background: #05050e; }
 .tcard[data-holo="amazing"] .tcard__art img,
-.tcard[data-holo="amazing"] .tcard__glitter {
+.tcard[data-holo="amazing"] .tcard__glitter,
+.tcard[data-holo="amazing"] .tcard__art::after {
   position: absolute;
   left: 50%;
   top: 50%;
@@ -927,28 +918,64 @@ html.deck-open { overflow: hidden; }
   border-radius: 0;
   background: none;
   object-fit: fill;
-  transform: translate(-50%, -50%) translate(calc(var(--px, 0) * -1.2cqw), calc(var(--py, 0) * -.9cqw));
+  transform: translate(-50%, -50%) translate(calc(var(--px, 0) * .9cqw), calc(var(--py, 0) * .7cqw));
+}
+.tcard[data-holo="amazing"] .tcard__foil {
+  display: block;
+  inset: .8cqw;
+  border-radius: .9cqw;
+  opacity: calc(.3 + var(--o, 0) * .7);
+  background:
+    radial-gradient(farthest-corner circle at var(--mx, 50%) var(--my, 50%), #fff 0%, #fff0 32%, #0009 72%),
+    repeating-linear-gradient(-22deg, var(--pillar), #ff8a8a 16.7%) calc(50% + (50% - var(--posx, 50%)) * 3) calc(50% + (50% - var(--posy, 50%)) * 3) / 300% 600%;
+  background-blend-mode: soft-light, normal;
+  -webkit-mask:
+    var(--art-mask) calc(50% + var(--px, 0) * .9cqw) calc(50% + var(--py, 0) * .7cqw) / calc(100% * var(--zoom)) auto no-repeat,
+    var(--flakes) 0 0 / 12cqw 12cqw repeat;
+  -webkit-mask-composite: source-in;
+  mask:
+    var(--art-mask) calc(50% + var(--px, 0) * .9cqw) calc(50% + var(--py, 0) * .7cqw) / calc(100% * var(--zoom)) auto no-repeat,
+    var(--flakes) 0 0 / 12cqw 12cqw repeat;
+  mask-composite: intersect;
+  mix-blend-mode: screen;
+  filter: none;
+  transform: none;
+}
+.tcard[data-holo="amazing"] .tcard__art::after {
+  content: "";
+  pointer-events: none;
+  opacity: calc(var(--o, 0) * .55);
+  background:
+    radial-gradient(farthest-corner circle at var(--mx, 50%) var(--my, 50%), #ffffff59 0%, #fff0 42%),
+    linear-gradient(115deg, var(--spectrum)) var(--posx, 50%) var(--posy, 50%) / 300% 300%;
+  -webkit-mask: var(--cut) center / 100% 100% no-repeat;
+  mask: var(--cut) center / 100% 100% no-repeat;
+  mix-blend-mode: soft-light;
 }
 .tcard[data-holo="amazing"] .tcard__glitter {
-  --flakes: url("../assets/deck/foil/glitter.webp");
   pointer-events: none;
-  opacity: calc(.18 + var(--o, 0) * .82);
+  opacity: calc(.1 + var(--o, 0) * .55);
   background:
     radial-gradient(farthest-corner circle at var(--mx, 50%) var(--my, 50%), #fff 0%, #fff0 28%, #000c 62%),
-    repeating-linear-gradient(-22deg, var(--pillar), #ff8a8a 16.7%) calc(50% + (50% - var(--mx, 50%)) * 3) calc(50% + (50% - var(--my, 50%)) * 3) / 400% 800%;
+    repeating-linear-gradient(-22deg, var(--pillar), #ff8a8a 16.7%) calc(50% + (50% - var(--posx, 50%)) * 3) calc(50% + (50% - var(--posy, 50%)) * 3) / 400% 800%;
   background-blend-mode: soft-light, normal;
-  -webkit-mask: var(--flakes) calc(var(--px, 0) * .8cqw) calc(var(--py, 0) * .8cqw) / 19cqw 19cqw repeat, var(--splash) center / 100% 100% no-repeat;
+  -webkit-mask: var(--flakes) 0 0 / 19cqw 19cqw repeat, var(--splash) center / 100% 100% no-repeat;
   -webkit-mask-composite: source-in;
-  mask: var(--flakes) calc(var(--px, 0) * .8cqw) calc(var(--py, 0) * .8cqw) / 19cqw 19cqw repeat, var(--splash) center / 100% 100% no-repeat;
+  mask: var(--flakes) 0 0 / 19cqw 19cqw repeat, var(--splash) center / 100% 100% no-repeat;
   mask-composite: intersect;
   mix-blend-mode: lighten;
 }
 @media (prefers-reduced-motion: reduce) {
-  .tcard[data-holo="amazing"] .tcard__art img, .tcard[data-holo="amazing"] .tcard__glitter { transform: translate(-50%, -50%); }
+  .tcard[data-holo="amazing"] .tcard__art img, .tcard[data-holo="amazing"] .tcard__glitter, .tcard[data-holo="amazing"] .tcard__art::after { transform: translate(-50%, -50%); }
+  .tcard[data-holo="amazing"] .tcard__foil {
+    -webkit-mask-position: center, 0 0;
+    mask-position: center, 0 0;
+  }
 }
 
-/* Per card: frame metal, accent and rainbow, as for the others; --foil-mask for reverse holo; the size of the
-   render and its splash for amazing rares (--zoom must match ZOOM in generate_holo.py). */
+/* Per card: frame metal, accent and rainbow, as for the others; --foil-mask for reverse holo; the window's foil
+   (--art-mask) for holo and amazing rares; and for amazing rares the size of the render, its cut-out (--cut,
+   also the picture) and splash (--zoom must match ZOOM in generate_holo.py). */
 .tcard--chirikov { /* reverse holo */
   --frame: linear-gradient(140deg, #9fe6ff, #2f39a8 32%, #d2f6ff 54%, #9b3fc0 80%, #7ff0e0);
   --accent: #6fd3ff;
@@ -979,6 +1006,7 @@ html.deck-open { overflow: hidden; }
   --panel: #050d12;
   --spectrum: #dcff94, #7ff0c0, #6ecbff, #8a8cff, #dcff94;
   --ring: #dcff94, #7ff0c0, #6ecbff, #8a8cff, #dcff94;
+  --art-mask: url("../assets/deck/foil/art-halvorsen.webp");
 }
 .tcard--logistic { /* holo rare */
   --frame: linear-gradient(140deg, #ffd38f, #bb3a2c 32%, #ffeacd 54%, #4f3fb0 80%, #8fd0ff);
@@ -986,6 +1014,7 @@ html.deck-open { overflow: hidden; }
   --panel: #0e0710;
   --spectrum: #ffd38f, #ff8a5b, #ff5c8a, #8fd0ff, #ffd38f;
   --ring: #ffd38f, #ff8a5b, #ff5c8a, #8fd0ff, #ffd38f;
+  --art-mask: url("../assets/deck/foil/art-logistic.webp");
 }
 .tcard--lorenz { /* amazing rare */
   --frame: linear-gradient(140deg, #ffb48c, #b81e3a 30%, #ffdccb 52%, #841d68 78%, #ffc26b);
@@ -994,6 +1023,8 @@ html.deck-open { overflow: hidden; }
   --spectrum: #ffb48c, #ff5c6f, #ff8ad8, #ffd36b, #ffb48c;
   --ring: #ffb48c, #ff5c6f, #ff8ad8, #ffd36b, #ffb48c;
   --zoom: 1.32;
+  --art-mask: url("../assets/deck/foil/art-lorenz.webp");
+  --cut: url("../assets/deck/foil/cut-lorenz.webp");
   --splash: url("../assets/deck/foil/splash-lorenz.webp");
 }
 .tcard--aizawa { /* amazing rare */
@@ -1003,6 +1034,8 @@ html.deck-open { overflow: hidden; }
   --spectrum: #b8ffd8, #5fe8b0, #6ecbff, #e2ff9a, #b8ffd8;
   --ring: #b8ffd8, #5fe8b0, #6ecbff, #e2ff9a, #b8ffd8;
   --zoom: 1.36;
+  --art-mask: url("../assets/deck/foil/art-aizawa.webp");
+  --cut: url("../assets/deck/foil/cut-aizawa.webp");
   --splash: url("../assets/deck/foil/splash-aizawa.webp");
 }
 
