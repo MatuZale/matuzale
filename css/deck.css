@@ -162,6 +162,7 @@ html.deck-open { overflow: hidden; }
   align-items: center;
   gap: .5rem;
   padding: .6rem 1.1rem;
+  min-height: 44px;
   border: 1px solid var(--deck-line);
   border-radius: 999px;
   background: var(--deck-chip);
@@ -172,7 +173,21 @@ html.deck-open { overflow: hidden; }
 .deck__close:hover, .deck__close:focus-visible { border-color: var(--deck-hot); background: color-mix(in srgb, var(--deck-hot) 12%, transparent); }
 .deck__hint--touch { display: none; }
 @media (hover: none) { .deck__hint--pointer { display: none; } .deck__hint--touch { display: inline; } }
+.deck[data-input="touch"] .deck__hint--pointer { display: none; }
+.deck[data-input="touch"] .deck__hint--touch { display: inline; }
+.deck[data-input="mouse"] .deck__hint--pointer,
+.deck[data-input="pen"] .deck__hint--pointer { display: inline; }
+.deck[data-input="mouse"] .deck__hint--touch,
+.deck[data-input="pen"] .deck__hint--touch { display: none; }
 @media (max-width: 640px) { .deck__hint { order: 3; flex-basis: 100%; font-size: .8rem; } }
+/* Keep Close reachable above the veil, without covering the card with the grid header. */
+.deck.has-active .deck__bar { z-index: 8; visibility: hidden; backdrop-filter: none; }
+.deck.has-active .deck__close {
+  position: fixed;
+  top: max(8px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  visibility: visible;
+}
 
 .deck__grid {
   display: grid;
@@ -210,21 +225,26 @@ html.deck-open { overflow: hidden; }
 .deck__tools {
   position: fixed;
   left: 50%;
-  bottom: 14px;
+  bottom: max(14px, env(safe-area-inset-bottom));
   z-index: 7;
   display: flex;
   gap: .6rem;
-  transform: translate(-50%, 12px);
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - max(12px, env(safe-area-inset-left)) - max(12px, env(safe-area-inset-right)));
+  flex-wrap: wrap;
+  justify-content: center;
   opacity: 0;
   visibility: hidden;
-  transition: opacity .3s, transform .3s, visibility 0s .3s;
+  transition: opacity .3s, visibility 0s .3s;
 }
-.deck.has-active .deck__tools { transform: translate(-50%, 0); opacity: 1; visibility: visible; transition: opacity .3s .15s, transform .3s .15s; }
+.deck.has-active .deck__tools { opacity: 1; visibility: visible; transition: opacity .3s .15s; }
 .deck__tool {
   display: inline-flex;
   align-items: center;
   gap: .45rem;
   padding: .55rem 1.05rem;
+  min-height: 44px;
   border: 1px solid var(--deck-line);
   border-radius: 999px;
   background: var(--deck-chip);
@@ -257,7 +277,9 @@ html.deck-open { overflow: hidden; }
   aspect-ratio: 63 / 88;
   outline: none;
   cursor: pointer;
-  pointer-events: none;
+  /* Keep the unrotated card box hittable while its face tilts. Otherwise a stationary
+     pointer near an edge can repeatedly leave/re-enter the moving face and restart rest(). */
+  pointer-events: auto;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
@@ -1099,4 +1121,5 @@ html.deck-open { overflow: hidden; }
 
 @media (prefers-reduced-motion: reduce) {
   .deck[open], .deck.is-dealt .deck__slot { animation: none; }
+  .deck__veil, .deck__tools { transition: none !important; }
 }

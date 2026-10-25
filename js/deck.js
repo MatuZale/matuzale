@@ -1,6 +1,6 @@
 // The attractor collection: trading cards for the renders behind "Strange attractors & fractals".
 // Loaded on first use by script.js. Each card follows the pointer on springs; a lifted card can be
-// tilted hard and spun round by dragging. The equations and parameters are the ones used for the
+// tilted by touch, or spun round by dragging with a mouse. The equations and parameters are the ones used for the
 // renders (github.com/MatuZale/color_recursive_maps).
 
 // Each card reads like a trading card: a stage tag and dimension in the header, a Pokédex-style
@@ -219,8 +219,9 @@ const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 // Whether a spring has all but arrived: within eps of its target and hardly moving.
 const near = eps => spring => Math.abs(spring.target - spring.value) < eps && Math.abs(spring.velocity) < eps / 4;
 
-// A damped spring per animated value. Small steps feel like a card in the hand rather than a tween.
-class Spring {
+const SPRING_FRAME_MS = 1000 / 60;
+// Coefficients retain the original 60 Hz feel. Exported for the deterministic cadence check.
+export class Spring {
   constructor(value, stiffness = .07, damping = .26) {
     this.value = this.target = value; this.velocity = 0;
     this.stiffness = stiffness; this.damping = damping;
@@ -231,10 +232,16 @@ class Spring {
     if (damping) this.damping = damping;
   }
   jump(value) { this.value = this.target = value; this.velocity = 0; }
-  step() {
-    this.velocity = (this.velocity + (this.target - this.value) * this.stiffness) * (1 - this.damping);
-    this.value += this.velocity;
-    if (Math.abs(this.velocity) < 1e-3 && Math.abs(this.target - this.value) < 1e-3) { this.value = this.target; return false; }
+  step(elapsed = SPRING_FRAME_MS) {
+    // Integrate at most four reference frames, never one large unstable step after
+    // a stalled frame/background pause. Fractional steps also work at 120 Hz.
+    const frames = clamp(elapsed / SPRING_FRAME_MS, 0, 4);
+    for (let remaining = frames; remaining > 1e-9; remaining -= 1) {
+      const dt = Math.min(remaining, 1);
+      this.velocity = (this.velocity + (this.target - this.value) * this.stiffness * dt) * Math.pow(1 - this.damping, dt);
+      this.value += this.velocity * dt;
+    }
+    if (Math.abs(this.velocity) < 1e-3 && Math.abs(this.target - this.value) < 1e-3) { this.jump(this.target); return false; }
     return true;
   }
 }
@@ -309,7 +316,7 @@ export async function createDeck() {
       </div>
       <p class="deck__hint">
         <span class="deck__hint--pointer">Tilt a card with the pointer and click to lift it out. Flip it with the button, the mouse wheel, F or a sideways drag. Esc puts it back.</span>
-        <span class="deck__hint--touch">Tap a card to lift it out and drag to spin it round. Tap again to put it back.</span>
+        <span class="deck__hint--touch">Tap to lift a card. Slide one finger to tilt it and explore the light; release to relax. Use Flip card to turn it over, or Put back to return it.</span>
       </p>
       <button type="button" class="deck__close">Close <span aria-hidden="true">✕</span></button>
     </div>
@@ -322,17 +329,20 @@ export async function createDeck() {
   document.body.append(dialog);
 
   const veil = dialog.querySelector(".deck__veil");
+  const tools = dialog.querySelector(".deck__tools");
+  const closeButton = dialog.querySelector(".deck__close");
   const cards = [...dialog.querySelectorAll(".tcard")].map(el => controller(el));
   let active = null, opener = null;
 
   function controller(el) {
+    const label = el.getAttribute("aria-label");
     const rotator = el.querySelector(".tcard__rotator");
     const s = {
       rx: new Spring(0), ry: new Spring(0), spin: new Spring(0, .05, .2),
       mx: new Spring(50), my: new Spring(50), o: new Spring(0, .05, .3),
       tx: new Spring(0, .06, .28), ty: new Spring(0, .06, .28), scale: new Spring(1, .06, .28),
     };
-    let raf = 0, returning = false;
+    let raf = 0, returning = false, lastFrame = null;
     function render() {
       const mx = s.mx.value, my = s.my.value;
       const st = el.style;
@@ -353,22 +363,38 @@ export async function createDeck() {
       st.setProperty("--ty", s.ty.value.toFixed(1) + "px");
       st.setProperty("--s", s.scale.value.toFixed(4));
     }
-    function tick() {
+    function tick(time = performance.now()) {
+      const elapsed = lastFrame === null ? 0 : Math.max(0, time - lastFrame);
+      lastFrame = time;
       // On its way home a card follows its place in the grid, which may scroll meanwhile, and drops back
       // into the grid as soon as it is over it; its tilt and light settle there.
       if (returning) { const to = slotOffset(); s.tx.set(to.x); s.ty.set(to.y); s.scale.set(to.scale); }
       let moving = false;
-      for (const spring of Object.values(s)) moving = spring.step() || moving;
+      for (const spring of Object.values(s)) {
+        if (motion.matches) spring.jump(spring.target);
+        else moving = spring.step(elapsed) || moving;
+      }
       if (returning && [s.tx, s.ty].every(near(.5)) && near(.002)(s.scale)) { returning = false; unstage(); }
       render();
       raf = moving ? requestAnimationFrame(tick) : 0;
+      if (!moving) lastFrame = null;
     }
     function wake() {
-      if (motion.matches) { for (const spring of Object.values(s)) spring.jump(spring.target); tick(); return; }
-      if (!raf) raf = requestAnimationFrame(tick);
+      // Layout/hit-test changes can repeat pointerleave at a stationary pointer (notably
+      // in WebKit). Resting an already settled card must not start another render cycle.
+      if (!returning && Object.values(s).every(spring => spring.value === spring.target && spring.velocity === 0)) return;
+      if (motion.matches) { stop(); tick(); return; }
+      if (!raf) {
+        // Start a fresh clock on wake; idle time is not animation time. Do not reset
+        // it on pointermove while running, or frequent input would starve the spring.
+        lastFrame = performance.now();
+        raf = requestAnimationFrame(tick);
+      }
     }
+    function stop() { cancelAnimationFrame(raf); raf = 0; lastFrame = null; }
     // Pointer position on the card, 0…1 on both axes, mapped to rotation and light.
     function aim(x, y, strength) {
+      if (motion.matches) strength = 0;
       s.rx.set((.5 - y) * strength, .07, .26);
       s.ry.set((x - .5) * strength, .07, .26);
       s.mx.set(x * 100, .07, .26);
@@ -386,12 +412,17 @@ export async function createDeck() {
     // from the grid: browsers rasterise a card tilted in 3D at its layout size, so an upscaled card
     // would turn soft. The flight between grid and stage is a scale *down* from the staged size.
     function stage() {
-      const vw = document.documentElement.clientWidth, vh = window.innerHeight;
-      // Leave room under the card for the flip / put back buttons.
-      const room = 64, width = Math.min((vh - room) * .9 * 63 / 88, vw * .92, 560);
+      const viewport = window.visualViewport;
+      const vw = viewport?.width ?? document.documentElement.clientWidth;
+      const vh = viewport?.height ?? window.innerHeight;
+      const left = viewport?.offsetLeft ?? 0, top = viewport?.offsetTop ?? 0;
+      // Measure the actual controls (including safe-area padding), also in landscape and at zoom.
+      const upper = Math.max(top + 8, closeButton.getBoundingClientRect().bottom + 10);
+      const lower = Math.min(top + vh - 8, tools.getBoundingClientRect().top - 12);
+      const width = Math.max(1, Math.min((lower - upper) * .9 * 63 / 88, vw * .86, 560));
       el.style.setProperty("--stage-w", width.toFixed(1) + "px");
-      el.style.setProperty("--stage-x", ((vw - width) / 2).toFixed(1) + "px");
-      el.style.setProperty("--stage-y", ((vh - room - width * 88 / 63) / 2).toFixed(1) + "px");
+      el.style.setProperty("--stage-x", (left + (vw - width) / 2).toFixed(1) + "px");
+      el.style.setProperty("--stage-y", (upper + (lower - upper - width * 88 / 63) / 2).toFixed(1) + "px");
       el.classList.add("is-staged");
       el.parentElement.classList.add("is-raised");
     }
@@ -412,13 +443,13 @@ export async function createDeck() {
       };
     }
     function place() { stage(); }
-    function lift() {
+    function lift(input) {
       const flying = el.classList.contains("is-staged");
       returning = false;
       el.parentElement.classList.remove("is-returning");
       el.classList.add("is-active");
       el.setAttribute("aria-pressed", "true");
-      el.setAttribute("aria-label", el.getAttribute("aria-label").replace("lift the card", "put the card back"));
+      el.setAttribute("aria-label", label.replace("lift the card", "touch: slide to explore the light; mouse: drag to turn; use Flip card or Put back; Enter or Escape puts it back"));
       stage();
       if (!flying) {
         const from = slotOffset();
@@ -426,14 +457,16 @@ export async function createDeck() {
       }
       s.tx.set(0); s.ty.set(0); s.scale.set(1);
       // A flourish on the way out of the deck, then it settles face up.
-      if (!motion.matches) s.spin.set(s.spin.target + 360, .03, .14);
+      if (!motion.matches && input !== "touch") s.spin.set(s.spin.target + 360, .03, .14);
+      else s.spin.jump(Math.round(s.spin.target / 360) * 360);
+      s.rx.set(0); s.ry.set(0);
       s.o.set(1); s.mx.set(50); s.my.set(50);
       wake();
     }
     function drop() {
       el.classList.remove("is-active");
       el.setAttribute("aria-pressed", "false");
-      el.setAttribute("aria-label", el.getAttribute("aria-label").replace("put the card back", "lift the card"));
+      el.setAttribute("aria-label", label);
       returning = true;
       el.parentElement.classList.add("is-returning");
       s.spin.set(Math.round(s.spin.target / 360) * 360, .04, .2);
@@ -445,18 +478,29 @@ export async function createDeck() {
       else s.spin.set(value, .2, .45);
       wake();
     }
+    function reset() {
+      stop();
+      el.classList.remove("is-active");
+      el.setAttribute("aria-pressed", "false");
+      el.setAttribute("aria-label", label);
+      unstage();
+      for (const spring of Object.values(s)) spring.jump(spring === s.scale ? 1 : spring === s.mx || spring === s.my ? 50 : 0);
+      render();
+    }
     const staged = () => el.classList.contains("is-staged");
-    return { el, rotator, s, aim, rest, place, lift, drop, flip, spinTo, render, unstage, staged };
+    return { el, rotator, s, aim, rest, place, lift, drop, flip, spinTo, render, staged, reset };
   }
 
-  function lift(card) {
+  function lift(card, input) {
     if (active === card) return;
+    interrupt();
     if (active) active.drop();
     active = card;
     dialog.classList.add("has-active");
-    card.lift();
+    card.lift(input);
   }
   function drop() {
+    interrupt();
     if (!active) return;
     active.drop();
     active = null;
@@ -467,80 +511,171 @@ export async function createDeck() {
   for (const card of cards) {
     card.render();
     card.el.addEventListener("pointermove", event => {
-      if (card === active || card.staged() || event.pointerType === "touch" || motion.matches) return;
+      if (card === active || card.staged() || event.pointerType === "touch") return;
       const r = card.el.getBoundingClientRect();
       card.aim(clamp((event.clientX - r.left) / r.width, 0, 1), clamp((event.clientY - r.top) / r.height, 0, 1), 26);
     });
     card.el.addEventListener("pointerleave", () => { if (card !== active) card.rest(); });
     card.el.addEventListener("keydown", event => {
       if (event.key === "Enter" || event.key === " ") { event.preventDefault(); card === active ? drop() : lift(card); }
-      else if (card === active && (event.key === "ArrowLeft" || event.key === "ArrowRight")) { event.preventDefault(); card.flip(event.key === "ArrowLeft" ? -1 : 1); }
-      else if (card === active && event.key.toLowerCase() === "f") { event.preventDefault(); card.flip(1); }
+      else if (card === active && (event.key === "ArrowLeft" || event.key === "ArrowRight")) { event.preventDefault(); flip(event.key === "ArrowLeft" ? -1 : 1); }
+      else if (card === active && event.key.toLowerCase() === "f") { event.preventDefault(); flip(1); }
     });
   }
 
-  // A click on a grid card lifts it (a click rather than a press, so a swipe can still scroll the
-  // grid on touch screens). On the lifted card, a click puts it back and a drag spins it round;
-  // releasing settles it on whichever face is nearer.
-  let drag = null, spun = false;
+  // Each physical press owns its click eligibility. Keep the completed sequence until the
+  // next press, since a compatibility click can follow pointerup/lostpointercapture.
+  const pointers = new Map();
+  let gesture = null, lastPress = null, wheelEnd = 0, dealFrame = 0;
+  const cardAt = target => cards.find(card => card.el.contains(target));
+  const touchCount = () => [...pointers.values()].filter(press => press.type === "touch").length;
+
+  function finishGesture(cancelled = false) {
+    if (!gesture) return;
+    const g = gesture;
+    gesture = null; // releasePointerCapture may itself dispatch lostpointercapture.
+    if (g.type === "touch") g.card.rest();
+    else if (g.press.moved || cancelled) {
+      g.card.spinTo(cancelled ? g.spin : g.card.s.spin.target, true);
+      g.card.rest();
+    }
+    if (g.card.el.hasPointerCapture(g.id)) g.card.el.releasePointerCapture(g.id);
+  }
+  function interrupt() {
+    for (const press of pointers.values()) press.suppress = true;
+    finishGesture(true);
+    finishWheel();
+  }
+  function finishWheel() {
+    clearTimeout(wheelEnd);
+    if (wheelEnd && active) active.spinTo(active.s.spin.target, true);
+    wheelEnd = 0;
+  }
+  function flip(direction) {
+    interrupt();
+    active?.flip(direction);
+  }
+
+  // Guard button/veil handlers too: a finger starting on a card cannot become a Flip,
+  // Put back or veil click after capture is released or geometry changes.
   dialog.addEventListener("click", event => {
-    const card = cards.find(c => c.el.contains(event.target));
-    if (!card) return;
-    if (card !== active) lift(card);
-    else if (!spun) drop();
-  });
-  dialog.addEventListener("pointerdown", event => {
-    spun = false;
-    const card = cards.find(c => c.el.contains(event.target));
-    if (!card || card !== active || event.button !== 0) return;
-    drag = { card, id: event.pointerId, x: event.clientX, y: event.clientY, spin: card.s.spin.target, moved: false };
-    card.el.setPointerCapture(event.pointerId);
-  });
-  dialog.addEventListener("pointermove", event => {
-    if (!active) return;
-    if (drag && drag.id === event.pointerId) {
-      const dx = event.clientX - drag.x, dy = event.clientY - drag.y;
-      if (Math.hypot(dx, dy) > 6) drag.moved = true;
-      if (drag.moved) {
-        active.spinTo(drag.spin + dx * .6, false);
-        active.s.rx.set(clamp(-dy * .2, -30, 30), .1, .3);
-        active.s.my.set(clamp(50 + dy * .25, 0, 100), .1, .3);
-        active.s.mx.set(clamp(50 + dx * .25, 0, 100), .1, .3);
-      }
+    const physical = event.detail > 0 || event.pointerType === "touch";
+    if (physical && (lastPress?.suppress || touchCount())) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
       return;
     }
-    if (event.pointerType === "touch" || motion.matches) return;
+    const card = cardAt(event.target);
+    if (!card) return;
+    // WebKit can label the compatibility click as mouse after touch down/up (even
+    // with a different pointerId). The press owns the source, just as it owns click
+    // eligibility. A new mouse press replaces it; keyboard activation has no press.
+    const input = physical ? (lastPress?.type || event.pointerType) : "keyboard";
+    if (card !== active) lift(card, input);
+    else if (input !== "touch") drop();
+  }, true);
+
+  // Track releases on window as scrolling/capture can move their target outside the dialog.
+  // A second finger cancels inspection; neither can take over until both are up.
+  window.addEventListener("pointerdown", event => {
+    if (!dialog.open) return;
+    if (event.pointerType) dialog.dataset.input = event.pointerType;
+    const press = {
+      id: event.pointerId, type: event.pointerType, x: event.clientX, y: event.clientY,
+      moved: false, suppress: false,
+    };
+    if (!pointers.size) lastPress = null;
+    pointers.set(event.pointerId, press);
+    lastPress = press;
+    if (touchCount() > 1 || (press.type === "touch" && !event.isPrimary)) {
+      interrupt();
+      return;
+    }
+    if (gesture || event.button !== 0) { press.suppress = true; return; }
+    const card = cardAt(event.target);
+    if (!card || card !== active) return;
+    finishWheel();
+    const r = card.el.getBoundingClientRect();
+    const touch = press.type === "touch";
+    press.suppress = touch;
+    gesture = {
+      card, press, id: event.pointerId, type: press.type,
+      x: event.clientX, y: event.clientY, width: r.width, height: r.height,
+      // Start at the rendered light: touching an edge never jumps the highlight.
+      lightX: card.s.mx.value / 100, lightY: card.s.my.value / 100,
+      spin: card.s.spin.target,
+    };
+    card.el.setPointerCapture(event.pointerId);
+    if (touch) card.aim(gesture.lightX, gesture.lightY, 26);
+  }, true);
+
+  window.addEventListener("pointermove", event => {
+    if (!dialog.open) return;
+    const press = pointers.get(event.pointerId);
+    if (press && Math.hypot(event.clientX - press.x, event.clientY - press.y) > 6) {
+      press.moved = true;
+      press.suppress = true;
+    }
+    if (!gesture || gesture.id !== event.pointerId) return;
+    const g = gesture;
+    const dx = event.clientX - g.x, dy = event.clientY - g.y;
+    if (g.type === "touch") {
+      // Frozen, unrotated layout dimensions avoid feedback from the animated 3D face.
+      // Half a card's travel explores most of the foil; tilt stays within ±13 degrees.
+      g.card.aim(clamp(g.lightX + dx / g.width, 0, 1), clamp(g.lightY + dy / g.height, 0, 1), 26);
+    } else if (press.moved) {
+      g.card.s.rx.set(motion.matches ? 0 : clamp(-dy * .2, -30, 30), .1, .3);
+      g.card.s.my.set(clamp(50 + dy * .25, 0, 100), .1, .3);
+      g.card.s.mx.set(clamp(50 + dx * .25, 0, 100), .1, .3);
+      g.card.spinTo(g.spin + dx * .6, false);
+    }
+  }, true);
+
+  dialog.addEventListener("pointermove", event => {
+    if (!active || gesture || touchCount() || event.pointerType === "touch") return;
+    if (event.pointerType) dialog.dataset.input = event.pointerType;
     // Over the buttons the card faces the viewer instead of craning towards the pointer.
     if (event.target.closest(".deck__tools")) { active.aim(.5, .5, 0); return; }
     // The staged card's own box, unaffected by its tilt.
     const r = active.el.getBoundingClientRect();
     active.aim(clamp((event.clientX - r.left) / r.width, 0, 1), clamp((event.clientY - r.top) / r.height, 0, 1), 34);
   });
-  function endDrag(event) {
-    if (!drag || drag.id !== event.pointerId) return;
-    const { card, moved } = drag;
-    drag = null;
-    spun = moved;
-    if (moved) { card.spinTo(card.s.spin.target, true); card.s.rx.set(0, .04, .2); }
+  function endPress(event) {
+    const press = pointers.get(event.pointerId);
+    if (!press) return;
+    if (Math.hypot(event.clientX - press.x, event.clientY - press.y) > 6) {
+      press.moved = true;
+      press.suppress = true;
+    }
+    if (event.type === "pointercancel") press.suppress = true;
+    if (gesture?.id === event.pointerId) finishGesture(event.type === "pointercancel");
+    pointers.delete(event.pointerId);
+    lastPress = press;
   }
-  dialog.addEventListener("pointerup", endDrag);
-  dialog.addEventListener("pointercancel", endDrag);
+  window.addEventListener("pointerup", endPress, true);
+  window.addEventListener("pointercancel", endPress, true);
+  dialog.addEventListener("lostpointercapture", event => {
+    if (gesture?.id !== event.pointerId) return;
+    gesture.press.suppress = true;
+    finishGesture(true);
+    // Capture loss is not necessarily a release; keep tracking the physical press.
+  });
   veil.addEventListener("click", drop);
-  dialog.querySelector("[data-deck-flip]").addEventListener("click", () => active?.flip(1));
+  dialog.querySelector("[data-deck-flip]").addEventListener("click", () => flip(1));
   dialog.querySelector("[data-deck-back]").addEventListener("click", () => {
     const card = active;
     drop();
     card?.el.focus({ preventScroll: true });
   });
   // The wheel turns a lifted card like a dial and lets it settle on the nearer face.
-  let wheelEnd = 0;
   dialog.addEventListener("wheel", event => {
     if (!active) return;
     event.preventDefault();
+    if (gesture || touchCount()) return;
     active.spinTo(active.s.spin.target + clamp(event.deltaY + event.deltaX, -80, 80) * .9, false);
     clearTimeout(wheelEnd);
     const card = active;
-    wheelEnd = setTimeout(() => card.spinTo(card.s.spin.target, true), 160);
+    wheelEnd = setTimeout(() => { wheelEnd = 0; if (active === card) card.spinTo(card.s.spin.target, true); }, 160);
   }, { passive: false });
 
   dialog.querySelector(".deck__close").addEventListener("click", () => dialog.close());
@@ -551,17 +686,40 @@ export async function createDeck() {
   });
   dialog.addEventListener("cancel", event => { if (active) { event.preventDefault(); drop(); } });
   dialog.addEventListener("close", () => {
-    if (active) { active.drop(); active = null; dialog.classList.remove("has-active"); }
-    cards.forEach(card => { for (const spring of Object.values(card.s)) spring.jump(spring === card.s.scale ? 1 : spring === card.s.mx || spring === card.s.my ? 50 : 0); card.unstage(); card.render(); });
+    interrupt();
+    pointers.clear();
+    cancelAnimationFrame(dealFrame);
+    dealFrame = 0;
+    active = null;
+    dialog.classList.remove("has-active");
+    cards.forEach(card => card.reset());
     document.documentElement.classList.remove("deck-open");
     opener?.focus();
   });
-  const replace = () => active?.place();
+  const replace = () => {
+    if (!dialog.open) return;
+    interrupt();
+    active?.rest();
+    active?.place();
+  };
   window.addEventListener("resize", replace, { passive: true });
-  dialog.addEventListener("scroll", replace, { passive: true });
+  window.addEventListener("orientationchange", replace, { passive: true });
+  window.visualViewport?.addEventListener("resize", replace, { passive: true });
+  window.visualViewport?.addEventListener("scroll", replace, { passive: true });
+  // Scrolling the grid does not change the fixed stage; returning cards track their slot in tick().
+  window.addEventListener("blur", () => { interrupt(); pointers.clear(); active?.rest(); });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) { interrupt(); pointers.clear(); active?.rest(); }
+  });
+  motion.addEventListener("change", () => {
+    if (!dialog.open) return;
+    interrupt();
+    cards.forEach(card => card.rest());
+  });
 
   return {
     open(trigger) {
+      if (dialog.open) return;
       opener = trigger;
       document.documentElement.classList.add("deck-open");
       dialog.classList.remove("is-dealt");
@@ -569,7 +727,7 @@ export async function createDeck() {
       dialog.scrollTop = 0;
       dialog.querySelector(".deck__close").focus();
       // Re-deal on every visit; the class restarts the CSS entrance.
-      requestAnimationFrame(() => dialog.classList.add("is-dealt"));
+      dealFrame = requestAnimationFrame(() => { dealFrame = 0; if (dialog.open) dialog.classList.add("is-dealt"); });
     },
   };
 }

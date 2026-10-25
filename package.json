@@ -1,0 +1,13 @@
+{
+  "name": "matuzale-ui-tests",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --check js/deck.js",
+    "test:mobile": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1"
+  }
+}
