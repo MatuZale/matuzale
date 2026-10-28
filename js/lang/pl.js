@@ -113,6 +113,15 @@ export const PL = {
   "bentos.feedText": "Cokolwiek ostatecznie zmierzą czujniki, oprogramowanie dostaje dane w tym samym kształcie: numerowaną próbkę ze znacznikiem czasu i kilka odczytów, z których każdy ma jednostkę i sensowny zakres. Boja jest wciąż w budowie, więc ten panel to symulacja: wartości wędrują po typowych bałtyckich zakresach. To nie są dane z boi.",
   "bentos.feedStatus": "<i class=\"feed__dot\" aria-hidden=\"true\"></i>Symulacja · prototyp czujnika",
   "bentos.feedFoot": "Wartości symulowane",
+  "bentos.pathLabel": "Droga danych",
+  "bentos.pathTitle": "Od pomiaru do wyraźniejszego obrazu",
+  "bentos.pathNote": "Powyższe odczyty czujników są symulowane; przepływ od boi do dashboardu jest planowany. Demo dashboardu pozwala już przeglądać warstwy satelitarne i modelowe.",
+  "bentos.pathSense": "Próbka z czujnika",
+  "bentos.pathSenseDetail": "Czas pomiaru i odczyty",
+  "bentos.pathProcess": "Pipeline danych",
+  "bentos.pathProcessDetail": "Przygotowanie i łączenie warstw",
+  "bentos.pathExplore": "Dashboard",
+  "bentos.pathExploreDetail": "Mapy i zmiany w czasie",
   "bentos.flowLabel": "Planowany przepływ danych BENTOS",
   "bentos.flow1": "01 / Pomiar",
   "bentos.flow1Title": "Pod powierzchnią",
@@ -130,6 +139,7 @@ export const PL = {
 
   "research.kicker": "Badania",
   "research.title": "Publikacje",
+  "research.featurePlain": "<span>Prosto mówiąc / </span>Czy dodatkowe kopie nieznanego stanu kwantowego pomagają go przesłać, gdy odbiorca nie może wprowadzić korekt? W tej pracy wyznaczamy największą możliwą szansę powodzenia.",
   "research.lead": "Badania nad mapami dodatnimi, splątaniem i kwantowymi transformacjami wyższego rzędu. Pełna lista w <a href=\"https://scholar.google.com/citations?user=Fzdweu4AAAAJ&amp;hl=en\" target=\"_blank\" rel=\"noopener\">Google Scholar ↗</a>.",
 
   "journey.kicker": "Ścieżka",
@@ -154,6 +164,14 @@ export const PL = {
   "contact.title": "Zbudujmy razem<br />coś użytecznego<span class=\"end-dot\">.</span>",
   "contact.lead": "Chcesz współpracować, masz pomysł na projekt open source albo pytanie o BENTOS, a może po prostu chcesz pogadać o danych i oprogramowaniu? Napisz, chętnie odpowiem. Jestem z Gdańska.",
 
+  "footer.role": "Dane i oprogramowanie · Gdańsk, Polska",
+  "footer.navLabel": "Nawigacja w stopce",
+  "footer.explore": "Odkrywaj",
+  "footer.projects": "Projekty ↗",
+  "footer.research": "Badania ↗",
+  "footer.journey": "Doświadczenie ↗",
+  "footer.signal": "Sygnał: stabilny",
+  "footer.end": "Koniec transmisji ↑",
   "footer.process": "proces w tle:",
   "footer.observer": "<span aria-hidden=\"true\">◎</span> wykryto obserwatora ↗",
 };

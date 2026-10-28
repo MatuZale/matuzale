@@ -598,7 +598,7 @@
               </g>
               <g font-family="ui-monospace, monospace" font-size="9" fill="#aaff00" font-weight="700">
               <text x="180" y="175" text-anchor="middle" letter-spacing="1.2">BENTOS</text>
-              </g></svg>
+              </g><circle class="bentos__sonar" cx="278" cy="219" r="3" aria-hidden="true" /></svg>
             </figure>
             <div class="bentos__dashboard">
               <span data-i18n="bentos.dashLabel" class="bentos__label">The software I build</span>
@@ -637,6 +637,15 @@
           </div>
         </div>
 
+        <div class="bentos__signal-path reveal" aria-labelledby="bentos-path-title">
+          <div class="bentos__signal-intro"><span class="bentos__label" data-i18n="bentos.pathLabel">The data journey</span><h3 id="bentos-path-title" data-i18n="bentos.pathTitle">From a reading to a clearer picture</h3><p data-i18n="bentos.pathNote">The sensor feed above is simulated; the buoy-to-dashboard flow is planned. The dashboard demo already explores satellite and model layers.</p></div>
+          <ol class="bentos__signal-steps">
+            <li><span>01</span><strong data-i18n="bentos.pathSense">Sensor sample</strong><small data-i18n="bentos.pathSenseDetail">A timestamp and measurements</small></li>
+            <li><span>02</span><strong data-i18n="bentos.pathProcess">Data pipeline</strong><small data-i18n="bentos.pathProcessDetail">Prepare and combine layers</small></li>
+            <li><span>03</span><strong data-i18n="bentos.pathExplore">Dashboard</strong><small data-i18n="bentos.pathExploreDetail">Explore maps and change over time</small></li>
+          </ol>
+        </div>
+
         <ol data-i18n-attr="aria-label:bentos.flowLabel" class="bentos__flow" aria-label="The planned BENTOS data flow">
           <li class="reveal"><span data-i18n="bentos.flow1">01 / Sense</span><h3 data-i18n="bentos.flow1Title">Below the surface</h3><p data-i18n="bentos.flow1Text">In-situ sensors collect water-quality measurements.</p></li>
           <li class="reveal"><span data-i18n="bentos.flow2">02 / Combine</span><h3 data-i18n="bentos.flow2Title">The wider picture</h3><p data-i18n="bentos.flow2Text">Satellite and model layers add context from SatBałtyk.</p></li>
@@ -662,13 +671,13 @@
             <span class="pub__year">2026</span>
             <div>
               <a href="https://quantum-journal.org/papers/q-2026-05-13-2105/" target="_blank" rel="noopener">Multicopy quantum state teleportation with application to storage and retrieval of quantum programs</a>
+              <p class="pub__plain" data-i18n="research.featurePlain"><span>In plain language / </span>Can extra copies of an unknown quantum state help transmit it when the receiver cannot make corrections? This work finds the best possible chance of success.</p>
               <p>F. Grosshans, M. Horodecki, M. Murao, <strong>T. Młynik</strong>, M. T. Quintino, M. Studziński, S. Yoshida · <em>Quantum</em> 10, 2105 · <a href="https://doi.org/10.22331/q-2026-05-13-2105" target="_blank" rel="noopener">DOI</a> · <a href="https://arxiv.org/abs/2409.10393" target="_blank" rel="noopener">arXiv</a></p>
             </div>
             <figure class="pub__sheet" style="--tilt: -7deg; --dx: 0px" aria-hidden="true">
               <img src="assets/papers/2409.10393.webp" alt="" width="440" height="622" loading="lazy" decoding="async" />
               <figcaption>arXiv:2409.10393 · p. 1</figcaption>
             </figure>
-          </li>
           </li>
           <li class="pub reveal">
             <span class="pub__year">2025</span>
@@ -681,7 +690,6 @@
               <figcaption>arXiv:2104.14058 · p. 1</figcaption>
             </figure>
           </li>
-          </li>
           <li class="pub reveal">
             <span class="pub__year">2023</span>
             <div>
@@ -692,7 +700,6 @@
               <img src="assets/papers/2206.00107.webp" alt="" width="440" height="569" loading="lazy" decoding="async" />
               <figcaption>arXiv:2206.00107 · p. 1</figcaption>
             </figure>
-          </li>
           </li>
           <li class="pub reveal">
             <span class="pub__year">2017</span>
@@ -705,7 +712,6 @@
               <figcaption>arXiv:1503.01947 · p. 1</figcaption>
             </figure>
           </li>
-          </li>
           <li class="pub pub--pre reveal">
             <span class="pub__year">arXiv</span>
             <div>
@@ -716,7 +722,6 @@
               <img src="assets/papers/2501.13067.webp" alt="" width="440" height="622" loading="lazy" decoding="async" />
               <figcaption>arXiv:2501.13067 · p. 1</figcaption>
             </figure>
-          </li>
           </li>
         </ol>
       </div>
@@ -820,9 +825,25 @@
     </section>
   </main>
 
+  <div class="transmission" aria-hidden="true">
+    <svg viewBox="0 0 1200 180" preserveAspectRatio="none">
+      <defs><linearGradient id="signal-gradient"><stop stop-color="var(--accent)"/><stop offset=".5" stop-color="var(--accent-2)"/><stop offset="1" stop-color="var(--accent-3)"/></linearGradient></defs>
+      <g fill="none" stroke="url(#signal-gradient)">
+        <path d="M-40 5 C210 5 220 145 510 122 S790 20 1240 95"/><path d="M-40 40 C180 40 315 155 575 100 S880 12 1240 145"/><path d="M-40 115 C190 0 300 150 600 145 S970 70 1240 50"/>
+        <path d="M0 167 H240 L264 143 H350 M1200 167 H970 L946 143 H860"/>
+      </g>
+      <g fill="var(--accent-3)"><circle cx="350" cy="143" r="2"/><circle cx="860" cy="143" r="2"/><circle cx="510" cy="122" r="2"/><circle cx="575" cy="100" r="2"/></g>
+    </svg>
+  </div>
   <footer class="footer">
     <div class="wrap footer__inner">
-      <p>© <span id="year">2026</span> Tomasz Młynik</p>
+      <div class="footer__identity"><p class="footer__label">TRANSMISSION / 07</p><p class="footer__name">Tomasz Młynik<span class="end-dot">.</span></p><p data-i18n="footer.role">Data &amp; software · Gdańsk, Poland</p></div>
+      <nav class="footer__nav" aria-label="Footer navigation" data-i18n-attr="aria-label:footer.navLabel">
+        <p class="footer__label" data-i18n="footer.explore">Explore</p>
+        <a href="#projects" data-i18n="footer.projects">Projects ↗</a>
+        <a href="#research" data-i18n="footer.research">Research ↗</a>
+        <a href="#journey" data-i18n="footer.journey">Journey ↗</a>
+      </nav>
       <div class="footer__secrets">
         <button data-i18n="footer.observer" class="footer__trace" id="observer-unlock" type="button" aria-haspopup="dialog" aria-controls="observer-trace" hidden><span aria-hidden="true">◎</span> observer detected ↗</button>
       </div>
@@ -852,6 +873,12 @@
         </svg>
         <figcaption class="circuit-caption"><span><span class="circuit-caption__dot" aria-hidden="true"></span><span data-i18n="footer.process">background process:</span> <strong id="game-name">snake</strong></span><button class="circuit-caption__pause" id="game-toggle" type="button" aria-label="Pause Snake animation" aria-pressed="false" hidden>pause <span aria-hidden="true">Ⅱ</span></button></figcaption>
       </figure>
+      <div class="footer__bottom">
+        <p>© <span id="year">2026</span> Tomasz Młynik</p>
+        <button class="footer__signal" id="footer-signal" type="button"><span class="footer__signal-dot" aria-hidden="true"></span><span data-i18n="footer.signal">Signal: stable</span></button>
+        <a href="#top" class="footer__end" data-i18n="footer.end">End of transmission ↑</a>
+        <p class="footer__message" id="signal-message" role="status" aria-live="polite"></p>
+      </div>
     </div>
   </footer>
 
@@ -882,6 +909,7 @@
     <footer class="observer__footer"><span>ACCESS: browser sandbox</span><span>Observation changes the observer.</span></footer>
   </dialog>
   <script src="js/script.js"></script>
+  <script src="js/transmission.js" defer></script>
   <script type="module" src="js/channels.js"></script>
 </body>
 </html>

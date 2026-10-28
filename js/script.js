@@ -693,3 +693,32 @@ document.getElementById("year").textContent = new Date().getFullYear();
   resize();
   themeChange();
 })();
+
+/* A rare, silent sonar echo on the BENTOS schematic, only while it is visible. */
+(function bentosSonar() {
+  const diagram = document.querySelector('.bentos__diagram');
+  if (!diagram) return;
+  const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let visible = false, timer;
+  const stop = () => { clearTimeout(timer); timer = 0; diagram.classList.remove('is-sonar'); };
+  const schedule = () => {
+    stop();
+    if (!visible || document.hidden || motion.matches) return;
+    timer = setTimeout(() => {
+      diagram.classList.add('is-sonar');
+      timer = setTimeout(schedule, 3200);
+    }, 30000 + Math.random() * 90000);
+  };
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; schedule(); }, { threshold: .25 }).observe(diagram);
+  } else {
+    const check = () => { const rect = diagram.getBoundingClientRect(); const next = rect.bottom > 0 && rect.top < innerHeight; if (next !== visible) { visible = next; schedule(); } };
+    addEventListener('scroll', check, { passive: true });
+    addEventListener('resize', check, { passive: true });
+    check();
+  }
+  motion.addEventListener('change', schedule);
+  document.addEventListener('visibilitychange', schedule);
+  addEventListener('pagehide', stop);
+  addEventListener('pageshow', schedule);
+})();
