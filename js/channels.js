@@ -156,6 +156,8 @@ for (const el of units) {
 const NOISE = "01ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾅﾆﾇﾈﾊﾋﾌﾍﾎﾏﾐ#%&*+=<>/";
 const running = new WeakMap();
 function resolve(els, bitsOnly, before) {
+  // Project sleeves stay still while the rest of the channel tunes in.
+  els = els.filter(el => !el.closest('.project-tape'));
   if (motion.matches) return;
   const run = {}, start = performance.now(), length = 650;
   if (before) for (const el of els) if (before.has(el)) hold(el, before.get(el), length + 80);

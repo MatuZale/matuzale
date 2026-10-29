@@ -1,0 +1,70 @@
+/* A little collector's-edition ticket for the hidden card gallery. */
+.tape-player__screen .card__deck {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: .8rem;
+  min-height: 54px;
+  padding: .5rem 3rem .5rem .75rem;
+  border: 1px solid #e5cbf0;
+  border-radius: 5px;
+  background:
+    linear-gradient(115deg, #e075c3 0%, #8d8bfa 25%, #79d8df 50%, #f2c577 75%, #e075c3 100%) border-box,
+    #252044;
+  background-size: 100% 2px, 100% 100%;
+  background-position: center bottom, center;
+  background-repeat: no-repeat;
+  color: #fff9f1;
+  box-shadow: 0 3px 0 #080c1b, 0 5px 12px #0008, inset 0 1px #ffffff24;
+  font: 700 .78rem/1.2 var(--font-mono);
+  letter-spacing: .035em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+/* Three overlapping miniature foil cards: an honest hint of what opens. */
+.tape-player__screen .card__deck::before {
+  content: '✦';
+  box-sizing: border-box;
+  flex: 0 0 25px;
+  width: 25px;
+  height: 33px;
+  display: grid;
+  place-items: center;
+  transform: rotate(-8deg);
+  border: 1px solid #f9e7d0;
+  border-radius: 3px;
+  color: #fff6ec;
+  background: linear-gradient(145deg, #d779bf 0%, #5053a4 48%, #28a9b2 100%);
+  box-shadow: 3px 2px 0 -1px #392b50, 4px 2px 0 #e8bdc7, 6px 4px 0 -1px #292b48, 7px 4px 0 #91c8d3;
+  font: 700 14px/1 Georgia, serif;
+  text-shadow: 0 1px 4px #24142b;
+}
+/* The perforated end of the ticket doubles as a directional cue. */
+.tape-player__screen .card__deck::after {
+  content: '↗';
+  position: absolute;
+  top: 5px;
+  right: 0;
+  bottom: 5px;
+  width: 2.35rem;
+  display: grid;
+  place-items: center;
+  border-left: 1px dashed #e5cbf080;
+  color: #f5c9e9;
+  font: 700 1rem/1 Arial, sans-serif;
+}
+.tape-player__screen .card__deck > span { color: #f6bdda; }
+.tape-player__screen .card__deck:hover {
+  transform: translateY(-2px);
+  border-color: #fff0bb;
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 5px 0 #080c1b, 0 8px 18px #000a, inset 0 1px #fff4;
+}
+.tape-player__screen .card__deck:active { transform: translateY(1px); box-shadow: 0 1px 0 #080c1b, 0 3px 6px #0007; }
+.tape-player__screen .card__deck:focus-visible { outline: 2px solid #ffe18a; outline-offset: 4px; }
+@media (max-width: 480px) { .tape-player__screen .card__deck { max-width: 100%; font-size: .72rem; } }
+@media (prefers-reduced-motion: reduce) { .tape-player__screen .card__deck { transition: none; } }

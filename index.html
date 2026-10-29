@@ -28,6 +28,17 @@
   <link rel="stylesheet" href="css/typography.css" />
   <link rel="stylesheet" href="css/about-vhs.css" />
   <link rel="stylesheet" href="css/tape-pause.css" />
+  <link rel="stylesheet" href="css/project-tapes.css" />
+  <link rel="stylesheet" href="css/tape-covers.css" />
+  <link rel="stylesheet" href="css/tape-shelf-vertical.css" />
+  <link rel="stylesheet" href="css/tape-tv.css" />
+  <link rel="stylesheet" href="css/tape-art-holo.css" />
+  <link rel="stylesheet" href="css/tape-gallery-cta.css" />
+  <link rel="stylesheet" href="css/tape-easter.css" />
+  <link rel="stylesheet" href="css/tape-screen-fit.css" />
+  <link rel="stylesheet" href="css/tape-shelf-glow.css" />
+  <link rel="stylesheet" href="css/tape-themes.css" />
+  <link rel="stylesheet" href="css/tape-bentos.css" />
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -252,7 +263,21 @@
         <p data-i18n="projects.lead" class="section__lead reveal">A mix of production work, open source, learning projects and generative art.
           Most of it lives on <a href="https://github.com/MatuZale" target="_blank" rel="noopener">GitHub</a>.</p>
 
-        <div class="bento">
+        <div class="tape-shelf" id="project-shelf" aria-label="Project tapes" data-i18n-attr="aria-label:tapes.label" hidden>
+          <div class="tape-shelf__header"><span>TM / VIDEO LIBRARY</span><span data-i18n="tapes.shelfHint">PICK A TAPE TO EXPLORE <span aria-hidden="true">↘</span></span></div>
+          <div class="tape-shelf__stacks"></div>
+          <div class="tape-shelf__footer"><span>PERSONAL ARCHIVE · VOL. 01</span><span class="tape-shelf__format">VHS / HI-FI</span><span class="tape-shelf__scroll-hint" data-i18n="tapes.scrollHint">SCROLL TO BROWSE ↔</span></div>
+        </div>
+        <section class="tape-player" id="project-player" aria-labelledby="tape-player-title" hidden>
+          <div class="tape-player__stage">
+            <div class="tape-player__case" id="tape-player-cover"></div>
+            <div class="tape-player__tv">
+              <div class="tape-player__screen" id="tape-player-screen" role="region" aria-labelledby="tape-player-title"></div>
+              <div class="tape-player__controls"><button type="button" class="tape-player__secret" aria-label="Play hidden VHS ident" title="Play hidden VHS ident" data-i18n-attr="aria-label:tapes.ident;title:tapes.ident">TM<span aria-hidden="true">✦</span></button><span data-i18n="tapes.nowPlaying">NOW PLAYING / PROJECT ARCHIVE</span><button type="button" class="tape-player__close" data-i18n="tapes.eject">EJECT ×</button></div>
+            </div>
+          </div>
+        </section>
+        <div class="bento" id="project-cards">
           <!-- BENTOS -->
           <article class="card card--xl card--bentos reveal" data-spot>
             <div class="card__body">
@@ -300,6 +325,29 @@
               </svg>
             </div>
           </article>
+
+          <!-- Personal projects -->
+          <div class="project-slot reveal" data-holo>
+            <article class="card card--m card--holo" data-tape="kodlab">
+              <div class="card__body">
+                <span data-i18n="tapes.private" class="badge">Personal project · Private repository</span>
+                <h3>Kodlab</h3>
+                <p data-i18n="kodlab.text">A personal learning lab for web development and computer science: a roadmap, browser-based coding exercises, tests and practice designed to build independence.</p>
+                <p data-i18n="kodlab.detail">Built with HTML, CSS and JavaScript, with an in-browser editor and progress tracking. Available in Polish and English.</p>
+                <figure class="tape-preview"><img src="assets/kodlab-en-light.png" data-kodlab-preview alt="Kodlab learning dashboard in a fresh session" data-i18n-attr="alt:kodlab.alt" loading="lazy" width="1440" height="900" /><figcaption data-i18n="kodlab.caption">Kodlab · a fresh learning dashboard</figcaption></figure>
+              </div>
+            </article>
+          </div>
+          <div class="project-slot reveal" data-holo>
+            <article class="card card--m card--holo" data-tape="agent">
+              <div class="card__body">
+                <span data-i18n="tapes.private" class="badge">Personal project · Private repository</span>
+                <h3>Agent Control</h3>
+                <p data-i18n="agent.text">A self-hosted dashboard for managing coding tasks with AI agents: queue work, follow live activity and review changes before deciding what to keep.</p>
+                <p data-i18n="agent.detail">Built with React, TypeScript, Fastify and SQLite. Tasks run in isolated Git worktrees, with a review workflow and human approval.</p>
+              </div>
+            </article>
+          </div>
 
           <!-- Generative art -->
           <div class="project-slot project-slot--tall reveal" data-holo>
@@ -865,7 +913,7 @@
         <button data-i18n="footer.observer" class="footer__trace" id="observer-unlock" type="button" aria-haspopup="dialog" aria-controls="observer-trace" hidden><span aria-hidden="true">◎</span> observer detected ↗</button>
       </div>
       <figure class="footer__circuit">
-        <svg class="circuit-window" id="footer-game" viewBox="0 0 384 128" role="img" aria-label="A little Snake game playing itself beneath a torn-open circuit board">
+        <svg class="circuit-window" id="footer-game" viewBox="0 0 384 128" role="img" aria-label="A little Snake game playing itself on the tape deck monitor">
           <defs>
             <path id="circuit-edge" d="M5 30 20 25 13 15 65 18 77 8 121 14 139 5 182 12 203 4 238 13 268 8 284 17 324 10 334 20 372 16 368 32 380 40 373 57 380 80 368 86 374 108 335 106 321 119 280 113 263 123 224 115 204 124 169 116 136 122 117 112 73 119 59 108 15 113 19 94 6 86 13 65 4 51 12 41Z" />
             <clipPath id="circuit-cut"><use href="#circuit-edge" /></clipPath>
@@ -929,6 +977,9 @@
     <footer class="observer__footer"><span>ACCESS: browser sandbox</span><span>Observation changes the observer.</span></footer>
   </dialog>
   <script src="js/script.js"></script>
+  <script src="js/project-tapes.js" defer></script>
+  <script src="js/tape-art-holo.js" defer></script>
+  <script src="js/tape-easter.js" defer></script>
   <script src="js/tape-seams.js" defer></script>
   <script type="module" src="js/channels.js"></script>
   <script type="module" src="js/footer-tape.js"></script>

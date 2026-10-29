@@ -1,0 +1,121 @@
+/* VHS spines standing together like a well-used library, with a lip under the row. */
+.tape-shelf__stacks {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 3px;
+  padding: 23px 22px 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;
+  scrollbar-color: #b3a18b #272229;
+  scrollbar-width: thin;
+  background: linear-gradient(180deg, #18161d 0%, #252128 94%, #0e0c11 100%);
+  box-shadow: inset 0 8px 18px #0009, 0 8px 0 #71604c, 0 12px 0 #292122, 0 18px 18px #0006;
+}
+.project-tape {
+  position: relative;
+  flex: 1 0 0;
+  flex-direction: column;
+  align-items: stretch;
+  width: auto;
+  min-width: 49px;
+  max-width: 88px;
+  height: 298px;
+  min-height: 0;
+  padding: 4px;
+  text-align: center;
+  transform-origin: bottom center;
+  box-shadow: inset 1px 0 #ffffff20, inset -2px 0 #0007, 2px 2px 4px #000b;
+}
+.project-tape:nth-child(3n + 2) { height: 290px; }
+.project-tape:nth-child(4n + 3) { height: 303px; }
+.project-tape__brand { min-width: 0; min-height: 32px; flex: 0 0 32px; font-size: 16px; }
+.project-tape__label {
+  flex: 1 1 auto;
+  min-height: 0;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 9px 3px;
+}
+.project-tape__name {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-size: clamp(.76rem, 1.25vw, .95rem);
+  line-height: 1;
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+.project-tape__category { display: none; }
+.project-tape__bands { width: 100%; flex: 0 0 12px; }
+.project-tape__format { width: auto; flex: 0 0 39px; font-size: 12px; }
+.project-tape__format small { font-size: 8px; margin-top: 2px; }
+.project-tape--cold .project-tape__bands, .project-tape--cloud .project-tape__bands { order: 0; }
+.project-tape--kodlab .project-tape__label { border-left: 0; border-top: 5px solid #d6a12d; }
+.project-tape--art {
+  flex-grow: .9;
+  margin-left: 27px;
+  margin-right: 10px;
+  transform: rotate(-8deg);
+}
+.project-tape:hover, .project-tape:focus-visible { transform: translateY(-8px); }
+.project-tape--art:hover, .project-tape--art:focus-visible { transform: translateY(-8px) rotate(-8deg); }
+.project-tape:focus-visible { outline-offset: 3px; }
+@media (max-width: 760px) {
+  .tape-shelf__stacks { justify-content: flex-start; padding-inline: 16px 34px; }
+  .project-tape { flex: 0 0 61px; max-width: none; height: 275px; }
+  .project-tape:nth-child(3n + 2) { height: 269px; }
+  .project-tape:nth-child(4n + 3) { height: 280px; }
+  .project-tape__name { font-size: .88rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .project-tape { transition: none; }
+}
+.project-tape[aria-expanded="true"] { outline: 2px solid #ffe08a; outline-offset: 2px; }
+.tape-shelf__scroll-hint { display: none; }
+@media (max-width: 760px) {
+  .tape-shelf__scroll-hint { display: inline; }
+  .tape-shelf__format { display: none; }
+}
+
+/* Slim sleeves leave enough room for a second, quieter line on the spine. */
+.project-tape {
+  max-width: 65px;
+  height: 320px;
+  animation: none;
+  --glitch-text: none;
+  --glitch-icon: none;
+  --glitch-rest: none;
+  text-shadow: none;
+}
+.project-tape:nth-child(3n + 2) { height: 312px; }
+.project-tape:nth-child(4n + 3) { height: 325px; }
+.project-tape:is(:hover, :focus-visible, :active), .project-tape * {
+  --glitch-text: none;
+  --glitch-icon: none;
+  --glitch-rest: none;
+  text-shadow: none;
+  animation: none;
+}
+.project-tape__label { gap: 8px; }
+.project-tape__name { flex: 0 0 auto; font-size: clamp(.77rem, 1.2vw, .9rem); }
+.project-tape__category {
+  display: block;
+  flex: 0 1 auto;
+  min-height: 0;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font: 600 .62rem/1.15 Arial, sans-serif;
+  letter-spacing: 0;
+  opacity: .85;
+}
+.project-tape--art { margin-left: 33px; margin-right: 8px; transform: rotate(-6deg); }
+.project-tape--art:hover, .project-tape--art:focus-visible { transform: translateY(-8px) rotate(-6deg); }
+@media (max-width: 760px) {
+  .project-tape { flex-basis: 55px; height: 310px; }
+  .project-tape:nth-child(3n + 2) { height: 302px; }
+  .project-tape:nth-child(4n + 3) { height: 315px; }
+  .project-tape__name { font-size: .82rem; }
+}

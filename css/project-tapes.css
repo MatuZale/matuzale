@@ -1,0 +1,64 @@
+/* Horizontal spines form a small archive; original cards remain the no-JS fallback. */
+.bento[hidden], .tape-shelf[hidden] { display: none; }
+.tape-shelf { padding: clamp(1rem, 2.4vw, 1.8rem); color: #f4ecdc; background: linear-gradient(120deg, #333039, #1b1920 45%, #242127); border: 1px solid #5d5657; border-radius: 9px; box-shadow: inset 0 0 0 5px #ffffff08, 0 14px 35px #0003; }
+.tape-shelf__header, .tape-shelf__footer { display: flex; justify-content: space-between; gap: 1rem; font: 600 .65rem/1.4 var(--font-mono); letter-spacing: .08em; }
+.tape-shelf__header { padding: .15rem .2rem 1rem; }
+.tape-shelf__header span:last-child { color: #c8bdb1; text-align: right; }
+.tape-shelf__footer { color: #b8aaa1; padding: 1rem .2rem .1rem; }
+.tape-shelf__stacks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px clamp(.7rem, 2vw, 1.5rem); padding: 8px; background: #100f14; border: 1px solid #71665b; box-shadow: inset 0 3px 12px #000b, 0 7px 0 #51423c, 0 11px 0 #211c1e; }
+.project-tape { --case: #27252b; --ink: #24222a; --label: #ece4ce; --stripe: #eaaa35; appearance: none; cursor: pointer; display: flex; align-items: stretch; width: 100%; min-width: 0; min-height: 57px; padding: 4px; border: 1px solid #827f7a; border-radius: 3px; background: linear-gradient(180deg, #ffffff1a, transparent 25%, #0004 90%), var(--case); color: var(--ink); text-align: left; box-shadow: inset 0 0 0 1px #0009, 0 3px 5px #0008; transition: transform .18s, box-shadow .18s; }
+.project-tape:hover, .project-tape:focus-visible { transform: translateX(5px); box-shadow: inset 0 0 0 1px #0009, -4px 4px 8px #0009; outline: 2px solid #f8d06c; outline-offset: 2px; z-index: 1; }
+.project-tape__brand { display: flex; align-items: center; justify-content: center; min-width: 44px; color: #f7f1e8; font: 900 17px/.9 Arial, sans-serif; letter-spacing: -.08em; }
+.project-tape__brand span { align-self: center; font: 700 8px var(--font-mono); color: var(--stripe); }
+.project-tape__label { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 3px; padding: 5px 9px; background: var(--label); box-shadow: inset 0 0 0 1px #0003; }
+.project-tape__name { display: block; font: 800 clamp(.8rem, 1.35vw, 1rem)/1.05 Arial, sans-serif; letter-spacing: -.03em; overflow-wrap: anywhere; }
+.project-tape__category { font: 600 .55rem/1 var(--font-mono); letter-spacing: .02em; opacity: .8; }
+.project-tape__bands { flex: 0 0 15px; background: linear-gradient(to bottom, #ed4f52 0 20%, #f3993e 20% 40%, #edcc48 40% 60%, #61aa7d 60% 80%, #5988ad 80%); }
+.project-tape__format { width: 63px; flex: 0 0 63px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #f5f1e9; font: 800 14px/1 Arial, sans-serif; letter-spacing: -.04em; }
+.project-tape__format small { font: 700 9px/1 var(--font-mono); margin-top: 4px; border: 1px solid currentColor; padding: 1px 3px; }
+.project-tape--bentos { --case:#07335b; --label:#d9ebda; --stripe:#b5ee35; }
+.project-tape--kodlab { --case:#d3c3a8; --label:#f9f1dc; --stripe:#e5a127; }
+.project-tape--kodlab .project-tape__brand, .project-tape--kodlab .project-tape__format { color:#29242d; }
+.project-tape--agent { --case:#1d1829; --label:#eee6df; --stripe:#ed65b0; }
+.project-tape--agent .project-tape__bands { background: linear-gradient(#e85ca2 0 40%, #9355bf 40% 70%, #6fbcbd 70%); }
+.project-tape--art { --case:#1a1329; --label:#231b35; --ink:#fff1ee; --stripe:#f66cc8; }
+.project-tape--art .project-tape__bands { background: repeating-linear-gradient(135deg,#ee74c5 0 3px,#7d58aa 3px 6px,#d99c46 6px 9px); }
+.project-tape--cold { --case:#d3e5dc; --label:#f2f4e9; --stripe:#0096a3; }
+.project-tape--cold .project-tape__brand, .project-tape--cold .project-tape__format { color:#164151; }
+.project-tape--cold .project-tape__bands { background: linear-gradient(#006681 0 33%,#31a5b0 33% 66%,#a0d3c9 66%); }
+.project-tape--finance { --case:#1e3029; --label:#d8d9b7; --stripe:#bdd071; }
+.project-tape--finance .project-tape__bands { background: repeating-linear-gradient(135deg,#1b302b 0 4px,#a9bf77 4px 8px); }
+.project-tape--cloud { --case:#342c2c; --label:#e7d7ba; --stripe:#ed8755; }
+.project-tape--cloud .project-tape__bands { background: linear-gradient(#ec714b 0 33%,#f4b45a 33% 66%,#e8d2a3 66%); }
+.project-tape--sound { --case:#25274b; --label:#d7e4df; --stripe:#6ee2d5; }
+.project-tape--sound .project-tape__bands { background: repeating-linear-gradient(0deg,#6fd4c7 0 3px,#244454 3px 6px); }
+.project-tape--nbody { --case:#1a1920; --label:#ede3cf; --stripe:#ef8a61; }
+.project-tape--nbody .project-tape__bands { background: linear-gradient(#bc4e62 0 25%,#df7557 25% 50%,#efb56c 50% 75%,#3d2747 75%); }
+.project-tape--physics { --case:#d8b948; --label:#fbeb96; --stripe:#e56975; }
+.project-tape--physics .project-tape__brand, .project-tape--physics .project-tape__format { color:#292537; }
+.project-tape--quantum { --case:#403750; --label:#e8e2ed; --stripe:#ac8ad5; }
+.project-tape--quantum .project-tape__bands { background: repeating-linear-gradient(45deg,#ac8ad5 0 3px,#51446d 3px 6px); }
+.tape-dialog { width: min(820px, calc(100% - 2rem)); max-height: min(90dvh, 950px); padding: 0; color: var(--text); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 24px 90px #000b; }
+.tape-dialog::backdrop { background: #080610d9; }
+.tape-dialog__top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .8rem 1.3rem; background: #1b1823; color: #f6e9df; font: .7rem var(--font-mono); letter-spacing: .08em; }
+.tape-dialog__close { cursor: pointer; border: 1px solid #ffffff66; background: transparent; color: #fff; border-radius: 3px; width: 2rem; height: 2rem; font-size: 1.4rem; line-height: 1; }
+#tape-dialog-content { display: grid; grid-template-columns: 200px minmax(0, 1fr); align-items: start; gap: clamp(1.3rem, 3vw, 2.5rem); padding: clamp(1.3rem, 4vw, 2.3rem); }
+.tape-dialog .card__body { padding: 0; min-width: 0; }
+.tape-dialog h3 { font-size: clamp(1.7rem, 4vw, 2.5rem); margin: .8rem 0; }
+.tape-dialog p { color: var(--muted); line-height: 1.7; }
+.tape-dialog .card__links { margin-top: .5rem; }
+.tape-preview { margin: 1rem 0 0; }
+.tape-preview img { display: block; width: 100%; height: auto; border: 5px solid #292632; border-radius: 4px; }
+.tape-preview figcaption { margin-top: .5rem; color: var(--muted); font: .7rem var(--font-mono); }
+@media (max-width: 680px) { .tape-shelf__stacks { grid-template-columns: 1fr; } .project-tape__name { font-size: .95rem; } #tape-dialog-content { grid-template-columns: 1fr; } #tape-dialog-content .tape-cover { width: 145px; } }
+@media (prefers-reduced-motion: reduce) { .project-tape { transition: none; } }
+/* Different generations of tape labels: stamped blocks, reversed stock and color rails. */
+.project-tape--kodlab .project-tape__label { border-left: 5px solid #d6a12d; }
+.project-tape--agent .project-tape__label { border-top: 5px solid #e762a5; }
+.project-tape--cold .project-tape__bands, .project-tape--cloud .project-tape__bands { order: -1; }
+.project-tape--finance .project-tape__label { background: #263b30; color: #f4ebcf; border: 1px solid #c1c99b; }
+.project-tape--sound .project-tape__label { background: #243451; color: #ebf4ed; border: 1px solid #6bb0ac; }
+.project-tape--physics .project-tape__name, .project-tape--quantum .project-tape__name { letter-spacing: .03em; }
+.project-tape--nbody .project-tape__format, .project-tape--cloud .project-tape__format { font-size: 16px; }
+.tape-art-preview { margin: 1rem 0 0; }
+.tape-art-preview img { display: block; max-width: 100%; max-height: 230px; width: auto; object-fit: contain; border: 4px solid #292632; border-radius: 3px; }

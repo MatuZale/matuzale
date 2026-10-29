@@ -90,6 +90,7 @@ test('sunset waits for tape time rather than skipping scenes during pause', asyn
 test('a paused tape still lets the card collection open and respond', async ({ page }) => {
   await page.goto('/');
   await page.locator('[data-tape-action="pause"]').evaluate(el => el.click());
+  await page.locator('#project-shelf #art').click();
   await page.locator('[data-deck-open]').click();
   const deck = page.locator('.deck');
   const card = deck.locator('.tcard').first();

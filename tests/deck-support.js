@@ -137,6 +137,8 @@ export async function dealt(page) {
 export async function openDeck(page, entry, touch = false) {
   await page.goto(entry === 'cards' ? '/cards.html' : '/index.html', { waitUntil: 'domcontentloaded' });
   if (entry === 'home') {
+    const tape = page.locator('#project-shelf #art');
+    if (touch) await tape.tap(); else await tape.click();
     const link = page.locator('[data-deck-open]');
     await expect(link).toContainText('See examples');
     if (touch) await link.tap(); else await link.click();

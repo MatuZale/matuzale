@@ -5,7 +5,10 @@ for (const entry of ['cards', 'home']) for (const width of [1280, 390]) {
     await page.setViewportSize({ width, height: 900 });
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto(entry === 'cards' ? '/cards.html' : '/');
-    if (entry === 'home') await page.locator('[data-deck-open]').click();
+    if (entry === 'home') {
+      await page.locator('#project-shelf #art').click();
+      await page.locator('[data-deck-open]').click();
+    }
     await expect(page.locator('.deck[open] .tcard')).toHaveCount(20);
     const audit = await page.evaluate(async () => {
       const faces = ['400 16px "STIX Two Math"', 'italic 400 16px "STIX Two Text"', '700 16px "Deck Sans"'];

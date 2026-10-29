@@ -1,4 +1,4 @@
-// Background processes for the footer: small games that play themselves on the torn-open circuit board.
+// Background processes for the footer: small games that play themselves on the tape deck monitor.
 // Snake is the usual guest; Tetris and Pac-Man drop in now and then. Each game is plain state with a
 // tick() that returns the delay until the next tick and a draw() that returns SVG nodes, so the board
 // only ever has one set of pixels to replace. Colours come from CSS classes (see style.css), which is
@@ -427,7 +427,7 @@ export function startFooterGames({ board, pixels, toggle, caption }) {
     // Reduced motion shows one still frame, so give it a game already under way.
     if (paused) for (let i = 0; i < game.preview; i++) game.tick();
     caption.textContent = label(name);
-    board.setAttribute("aria-label", `A little ${TITLES[name]} game playing itself beneath a torn-open circuit board`);
+    board.setAttribute("aria-label", `A little ${TITLES[name]} game playing itself on the tape deck monitor`);
     updateToggle();
     draw();
   }
@@ -452,7 +452,7 @@ export function startFooterGames({ board, pixels, toggle, caption }) {
       .catch(error => console.error(error))
       .finally(() => {
         figure.classList.add("is-crashed");
-        board.setAttribute("aria-label", `The little ${TITLES[name]} game beneath the circuit board has crashed`);
+        board.setAttribute("aria-label", `The little ${TITLES[name]} game on the tape deck monitor has crashed`);
       });
   }
   board.crash = breakDown;

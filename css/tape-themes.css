@@ -1,0 +1,283 @@
+/* Each sleeve keeps its own palette while changing stock with the site theme. */
+:root {
+  --tape-kodlab-case: #d8c4a8;
+  --tape-kodlab-label: #f9f1dc;
+  --tape-kodlab-ink: #242131;
+  --tape-kodlab-case-ink: #29242d;
+  --tape-kodlab-paper: #f4ecda;
+  --tape-kodlab-cover-ink: #242131;
+  --tape-agent-case: #d5bacb;
+  --tape-agent-label: #f6e8ef;
+  --tape-agent-ink: #292036;
+  --tape-agent-case-ink: #352239;
+  --tape-agent-paper: #f2e1ec;
+  --tape-agent-cover-ink: #292036;
+  --tape-art-case: #d1b8d1;
+  --tape-art-label: #f4e5f0;
+  --tape-art-ink: #291b35;
+  --tape-art-case-ink: #2f2037;
+  --tape-art-paper: #f0e2ed;
+  --tape-art-cover-ink: #251738;
+  --tape-cold-case: #c3ddd4;
+  --tape-cold-label: #eff6e9;
+  --tape-cold-ink: #102d38;
+  --tape-cold-case-ink: #164151;
+  --tape-cold-paper: #e1f1e8;
+  --tape-cold-cover-ink: #102d38;
+  --tape-finance-case: #c7d4bd;
+  --tape-finance-label: #eef0de;
+  --tape-finance-ink: #263b30;
+  --tape-finance-case-ink: #263b30;
+  --tape-finance-paper: #e4e8d3;
+  --tape-finance-cover-ink: #19382d;
+  --tape-cloud-case: #d6c1a9;
+  --tape-cloud-label: #f0e2c8;
+  --tape-cloud-ink: #24212a;
+  --tape-cloud-case-ink: #34292c;
+  --tape-cloud-paper: #eee1c8;
+  --tape-cloud-cover-ink: #24212a;
+  --tape-sound-case: #bbcdd5;
+  --tape-sound-label: #e4eeee;
+  --tape-sound-ink: #182b42;
+  --tape-sound-case-ink: #1d3545;
+  --tape-sound-paper: #dce9ef;
+  --tape-sound-cover-ink: #1b2645;
+  --tape-nbody-case: #d4bcb2;
+  --tape-nbody-label: #f3e8d9;
+  --tape-nbody-ink: #291f2d;
+  --tape-nbody-case-ink: #35242b;
+  --tape-nbody-paper: #f1e5dc;
+  --tape-nbody-cover-ink: #291f2d;
+  --tape-physics-case: #d8b948;
+  --tape-physics-label: #fbeb96;
+  --tape-physics-ink: #282338;
+  --tape-physics-case-ink: #292537;
+  --tape-physics-paper: #f2d76e;
+  --tape-physics-cover-ink: #282338;
+  --tape-quantum-case: #c9bdd8;
+  --tape-quantum-label: #f0e9f2;
+  --tape-quantum-ink: #251d3a;
+  --tape-quantum-case-ink: #332843;
+  --tape-quantum-paper: #e8e2ef;
+  --tape-quantum-cover-ink: #251d3a;
+  --tape-shelf-bg: linear-gradient(135deg, #e5d8c1, #c4ae91);
+  --tape-shelf-ink: #3c3040;
+  --tape-shelf-secondary: #574a4c;
+  --tape-shelf-interior: linear-gradient(180deg, #776559, #5e504b 95%, #40373a);
+  --tape-shelf-edge: #9a8068;
+  --tape-finance-foil: #647945;
+  --tape-sound-foil: #198e90;
+  --tape-cloud-bars: #443b42;
+  --tape-cold-foil: #168da7;
+  --tape-agent-grid: #795c7b88;
+  --tape-agent-mark: #843e6a;
+  --tape-quantum-grid: #8670ad;
+}
+:root[data-theme="dark"] {
+  --tape-kodlab-case: #302438;
+  --tape-kodlab-label: #57445a;
+  --tape-kodlab-ink: #fff4df;
+  --tape-kodlab-case-ink: #fff0dc;
+  --tape-kodlab-paper: #302438;
+  --tape-kodlab-cover-ink: #fff1df;
+  --tape-agent-case: #1d1829;
+  --tape-agent-label: #4b324e;
+  --tape-agent-ink: #fff0f6;
+  --tape-agent-case-ink: #f8edf9;
+  --tape-agent-paper: #1b1427;
+  --tape-agent-cover-ink: #f8edf9;
+  --tape-art-case: #1a1329;
+  --tape-art-label: #30203d;
+  --tape-art-ink: #fff1ee;
+  --tape-art-case-ink: #fff1ee;
+  --tape-art-paper: #120e23;
+  --tape-art-cover-ink: #fff2e8;
+  --tape-cold-case: #102e38;
+  --tape-cold-label: #255362;
+  --tape-cold-ink: #f2faf1;
+  --tape-cold-case-ink: #e8f8f3;
+  --tape-cold-paper: #0c3545;
+  --tape-cold-cover-ink: #eaf5eb;
+  --tape-finance-case: #172a22;
+  --tape-finance-label: #345044;
+  --tape-finance-ink: #f4ead1;
+  --tape-finance-case-ink: #f4ead1;
+  --tape-finance-paper: #20372d;
+  --tape-finance-cover-ink: #f4ead1;
+  --tape-cloud-case: #30282d;
+  --tape-cloud-label: #594538;
+  --tape-cloud-ink: #fff0d6;
+  --tape-cloud-case-ink: #fff0d6;
+  --tape-cloud-paper: #2d2831;
+  --tape-cloud-cover-ink: #f8e9d0;
+  --tape-sound-case: #19223d;
+  --tape-sound-label: #2b405a;
+  --tape-sound-ink: #ecf8f6;
+  --tape-sound-case-ink: #ecf8f6;
+  --tape-sound-paper: #18234a;
+  --tape-sound-cover-ink: #f2f5eb;
+  --tape-nbody-case: #1a1920;
+  --tape-nbody-label: #4b302c;
+  --tape-nbody-ink: #fff1e2;
+  --tape-nbody-case-ink: #fff1e2;
+  --tape-nbody-paper: #16141f;
+  --tape-nbody-cover-ink: #f8ece0;
+  --tape-physics-case: #3a3026;
+  --tape-physics-label: #5c482e;
+  --tape-physics-ink: #fff0bf;
+  --tape-physics-case-ink: #fff0bf;
+  --tape-physics-paper: #372c24;
+  --tape-physics-cover-ink: #fff0bf;
+  --tape-quantum-case: #2a2238;
+  --tape-quantum-label: #453454;
+  --tape-quantum-ink: #f6eaff;
+  --tape-quantum-case-ink: #f6eaff;
+  --tape-quantum-paper: #2c243f;
+  --tape-quantum-cover-ink: #f4eaff;
+  --tape-shelf-bg: linear-gradient(120deg, #333039, #1b1920 45%, #242127);
+  --tape-shelf-ink: #f4ecdc;
+  --tape-shelf-secondary: #c8bdb1;
+  --tape-shelf-interior: linear-gradient(180deg, #18161d, #252128 94%, #0e0c11);
+  --tape-shelf-edge: #71604c;
+  --tape-finance-foil: #b6c47e;
+  --tape-sound-foil: #65d4c9;
+  --tape-cloud-bars: #d7c4ae;
+  --tape-cold-foil: #61d2df;
+  --tape-agent-grid: #a783c488;
+  --tape-agent-mark: #f5b0dd;
+  --tape-quantum-grid: #b79bd8;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --tape-kodlab-case: #302438;
+    --tape-kodlab-label: #57445a;
+    --tape-kodlab-ink: #fff4df;
+    --tape-kodlab-case-ink: #fff0dc;
+    --tape-kodlab-paper: #302438;
+    --tape-kodlab-cover-ink: #fff1df;
+    --tape-agent-case: #1d1829;
+    --tape-agent-label: #4b324e;
+    --tape-agent-ink: #fff0f6;
+    --tape-agent-case-ink: #f8edf9;
+    --tape-agent-paper: #1b1427;
+    --tape-agent-cover-ink: #f8edf9;
+    --tape-art-case: #1a1329;
+    --tape-art-label: #30203d;
+    --tape-art-ink: #fff1ee;
+    --tape-art-case-ink: #fff1ee;
+    --tape-art-paper: #120e23;
+    --tape-art-cover-ink: #fff2e8;
+    --tape-cold-case: #102e38;
+    --tape-cold-label: #255362;
+    --tape-cold-ink: #f2faf1;
+    --tape-cold-case-ink: #e8f8f3;
+    --tape-cold-paper: #0c3545;
+    --tape-cold-cover-ink: #eaf5eb;
+    --tape-finance-case: #172a22;
+    --tape-finance-label: #345044;
+    --tape-finance-ink: #f4ead1;
+    --tape-finance-case-ink: #f4ead1;
+    --tape-finance-paper: #20372d;
+    --tape-finance-cover-ink: #f4ead1;
+    --tape-cloud-case: #30282d;
+    --tape-cloud-label: #594538;
+    --tape-cloud-ink: #fff0d6;
+    --tape-cloud-case-ink: #fff0d6;
+    --tape-cloud-paper: #2d2831;
+    --tape-cloud-cover-ink: #f8e9d0;
+    --tape-sound-case: #19223d;
+    --tape-sound-label: #2b405a;
+    --tape-sound-ink: #ecf8f6;
+    --tape-sound-case-ink: #ecf8f6;
+    --tape-sound-paper: #18234a;
+    --tape-sound-cover-ink: #f2f5eb;
+    --tape-nbody-case: #1a1920;
+    --tape-nbody-label: #4b302c;
+    --tape-nbody-ink: #fff1e2;
+    --tape-nbody-case-ink: #fff1e2;
+    --tape-nbody-paper: #16141f;
+    --tape-nbody-cover-ink: #f8ece0;
+    --tape-physics-case: #3a3026;
+    --tape-physics-label: #5c482e;
+    --tape-physics-ink: #fff0bf;
+    --tape-physics-case-ink: #fff0bf;
+    --tape-physics-paper: #372c24;
+    --tape-physics-cover-ink: #fff0bf;
+    --tape-quantum-case: #2a2238;
+    --tape-quantum-label: #453454;
+    --tape-quantum-ink: #f6eaff;
+    --tape-quantum-case-ink: #f6eaff;
+    --tape-quantum-paper: #2c243f;
+    --tape-quantum-cover-ink: #f4eaff;
+    --tape-shelf-bg: linear-gradient(120deg, #333039, #1b1920 45%, #242127);
+    --tape-shelf-ink: #f4ecdc;
+    --tape-shelf-secondary: #c8bdb1;
+    --tape-shelf-interior: linear-gradient(180deg, #18161d, #252128 94%, #0e0c11);
+    --tape-shelf-edge: #71604c;
+    --tape-finance-foil: #b6c47e;
+    --tape-sound-foil: #65d4c9;
+    --tape-cloud-bars: #d7c4ae;
+    --tape-cold-foil: #61d2df;
+    --tape-agent-grid: #a783c488;
+    --tape-agent-mark: #f5b0dd;
+    --tape-quantum-grid: #b79bd8;
+  }
+}
+.tape-shelf { background: var(--tape-shelf-bg); color: var(--tape-shelf-ink); }
+.tape-shelf__header span:last-child, .tape-shelf__footer { color: var(--tape-shelf-secondary); }
+.tape-shelf__stacks { background: var(--tape-shelf-interior); box-shadow: inset 0 8px 18px #0007, 0 8px 0 var(--tape-shelf-edge), 0 12px 0 #292122, 0 18px 18px #0006; }
+.project-tape--kodlab, .tape-cover--kodlab {
+  --case: var(--tape-kodlab-case); --label: var(--tape-kodlab-label); --ink: var(--tape-kodlab-ink); --case-ink: var(--tape-kodlab-case-ink);
+  --sleeve-paper: var(--tape-kodlab-paper); --sleeve-ink: var(--tape-kodlab-cover-ink);
+}
+.project-tape--agent, .tape-cover--agent {
+  --case: var(--tape-agent-case); --label: var(--tape-agent-label); --ink: var(--tape-agent-ink); --case-ink: var(--tape-agent-case-ink);
+  --sleeve-paper: var(--tape-agent-paper); --sleeve-ink: var(--tape-agent-cover-ink);
+}
+.project-tape--art, .tape-cover--art {
+  --case: var(--tape-art-case); --label: var(--tape-art-label); --ink: var(--tape-art-ink); --case-ink: var(--tape-art-case-ink);
+  --sleeve-paper: var(--tape-art-paper); --sleeve-ink: var(--tape-art-cover-ink);
+}
+.project-tape--cold, .tape-cover--cold {
+  --case: var(--tape-cold-case); --label: var(--tape-cold-label); --ink: var(--tape-cold-ink); --case-ink: var(--tape-cold-case-ink);
+  --sleeve-paper: var(--tape-cold-paper); --sleeve-ink: var(--tape-cold-cover-ink);
+}
+.project-tape--finance, .tape-cover--finance {
+  --case: var(--tape-finance-case); --label: var(--tape-finance-label); --ink: var(--tape-finance-ink); --case-ink: var(--tape-finance-case-ink);
+  --sleeve-paper: var(--tape-finance-paper); --sleeve-ink: var(--tape-finance-cover-ink);
+}
+.project-tape--cloud, .tape-cover--cloud {
+  --case: var(--tape-cloud-case); --label: var(--tape-cloud-label); --ink: var(--tape-cloud-ink); --case-ink: var(--tape-cloud-case-ink);
+  --sleeve-paper: var(--tape-cloud-paper); --sleeve-ink: var(--tape-cloud-cover-ink);
+}
+.project-tape--sound, .tape-cover--sound {
+  --case: var(--tape-sound-case); --label: var(--tape-sound-label); --ink: var(--tape-sound-ink); --case-ink: var(--tape-sound-case-ink);
+  --sleeve-paper: var(--tape-sound-paper); --sleeve-ink: var(--tape-sound-cover-ink);
+}
+.project-tape--nbody, .tape-cover--nbody {
+  --case: var(--tape-nbody-case); --label: var(--tape-nbody-label); --ink: var(--tape-nbody-ink); --case-ink: var(--tape-nbody-case-ink);
+  --sleeve-paper: var(--tape-nbody-paper); --sleeve-ink: var(--tape-nbody-cover-ink);
+}
+.project-tape--physics, .tape-cover--physics {
+  --case: var(--tape-physics-case); --label: var(--tape-physics-label); --ink: var(--tape-physics-ink); --case-ink: var(--tape-physics-case-ink);
+  --sleeve-paper: var(--tape-physics-paper); --sleeve-ink: var(--tape-physics-cover-ink);
+}
+.project-tape--quantum, .tape-cover--quantum {
+  --case: var(--tape-quantum-case); --label: var(--tape-quantum-label); --ink: var(--tape-quantum-ink); --case-ink: var(--tape-quantum-case-ink);
+  --sleeve-paper: var(--tape-quantum-paper); --sleeve-ink: var(--tape-quantum-cover-ink);
+}
+/* Existing labels with bespoke fills follow their sleeve palettes, too. */
+.project-tape:not(.project-tape--bentos) :is(.project-tape__brand, .project-tape__format) { color: var(--case-ink); }
+.project-tape--finance .project-tape__label, .project-tape--sound .project-tape__label { background: var(--label); color: var(--ink); }
+.tape-cover--kodlab .tape-cover__brand { color: inherit; }
+.tape-cover--agent .tape-cover__brand { color: var(--tape-agent-mark); border-bottom-color: var(--tape-agent-mark); }
+.tape-cover--agent .tape-cover__art { background: linear-gradient(transparent, var(--sleeve-paper) 96%), repeating-linear-gradient(90deg, var(--tape-agent-grid) 0 1px, transparent 1px 15px), repeating-linear-gradient(0deg, var(--tape-agent-grid) 0 1px, transparent 1px 15px); }
+.tape-cover--agent .tape-cover__art::before { border-color: var(--tape-agent-mark); }
+.tape-cover--agent .tape-cover__art::after { color: var(--tape-agent-mark); }
+.tape-cover--finance .tape-cover__art { background: repeating-radial-gradient(ellipse at center, transparent 0 5px, var(--tape-finance-foil) 6px 7px, transparent 8px 12px); }
+.tape-cover--finance .tape-cover__art::after { border-color: var(--tape-finance-foil); }
+.tape-cover--sound .tape-cover__art { background: repeating-radial-gradient(ellipse at center, transparent 0 9px, var(--tape-sound-foil) 10px 12px, transparent 13px 19px); }
+.tape-cover--cloud .tape-cover__art { background: linear-gradient(125deg, transparent 0 30%, #e77743 30% 45%, #f3b641 45% 59%, transparent 59%), repeating-linear-gradient(90deg, var(--tape-cloud-bars) 0 3px, transparent 3px 7px); }
+.tape-cover--cold .tape-cover__art { background: repeating-radial-gradient(ellipse at 10% 100%, transparent 0 10px, var(--tape-cold-foil) 11px 13px, transparent 14px 19px); }
+.tape-cover--quantum .tape-cover__art { background: repeating-linear-gradient(45deg, transparent 0 11px, var(--tape-quantum-grid) 12px 13px, transparent 14px 23px), repeating-linear-gradient(-45deg, transparent 0 11px, var(--tape-quantum-grid) 12px 13px, transparent 14px 23px); }
+.tape-cover--quantum .tape-cover__art::after { border-color: var(--sleeve-paper); }

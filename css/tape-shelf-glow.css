@@ -1,0 +1,34 @@
+/* A travelling five-colour highlight belongs to the pointer, not the selection or keyboard focus. */
+@property --tape-halo-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+.project-tape[aria-expanded="true"] { outline: none; }
+.project-tape:not(.project-tape--bentos) {
+  --tape-halo-angle: 0deg;
+  --tape-halo-border: linear-gradient(#827f7a, #827f7a);
+  border: 2px solid transparent;
+  background:
+    linear-gradient(180deg, #ffffff1a, transparent 25%, #0004 90%) padding-box,
+    linear-gradient(var(--case), var(--case)) padding-box,
+    var(--tape-halo-border) border-box;
+}
+.project-tape:focus-visible {
+  outline: 2px solid #fff5ce;
+  outline-offset: 4px;
+  z-index: 2;
+}
+@media (hover: hover) and (pointer: fine) {
+  .project-tape:not(.project-tape--bentos):hover {
+    --tape-halo-border: conic-gradient(from var(--tape-halo-angle), #ffbf35 0 20%, #ff763d 20% 40%, #ed466d 40% 60%, #bb51ce 60% 80%, #8264e6 80% 100%);
+    box-shadow: inset 1px 0 #ffffff26, inset -2px 0 #0007,
+      0 0 8px #ed466d88, 0 0 20px #bb51ce55, 2px 4px 8px #000b;
+    z-index: 2;
+    animation: tape-halo-turn 9s linear infinite;
+  }
+}
+@keyframes tape-halo-turn { to { --tape-halo-angle: 360deg; } }
+@media (prefers-reduced-motion: reduce) {
+  .project-tape:not(.project-tape--bentos):hover { animation: none; }
+}

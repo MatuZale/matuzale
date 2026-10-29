@@ -1,0 +1,74 @@
+/* BENTOS keeps the Baltic-blue and lime identity used by bentos.info. */
+.project-tape.project-tape--bentos {
+  --case: #001562;
+  --label: #002578;
+  --ink: #eff7ff;
+  --stripe: #aaff00;
+}
+.project-tape.project-tape--bentos .project-tape__label {
+  background: linear-gradient(180deg, #0036a6, #001451);
+  color: #f1f7ff;
+  border: 1px solid #88adff66;
+}
+.project-tape.project-tape--bentos .project-tape__name { color: #fff; }
+.project-tape.project-tape--bentos .project-tape__bands {
+  background: linear-gradient(90deg, #aaff00 0 42%, #7eddeb 42% 69%, #527dff 69%);
+}
+@media (hover: hover) and (pointer: fine) {
+  .project-tape.project-tape--bentos:hover {
+    animation: none;
+    border-color: #aaff00;
+    background: linear-gradient(180deg, #294fba 0%, #001562 40%, #00093d 100%);
+    box-shadow: inset 1px 0 #ffffff26, inset -2px 0 #0007,
+      0 0 9px #aaff0066, 0 0 20px #326cff66, 2px 4px 8px #000b;
+  }
+}
+.project-tape.project-tape--bentos:focus-visible { outline: 2px solid #caff65; outline-offset: 4px; }
+
+/* The cover borrows the existing BENTOS mark and its sea-to-data language. */
+.tape-cover--bentos {
+  --sleeve-paper: #001562;
+  --sleeve-ink: #f1f6ff;
+  --sleeve-accent: #aaff00;
+  background: radial-gradient(ellipse at 90% 5%, #0036ff9c, transparent 56%), #001562;
+  border-color: #8cafff77;
+}
+.tape-cover--bentos .tape-cover__brand { color: #aaff00; }
+.tape-cover--bentos .tape-cover__title {
+  width: min(100%, 140px);
+  height: 35px;
+  font-size: 0;
+  background: url('../assets/brand/bentos-white.png') left center / contain no-repeat;
+}
+.tape-cover--bentos .tape-cover__art {
+  inset: 45% 0 12%;
+  background:
+    repeating-radial-gradient(ellipse 125% 42% at 46% 100%, transparent 0 12px, #7eddeb77 13px 14px, transparent 15px 23px),
+    linear-gradient(160deg, transparent, #0036a966);
+}
+.tape-cover--bentos .tape-cover__art::after {
+  width: 36px;
+  height: 36px;
+  right: 20%;
+  bottom: 42%;
+  border: 2px solid #aaff00;
+  border-radius: 50%;
+  box-shadow: 0 0 0 8px #001562, 0 0 0 10px #aaff0066, 0 0 18px #aaff0055;
+}
+.tape-cover--bentos .tape-cover__foot { color: #aaff00; }
+
+/* The selected BENTOS programme keeps its own identity in either portfolio theme. */
+.tape-player__screen[data-project='bentos'] {
+  color: #fff;
+  background: radial-gradient(ellipse at 95% 0, #0036ff7a, transparent 62%), linear-gradient(160deg, #001562, #00093d 85%);
+  border-color: #000c3d;
+}
+.tape-player__screen[data-project='bentos'] .badge {
+  color: #d7ff8b;
+  border-color: #aaff0080;
+  background: #aaff0010;
+}
+.tape-player__screen[data-project='bentos'] h3 { color: #fff; font-family: 'Inter', system-ui, sans-serif; }
+.tape-player__screen[data-project='bentos'] .tape-summary { color: #d5e1ff; }
+.tape-player__screen[data-project='bentos'] .card__links a { color: #d4ff7a; text-decoration-color: #aaff00; }
+.tape-player__screen[data-project='bentos'] .card__links a:focus-visible { outline-color: #aaff00; }

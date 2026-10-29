@@ -1,0 +1,89 @@
+/* The CRT is a frame, not a scrolling container: every project uses one fixed tube. */
+.tape-player__screen {
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  scrollbar-gutter: auto;
+}
+.tape-player__screen .card__body {
+  display: grid;
+  grid-auto-rows: min-content;
+  align-content: center;
+  justify-items: start;
+  gap: .65rem;
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  box-sizing: border-box;
+  padding: clamp(1.15rem, 2.7vw, 2rem);
+}
+.tape-player__screen .badge {
+  font-size: .62rem;
+  line-height: 1.25;
+}
+.tape-player__screen h3 {
+  margin: 0;
+  font-size: clamp(1.35rem, 2.5vw, 2rem);
+  line-height: 1.12;
+  overflow-wrap: anywhere;
+}
+.tape-player__screen p {
+  margin: 0;
+  font-size: clamp(.875rem, 1.25vw, .98rem);
+  line-height: 1.5;
+}
+.tape-player__screen .card__links {
+  margin: .15rem 0 0;
+  align-items: center;
+  gap: .55rem 1rem;
+  font-size: .86rem;
+}
+.tape-player__screen .tape-preview,
+.tape-player__screen .tape-art-preview {
+  margin: .25rem 0 0;
+  max-width: 100%;
+}
+.tape-player__screen .tape-preview img,
+.tape-player__screen .tape-art-preview img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  max-height: 125px;
+  object-fit: contain;
+}
+.tape-player__screen .tape-preview figcaption {
+  margin-top: .3rem;
+  font-size: .6rem;
+}
+/* Prints sit alongside the copy on larger screens, so neither competes with the links. */
+@media (min-width: 681px) {
+  .tape-player__screen .card__body:has(.tape-preview, .tape-art-preview) {
+    grid-template-columns: minmax(0, 1fr) minmax(110px, 28%);
+    column-gap: 1.2rem;
+  }
+  .tape-player__screen .card__body:has(.tape-preview, .tape-art-preview) > :not(.tape-preview, .tape-art-preview) { grid-column: 1; }
+  .tape-player__screen .card__body > :is(.tape-preview, .tape-art-preview) {
+    grid-column: 2;
+    grid-row: 1 / span 8;
+    align-self: center;
+    margin: 0;
+  }
+  .tape-player__screen .tape-preview img,
+  .tape-player__screen .tape-art-preview img { max-height: 165px; }
+}
+/* A taller tube at phone widths leaves room for actual text, not tiny type or a second scroll. */
+@media (max-width: 680px) {
+  .tape-player__screen { aspect-ratio: 3 / 5; }
+  .tape-player__screen .card__body { padding: 1.1rem; gap: .55rem; }
+  .tape-player__screen h3 { font-size: 1.35rem; }
+  .tape-player__screen p { font-size: .875rem; line-height: 1.43; }
+  .tape-player__screen .card__links { gap: .5rem .8rem; }
+  .tape-player__screen .tape-preview img,
+  .tape-player__screen .tape-art-preview img { max-height: 110px; }
+}
+@media (max-width: 380px) {
+  .tape-player__screen { aspect-ratio: 1 / 1.86; }
+}
+/* Keep the full card descriptions for the fallback; the screen uses concise copy. */
+.tape-player__screen .card__body > p:not(.tape-summary) { display: none; }
+.tape-player__screen .tape-summary[hidden] { display: none; }

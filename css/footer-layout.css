@@ -1,19 +1,112 @@
-/* The little background game sits in the same family of equipment as the tape. */
-.footer__circuit {
-  padding: .55rem .65rem .4rem;
-  border: 1px solid var(--retro-bezel-edge);
-  border-radius: 8px;
-  background: var(--retro-bezel);
-  box-shadow: inset 0 1px #ffffff18, 0 10px 24px -20px #0009;
+/* Cassette and background process share the faceplate of one little tape deck. */
+.footer__inner {
+  grid-template-columns: minmax(0, 1fr) minmax(190px, 270px) minmax(210px, 300px);
+  gap: 1rem 1.15rem;
 }
-.footer__circuit .circuit-window { display: block; }
-.footer__circuit .circuit-caption { padding-top: .25rem; color: var(--retro-key-text); }
-.footer__circuit .circuit-caption__pause { color: var(--retro-key-text); }
-
+.footer__inner::before {
+  content: 'TM. / TAPE DECK  ·  SIGNAL MONITOR';
+  grid-column: 2 / 4;
+  grid-row: 1 / 3;
+  z-index: 0;
+  align-self: stretch;
+  min-width: 0;
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--retro-bezel-edge);
+  border-radius: 10px;
+  color: var(--retro-key-text);
+  background: var(--retro-bezel);
+  box-shadow: inset 0 1px #ffffff38, inset 0 -5px #00000012, 0 12px 24px -20px #000a;
+  font: 600 .59rem/1.2 var(--font-mono);
+  letter-spacing: .08em;
+  white-space: pre-wrap;
+  pointer-events: none;
+}
+.footer__inner::after {
+  content: 'SIDE A / B  ·  AUTO 120';
+  grid-column: 2 / 4;
+  grid-row: 1 / 3;
+  align-self: end;
+  z-index: 0;
+  margin: 0 1.2rem .65rem;
+  color: var(--retro-key-text);
+  opacity: .68;
+  font: 600 .53rem/1 var(--font-mono);
+  letter-spacing: .08em;
+  white-space: pre-wrap;
+  pointer-events: none;
+}
+.footer-tape {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  z-index: 1;
+  width: calc(100% - 1rem);
+  margin: 3rem 0 2rem 1rem;
+  align-self: center;
+}
+.footer__circuit {
+  grid-column: 3;
+  grid-row: 1 / 3;
+  z-index: 1;
+  width: calc(100% - 1rem);
+  margin: 3rem 1rem 2rem 0;
+  align-self: center;
+  padding: .55rem .55rem .35rem;
+  border: 1px solid #0a0b12;
+  border-radius: 7px;
+  background: linear-gradient(#302d32, #1a1820);
+  box-shadow: inset 0 1px #ffffff2b, 0 3px 0 #0003;
+  --tear-bg: #1b1020;
+  --tear-grid: #4a303a;
+  --tear-comment: #c1a9b2;
+  --tear-prop: #ffc05d;
+  --tear-glow: #9570ef22;
+  --pcb-trace: #664450;
+  --pcb-part: #2a1c2a;
+  --pcb-part-edge: #765261;
+  --snake-a: #ac80f6;
+  --snake-b: #d365e0;
+  --snake-head: #ffc05d;
+  --snake-food: #ff80c8;
+  --tc-i: #ffc05d;
+  --tc-o: #ffd56b;
+  --tc-t: #b28bff;
+  --tc-s: #ff8a61;
+  --tc-z: #ff7a9a;
+  --tc-j: #db85ed;
+  --tc-l: #ffad6b;
+  --pac-wall: #ba84ed;
+  --pac-pellet: #f3e3b8;
+  --pac: #ffd24a;
+  --pac-edge: #ffd24a;
+  --ghost-0: #ff5e7e;
+  --ghost-1: #ff9bd8;
+  --ghost-2: #ffc05d;
+  --ghost-scared: #b28bff;
+}
+.footer__circuit .circuit-window {
+  display: block;
+  border: 1px solid #77707d;
+  border-radius: 4px;
+  background: #1b1020;
+  box-shadow: inset 0 0 12px #000b;
+  filter: none;
+}
+.footer__circuit .circuit-window > use { opacity: 0; }
+.footer__circuit .circuit-window__traces { opacity: .35; }
+.footer__circuit .circuit-caption { padding: .4rem .1rem 0; color: #e8dfe1; }
+.footer__circuit .circuit-caption strong { color: #e1bbff; }
+.footer__circuit .circuit-caption__pause { color: #f5e3cf; }
+.footer__circuit .circuit-caption__pause:focus-visible { outline: 2px solid #ffcf75; outline-offset: 3px; }
+@media (max-width: 800px) {
+  .footer__inner { grid-template-columns: minmax(0, 1fr) minmax(180px, 230px) minmax(180px, 250px); }
+}
 @media (max-width: 640px) {
-  .footer__identity { grid-row: 1; }
-  .footer__secrets { grid-row: 2; margin-top: -1.35rem; }
-  .footer-tape { grid-row: 3; }
-  .footer__circuit { grid-row: 4; }
-  .footer__bottom { grid-row: 5; }
+  .footer__inner { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+  .footer__identity { grid-column: 1; grid-row: 1; }
+  .footer__secrets { grid-column: 1; grid-row: 2; margin-top: -1.35rem; }
+  .footer__inner::before, .footer__inner::after { grid-column: 1; grid-row: 3 / 5; }
+  .footer__inner::before { padding: 1rem; }
+  .footer-tape { grid-column: 1; grid-row: 3; width: min(calc(100% - 2rem), 300px); margin: 3rem auto 0; justify-self: center; }
+  .footer__circuit { grid-column: 1; grid-row: 4; width: min(calc(100% - 2rem), 300px); margin: 0 auto 2rem; }
+  .footer__bottom { grid-column: 1; grid-row: 5; }
 }

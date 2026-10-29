@@ -1,0 +1,27 @@
+/* A small station ident, hidden in the CRT's TM badge. */
+.tape-player__tv { position: relative; }
+.tape-player__secret {
+  flex: 0 0 auto; cursor: pointer; padding: .28rem .38rem;
+  border: 1px solid #b8aa9d75; border-radius: 3px; background: #29252a; color: #f6eadd;
+  font: 800 .7rem/1 Arial, sans-serif; letter-spacing: -.06em;
+}
+.tape-player__secret span { color: #f4bd70; font-size: .55rem; }
+.tape-player__secret:hover { color: #ffe1ab; border-color: #e1ccaa; }
+.tape-player__secret:focus-visible { outline: 2px solid #ffe391; outline-offset: 3px; }
+.tape-ident[hidden] { display: none; }
+.tape-ident {
+  position: absolute; z-index: 6; overflow: hidden; box-sizing: border-box;
+  border: 7px solid #161a20; border-radius: 28px / 22px; pointer-events: none; background: #f5efde;
+}
+.tape-ident__announce { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.tape-ident__art { position: absolute; inset: 0; overflow: hidden; background: #f5efde; }
+.tape-ident__art::after { content: ''; position: absolute; z-index: 6; inset: 0; background: repeating-linear-gradient(0deg, #161323 0 1px, transparent 1px 4px); opacity: .07; pointer-events: none; }
+.tape-ident__svg { width: 100%; height: 100%; display: block; }
+.tape-ident__ribbons path { stroke-width: 23; stroke-dasharray: 1; stroke-dashoffset: 1; }
+.tape-ident__masthead { position: absolute; top: 8%; left: 8%; color: #242139; }
+.tape-ident__masthead > span { font: 900 clamp(1.3rem, 4vw, 2.5rem)/.9 Arial, sans-serif; letter-spacing: -.1em; }
+.tape-ident__dot { color: #d94f60; }
+.tape-ident__masthead small { display: block; margin-top: .45rem; font: 700 clamp(.45rem, .85vw, .68rem)/1 var(--font-mono); letter-spacing: .1em; }
+.tape-ident__details { position: absolute; left: 8%; right: 8%; bottom: 8%; display: flex; justify-content: space-between; gap: 1rem; color: #413c49; font: 700 clamp(.42rem, .8vw, .62rem)/1.2 var(--font-mono); letter-spacing: .07em; }
+.tape-ident.is-running .tape-ident__art { animation: ident-arrive 7.6s ease both; }
+@keyframes ident-arrive { 0% { opacity: 0; } 8%, 90% { opacity: 1; } 100% { opacity: 0; } }
