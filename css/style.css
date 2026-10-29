@@ -7,12 +7,12 @@
   --text: #17152b;
   --muted: #5a5775;
   --line: rgba(23, 21, 43, 0.1);
-  --accent: #d6249f;
+  --accent: #c62860;
   --accent-2: #6d28d9;
-  --accent-3: #0891b2;
+  --accent-3: #a75508;
   --link: #6d28d9;
-  --grad: linear-gradient(120deg, #d6249f, #6d28d9 55%, #0891b2);
-  --grad-text: linear-gradient(120deg, color-mix(in srgb, var(--accent) 88%, var(--text)), var(--accent-2) 55%, color-mix(in srgb, var(--accent-3) 72%, var(--text)));
+  --grad: linear-gradient(120deg, #ffbf35 0 20%, #ff763d 20% 40%, #ed466d 40% 60%, #bb51ce 60% 80%, #8264e6 80%);
+  --grad-text: linear-gradient(120deg, #a75508, #c62860 50%, #6d28d9);
   --rim: linear-gradient(120deg, color-mix(in srgb, var(--accent) 55%, var(--line)), color-mix(in srgb, var(--accent-2) 45%, var(--line)) 55%, color-mix(in srgb, var(--accent-3) 55%, var(--line)));
   --glow: -10px -6px 26px -20px color-mix(in srgb, var(--accent) 55%, transparent), 12px 10px 28px -21px color-mix(in srgb, var(--accent-3) 50%, transparent);
   --glow-hover: -8px -6px 28px -16px color-mix(in srgb, var(--accent) 50%, transparent), 10px 8px 32px -18px color-mix(in srgb, var(--accent-3) 50%, transparent);
@@ -27,12 +27,12 @@
   --card-foil-tone: saturate(1.9) brightness(.7);
   /* Terminal under the portrait and the torn-open code in "Currently learning". */
   --term-bg: #fdfcff;
-  --term-bar: linear-gradient(100deg, #f8e8f4, #e6f0fa);
+  --term-bar: linear-gradient(100deg, #f8e8f4, #fff0dc);
   --term-bar-text: #6b6585;
   --term-rule: #6d28d91a;
   --term-text: #3a3550;
   --term-command: #7a2e9e;
-  --term-prompt: #0a8f96;
+  --term-prompt: #a75508;
   --term-arrow: #c2268f;
   --term-shadow: 0 16px 36px -24px #5a3fa055;
   --tear-bg: #f8f6fd;
@@ -42,37 +42,37 @@
   --tear-code: #5f6b78;
   --tear-comment: #8d97a3;
   --tear-sel: #7c3fd6;
-  --tear-prop: #0a8a91;
+  --tear-prop: #a75508;
   --tear-val: #7a5f88;
-  --tear-a1: #d6249f;
+  --tear-a1: #c62860;
   --tear-a2: #6d28d9;
-  --tear-a3: #0891b2;
+  --tear-a3: #a75508;
   --tear-tone: #c2268f;
   --tear-current: #6d28d9;
   --tear-glow: #9570ef1a;
   /* The footer's circuit board and the games that play on it. */
-  --pcb-trace: #c5cde8;
-  --pcb-part: #ece9f8;
-  --pcb-part-edge: #b9b3d8;
+  --pcb-trace: #d8b9c9;
+  --pcb-part: #f3e5ec;
+  --pcb-part-edge: #ceb0c2;
   --snake-a: #7c3fd6;
   --snake-b: #d6249f;
-  --snake-head: #0a8f96;
+  --snake-head: #ae5b07;
   --snake-food: #e11d74;
-  --tc-i: #0a8f96;
+  --tc-i: #ad5a0a;
   --tc-o: #c98a00;
   --tc-t: #7c3fd6;
-  --tc-s: #1a9a52;
+  --tc-s: #bf4b38;
   --tc-z: #d6244f;
-  --tc-j: #2f5fd0;
+  --tc-j: #9c3ba8;
   --tc-l: #d4691f;
-  --pac-wall: #5a62d6;
+  --pac-wall: #8950b5;
   --pac-pellet: #c28a2b;
   --pac: #f2b000;
   --pac-edge: #b57a00;
   --ghost-0: #e0334f;
   --ghost-1: #e86fb7;
-  --ghost-2: #1da6d0;
-  --ghost-scared: #3d4bd0;
+  --ghost-2: #e38a2b;
+  --ghost-scared: #7c3fd6;
 
   --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-head: "Space Grotesk", var(--font-body);
@@ -89,11 +89,12 @@
   --text: #ece9ff;
   --muted: #a5a1c7;
   --line: rgba(236, 233, 255, 0.1);
-  --accent: #ff5ecb;
-  --accent-2: #9b6bff;
-  --accent-3: #4fd8ff;
-  --link: #4fd8ff;
-  --grad: linear-gradient(120deg, #ff5ecb, #9b6bff 55%, #4fd8ff);
+  --accent: #ff799f;
+  --accent-2: #bd9aff;
+  --accent-3: #ffc05d;
+  --link: #ffd18a;
+  --grad: linear-gradient(120deg, #ffbf35 0 20%, #ff763d 20% 40%, #ed466d 40% 60%, #bb51ce 60% 80%, #8264e6 80%);
+  --grad-text: linear-gradient(120deg, #ffc05d, #ff799f 50%, #bd9aff);
   --shadow: 0 14px 40px -16px rgba(0, 0, 0, 0.7);
   --card-paper: #28262e;
   --card-ink: #f1ebed;
@@ -103,51 +104,51 @@
   --card-relief: #00000080;
   --card-foil-tone: saturate(1.1) brightness(1.05);
   --term-bg: #100e20;
-  --term-bar: linear-gradient(100deg, #30213a70, #192a3d70);
+  --term-bar: linear-gradient(100deg, #30213a70, #3b241970);
   --term-bar-text: #b6accb;
   --term-rule: #c5b6ef1a;
   --term-text: #dfd9ee;
   --term-command: #eeceff;
-  --term-prompt: #6ce7e4;
+  --term-prompt: #ffc05d;
   --term-arrow: #ff91cf;
   --term-shadow: 0 16px 36px -24px #08051c80;
-  --tear-bg: #08151d;
-  --tear-grid: #203440;
+  --tear-bg: #1b1020;
+  --tear-grid: #4a303a;
   --tear-shade: #000;
   --tear-shade-o: .55;
-  --tear-code: #8fa3ad;
-  --tear-comment: #4d6b78;
+  --tear-code: #c3abb3;
+  --tear-comment: #8e6f79;
   --tear-sel: #ac80f6;
-  --tear-prop: #6ce7e4;
+  --tear-prop: #ffc05d;
   --tear-val: #c9b4d6;
-  --tear-a1: #ff5ecb;
-  --tear-a2: #9b6bff;
-  --tear-a3: #4fd8ff;
+  --tear-a1: #ff799f;
+  --tear-a2: #bd9aff;
+  --tear-a3: #ffc05d;
   --tear-tone: #ff80c8;
   --tear-current: #9b6bff;
   --tear-glow: #9570ef22;
-  --pcb-trace: #255264;
-  --pcb-part: #172833;
-  --pcb-part-edge: #37515e;
+  --pcb-trace: #664450;
+  --pcb-part: #2a1c2a;
+  --pcb-part-edge: #765261;
   --snake-a: #ac80f6;
   --snake-b: #c926bb;
-  --snake-head: #6ce7e4;
+  --snake-head: #ffc05d;
   --snake-food: #ff80c8;
-  --tc-i: #6ce7e4;
+  --tc-i: #ffc05d;
   --tc-o: #ffd56b;
   --tc-t: #b28bff;
-  --tc-s: #7ef5a0;
+  --tc-s: #ff8a61;
   --tc-z: #ff7a9a;
-  --tc-j: #6e9aff;
+  --tc-j: #db85ed;
   --tc-l: #ffad6b;
-  --pac-wall: #5b6cff;
+  --pac-wall: #ba84ed;
   --pac-pellet: #f3e3b8;
   --pac: #ffd24a;
   --pac-edge: #ffd24a;
   --ghost-0: #ff5e7e;
   --ghost-1: #ff9bd8;
-  --ghost-2: #5be0ff;
-  --ghost-scared: #5b6cff;
+  --ghost-2: #ffc05d;
+  --ghost-scared: #b28bff;
   color-scheme: dark;
 }
 
@@ -160,11 +161,12 @@
     --text: #ece9ff;
     --muted: #a5a1c7;
     --line: rgba(236, 233, 255, 0.1);
-    --accent: #ff5ecb;
-    --accent-2: #9b6bff;
-    --accent-3: #4fd8ff;
-    --link: #4fd8ff;
-    --grad: linear-gradient(120deg, #ff5ecb, #9b6bff 55%, #4fd8ff);
+    --accent: #ff799f;
+    --accent-2: #bd9aff;
+    --accent-3: #ffc05d;
+    --link: #ffd18a;
+    --grad: linear-gradient(120deg, #ffbf35 0 20%, #ff763d 20% 40%, #ed466d 40% 60%, #bb51ce 60% 80%, #8264e6 80%);
+    --grad-text: linear-gradient(120deg, #ffc05d, #ff799f 50%, #bd9aff);
     --shadow: 0 14px 40px -16px rgba(0, 0, 0, 0.7);
     --card-paper: #28262e;
     --card-ink: #f1ebed;
@@ -174,51 +176,51 @@
     --card-relief: #00000080;
     --card-foil-tone: saturate(1.1) brightness(1.05);
     --term-bg: #100e20;
-    --term-bar: linear-gradient(100deg, #30213a70, #192a3d70);
+    --term-bar: linear-gradient(100deg, #30213a70, #3b241970);
     --term-bar-text: #b6accb;
     --term-rule: #c5b6ef1a;
     --term-text: #dfd9ee;
     --term-command: #eeceff;
-    --term-prompt: #6ce7e4;
+    --term-prompt: #ffc05d;
     --term-arrow: #ff91cf;
     --term-shadow: 0 16px 36px -24px #08051c80;
-    --tear-bg: #08151d;
-    --tear-grid: #203440;
+    --tear-bg: #1b1020;
+    --tear-grid: #4a303a;
     --tear-shade: #000;
     --tear-shade-o: .55;
-    --tear-code: #8fa3ad;
-    --tear-comment: #4d6b78;
+    --tear-code: #c3abb3;
+    --tear-comment: #8e6f79;
     --tear-sel: #ac80f6;
-    --tear-prop: #6ce7e4;
+    --tear-prop: #ffc05d;
     --tear-val: #c9b4d6;
-    --tear-a1: #ff5ecb;
-    --tear-a2: #9b6bff;
-    --tear-a3: #4fd8ff;
+    --tear-a1: #ff799f;
+    --tear-a2: #bd9aff;
+    --tear-a3: #ffc05d;
     --tear-tone: #ff80c8;
     --tear-current: #9b6bff;
     --tear-glow: #9570ef22;
-    --pcb-trace: #255264;
-    --pcb-part: #172833;
-    --pcb-part-edge: #37515e;
+    --pcb-trace: #664450;
+    --pcb-part: #2a1c2a;
+    --pcb-part-edge: #765261;
     --snake-a: #ac80f6;
     --snake-b: #c926bb;
-    --snake-head: #6ce7e4;
+    --snake-head: #ffc05d;
     --snake-food: #ff80c8;
-    --tc-i: #6ce7e4;
+    --tc-i: #ffc05d;
     --tc-o: #ffd56b;
     --tc-t: #b28bff;
-    --tc-s: #7ef5a0;
+    --tc-s: #ff8a61;
     --tc-z: #ff7a9a;
-    --tc-j: #6e9aff;
+    --tc-j: #db85ed;
     --tc-l: #ffad6b;
-    --pac-wall: #5b6cff;
+    --pac-wall: #ba84ed;
     --pac-pellet: #f3e3b8;
     --pac: #ffd24a;
     --pac-edge: #ffd24a;
     --ghost-0: #ff5e7e;
     --ghost-1: #ff9bd8;
-    --ghost-2: #5be0ff;
-    --ghost-scared: #5b6cff;
+    --ghost-2: #ffc05d;
+    --ghost-scared: #b28bff;
     color-scheme: dark;
   }
 }
@@ -451,7 +453,7 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
 .about-terminal__lights { display: flex; gap: 5px; }
 .about-terminal__lights i { width: 6px; height: 6px; border-radius: 50%; background: #ff7db5; }
 .about-terminal__lights i:nth-child(2) { background: #bb9bff; }
-.about-terminal__lights i:nth-child(3) { background: #6ce7e4; }
+.about-terminal__lights i:nth-child(3) { background: #ffc05d; }
 .about-terminal__body { padding: 1rem 1.1rem .85rem; overflow-wrap: anywhere; }
 .about-terminal__body p { margin: 0 0 .8rem; }
 .about-terminal__body .about-terminal__command { margin-bottom: .3rem; color: var(--term-command); }
@@ -481,12 +483,21 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
 /* Only the lower edge is clipped: the sun sets behind the horizon, its glow may spill around the rest. */
 .horizon__sky { position: absolute; inset: 0 0 var(--floor); display: flex; justify-content: center; align-items: flex-end; padding-left: calc((var(--vanish) - 50%) * 2); clip-path: inset(-100% -100% 0); }
 .horizon__sun {
-  flex: none; width: var(--sun); aspect-ratio: 1; margin-bottom: calc(var(--sun) * -.5); border-radius: 50%;
+  position: relative; flex: none; width: var(--sun); aspect-ratio: 1; margin-bottom: calc(var(--sun) * -.5); border-radius: 50%;
   background: linear-gradient(color-mix(in srgb, var(--accent) 55%, #ffa94d), var(--accent) 50%, var(--accent-2));
   box-shadow: 0 0 calc(var(--sun) * .28) color-mix(in srgb, var(--accent) 45%, transparent);
   -webkit-mask: linear-gradient(#000 24%, #0000 24% 25.5%, #000 25.5% 31%, #0000 31% 33.5%, #000 33.5% 38%, #0000 38% 41.5%, #000 41.5% 44.5%, #0000 44.5% 49%, #000 49%);
   mask: linear-gradient(#000 24%, #0000 24% 25.5%, #000 25.5% 31%, #0000 31% 33.5%, #000 33.5% 38%, #0000 38% 41.5%, #000 41.5% 44.5%, #0000 44.5% 49%, #000 49%);
 }
+/* Occasionally the same sun takes on the colours of a VHS sleeve. */
+.horizon__sun::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0;
+  background: linear-gradient(to bottom, #ffbf35 0 20%, #ff763d 20% 40%, #ed466d 40% 60%, #bb51ce 60% 80%, #8264e6 80%);
+  transition: opacity 1.8s ease;
+}
+.horizon.is-tape-sun .horizon__sun::after { opacity: 1; }
+.horizon.is-idle .horizon__sun::after { transition: none; }
+@media (prefers-reduced-motion: reduce) { .horizon__sun::after { transition: none; } }
 .horizon__floor {
   position: absolute; inset: auto 0 0; height: var(--floor); overflow: hidden; perspective: calc(var(--floor) * 1.1); perspective-origin: var(--vanish) 0;
   -webkit-mask: linear-gradient(#0000, #000 10%, #000 60%, #0000);
@@ -826,7 +837,7 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
 .g-ghost-pupil { fill: #1b1c4a; }
 /* The game crashing (crash.js): the picture judders with its colours split, the pixels that break out fly in
    a layer over the page, and the core dump is written in the food's colour. */
-.footer__circuit.is-crashing #game-pixels { animation: crash-judder .14s steps(2, end) infinite; filter: drop-shadow(1.2px 0 0 #ff2a5acc) drop-shadow(-1.2px 0 0 #28dcffcc); }
+.footer__circuit.is-crashing #game-pixels { animation: crash-judder .14s steps(2, end) infinite; filter: drop-shadow(1.2px 0 0 #ff2a5acc) drop-shadow(-1.2px 0 0 #ffbf35cc); }
 @keyframes crash-judder { 50% { transform: translate(1.4px, -.6px); } }
 .circuit-burst { position: fixed; inset: 0; z-index: 80; overflow: hidden; pointer-events: none; perspective: 700px; font-family: var(--font-mono); }
 .circuit-burst svg { position: absolute; overflow: visible; }
@@ -1338,7 +1349,7 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
 .nav__brand::before, .nav__brand::after { content: attr(data-text); position: absolute; inset: 0; pointer-events: none; opacity: 0; }
 .nav__brand.is-glitching { animation: signal-jitter var(--glitch-duration, .28s) steps(2, end); }
 .nav__brand.is-glitching::before { color: #ff5ecb; opacity: .85; animation: signal-red var(--glitch-duration, .28s) steps(2, end); }
-.nav__brand.is-glitching::after { color: #4fd8ff; opacity: .85; animation: signal-blue var(--glitch-duration, .28s) steps(2, end); }
+.nav__brand.is-glitching::after { color: #ffbf35; opacity: .85; animation: signal-blue var(--glitch-duration, .28s) steps(2, end); }
 @keyframes signal-jitter { 0%, 100% { transform: none; } 25% { transform: translate(1px, -1px); } 50% { transform: translate(-1px, 0); } 75% { transform: translate(1px, 1px); } }
 @keyframes signal-red { 0%, 100% { clip-path: inset(10% 0 65%); transform: translateX(-3px); } 35% { clip-path: inset(45% 0 30%); transform: translateX(3px); } 70% { clip-path: inset(20% 0 50%); transform: translateX(-2px); } }
 @keyframes signal-blue { 0%, 100% { clip-path: inset(60% 0 10%); transform: translateX(3px); } 35% { clip-path: inset(15% 0 60%); transform: translateX(-2px); } 70% { clip-path: inset(65% 0 5%); transform: translateX(2px); } }
@@ -1395,7 +1406,7 @@ body.observer-open { overflow: hidden; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .js .reveal { opacity: 1; transform: none; }
-  .nav__brand.is-glitching { text-shadow: -2px 0 #ff5ecb, 2px 0 #4fd8ff; }
+  .nav__brand.is-glitching { text-shadow: -2px 0 #ff5ecb, 2px 0 #ffbf35; }
   .nav__brand.is-glitching::before, .nav__brand.is-glitching::after { display: none; }
 }
 
@@ -1470,13 +1481,6 @@ body.observer-open { overflow: hidden; }
 #research .section__lead a { white-space: nowrap; }
 
 
-/* Character print: an original still generated from the attractor artwork.
-   The original remains visible on touch and with reduced motion. */
-.ascii-print { display: none; }
-@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  .ascii-print { display: block; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: #090615 url("../assets/attractor-ascii.svg") center 40% / cover no-repeat; opacity: 1; transition: opacity .7s ease; }
-  .project-slot:hover .ascii-print, .project-slot:focus-within .ascii-print { opacity: 0; }
-}
 /* A small field of characters at section transitions. The canvas is decorative;
    without JavaScript the space stays empty and the sections remain readable. */
 .tape-seam {

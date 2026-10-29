@@ -467,7 +467,7 @@ export function startFooterGames({ board, pixels, toggle, caption }) {
   function schedule() {
     clearTimeout(timer);
     timer = 0;
-    const running = visible && !document.hidden && !paused && !crashing;
+    const running = visible && !document.hidden && !paused && !crashing && !document.documentElement.classList.contains('is-tape-paused');
     figure.classList.toggle("is-paused", !running && !crashing);
     if (running) timer = setTimeout(step, delay);
   }
@@ -481,6 +481,7 @@ export function startFooterGames({ board, pixels, toggle, caption }) {
   toggle.addEventListener("click", () => { paused = !paused; updateToggle(); });
   motion.addEventListener("change", event => { if (event.matches) { paused = true; updateToggle(); } });
   document.addEventListener("visibilitychange", schedule);
+  document.addEventListener("tape-pause-change", schedule);
   window.addEventListener("pagehide", () => { clearTimeout(timer); timer = 0; });
   window.addEventListener("pageshow", schedule);
   if ("IntersectionObserver" in window) {

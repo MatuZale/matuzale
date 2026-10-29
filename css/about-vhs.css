@@ -1,0 +1,32 @@
+/* A smaller, more measured headline lets the typewriter face breathe beside
+   the portrait. The coloured lettering echoes the diagonal cassette sleeves. */
+#about .about__text h2 {
+  max-width: 21ch;
+  font-size: clamp(2.2rem, 3.55vw, 3.5rem);
+  line-height: 1.12;
+  letter-spacing: -.055em;
+}
+#about .about__text h2 em {
+  font-style: normal;
+  color: #9b246c;
+  background: linear-gradient(135deg, #a95700 0 20%, #bd4e14 20% 40%, #c52450 40% 60%, #a82a87 60% 80%, #6835bf 80%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+:root[data-theme="dark"] #about .about__text h2 em {
+  background-image: linear-gradient(135deg, #ffce62 0 20%, #ff985a 20% 40%, #ff7790 40% 60%, #e880d3 60% 80%, #bea1ff 80%);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) #about .about__text h2 em {
+    background-image: linear-gradient(135deg, #ffce62 0 20%, #ff985a 20% 40%, #ff7790 40% 60%, #e880d3 60% 80%, #bea1ff 80%);
+  }
+}
+@media (max-width: 800px) {
+  #about .about__text h2 { max-width: 20ch; font-size: clamp(2.15rem, 8.6vw, 3rem); }
+}
+@media (forced-colors: active) {
+  #about .about__text h2 em { background: none; color: CanvasText; -webkit-text-fill-color: CanvasText; }
+}

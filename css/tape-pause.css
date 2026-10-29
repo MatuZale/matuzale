@@ -1,0 +1,12 @@
+/* Hold ambient CSS animations while keeping the controls and tracking display alive. */
+html.is-tape-paused :not(.nav, .nav *, .footer-tape__transport, .footer-tape__transport *, .tape-still, .tape-still *, .footer-tape-seek, .footer-tape-seek *, .tape-transport, .tape-transport *, .tape-resume, .tape-resume *, .osd, .osd *) {
+  animation-play-state: paused !important;
+}
+html.is-tape-paused :not(.nav, .nav *, .footer-tape__transport, .footer-tape__transport *, .tape-still, .tape-still *, .footer-tape-seek, .footer-tape-seek *, .tape-transport, .tape-transport *, .tape-resume, .tape-resume *, .osd, .osd *)::before,
+html.is-tape-paused :not(.nav, .nav *, .footer-tape__transport, .footer-tape__transport *, .tape-still, .tape-still *, .footer-tape-seek, .footer-tape-seek *, .tape-transport, .tape-transport *, .tape-resume, .tape-resume *, .osd, .osd *)::after {
+  animation-play-state: paused !important;
+}
+/* A dialog opened while the tape is held must not be stuck at the invisible
+   first frame of its entrance. Its ambient animation remains paused. */
+html.is-tape-paused .deck[open],
+html.is-tape-paused .deck.is-dealt .deck__slot { animation: none !important; }

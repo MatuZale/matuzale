@@ -1,0 +1,19 @@
+/* The little background game sits in the same family of equipment as the tape. */
+.footer__circuit {
+  padding: .55rem .65rem .4rem;
+  border: 1px solid var(--retro-bezel-edge);
+  border-radius: 8px;
+  background: var(--retro-bezel);
+  box-shadow: inset 0 1px #ffffff18, 0 10px 24px -20px #0009;
+}
+.footer__circuit .circuit-window { display: block; }
+.footer__circuit .circuit-caption { padding-top: .25rem; color: var(--retro-key-text); }
+.footer__circuit .circuit-caption__pause { color: var(--retro-key-text); }
+
+@media (max-width: 640px) {
+  .footer__identity { grid-row: 1; }
+  .footer__secrets { grid-row: 2; margin-top: -1.35rem; }
+  .footer-tape { grid-row: 3; }
+  .footer__circuit { grid-row: 4; }
+  .footer__bottom { grid-row: 5; }
+}

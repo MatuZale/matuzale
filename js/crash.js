@@ -7,11 +7,25 @@
 
 const SVG = "http://www.w3.org/2000/svg";
 const rand = (a, b) => a + Math.random() * (b - a);
-const sleep = ms => new Promise(done => setTimeout(done, ms));
+const tapePaused = () => document.documentElement.classList.contains("is-tape-paused");
+// Wait in tape time, so the glitch, the explosion and the dump stay in sync.
+const sleep = ms => new Promise(done => {
+  let remaining = ms, started = 0, timer = 0;
+  function sync() {
+    if (timer) { clearTimeout(timer); timer = 0; remaining -= performance.now() - started; }
+    if (!tapePaused()) {
+      started = performance.now();
+      timer = setTimeout(() => { document.removeEventListener("tape-pause-change", sync); done(); }, Math.max(0, remaining));
+    }
+  }
+  document.addEventListener("tape-pause-change", sync);
+  sync();
+});
 const NOISE = "▓▒░#%&@$?!";
 
 export async function crash({ figure, board, pixels, caption, name }) {
   figure.classList.add("is-crashing");
+  await sleep(0);
   await glitch(pixels, caption, name, 1100);
   burst(board, pixels);
   caption.textContent = `${name}: crashed`;
@@ -24,8 +38,8 @@ export async function crash({ figure, board, pixels, caption, name }) {
 async function glitch(pixels, caption, name, length) {
   const frame = [...pixels.children], boxes = frame.map(n => n.getBBox());
   const classes = [...new Set(frame.map(n => n.getAttribute("class")).filter(Boolean))];
-  const end = performance.now() + length;
-  while (performance.now() < end) {
+  let remaining = length;
+  while (remaining > 0) {
     const band = rand(10, 110), height = rand(6, 34), shift = Math.round(rand(-5, 5)) * 8;
     const out = frame.map((n, i) => {
       const copy = n.cloneNode(true), box = boxes[i], middle = box.y + box.height / 2;
@@ -44,7 +58,9 @@ async function glitch(pixels, caption, name, length) {
     }
     pixels.replaceChildren(...out);
     caption.textContent = [...name].map(ch => Math.random() < .45 ? NOISE[Math.floor(Math.random() * NOISE.length)] : ch).join("");
-    await sleep(rand(50, 110));
+    const step = rand(50, 110);
+    await sleep(step);
+    remaining -= step;
   }
   pixels.replaceChildren(...frame);
 }
@@ -59,6 +75,7 @@ function burst(board, pixels) {
   const cx = view.left + view.width / 2, cy = view.top + view.height / 2;
   layer.style.perspectiveOrigin = `${cx}px ${cy}px`;
   let last = 0;
+  const animations = [];
   for (const n of [...pixels.children]) {
     const b = n.getBBox(), pad = 3;
     if (!b.width && !b.height) continue;
@@ -71,11 +88,23 @@ function burst(board, pixels) {
     layer.append(piece);
     const big = b.width > 30 || b.height > 30, delay = rand(0, 260), duration = big ? rand(1700, 2300) : rand(1600, 2700);
     if (big) piece.style.transformOrigin = "50% 100%";
-    piece.animate(big ? tip() : fling(left + width / 2 - cx, top + height / 2 - cy), { duration, delay, easing: "linear", fill: "both" });
+    animations.push(piece.animate(big ? tip() : fling(left + width / 2 - cx, top + height / 2 - cy), { duration, delay, easing: "linear", fill: "both" }));
     last = Math.max(last, delay + duration);
   }
   pixels.replaceChildren();
-  setTimeout(() => layer.remove(), last + 200);
+  let held = [];
+  function sync() {
+    if (tapePaused()) {
+      held = animations.filter(animation => animation.playState === "running");
+      held.forEach(animation => animation.pause());
+    } else {
+      held.forEach(animation => { if (animation.playState === "paused") animation.play(); });
+      held = [];
+    }
+  }
+  document.addEventListener("tape-pause-change", sync);
+  sync();
+  sleep(last + 200).then(() => { document.removeEventListener("tape-pause-change", sync); layer.remove(); });
 }
 
 // A pixel: away from the board's middle, up, towards the viewer (up to some five times its size, with

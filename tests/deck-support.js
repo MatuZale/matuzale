@@ -111,18 +111,23 @@ export async function dealt(page) {
   await expect.poll(() => page.locator('.deck').evaluate(el =>
     el.getAnimations({ subtree: true }).filter(animation => {
       // style.css deliberately runs rgb-split forever on focused/hovered buttons.
-      // Exclude only this paint-only text shadow, not deal/deck-in, transitions or
-      // arbitrary infinite animations. Keep it enabled in the rendered page.
+      // Exclude the text shadow and the decorative, transform-only deck backdrop;
+      // card animation, transitions and arbitrary infinite animations still settle.
       const effect = animation.effect;
       const textOnly = animation.animationName === 'rgb-split' &&
         effect?.target?.matches('.deck__close, .deck__tool') &&
         effect.getComputedTiming().iterations === Infinity &&
         effect.getKeyframes().every(frame => Object.keys(frame).every(key =>
           ['offset', 'computedOffset', 'easing', 'composite', 'textShadow'].includes(key)));
-      return !textOnly && !['finished', 'idle'].includes(animation.playState);
+      const backdropOnly = animation.animationName === 'deck-ambient' &&
+        effect?.target?.matches('.deck') && effect.pseudoElement === '::before' &&
+        effect.getComputedTiming().iterations === Infinity &&
+        effect.getKeyframes().every(frame => Object.keys(frame).every(key =>
+          ['offset', 'computedOffset', 'easing', 'composite', 'transform'].includes(key)));
+      return !textOnly && !backdropOnly && !['finished', 'idle'].includes(animation.playState);
     }).map(animation => ({ name: animation.animationName || animation.transitionProperty,
       state: animation.playState, target: animation.effect?.target?.className })),
-  ), { message: 'All deck motion must settle; only the button text-shadow loop is exempt' }).toEqual([]);
+  ), { message: 'Card motion must settle; only decorative button and backdrop loops are exempt' }).toEqual([]);
   await idle(page);
   // Prove the RAF observer actually saw the module, rather than silently counting nothing.
   expect(await page.evaluate(() => window.deckAudit.scheduled)).toBeGreaterThan(0);

@@ -371,7 +371,7 @@ export async function createDeck() {
       if (returning) { const to = slotOffset(); s.tx.set(to.x); s.ty.set(to.y); s.scale.set(to.scale); }
       let moving = false;
       for (const spring of Object.values(s)) {
-        if (motion.matches) spring.jump(spring.target);
+        if (motion.matches || document.documentElement.classList.contains("is-tape-paused")) spring.jump(spring.target);
         else moving = spring.step(elapsed) || moving;
       }
       if (returning && [s.tx, s.ty].every(near(.5)) && near(.002)(s.scale)) { returning = false; unstage(); }
@@ -383,7 +383,8 @@ export async function createDeck() {
       // Layout/hit-test changes can repeat pointerleave at a stationary pointer (notably
       // in WebKit). Resting an already settled card must not start another render cycle.
       if (!returning && Object.values(s).every(spring => spring.value === spring.target && spring.velocity === 0)) return;
-      if (motion.matches) { stop(); tick(); return; }
+      // While the tape is held, interactions still work, but settle instantly.
+      if (motion.matches || document.documentElement.classList.contains("is-tape-paused")) { stop(); tick(); return; }
       if (!raf) {
         // Start a fresh clock on wake; idle time is not animation time. Do not reset
         // it on pointermove while running, or frequent input would starve the spring.
@@ -488,8 +489,12 @@ export async function createDeck() {
       render();
     }
     const staged = () => el.classList.contains("is-staged");
-    return { el, rotator, s, aim, rest, place, lift, drop, flip, spinTo, render, staged, reset };
+    return { el, rotator, s, aim, rest, place, lift, drop, flip, spinTo, render, staged, reset, stop, wake };
   }
+
+  document.addEventListener("tape-pause-change", () => {
+    cards.forEach(card => document.documentElement.classList.contains("is-tape-paused") ? card.stop() : card.wake());
+  });
 
   function lift(card, input) {
     if (active === card) return;

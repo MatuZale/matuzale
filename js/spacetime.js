@@ -41,6 +41,8 @@ const PLANETS = [24, 42], COMETS = [28, 50];
 // heavy visitor: 15 s for the first (three in four who stay 20 s see it), then 150 s. The culmination:
 // 480 s (a 6% chance in the first 30 s), and none for 120 s after one.
 const HEAVY_FIRST = 15, HEAVY_AGAIN = 150, SHOW_MEAN = 480, SHOW_REST = 120;
+const TAPE_PHOTON_MEAN = 180, TAPE_PHOTON_REST = 80;
+const TAPE_COLOURS = ["#ffbf35", "#ff763d", "#ed466d", "#bb51ce", "#8264e6"];
 const chance = (mean, dt) => Math.random() < 1 - Math.exp(-dt / mean);
 const KEEP = { matter: 18, light: 3.5, planet: 12, comet: 10, heavy: 14 };
 // Masses that pull on the rest (the hole is M = 0.5), softened so a close pass flings rather than spikes.
@@ -99,6 +101,24 @@ function spawnParticle() {
   if (roll < .75) return launch("matter", fromAfar(rand(8, 12), rand(.28, .36)), .5);         // flyby
   if (roll < .87) return launch("matter", fromAfar(rand(2.5, 5.5), rand(.28, .36)), .5);      // falls in
   return launch("light", fromAfar(rand(2.9, 6), 1), .5);
+}
+// Five nearby rays with the same initial direction; each is then integrated independently.
+function spawnTapePhotons() {
+  const ray = launch("light", fromAfar(rand(8.5, 10.5), 1), .25);
+  // A direction across the view, projected perpendicular to the rays' velocity.
+  let across = [1, -1, 0];
+  let dot = across.reduce((sum, v, i) => sum + v * ray.vel[i], 0);
+  across = across.map((v, i) => v - dot * ray.vel[i]);
+  if (norm(across) < .2) {
+    across = [0, 0, 1];
+    dot = across.reduce((sum, v, i) => sum + v * ray.vel[i], 0);
+    across = across.map((v, i) => v - dot * ray.vel[i]);
+  }
+  const length = norm(across);
+  across = across.map(v => v / length);
+  return TAPE_COLOURS.map((colour, i) => ({
+    ...ray, pos: along(ray.pos, across, (i - 2) * .6), vel: [...ray.vel], trail: [], colour,
+  }));
 }
 const spawnPlanet = () => launch("planet", bound(rand(8, 10.5), rand(11.5, 14.5)), .3, {
   life: rand(45, 60), mass: PLANET_MASS, radius: rand(.32, .45),
@@ -193,7 +213,7 @@ export function startSpacetime(holder) {
   const hole = { pos: [0, 0], vel: [0, 0] };       // the hole's sway off the middle, in the sheet's plane
   let ripple = [];                                  // what the heavy visitor sends out: {t, amp, phi}
   let flashes = [];                                 // something swallowed by a planet or the visitor: {by, t, body}
-  let clock = 0, nextSpawn = 0, nextPlanet = 4, nextComet = rand(12, 25), heavySeen = false;
+  let clock = 0, nextSpawn = 0, nextPlanet = 4, nextComet = rand(12, 25), nextTapePhotons = 0, heavySeen = false;
   let show = null, showDue = false, restUntil = 0, dim = 1;    // the culmination: {t, lens, ready, spawnAt}
   let dust = [], exposure = null, peak = 0;                       // its fine matter, and the plate it glows on
   const heavy = () => bodies.find(b => b.alive && b.kind === "heavy");
@@ -340,6 +360,9 @@ export function startSpacetime(holder) {
       if (roll && !showDue && clock >= restUntil && W >= 800 && chance(SHOW_MEAN, dt)) showDue = true;
       if (roll && !showDue && !alive("heavy") && !lively() && chance(heavySeen ? HEAVY_AGAIN : HEAVY_FIRST, dt)) {
         bodies.push(spawnHeavy()); heavySeen = true;
+      }
+      if (roll && !showDue && !lively() && clock >= nextTapePhotons && !bodies.some(b => b.alive && b.colour) && chance(TAPE_PHOTON_MEAN, dt)) {
+        bodies.push(...spawnTapePhotons()); nextTapePhotons = clock + TAPE_PHOTON_REST;
       }
       if (showDue && !lively() && W >= 800) { showDue = false; beginShow(); }
     }
@@ -504,7 +527,7 @@ export function startSpacetime(holder) {
 
   const planetColour = look => [mix(colours.a1, "#ffa94d", .45), colours.a2, colours.a3][look.tone];
   const cometColour = () => colours.dark ? mix(colours.a3, "#ffffff", .5) : colours.a3;
-  const pathColour = b => ({ matter: colours.a2, light: colours.a3, planet: b.look && planetColour(b.look), comet: cometColour(), heavy: colours.muted })[b.kind];
+  const pathColour = b => b.colour || ({ matter: colours.a2, light: colours.a3, planet: b.look && planetColour(b.look), comet: cometColour(), heavy: colours.muted })[b.kind];
   const pathStrength = { matter: 1, light: 1, planet: .45, comet: .5, heavy: .45 };
 
   // A path fading towards its tail, in fine alpha steps (coarse ones show as bands on long paths).
@@ -588,7 +611,7 @@ export function startSpacetime(holder) {
       else if (b.kind === "heavy") drawHeavy(x, y, Math.min(1, b.age / born) * dim);
       else {
         c.globalAlpha = (dark ? .85 : .75) * seen;
-        c.fillStyle = dark ? colours.text : pathColour(b);
+        c.fillStyle = b.colour || (dark ? colours.text : pathColour(b));
         c.beginPath(); c.arc(x, y, 1.8 * dpr, 0, 2 * Math.PI); c.fill();
       }
     }
@@ -614,7 +637,7 @@ export function startSpacetime(holder) {
     drawLive(dt);
   }
   function update() {
-    const run = visible && !motion.matches;
+    const run = visible && !document.hidden && !motion.matches && !document.documentElement.classList.contains("is-tape-paused");
     if (run && !raf) { last = performance.now(); raf = requestAnimationFrame(frame); }
     if (!run && raf) { cancelAnimationFrame(raf); raf = 0; }
   }
@@ -624,6 +647,13 @@ export function startSpacetime(holder) {
   // summon("luminet") for the culmination.
   holder.summon = kind => {
     if (kind === "luminet") { if (W >= 800) beginShow(); return; }
+    if (kind === "tape-photons") {
+      if (visible && !document.hidden && !motion.matches && !document.documentElement.classList.contains("is-tape-paused") && !show && !bodies.some(b => b.alive && b.colour)) {
+        bodies.push(...spawnTapePhotons()); nextTapePhotons = clock + TAPE_PHOTON_REST;
+        return true;
+      }
+      return false;
+    }
     bodies.push({ particle: spawnParticle, planet: spawnPlanet, comet: spawnComet, heavy: spawnHeavy }[kind]());
   };
 
@@ -637,5 +667,8 @@ export function startSpacetime(holder) {
   new MutationObserver(rebuild).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", rebuild);
   motion.addEventListener("change", update);
-  new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; update(); }).observe(holder);
+  document.addEventListener("visibilitychange", update);
+  document.addEventListener("tape-pause-change", update);
+  // A fast tape wind can queue an exit and an entry together: the last one is the current view.
+  new IntersectionObserver(entries => { visible = entries[entries.length - 1].isIntersecting; update(); }).observe(holder);
 }

@@ -21,7 +21,13 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&family=VT323&display=swap" />
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/editorial.css" />
   <link rel="stylesheet" href="css/retro.css" />
+  <link rel="stylesheet" href="css/footer-cassette.css" />
+  <link rel="stylesheet" href="css/footer-layout.css" />
+  <link rel="stylesheet" href="css/typography.css" />
+  <link rel="stylesheet" href="css/about-vhs.css" />
+  <link rel="stylesheet" href="css/tape-pause.css" />
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -67,11 +73,8 @@
     <a data-i18n-attr="aria-label:nav.home;title:nav.brandHint" class="nav__brand" href="#top" aria-label="Tomasz Młynik, home" data-text="TM." title="Sometimes the signal slips. Focus here and press G.">TM<span>.</span></a>
     <nav data-i18n-attr="aria-label:nav.label" class="nav__links" id="nav-links" aria-label="Main">
       <a data-i18n="nav.about" href="#about">About</a>
-      <a data-i18n="nav.skills" href="#skills">Toolbox</a>
       <a data-i18n="nav.projects" href="#projects">Projects</a>
-      <a href="#bentos">BENTOS</a>
       <a data-i18n="nav.research" href="#research">Research</a>
-      <a data-i18n="nav.journey" href="#journey">Journey</a>
       <a data-i18n="nav.contact" href="#contact">Contact</a>
     </nav>
     <div class="nav__actions">
@@ -84,16 +87,9 @@
         <button class="channel__key channel__key--av" type="button" data-av title="AV: the page on an old CRT screen (key 0)" aria-label="AV, old CRT screen" aria-keyshortcuts="0" aria-pressed="false">AV</button>
         <button class="channel__key channel__key--game" type="button" data-game title="CH 04: Spacewar! (key 4)" aria-label="04, Spacewar!" aria-keyshortcuts="4">04</button>
       </div>
-      <!-- A small CRT set: its screen glows in the light theme and goes dark in the dark one. -->
-      <button class="icon-btn tv-btn" id="theme-toggle" type="button" aria-label="Toggle light / dark theme">
-        <svg class="tv" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M8.5 2.5 12 6l3.5-3.5" />
-          <rect x="2.5" y="6" width="19" height="14.5" rx="3" />
-          <rect class="tv__screen" x="5" y="8.5" width="11" height="9.5" rx="1.8" />
-          <path d="M19 10.5v.01M19 13.5v.01" />
-          <path class="i-moon" d="M12.2 15.6a2.7 2.7 0 1 1-1.9-4.9 2.1 2.1 0 0 0 1.9 4.9Z" />
-          <circle class="i-sun" cx="10.5" cy="13.25" r="1.6" />
-        </svg>
+      <!-- A miniature cassette takes the colour of the current theme. -->
+      <button class="icon-btn cassette-btn" id="theme-toggle" type="button" aria-label="Toggle light / dark theme">
+        <span class="cassette" aria-hidden="true"><span class="cassette__label"><i></i><i></i></span><span class="cassette__window"></span></span>
       </button>
       <button class="icon-btn nav__burger" id="burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
@@ -113,20 +109,19 @@
           Tomasz<br />Młynik<span class="phd">, PhD</span>
         </h1>
         <p data-i18n="hero.lead" class="hero__lead reveal">
-          Physicist turned <strong>data &amp; software engineer</strong>. I take messy scientific and sensor
-          data and turn it into pipelines, dashboards and tools that people actually use. So far that has
-          taken me from quantum-information theory to an open-source buoy in the Baltic Sea.
+          Physicist and <strong>data &amp; software engineer</strong>. I build tools that make complex data
+          useful, from quantum research to an open-source buoy in the Baltic Sea.
         </p>
         <div class="hero__cta reveal">
-          <a data-i18n="hero.cta.contact" class="btn btn--primary" href="#contact">Get in touch</a>
-          <a data-i18n="hero.cta.work" class="btn btn--ghost" href="#projects">See my work</a>
+          <a data-i18n="hero.cta.work" class="btn btn--primary" href="#projects">Explore my work</a>
+          <a data-i18n="hero.cta.contact" class="btn btn--ghost" href="#contact">Get in touch</a>
         </div>
         <ul data-i18n-attr="aria-label:hero.statsLabel" class="hero__stats reveal" aria-label="Highlights">
           <li><strong>PhD</strong><span data-i18n="hero.stat1">Physics, Univ. of Gdańsk, 2024</span></li>
           <li><strong>5</strong><span data-i18n="hero.stat2">papers &amp; preprints, 4 in quantum information</span></li>
           <li><strong>Python · SQL · AWS</strong><span data-i18n="hero.stat3">day-to-day toolbox</span></li>
         </ul>
-        <p data-i18n="hero.hint" class="hero__hint">The background is a live <a href="#art">Clifford attractor</a>. Move your mouse to bend it.</p>
+        <p data-i18n="hero.hint" class="hero__hint"><a href="#art">Clifford attractor</a> / a live mathematical study</p>
       </div>
     </section>
 
@@ -219,7 +214,7 @@
             <svg data-i18n-attr="aria-label:skills.tear" class="code-tear" viewBox="0 0 600 128" preserveAspectRatio="xMinYMin slice" role="img" aria-label="The card torn open along its lower edge, showing the CSS rules that give each toolbox card its colour">
               <defs>
                 <clipPath id="tear-cut"><path d="M0 16L26 8L40 26L47 5L57 19L67 13L81 24L91 5L117 19L143 11L150 21L169 8L179 24L189 13L199 26L225 5L235 21L242 13L252 21L262 11L276 22L286 2L296 21L306 5L320 19L334 5L344 21L358 13L372 22L398 2L405 26L419 13L433 22L447 5L461 21L480 5L490 19L504 13L518 24L525 2L544 22L563 2L570 24L577 11L600 15V128H0Z" /></clipPath>
-                <linearGradient id="tear-rim" x2="1" y2="1"><stop stop-color="#f46acb" /><stop offset=".5" stop-color="#8364e8" /><stop offset="1" stop-color="#59dce8" /></linearGradient>
+                <linearGradient id="tear-rim" x2="1" y2="1"><stop stop-color="#ffbf35" /><stop offset=".25" stop-color="#ff763d" /><stop offset=".5" stop-color="#ed466d" /><stop offset=".75" stop-color="#bb51ce" /><stop offset="1" stop-color="#8264e6" /></linearGradient>
                 <pattern id="tear-grid" width="10" height="10" patternUnits="userSpaceOnUse"><path class="code-tear__grid" d="M10 0H0V10" fill="none" stroke="#203440" stroke-width=".5" /></pattern>
               </defs>
               <g clip-path="url(#tear-cut)">
@@ -271,7 +266,8 @@
                 <a data-i18n="bentosCard.demo" href="https://embeddedsystems-do.github.io/bentos-satbaltyk-dashboard/" target="_blank" rel="noopener">Dashboard demo ↗</a>
               </div>
             </div>
-            <svg class="card__art" viewBox="0 0 320 220" aria-hidden="true">
+            <div class="card__scene" aria-hidden="true">
+              <svg class="card__sea card__sea--back" viewBox="0 0 320 220" preserveAspectRatio="none">
               <defs>
                 <linearGradient id="sea-back" gradientUnits="userSpaceOnUse" x1="0" y1="104" x2="0" y2="220">
                   <stop offset="0" style="stop-color: var(--accent-2); stop-opacity: .22"/><stop offset="1" style="stop-color: var(--accent-3); stop-opacity: .06"/>
@@ -284,6 +280,8 @@
                 <path d="M-180 112 q20-8 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 V420 H-180 Z" fill="url(#sea-back)"/>
                 <path class="wave__crest wave__crest--back" d="M-180 112 q20-8 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0"/>
               </g>
+              </svg>
+              <svg class="card__art" viewBox="0 0 320 220">
               <g class="buoy">
                 <line x1="160" y1="40" x2="160" y2="106" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
                 <circle class="buoy__light" cx="160" cy="36" r="5"/>
@@ -293,11 +291,14 @@
                 <line x1="160" y1="128" x2="160" y2="196" stroke="currentColor" stroke-width="2" stroke-dasharray="4 5" opacity=".7"/>
                 <circle class="buoy__sensor" cx="160" cy="162" r="4"/><circle class="buoy__sensor" cx="160" cy="196" r="5"/>
               </g>
+              </svg>
+              <svg class="card__sea card__sea--front" viewBox="0 0 320 220" preserveAspectRatio="none">
               <g class="wave">
                 <path d="M-160 122 q20-10 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 V420 H-160 Z" fill="url(#sea-front)"/>
                 <path class="wave__crest" d="M-160 122 q20-10 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0"/>
               </g>
-            </svg>
+              </svg>
+            </div>
           </article>
 
           <!-- Generative art -->
@@ -305,7 +306,6 @@
             <article class="card card--tall card--art card--holo" id="art">
               <div class="card__media card__print">
                 <img data-i18n-attr="alt:art.alt" src="assets/attractor.jpg" alt="Neon Clifford strange attractor rendered in purple and orange" loading="lazy" width="900" height="900" />
-                <span class="ascii-print" aria-hidden="true"></span>
               </div>
               <div class="card__body">
                 <span data-i18n="art.badge" class="badge">Generative art · Python</span>
@@ -432,6 +432,8 @@
         </div>
       </div>
     </section>
+
+    <div class="tape-seam tape-seam--to-bentos" aria-hidden="true"><canvas></canvas></div>
 
     <!-- ───────── BENTOS: a small window into the project's own visual world ───────── -->
     <section class="section bentos" id="bentos" aria-labelledby="bentos-title">
@@ -659,6 +661,8 @@
       </div>
     </section>
 
+    <div class="tape-seam tape-seam--from-bentos" aria-hidden="true"><canvas></canvas></div>
+
     <!-- ───────── RESEARCH ───────── -->
     <section class="section" id="research">
       <div class="wrap">
@@ -833,24 +837,30 @@
   </main>
 
   <div class="transmission" aria-hidden="true">
-    <svg viewBox="0 0 1200 180" preserveAspectRatio="none">
-      <defs><linearGradient id="signal-gradient"><stop stop-color="var(--accent)"/><stop offset=".5" stop-color="var(--accent-2)"/><stop offset="1" stop-color="var(--accent-3)"/></linearGradient></defs>
-      <g fill="none" stroke="url(#signal-gradient)">
-        <path d="M-40 5 C210 5 220 145 510 122 S790 20 1240 95"/><path d="M-40 40 C180 40 315 155 575 100 S880 12 1240 145"/><path d="M-40 115 C190 0 300 150 600 145 S970 70 1240 50"/>
-        <path d="M0 167 H240 L264 143 H350 M1200 167 H970 L946 143 H860"/>
+    <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+      <g class="transmission__ribbon" fill="none">
+        <path stroke="#ffbf35" d="M-40 83 C180 83 320 32 600 42 S1010 83 1240 40"/>
+        <path stroke="#ff763d" transform="translate(0 4)" d="M-40 83 C180 83 320 32 600 42 S1010 83 1240 40"/>
+        <path stroke="#ed466d" transform="translate(0 8)" d="M-40 83 C180 83 320 32 600 42 S1010 83 1240 40"/>
+        <path stroke="#bb51ce" transform="translate(0 12)" d="M-40 83 C180 83 320 32 600 42 S1010 83 1240 40"/>
+        <path stroke="#8264e6" transform="translate(0 16)" d="M-40 83 C180 83 320 32 600 42 S1010 83 1240 40"/>
       </g>
-      <g fill="var(--accent-3)"><circle cx="350" cy="143" r="2"/><circle cx="860" cy="143" r="2"/><circle cx="510" cy="122" r="2"/><circle cx="575" cy="100" r="2"/></g>
     </svg>
   </div>
   <footer class="footer">
     <div class="wrap footer__inner">
       <div class="footer__identity"><p class="footer__label">TRANSMISSION / 07</p><p class="footer__name">Tomasz Młynik<span class="end-dot">.</span></p><p data-i18n="footer.role">Data &amp; software · Gdańsk, Poland</p></div>
-      <nav class="footer__nav" aria-label="Footer navigation" data-i18n-attr="aria-label:footer.navLabel">
-        <p class="footer__label" data-i18n="footer.explore">Explore</p>
-        <a href="#projects" data-i18n="footer.projects">Projects ↗</a>
-        <a href="#research" data-i18n="footer.research">Research ↗</a>
-        <a href="#journey" data-i18n="footer.journey">Journey ↗</a>
-      </nav>
+      <div class="footer-tape is-playing">
+        <div class="footer-tape__cassette" aria-hidden="true">
+          <span class="footer-tape__screw footer-tape__screw--tl"></span><span class="footer-tape__screw footer-tape__screw--tr"></span>
+          <span class="footer-tape__screw footer-tape__screw--bl"></span><span class="footer-tape__screw footer-tape__screw--br"></span>
+          <div class="footer-tape__label">
+            <div class="footer-tape__label-top"><span>TM<span class="footer-tape__dot">.</span> <b>PORTFOLIO</b></span><span>SIDE <span class="footer-tape__side-a">A</span><span class="footer-tape__side-b">B</span> <strong>120</strong></span></div>
+            <div class="footer-tape__window"><span class="footer-tape__film"></span><span class="footer-tape__reel footer-tape__reel--left"></span><span class="footer-tape__reel footer-tape__reel--right"></span></div>
+          </div>
+          <div class="footer-tape__base"><span></span><span></span></div>
+        </div>
+      </div>
       <div class="footer__secrets">
         <button data-i18n="footer.observer" class="footer__trace" id="observer-unlock" type="button" aria-haspopup="dialog" aria-controls="observer-trace" hidden><span aria-hidden="true">◎</span> observer detected ↗</button>
       </div>
@@ -859,7 +869,7 @@
           <defs>
             <path id="circuit-edge" d="M5 30 20 25 13 15 65 18 77 8 121 14 139 5 182 12 203 4 238 13 268 8 284 17 324 10 334 20 372 16 368 32 380 40 373 57 380 80 368 86 374 108 335 106 321 119 280 113 263 123 224 115 204 124 169 116 136 122 117 112 73 119 59 108 15 113 19 94 6 86 13 65 4 51 12 41Z" />
             <clipPath id="circuit-cut"><use href="#circuit-edge" /></clipPath>
-            <linearGradient id="circuit-rim" x2="1" y2="1"><stop stop-color="#f46acb" /><stop offset=".5" stop-color="#8364e8" /><stop offset="1" stop-color="#59dce8" /></linearGradient>
+            <linearGradient id="circuit-rim" x2="1" y2="1"><stop stop-color="#ffbf35" /><stop offset=".25" stop-color="#ff763d" /><stop offset=".5" stop-color="#ed466d" /><stop offset=".75" stop-color="#bb51ce" /><stop offset="1" stop-color="#8264e6" /></linearGradient>
             <pattern id="circuit-grid" width="8" height="8" patternUnits="userSpaceOnUse"><path class="circuit-window__gridline" d="M8 0H0V8" fill="none" stroke-width=".5" /></pattern>
           </defs>
           <g clip-path="url(#circuit-cut)">
@@ -887,7 +897,12 @@
     </div>
   </footer>
 
-  <!-- A VCR key: rewinds to the top of the page (retro.js shows the tape counter on screen). -->
+  <!-- The tape transport follows the reader; the separate REW key returns to the top. -->
+  <div class="footer-tape__transport" role="group" aria-label="Tape controls" data-i18n-attr="aria-label:footer.tapeControls">
+    <button type="button" data-tape-action="rewind" aria-label="Rewind" title="Rewind" data-i18n-attr="aria-label:footer.tapeRewind;title:footer.tapeRewind"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 2 12l9 7V5Zm11 0-9 7 9 7V5Z"/></svg></button>
+    <button type="button" data-tape-action="pause" aria-label="Pause" title="Pause" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3v14H7zM14 5h3v14h-3z"/></svg></button>
+    <button type="button" data-tape-action="forward" aria-label="Fast forward" title="Fast forward" data-i18n-attr="aria-label:footer.tapeForward;title:footer.tapeForward"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m2 5 9 7-9 7V5Zm11 0 9 7-9 7V5Z"/></svg></button>
+  </div>
   <a class="back-top" id="back-top" href="#top" aria-label="Rewind to the top" aria-keyshortcuts="Backspace" data-i18n-attr="aria-label:backtop" inert>
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5 6 10.5h12zM12 12.5l-6 6h12z" /></svg>
     <span class="back-top__label" aria-hidden="true">REW</span>
@@ -916,5 +931,6 @@
   <script src="js/script.js"></script>
   <script src="js/tape-seams.js" defer></script>
   <script type="module" src="js/channels.js"></script>
+  <script type="module" src="js/footer-tape.js"></script>
 </body>
 </html>

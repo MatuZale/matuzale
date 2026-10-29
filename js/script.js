@@ -8,22 +8,32 @@ const say = (en, pl) => root.lang === "pl" ? pl : en;
 /* ───────── Theme toggle ───────── */
 const themeBtn = document.getElementById("theme-toggle");
 const systemDark = window.matchMedia("(prefers-color-scheme: dark)");
+let pendingTheme = null, themeTimer = 0;
 
 function currentTheme() {
   return root.getAttribute("data-theme") || (systemDark.matches ? "dark" : "light");
 }
 
 themeBtn.addEventListener("click", () => {
-  const next = currentTheme() === "dark" ? "light" : "dark";
+  const next = (pendingTheme || currentTheme()) === "dark" ? "light" : "dark";
+  clearTimeout(themeTimer);
+  pendingTheme = next;
+  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    themeBtn.classList.remove("is-inserting");
+    void themeBtn.offsetWidth;
+    themeBtn.classList.add("is-inserting");
+  }
   const apply = () => {
     root.setAttribute("data-theme", next);
     try { localStorage.setItem("theme", next); } catch (e) { /* storage unavailable */ }
+    pendingTheme = null;
     updateThemeLabel();
   };
-  // The little CRT on the button switches the page off (dark) or on (light) when retro.js is loaded.
-  if (window.crtPower) window.crtPower(next === "light", apply);
-  else apply();
+  // Swap sides as the cassette turns edge-on.
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) apply();
+  else themeTimer = setTimeout(apply, 325);
 });
+themeBtn.addEventListener("animationend", event => { if (event.animationName === "cassette-flip") themeBtn.classList.remove("is-inserting"); });
 
 function updateThemeLabel() {
   themeBtn.setAttribute("aria-label", currentTheme() === "dark"
@@ -107,8 +117,10 @@ function updateNavigation() {
     active = section;
   }
   if (pageTravel > 0 && y >= pageTravel - 2) active = watched[watched.length - 1];
+  // The shorter navigation groups the featured case study and supporting sections.
+  const navSection = { bentos: "projects", skills: "about", journey: "about" }[active.id] || active.id;
   navAnchors.forEach((a) => {
-    const isActive = a.hash === "#" + active.id;
+    const isActive = a.hash === "#" + navSection;
     a.classList.toggle("is-active", isActive);
     if (isActive) a.setAttribute("aria-current", "location");
     else a.removeAttribute("aria-current");
@@ -318,9 +330,9 @@ document.getElementById("year").textContent = new Date().getFullYear();
 
 /* ───────── The BENTOS card's buoy only rocks while it is on screen ───────── */
 (function buoyIdle() {
-  const art = document.querySelector(".card__art");
-  if (!art || !("IntersectionObserver" in window)) return;
-  new IntersectionObserver(([entry]) => art.classList.toggle("is-idle", !entry.isIntersecting)).observe(art);
+  const scene = document.querySelector(".card__scene");
+  if (!scene || !("IntersectionObserver" in window)) return;
+  new IntersectionObserver(([entry]) => scene.classList.toggle("is-idle", !entry.isIntersecting)).observe(scene);
 })();
 
 /* ───────── Journey: a black hole in a sheet of spacetime ─────────
@@ -347,10 +359,11 @@ document.getElementById("year").textContent = new Date().getFullYear();
   const feed = document.querySelector("[data-feed]");
   // SMIL ignores prefers-reduced-motion by itself, so pause it by hand: also while off-screen.
   if (schematic && schematic.pauseAnimations) {
-    if (reducedMotion) schematic.pauseAnimations();
-    else if ("IntersectionObserver" in window) {
-      new IntersectionObserver(([entry]) => entry.isIntersecting ? schematic.unpauseAnimations() : schematic.pauseAnimations()).observe(schematic);
-    }
+    let visible = !("IntersectionObserver" in window);
+    const sync = () => visible && !reducedMotion && !document.documentElement.classList.contains("is-tape-paused") ? schematic.unpauseAnimations() : schematic.pauseAnimations();
+    sync();
+    if ("IntersectionObserver" in window) new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; sync(); }).observe(schematic);
+    document.addEventListener("tape-pause-change", sync);
   }
   if (!feed) return;
   const clock = feed.querySelector("[data-feed-clock]"), counter = feed.querySelector("[data-feed-sample]");
@@ -389,7 +402,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
   function schedule() {
     clearInterval(sampling); clearInterval(rolling);
     sampling = rolling = 0;
-    if (!visible || document.hidden || reducedMotion) return;
+    if (!visible || document.hidden || reducedMotion || document.documentElement.classList.contains("is-tape-paused")) return;
     sampling = setInterval(update, 1400);
     rolling = setInterval(roll, 45);
   }
@@ -397,6 +410,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
   update();
   sensors.forEach(s => { s.shown = s.goal; render(s); });
   document.addEventListener("visibilitychange", schedule);
+  document.addEventListener("tape-pause-change", schedule);
   if ("IntersectionObserver" in window) {
     new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; schedule(); }).observe(feed);
   }
@@ -417,7 +431,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
   }
   function schedule(first = false) {
     clearTimeout(nextGlitch);
-    if (reducedMotion || document.hidden) return;
+    if (reducedMotion || document.hidden || document.documentElement.classList.contains("is-tape-paused")) return;
     const delay = first ? 3000 + Math.random() * 5000 : 8000 + Math.random() * 27000;
     nextGlitch = setTimeout(() => {
       if (!document.querySelector("dialog[open]")) glitch();
@@ -431,6 +445,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
       brand.classList.remove("is-glitching");
     } else schedule(true);
   });
+  document.addEventListener("tape-pause-change", () => { clearTimeout(clearGlitch); brand.classList.remove("is-glitching"); schedule(); });
   brand.addEventListener("keydown", (e) => {
     if (e.key.toLowerCase() === "g" && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey) glitch();
   });
@@ -633,11 +648,11 @@ document.getElementById("year").textContent = new Date().getFullYear();
     weight = PARTICLES / live;
   }
   function schedule() {
-    if (!raf && visible && !document.hidden) raf = requestAnimationFrame(loop);
+    if (!raf && visible && !document.hidden && !root.classList.contains("is-tape-paused")) raf = requestAnimationFrame(loop);
   }
   function loop(time) {
     raf = 0;
-    if (!visible || document.hidden) { last = 0; return; }
+    if (!visible || document.hidden || root.classList.contains("is-tape-paused")) { last = 0; return; }
     // A screen faster than the interval skips frames (the 3 ms let a 60 Hz screen through every time).
     if (last && !dirty && time - last < interval - 3) { schedule(); return; }
     const start = performance.now(), steady = !dirty;
@@ -688,6 +703,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
     if (document.hidden) { cancelAnimationFrame(raf); raf = 0; }
     else schedule();
   });
+  document.addEventListener("tape-pause-change", () => { cancelAnimationFrame(raf); raf = 0; last = 0; schedule(); });
   new MutationObserver(themeChange).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
   systemDark.addEventListener("change", themeChange);
   resize();
@@ -703,7 +719,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
   const stop = () => { clearTimeout(timer); timer = 0; diagram.classList.remove('is-sonar'); };
   const schedule = () => {
     stop();
-    if (!visible || document.hidden || motion.matches) return;
+    if (!visible || document.hidden || motion.matches || document.documentElement.classList.contains('is-tape-paused')) return;
     timer = setTimeout(() => {
       diagram.classList.add('is-sonar');
       timer = setTimeout(schedule, 3200);
@@ -719,6 +735,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
   }
   motion.addEventListener('change', schedule);
   document.addEventListener('visibilitychange', schedule);
+  document.addEventListener('tape-pause-change', schedule);
   addEventListener('pagehide', stop);
   addEventListener('pageshow', schedule);
 })();

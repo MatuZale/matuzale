@@ -7,15 +7,45 @@
 // Decoration only (the horizon is aria-hidden); never with reduced motion. Loaded by script.js when About
 // is first in sight.
 
-const MEAN = 200, REST = 60, STARS = 46;
+const MEAN = 200, REST = 60, TAPE_MEAN = 180, TAPE_DURATION = 8000, STARS = 46;
 const rand = (a, b) => a + Math.random() * (b - a);
-const wait = ms => new Promise(done => setTimeout(done, ms));
+const tapePaused = () => document.documentElement.classList.contains("is-tape-paused");
+// The sunset sequence must wait for tape time, not wall time, or it would run
+// through its later scenes while the picture is held.
+function tapeTimeout(callback, duration) {
+  let remaining = duration, started = 0, id = 0, done = false;
+  const cancel = () => { done = true; clearTimeout(id); document.removeEventListener("tape-pause-change", sync); };
+  const finish = () => { cancel(); callback(); };
+  function sync() {
+    if (id) { clearTimeout(id); id = 0; remaining -= performance.now() - started; }
+    if (!done && !tapePaused()) { started = performance.now(); id = setTimeout(finish, Math.max(0, remaining)); }
+  }
+  document.addEventListener("tape-pause-change", sync);
+  sync();
+  return cancel;
+}
+const wait = ms => new Promise(done => tapeTimeout(done, ms));
 
 export function startNightfall(horizon) {
   const sky = horizon.querySelector(".horizon__sky"), sun = horizon.querySelector(".horizon__sun");
   const prompt = document.querySelector(".about-terminal__prompt");
   const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  let visible = false, busy = false, restUntil = 0, moon, stars, meteor;
+  let visible = false, busy = false, restUntil = 0, tapeRestUntil = 0, tapeTimer = null, moon, stars, meteor;
+
+  function endTapeSun() {
+    if (!tapeTimer) return;
+    tapeTimer();
+    tapeTimer = null;
+    horizon.classList.remove("is-tape-sun");
+    tapeRestUntil = performance.now() + REST * 1000;
+  }
+  function tapeSun() {
+    if (!visible || busy || tapeTimer || document.hidden || motion.matches || tapePaused()) return false;
+    horizon.classList.add("is-tape-sun");
+    tapeTimer = tapeTimeout(endTapeSun, TAPE_DURATION);
+    return true;
+  }
+  horizon.tapeSun = tapeSun;
 
   function build() {
     if (moon) return;
@@ -43,7 +73,7 @@ export function startNightfall(horizon) {
   }
 
   async function nightfall() {
-    if (busy || motion.matches) return;
+    if (busy || tapeTimer || motion.matches || tapePaused()) return;
     busy = true;
     build();
     const h = sun.offsetHeight, rise = Math.min(sky.clientHeight * .42, h * 1.1);
@@ -100,9 +130,25 @@ export function startNightfall(horizon) {
   }
   horizon.nightfall = nightfall;
 
-  new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; }).observe(horizon);
+  // The sunset and moon use Web Animations rather than CSS. Keep only the
+  // ones we actually suspended, so animations paused for other reasons stay put.
+  let heldAnimations = [];
+  document.addEventListener("tape-pause-change", () => {
+    if (tapePaused()) {
+      heldAnimations = horizon.getAnimations({ subtree: true }).filter(a => !(typeof CSSAnimation !== "undefined" && a instanceof CSSAnimation) && !(typeof CSSTransition !== "undefined" && a instanceof CSSTransition) && a.playState === "running");
+      heldAnimations.forEach(a => a.pause());
+    } else {
+      heldAnimations.forEach(a => { if (a.playState === "paused") a.play(); });
+      heldAnimations = [];
+    }
+  });
+
+  new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; if (!visible) endTapeSun(); }).observe(horizon);
+  motion.addEventListener("change", () => { if (motion.matches) endTapeSun(); });
+  document.addEventListener("visibilitychange", () => { if (document.hidden) endTapeSun(); });
   setInterval(() => {
-    if (!visible || busy || document.hidden || motion.matches || performance.now() < restUntil) return;
-    if (Math.random() < 1 - Math.exp(-1 / MEAN)) nightfall();
+    if (!visible || busy || tapeTimer || document.hidden || motion.matches || tapePaused()) return;
+    if (performance.now() >= restUntil && Math.random() < 1 - Math.exp(-1 / MEAN)) nightfall();
+    else if (performance.now() >= tapeRestUntil && Math.random() < 1 - Math.exp(-1 / TAPE_MEAN)) tapeSun();
   }, 1000);
 }

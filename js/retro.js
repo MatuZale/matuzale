@@ -141,24 +141,57 @@ export const counter = () => {
   const s = Math.round(window.scrollY / 40);
   return `${Math.floor(s / 3600)}:${String(Math.floor(s / 60) % 60).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 };
-// The back-to-top link scrolls by itself; the remote's Backspace asks for the scroll too.
-export function rewind(scroll = false) {
-  osd("◀◀ REW", counter(), Infinity);
-  let quiet;
+// Native links keep their normal scrolling and history; the tape display follows it.
+let cancelTape, playTimer, transport;
+function tapePicture(on, direction = "forward") {
+  if (!on || motion.matches) { transport?.classList.remove("is-on"); return; }
+  if (!transport) {
+    transport = layer("tape-transport");
+    transport.append(...["tape-transport__band", "tape-transport__band tape-transport__band--second", "tape-transport__band tape-transport__band--major"].map(className =>
+      Object.assign(document.createElement("i"), { className })));
+  }
+  lift(transport);
+  transport.dataset.direction = direction;
+  transport.classList.add("is-on");
+}
+motion.addEventListener("change", () => { if (motion.matches) tapePicture(false); });
+function tape(direction, atEnd = () => false) {
+  cancelTape?.();
+  clearTimeout(playTimer);
+  osd(direction === "back" ? "◀◀ REW" : "FF ▶▶", counter(), Infinity);
+  tapePicture(true, direction);
+  let quiet, stopped = false;
+  const cleanup = () => { window.removeEventListener("scroll", follow); clearTimeout(quiet); tapePicture(false); };
+  cancelTape = cleanup;
   const follow = () => {
     osdSub(counter());
     clearTimeout(quiet);
-    if (window.scrollY < 4) return stop();
-    quiet = setTimeout(stop, 600);          // scrolling stopped short of the top (or was taken over)
+    if (atEnd()) return stop();
+    quiet = setTimeout(stop, 600);
   };
   const stop = () => {
-    window.removeEventListener("scroll", follow);
-    clearTimeout(quiet);
+    if (stopped) return;
+    stopped = true;
+    cleanup();
+    cancelTape = null;
     osd("■ STOP", counter(), 900);
-    setTimeout(() => window.scrollY < 4 && osd("▶ PLAY", "", 1100), 900);
+    playTimer = setTimeout(() => osd("▶ PLAY", "", 1100), 900);
   };
   window.addEventListener("scroll", follow, { passive: true });
   quiet = setTimeout(stop, 1500);
+}
+// The back-to-top link scrolls by itself; the remote's Backspace asks for the scroll too.
+export function rewind(scroll = false) {
+  tape("back", () => window.scrollY < 4);
   if (scroll) window.scrollTo({ top: 0, behavior: motion.matches ? "auto" : "smooth" });
 }
 document.getElementById("back-top")?.addEventListener("click", () => rewind());
+
+document.getElementById("nav-links")?.addEventListener("click", event => {
+  if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  const anchor = event.target.closest('a[href^="#"]');
+  const target = anchor && document.getElementById(anchor.hash.slice(1));
+  if (!target) return;
+  const distance = target.getBoundingClientRect().top - document.getElementById("nav").offsetHeight;
+  if (Math.abs(distance) > 4) tape(distance < 0 ? "back" : "forward");
+});

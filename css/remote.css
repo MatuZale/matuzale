@@ -7,6 +7,8 @@
 .loose-air { position: fixed; inset: 0; z-index: 45; overflow: hidden; pointer-events: none; }
 .loose-air > .skill {
   position: absolute; left: 0; top: 0; margin: 0; transition: none; will-change: transform;
+  /* The toolbox rows are transparent; the detached cover needs a solid face. */
+  background: var(--surface); border: 1px solid var(--line);
   box-shadow: var(--glow), 0 30px 60px -24px #000000b3;
 }
 .loose-screw {
@@ -67,8 +69,8 @@
 .remote__group { display: grid; gap: .4rem; align-content: start; }
 /* Groups printed on the case, each with its teletext colour. */
 .remote__group--about { --fastext: #e5bf2e; }
-.remote__group--journey { --fastext: #3b7de2; }
-.remote__group--footer { --fastext: #2eaa58; }
+.remote__group--journey { --fastext: #bc55cc; }
+.remote__group--footer { --fastext: #f38a36; }
 .remote__group--spacewar { --fastext: #e2463b; }
 .remote__label { display: flex; align-items: center; gap: .45rem; font-size: .92rem; letter-spacing: .14em; text-transform: uppercase; opacity: .85; }
 .remote__label::before { content: ""; width: 14px; height: 6px; border-radius: 3px; background: var(--fastext); box-shadow: 0 0 6px color-mix(in srgb, var(--fastext) 50%, transparent); }

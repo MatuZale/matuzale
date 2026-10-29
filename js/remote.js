@@ -51,12 +51,17 @@ function launch(node, move) {
 }
 // One frame for everything in the air; something launched meanwhile (the card's last screw) joins in.
 function fly(now) {
+  if (root.classList.contains("is-tape-paused")) { raf = 0; return; }
   const dt = Math.min(.05, (now - last) / 1000), moving = flying;
   last = now;
   flying = [];
   for (const bit of moving) if (bit.move(dt)) flying.push(bit); else bit.node.remove();
   raf = flying.length ? requestAnimationFrame(fly) : 0;
 }
+document.addEventListener("tape-pause-change", () => {
+  if (root.classList.contains("is-tape-paused")) { cancelAnimationFrame(raf); raf = 0; }
+  else if (flying.length && !raf) { last = performance.now(); raf = requestAnimationFrame(fly); }
+});
 
 // A screw pops out of its corner towards the viewer, spinning, and drops.
 function screw(x, y) {
@@ -76,6 +81,16 @@ export function startRemote(card) {
   const tone = getComputedStyle(card).getPropertyValue("--tool-tone");
   const place = [...card.parentElement.children].filter(other => other.matches(".skill")).indexOf(card);
   let knocks = 0, jolt = null;
+  let heldAnimations = [];
+  document.addEventListener("tape-pause-change", () => {
+    if (root.classList.contains("is-tape-paused")) {
+      heldAnimations = card.getAnimations({ subtree: true }).filter(a => !(typeof CSSAnimation !== "undefined" && a instanceof CSSAnimation) && !(typeof CSSTransition !== "undefined" && a instanceof CSSTransition) && a.playState === "running");
+      heldAnimations.forEach(a => a.pause());
+    } else {
+      heldAnimations.forEach(a => { if (a.playState === "paused") a.play(); });
+      heldAnimations = [];
+    }
+  });
   card.style.transformOrigin = "0 0";
   card.style.transition = "box-shadow .3s";
 
@@ -97,6 +112,7 @@ export function startRemote(card) {
   // A knock: the card jumps, wobbles and settles a little more crooked; at the second, the stylesheet
   // under the tear flickers, as if something behind it had come loose too.
   function shake({ tilt }, to) {
+    if (root.classList.contains("is-tape-paused")) { card.style.transform = `rotate(${to}deg)`; return; }
     const from = tilt.toString();
     jolt = card.animate([
       { transform: from },
@@ -287,6 +303,15 @@ async function call(get, ...args) {
   action(...args);
   return true;
 }
+// These moments can briefly be unavailable while their section becomes visible or
+// an earlier event is ending. Wait for the action to actually start, not just load.
+async function callWhenReady(get, current, ...args) {
+  return (await ready(() => {
+    if (!current()) return "cancelled";
+    const action = get();
+    return action && action(...args) === true;
+  })) === true;
+}
 async function footerGame(act) {
   if (!(await ready(() => board?.play))) return false;
   return !board.closest("figure").classList.contains("is-crashed") && act() !== false;
@@ -294,8 +319,10 @@ async function footerGame(act) {
 
 const CUES = {
   night: { at: about, osd: ["ABOUT · NIGHT", "O MNIE · NOC"], play: () => call(() => horizon?.nightfall) },
+  tapesun: { at: about, osd: ["ABOUT · VHS SUN", "O MNIE · SŁOŃCE VHS"], play: current => callWhenReady(() => horizon?.tapeSun, current) },
   heavy: { at: journey, osd: ["JOURNEY · VISITOR", "ŚCIEŻKA · GOŚĆ"], play: () => call(() => spacetime?.summon, "heavy") },
   luminet: { at: journey, osd: ["JOURNEY · LUMINET 1979", "ŚCIEŻKA · LUMINET 1979"], play: () => call(() => spacetime?.summon, "luminet") },
+  photons: { at: journey, osd: ["JOURNEY · VHS PHOTONS", "ŚCIEŻKA · FOTONY VHS"], play: current => callWhenReady(() => spacetime?.summon, current, "tape-photons") },
   snake: { at: footer, osd: ["FOOTER · SNAKE", "STOPKA · SNAKE"], play: () => footerGame(() => board.play("snake")) },
   tetris: { at: footer, osd: ["FOOTER · TETRIS", "STOPKA · TETRIS"], play: () => footerGame(() => board.play("tetris")) },
   pacman: { at: footer, osd: ["FOOTER · PAC-MAN", "STOPKA · PAC-MAN"], play: () => footerGame(() => board.play("pacman")) },
@@ -318,10 +345,12 @@ async function spacewar() {
 const PAD = [
   { group: "about", name: ["about", "o mnie"], keys: [
     { cue: "night", label: ["night", "noc"], title: ["Wind to About and let night fall", "Przewiń do „O mnie” i sprowadź noc"] },
+    { cue: "tapesun", label: ["vhs sun", "słońce vhs"], title: ["Wind to About and reveal the VHS sun", "Przewiń do „O mnie” i pokaż słońce VHS"] },
   ] },
   { group: "journey", name: ["journey", "ścieżka"], keys: [
     { cue: "heavy", label: ["visitor", "gość"], title: ["Wind to Journey and send in the heavy visitor", "Przewiń do „Ścieżki” i wpuść ciężkiego gościa"] },
     { cue: "luminet", label: ["culmination", "kulminacja"], title: ["Wind to Journey for the culmination: Luminet's 1979 black hole, from the particles", "Przewiń do „Ścieżki” na kulminację: czarna dziura Luminet'a z 1979, z cząstek"] },
+    { cue: "photons", label: ["vhs photons", "fotony vhs"], title: ["Wind to Journey and send the VHS photons", "Przewiń do „Ścieżki” i wpuść fotony VHS"] },
   ] },
   { group: "spacewar", name: ["ch 04", "ch 04"], keys: [
     { cue: "spacewar", label: ["spacewar!", "spacewar!"], title: ["Play Spacewar! on CH 04 (switches AV on)", "Zagraj w Spacewar! na CH 04 (włącza AV)"] },
@@ -383,7 +412,8 @@ function buildRemote() {
       osd("▶ PLAY", say(...cue.osd), 2400);
       await wait(LOOK);
       if (playing !== run) return;
-      played = await cue.play();
+      played = await cue.play(() => playing === run);
+      if (playing !== run) return;
       if (!played) osd("NO SIGNAL", cue.at === footer ? "core dumped" : "", 2200);
     }
     if (playing === run) { playing = null; light(null); }

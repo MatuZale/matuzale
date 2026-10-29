@@ -3,14 +3,30 @@
    layered shine + glare idea of Simon Goellner's Pokémon cards (codepen.io/simeydotme/pen/abYWJdX);
    the patterns, frames and artwork here are original. Every card gets its own foil. */
 
+/* Card typography is independent of the page that opens the collection. */
+@font-face { font-family: "STIX Two Math"; src: url("../assets/fonts/stix/stix-two-math.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "STIX Two Text"; src: url("../assets/fonts/stix/stix-two-text-regular.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "STIX Two Text"; src: url("../assets/fonts/stix/stix-two-text-italic.woff2") format("woff2"); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: "Deck Sans"; src: url("../assets/fonts/bentos/open-sauce-sans-400.ttf") format("truetype"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Deck Sans"; src: url("../assets/fonts/bentos/open-sauce-sans-500.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "Deck Sans"; src: url("../assets/fonts/bentos/open-sauce-sans-600.woff2") format("woff2"); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: "Deck Sans"; src: url("../assets/fonts/bentos/open-sauce-sans-700.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: "Deck Mono"; src: url("../assets/fonts/plex/ibm-plex-mono-400.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Deck Mono"; src: url("../assets/fonts/plex/ibm-plex-mono-400-ext.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; unicode-range: U+0100-02FF, U+1D00-1EFF, U+20A0-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Deck Mono"; src: url("../assets/fonts/plex/ibm-plex-mono-600.woff2") format("woff2"); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: "Deck Mono"; src: url("../assets/fonts/plex/ibm-plex-mono-600-ext.woff2") format("woff2"); font-weight: 600; font-style: normal; font-display: swap; unicode-range: U+0100-02FF, U+1D00-1EFF, U+20A0-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
 html.deck-open { overflow: hidden; }
 
 /* ───────── Themes ─────────
    The collection follows the site theme. Dark is the default here; light swaps the room and the card
    panels. Card backs and the full-art alternate stay dark, as printed cards do. */
 .deck {
+  --font-body: "Deck Sans", system-ui, sans-serif;
+  --font-head: "Deck Sans", system-ui, sans-serif;
+  --font-mono: "Deck Mono", ui-monospace, monospace;
   --deck-scheme: dark;
-  --deck-bg: radial-gradient(60% 50% at 15% 0%, #3a1a5c66, transparent 70%), radial-gradient(50% 45% at 90% 100%, #0b4d6266, transparent 70%), #07060f;
+  --deck-bg: radial-gradient(60% 50% at 15% 0%, #3a1a5c66, transparent 70%), radial-gradient(50% 45% at 90% 100%, #702b4666, transparent 70%), #07060f;
   --deck-text: #ece9ff;
   --deck-muted: #a5a1c7;
   --deck-line: #ffffff2e;
@@ -47,7 +63,7 @@ html.deck-open { overflow: hidden; }
 }
 :root[data-theme="light"] .deck {
   --deck-scheme: light;
-  --deck-bg: radial-gradient(60% 50% at 15% 0%, #e7d9ff, transparent 70%), radial-gradient(50% 45% at 90% 100%, #d3f0f6, transparent 70%), #f6f3fc;
+  --deck-bg: radial-gradient(60% 50% at 15% 0%, #e7d9ff, transparent 70%), radial-gradient(50% 45% at 90% 100%, #f5e4d5, transparent 70%), #f6f3fc;
   --deck-text: #17152b;
   --deck-muted: #5a5775;
   --deck-line: #17152b2e;
@@ -82,7 +98,7 @@ html.deck-open { overflow: hidden; }
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) .deck {
     --deck-scheme: light;
-    --deck-bg: radial-gradient(60% 50% at 15% 0%, #e7d9ff, transparent 70%), radial-gradient(50% 45% at 90% 100%, #d3f0f6, transparent 70%), #f6f3fc;
+    --deck-bg: radial-gradient(60% 50% at 15% 0%, #e7d9ff, transparent 70%), radial-gradient(50% 45% at 90% 100%, #f5e4d5, transparent 70%), #f6f3fc;
     --deck-text: #17152b;
     --deck-muted: #5a5775;
     --deck-line: #17152b2e;
@@ -138,6 +154,24 @@ html.deck-open { overflow: hidden; }
 :root[data-theme="light"] .deck::backdrop { background: #f6f3fc; }
 @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .deck::backdrop { background: #f6f3fc; } }
 @keyframes deck-in { from { opacity: 0; } }
+
+/* A slow field of light behind the cards, inspired by the stripes on a tape sleeve.
+   The fixed layer stays below the cards and never handles pointer events. */
+.deck::before {
+  content: "";
+  position: fixed;
+  z-index: 0;
+  inset: -15%;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 75% 20%, #b63fbe24, transparent 38%),
+    radial-gradient(ellipse at 18% 85%, #ee9a431c, transparent 40%),
+    repeating-linear-gradient(135deg, transparent 0 17rem, #b975e612 17rem 17.16rem, #ff8c4b12 17.16rem 17.32rem, transparent 17.32rem 25rem);
+  animation: deck-ambient 28s ease-in-out infinite alternate;
+}
+.deck:not([open])::before, .deck.has-active::before { animation-play-state: paused; }
+@keyframes deck-ambient { from { transform: translate3d(-1.5%, -1%, 0); } to { transform: translate3d(1.5%, 1%, 0); } }
+@media (prefers-reduced-motion: reduce) { .deck::before { animation: none; } }
 
 .deck__bar {
   position: sticky;
@@ -437,7 +471,7 @@ html.deck-open { overflow: hidden; }
 .tcard__move .tcard__energy { width: 4.4cqw; height: 4.4cqw; font-size: 2.6cqw; }
 .tcard__eq { overflow: hidden; text-overflow: ellipsis; }
 .tcard__eq b { display: inline-block; min-width: 4.4cqw; font-size: 1.1em; font-weight: 700; }
-.tcard__eq i, .tcard__stats i { font-family: "STIX Two Text", "Cambria", "Times New Roman", Georgia, serif; }
+.tcard__eq i, .tcard__stats i { font-family: "STIX Two Text", "STIX Two Math", "Cambria", "Times New Roman", Georgia, serif; }
 .tcard__eq sub { font-size: .7em; line-height: 0; }
 .tcard__eq sup { font-size: .7em; line-height: 0; }
 .tcard__eq .ol, .tcard__flavor .ol { text-decoration: overline; }

@@ -360,6 +360,7 @@ function showControls() {
 }
 
 function frame(now) {
+  if (document.documentElement.classList.contains("is-tape-paused")) { raf = 0; sound.hush(); return; }
   raf = requestAnimationFrame(frame);
   acc += Math.min((now - last) / 1000, .1);
   last = now;
@@ -686,6 +687,15 @@ function build() {
     sound.hush();
     if (state === "play") paused = true;
   });
+  document.addEventListener("tape-pause-change", () => {
+    if (!dialog.open) return;
+    if (document.documentElement.classList.contains("is-tape-paused")) {
+      cancelAnimationFrame(raf); raf = 0; sound.hush();
+    } else if (!raf) {
+      last = performance.now();
+      raf = requestAnimationFrame(frame);
+    }
+  });
   dialog.addEventListener("cancel", event => { event.preventDefault(); switchOff(); });
   dialog.addEventListener("close", () => {
     tuneAway();
@@ -729,6 +739,7 @@ export async function openSpacewar() {
   sound.staticHiss();
   tube(true);
   last = performance.now(); acc = 0;
+  if (document.documentElement.classList.contains("is-tape-paused")) draw();
   if (!raf) raf = requestAnimationFrame(frame);
   return dialog;
 }
