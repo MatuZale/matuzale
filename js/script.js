@@ -537,6 +537,19 @@ document.getElementById("year").textContent = new Date().getFullYear();
   // Never more than 60 frames a second, also on faster screens.
   const BUDGET = 8, FEWEST = .35;
   const px = new Float64Array(PARTICLES), py = new Float64Array(PARTICLES);
+  // The map's arguments stay within [-8, 8]. Linear interpolation at 1/1024
+  // keeps the error below 1.6e-7 while avoiding hundreds of thousands of
+  // transcendental calls per frame on the main thread.
+  const TRIG_SCALE = 1024, TRIG_OFFSET = 8 * TRIG_SCALE;
+  const sinTable = new Float32Array(TRIG_OFFSET * 2 + 2), cosTable = new Float32Array(TRIG_OFFSET * 2 + 2);
+  for (let i = 0; i < sinTable.length; i++) {
+    const x = (i - TRIG_OFFSET) / TRIG_SCALE;
+    sinTable[i] = Math.sin(x); cosTable[i] = Math.cos(x);
+  }
+  function lookup(table, x) {
+    const f = x * TRIG_SCALE + TRIG_OFFSET, i = f | 0, t = f - i;
+    return table[i] + (table[i + 1] - table[i]) * t;
+  }
   const occupied = new Uint8Array(40 * 40);
   const lut = new Uint32Array(256);
   // Density to colour in one lookup, in steps of 1/64 up to where the log scale saturates (110): a
@@ -547,7 +560,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
     light: [[0,251,250,255],[.15,222,208,252],[.4,165,115,238],[.65,214,36,159],[.85,112,20,124],[1,34,10,66]],
   };
   let W, H, density, img, pixels, scale, cx, cy;
-  let dirty = true, visible = true, raf = 0, resizeTimer = 0;
+  let dirty = true, warmup = 0, visible = true, raf = 0, resizeTimer = 0;
   let mx = .5, my = .5, tx = .5, ty = .5;
   // The parameters drift on their own clock, so a hidden tab never makes them jump, and the clock can
   // be run fast to get out of a periodic window (see watch).
@@ -619,8 +632,8 @@ document.getElementById("year").textContent = new Date().getFullYear();
     for (let i = 0; i < live; i++) {
       let x = px[i], y = py[i];
       for (let s = 0; s < STEPS; s++) {
-        const nx = Math.sin(a * y) + c * Math.cos(a * x);
-        y = Math.sin(b * x) + d * Math.cos(b * y); x = nx;
+        const nx = lookup(sinTable, a * y) + c * lookup(cosTable, a * x);
+        y = lookup(sinTable, b * x) + d * lookup(cosTable, b * y); x = nx;
         const ix = (cx + x * scale) | 0, iy = (cy + y * scale) | 0;
         if (ix >= 0 && ix < W && iy >= 0 && iy < H) density[iy * W + ix] += weight;
       }
@@ -654,12 +667,19 @@ document.getElementById("year").textContent = new Date().getFullYear();
     if (!visible || document.hidden || root.classList.contains("is-tape-paused")) { last = 0; return; }
     // A screen faster than the interval skips frames (the 3 ms let a 60 Hz screen through every time).
     if (last && !dirty && time - last < interval - 3) { schedule(); return; }
-    const start = performance.now(), steady = !dirty;
+    const start = performance.now(), steady = !dirty && !warmup;
     if (dirty) {
       seed(); density.fill(0);
       clock = 20000; speed = 1; lowSamples = 0;
-      for (let i = 0; i < (reducedMotion ? 40 : 8); i++) frame(0);
+      warmup = reducedMotion ? 40 : 8;
+      last = 0;
       dirty = false;
+    }
+    if (warmup) {
+      // Split the initial 8/40 simulation passes into small tasks. The first
+      // completed picture is still painted only once, even with reduced motion.
+      do { frame(0); warmup--; } while (warmup && performance.now() - start < 4);
+      if (warmup) { schedule(); return; }
     } else if (!reducedMotion) frame(last ? Math.min(time - last, 100) : 16);
     last = time;
     paint();
@@ -682,12 +702,15 @@ document.getElementById("year").textContent = new Date().getFullYear();
       const value = Math.log(1 + k / SHADES) * gain;
       shade[k] = lut[value > 255 ? 255 : value | 0];
     }
-    paint();
+    if (!warmup) paint();
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute("content", currentTheme() === "dark" ? "#0b0a1a" : "#fbfaff");
   }
   window.addEventListener("pointermove", event => {
-    tx = event.clientX / window.innerWidth; ty = event.clientY / window.innerHeight;
+    // Keep the map's input inside its natural range, even for captured or
+    // synthetic pointer events beyond the viewport.
+    tx = Math.max(0, Math.min(1, event.clientX / Math.max(1, window.innerWidth)));
+    ty = Math.max(0, Math.min(1, event.clientY / Math.max(1, window.innerHeight)));
   }, { passive: true });
   window.addEventListener("resize", () => {
     clearTimeout(resizeTimer); resizeTimer = setTimeout(resize, 150);

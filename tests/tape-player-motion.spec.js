@@ -137,10 +137,12 @@ test('reduced motion and pause skip tuning and hold static still', async ({ page
   await expect(screen.locator('.tape-static')).toBeVisible();
   await expect(screen.locator('.tape-static__grain')).toHaveCSS('animation-name', 'none');
   expect(await screen.locator('.tape-static__grain').evaluate(el => getComputedStyle(el, '::before').animationName)).toBe('none');
+  expect(await screen.locator('.tape-static__grain').evaluate(el => getComputedStyle(el, '::after').animationName)).toBe('none');
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await pause.evaluate(el => el.click());
   await expect(screen.locator('.tape-static__grain')).toHaveCSS('animation-play-state', 'paused');
   expect(await screen.locator('.tape-static__grain').evaluate(el => getComputedStyle(el, '::before').animationPlayState)).toBe('paused');
+  expect(await screen.locator('.tape-static__grain').evaluate(el => getComputedStyle(el, '::after').animationPlayState)).toBe('paused');
   await kodlab.evaluate(el => el.click());
   await expect(tuning).toHaveCount(0);
   await eject.evaluate(el => el.click());
@@ -156,18 +158,17 @@ test('off-air snow moves continuously on both layers', async ({ page }) => {
   await page.locator('.tape-player__close').evaluate(el => el.click());
   const grain = page.locator('.tape-static__grain');
   await expect(grain).toBeVisible();
-  await expect(grain).toHaveCSS('animation-play-state', 'running');
   const before = await grain.evaluate(el => ({
-    timing: getComputedStyle(el).animationTimingFunction,
+    timing: getComputedStyle(el, '::after').animationTimingFunction,
     secondTiming: getComputedStyle(el, '::before').animationTimingFunction,
-    first: getComputedStyle(el).backgroundPosition,
+    first: getComputedStyle(el, '::after').transform,
     second: getComputedStyle(el, '::before').transform,
   }));
   expect(before.timing).toBe('linear');
   expect(before.secondTiming).toBe('linear');
   await page.waitForTimeout(100);
   const after = await grain.evaluate(el => ({
-    first: getComputedStyle(el).backgroundPosition,
+    first: getComputedStyle(el, '::after').transform,
     second: getComputedStyle(el, '::before').transform,
   }));
   expect(after.first).not.toBe(before.first);

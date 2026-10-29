@@ -158,6 +158,52 @@ Open [cards.html](cards.html) or choose **See examples** in Strange attractors &
 four-project browser suite with `npm run test:mobile`; do not install dependencies or run
 Playwright on the host Mac for this task. See [test coverage and input limitations](tests/README.md).
 
+For a repeatable comparison of the hero attractor, use the installed Playwright dependencies and
+start a local server from the repository root:
+
+```sh
+python3 -m http.server 4183
+```
+
+In another terminal, compare the current `js/script.js` with a Git revision (three alternating
+runs per version by default). Add `--motion reduce` to measure the still-picture startup:
+
+```sh
+node tests/attractor-benchmark.mjs --baseline 4315a36 --url http://127.0.0.1:4183 --samples 3
+node tests/attractor-benchmark.mjs --baseline 4315a36 --url http://127.0.0.1:4183 --samples 3 --motion reduce
+```
+
+The JSON output separates startup and steady state: `attractorCallbackMs` measures the hero's
+JavaScript callback, `putImageDataMs` the canvas upload call, and `framesMs` the intervals between
+animation frames. The first-picture delay and gaps over 34 ms help identify startup stalls and
+missed frames. These are comparative observations, not CI thresholds or a full GPU profile; headless
+Playwright WebKit is not the installed Safari browser. Results vary with the machine and its load.
+
+To compare the TV's idle picture, snow, enlargement, TM ident and covered state, run:
+
+```sh
+node tests/tape-tv-benchmark.mjs --url http://127.0.0.1:4183 --baseline HEAD --samples 2
+```
+
+Add `--mobile` for a 390 × 844 viewport at DPR 3. The benchmark compares only the TV styles
+against the selected Git revision, so unrelated local changes remain the same in both variants.
+
+To profile the card collection using the same local server, run:
+
+```sh
+node tests/deck-benchmark.mjs --url http://127.0.0.1:4183 --samples 2
+node tests/deck-benchmark.mjs --url http://127.0.0.1:4183 --baseline HEAD --samples 2
+```
+
+The benchmark reports animation-frame intervals and card JavaScript callback times for opening,
+idle, lifting, mouse movement, flipping and returning three different cards. Use `--profile desktop`
+or `--profile mobile` for a single viewport. The mobile profile emulates a high-density touch viewport
+and uses touchscreen taps. Playwright's WebKit touchscreen API does not provide a touch-move gesture,
+so sliding a finger over the foil is not measured; the mouse-movement phase runs only on desktop.
+Compare baseline and current results on the same
+machine without other intensive workloads. These measurements do not directly measure GPU usage,
+energy consumption, actual displayed frames, native Safari or a physical phone.
+
 Run locally with `python3 -m http.server 8000`, then open `http://localhost:8000`. Serve over HTTP so the browser can load the SVG foil mask.
 Deployed with GitHub Pages from the `main` branch (root).
 

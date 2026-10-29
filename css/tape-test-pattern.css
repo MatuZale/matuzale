@@ -35,21 +35,19 @@
   pointer-events: none;
 }
 .tape-player__screen .tape-static--tuning { z-index: 2; }
-.tape-static--tuning .tape-static__grain { animation-duration: .12s; }
+.tape-static--tuning .tape-static__grain::after { animation-duration: .12s; }
 .tape-static--tuning .tape-static__grain::before { animation-duration: .16s; }
 .tape-static__grain {
   position: absolute;
   inset: 0;
   background-image:
     repeating-radial-gradient(#000 0 0.0001%, #fff 0 0.0002%),
-    repeating-conic-gradient(#000 0 0.0001%, #fff 0 0.0002%),
     var(--tape-static-texture);
-  background-position: 50% 0, 60% 60%, 0 0;
+  background-position: 50% 0, 0 0;
   background-repeat: repeat;
-  background-size: 2500px 2500px, 2500px 2500px, 192px 192px;
-  background-blend-mode: difference, difference, normal;
+  background-size: 2500px 2500px, 192px 192px;
+  background-blend-mode: difference, normal;
   image-rendering: pixelated;
-  animation: tape-static-signal .2s linear infinite alternate;
 }
 .tape-static__grain::before {
   content: '';
@@ -57,7 +55,19 @@
   inset: -12%;
   background: var(--tape-static-texture) repeat 0 0 / 192px 192px;
   opacity: .32;
+  z-index: 1;
   animation: tape-static-drift .24s linear infinite alternate;
+}
+.tape-static__grain::after {
+  content: '';
+  position: absolute;
+  inset: -15%;
+  pointer-events: none;
+  background: repeating-conic-gradient(#000 0 0.0001%, #fff 0 0.0002%) 60% 60% / 2500px 2500px;
+  mix-blend-mode: difference;
+  /* Move the already rendered signal instead of repainting its gradients. */
+  animation: tape-static-signal .2s linear infinite alternate;
+  will-change: transform;
 }
 .tape-static::after {
   content: '';
@@ -66,7 +76,10 @@
   background: repeating-linear-gradient(0deg, #1114 0 1px, transparent 1px 4px);
   pointer-events: none;
 }
-@keyframes tape-static-signal { to { background-position: 50% 0, 60% 50%, 0 0; } }
+@keyframes tape-static-signal {
+  from { transform: translateY(-3%); }
+  to { transform: translateY(3%); }
+}
 @keyframes tape-static-drift {
   from { transform: translate(-3%, 3%); }
   to { transform: translate(4%, -3%); }
@@ -74,7 +87,11 @@
 .tape-static.is-suspended .tape-static__grain,
 html.is-tape-paused .tape-static__grain,
 .tape-static.is-suspended .tape-static__grain::before,
-html.is-tape-paused .tape-static__grain::before { animation-play-state: paused; }
+html.is-tape-paused .tape-static__grain::before,
+.tape-static.is-suspended .tape-static__grain::after,
+html.is-tape-paused .tape-static__grain::after,
+html.deck-open .tape-static__grain::before,
+html.deck-open .tape-static__grain::after { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) {
-  .tape-static__grain, .tape-static__grain::before { animation: none; }
+  .tape-static__grain, .tape-static__grain::before, .tape-static__grain::after { animation: none; }
 }

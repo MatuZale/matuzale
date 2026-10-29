@@ -20,14 +20,31 @@ test('footer games follow explicit and system themes while preserving readable g
       return [...ctx.getImageData(0, 0, 1, 1).data];
     };
     const background = rgba(getComputedStyle(el.querySelector('.circuit-window__bg')).fill);
-    const selectors = ['.circuit-window__head', '.circuit-window__food', '.g-block', '.g-wall', '.g-pellet', '.g-pac', '.g-ghost--0'];
-    const colors = selectors.map(selector => {
-      const item = el.querySelector(selector);
-      if (!item) return null;
-      const style = getComputedStyle(item);
-      return rgba(selector === '.g-wall' ? style.stroke : style.fill);
-    }).filter(Boolean);
-    return { background, colors };
+    const actualGhost = el.querySelector('.g-ghost');
+    let fixture = null;
+    // In the reduced-motion preview, a ghost can be frightened, returning as
+    // eyes or temporarily absent while Pac-Man dies. Still check the normal
+    // ghost's real computed colour in the same SVG and theme in every case.
+    if (el.getAttribute('aria-label').includes('Pac-Man') && !el.querySelector('.g-ghost--0')) {
+      fixture = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      fixture.setAttribute('class', 'g-ghost g-ghost--0');
+      el.querySelector('#game-pixels').append(fixture);
+    }
+    try {
+      const selectors = ['.circuit-window__head', '.circuit-window__food', '.g-block', '.g-wall', '.g-pellet', '.g-pac', '.g-ghost--0'];
+      const colors = selectors.map(selector => {
+        const item = el.querySelector(selector);
+        if (!item) return null;
+        const style = getComputedStyle(item);
+        return rgba(selector === '.g-wall' ? style.stroke : style.fill);
+      }).filter(Boolean);
+      // Check the visible ghost's actual state too, when it is not the normal
+      // red ghost sampled above.
+      if (actualGhost && !actualGhost.classList.contains('g-ghost--0')) colors.push(rgba(getComputedStyle(actualGhost).fill));
+      return { background, colors };
+    } finally {
+      fixture?.remove();
+    }
   });
   const luminance = rgb => {
     const [r, g, b] = rgb.slice(0, 3).map(x => {
@@ -105,7 +122,10 @@ test('cassette rewinds the page and respects reduced motion and language', async
 test('holding rewind winds continuously and stops on release', async ({ page }) => {
   await page.goto('/');
   const rewind = page.locator('[data-tape-action="rewind"]');
-  await page.evaluate(() => window.scrollTo(0, 2000));
+  // The page defaults to smooth scrolling; let the setup finish before
+  // measuring rewind so its downward motion cannot overlap the hold.
+  await page.evaluate(() => window.scrollTo({ top: 2000, behavior: 'instant' }));
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(1900);
   const box = await rewind.boundingBox();
   const before = await page.evaluate(() => scrollY);
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);

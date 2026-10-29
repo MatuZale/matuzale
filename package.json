@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --check js/deck.js && node tests/tape-seams.test.js",
+    "test": "node --check js/deck.js && node tests/tape-seams.test.js && node tests/attractor-numerics.test.js",
     "test:mobile": "playwright test"
   },
   "devDependencies": {
