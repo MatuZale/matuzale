@@ -30,3 +30,55 @@
 @media (forced-colors: active) {
   #about .about__text h2 em { background: none; color: CanvasText; -webkit-text-fill-color: CanvasText; }
 }
+
+/* During the rare VHS sun, the horizon becomes a little synthwave landscape.
+   The layers are static compositor-friendly artwork and fade away with the event. */
+.horizon__sky::before, .horizon__sky::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.8s ease;
+}
+.horizon__sky::before {
+  width: min(94%, 1050px);
+  height: min(62%, 300px);
+  left: var(--vanish);
+  bottom: 0;
+  transform: translateX(-50%);
+  background:
+    radial-gradient(circle at 20% 29%, #e8bfff 0 1px, transparent 2px),
+    radial-gradient(circle at 32% 14%, #f1c5ff 0 1px, transparent 2px),
+    radial-gradient(circle at 69% 22%, #e6baff 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 82% 41%, #f7c4eb 0 1px, transparent 2px),
+    radial-gradient(ellipse at 50% 100%, #a45cef75, #bb65d82c 43%, transparent 72%);
+}
+.horizon__sky::after {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: min(28%, 120px);
+  background: linear-gradient(to top, #7044bb85, #a45ed126 75%, transparent);
+  clip-path: polygon(0 100%, 0 78%, 9% 63%, 16% 80%, 25% 49%, 34% 79%, 44% 54%, 54% 80%, 65% 45%, 75% 77%, 84% 50%, 93% 75%, 100% 58%, 100% 100%);
+}
+.horizon.is-tape-sun { --horizon-line: #a76bfa; }
+.horizon.is-tape-sun .horizon__sky::before { opacity: .8; }
+.horizon.is-tape-sun .horizon__sky::after { opacity: .55; }
+.horizon__floor { transition: filter 2.2s, opacity 1.8s ease; }
+.horizon.is-tape-sun .horizon__floor { opacity: .6; }
+:root[data-theme="light"] .horizon.is-tape-sun { --horizon-line: #8452bc; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .horizon.is-tape-sun { --horizon-line: #8452bc; }
+}
+.horizon.is-idle .horizon__sky::before, .horizon.is-idle .horizon__sky::after, .horizon.is-idle .horizon__floor { transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  .horizon__sky::before, .horizon__sky::after, .horizon__floor { transition: none; }
+}
+/* Keep the body copy legible where it crosses the sun in the dark palette. */
+.horizon__sky { transition: opacity 1.8s ease; }
+:root[data-theme="dark"] .horizon.is-tape-sun .horizon__sky { opacity: .22; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .horizon.is-tape-sun .horizon__sky { opacity: .22; }
+}
+.horizon.is-idle .horizon__sky { transition: none; }
+@media (prefers-reduced-motion: reduce) { .horizon__sky { transition: none; } }

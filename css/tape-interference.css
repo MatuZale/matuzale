@@ -1,0 +1,44 @@
+/* A rare tracking line, confined to the picture and never the television controls. */
+.tape-interference {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+}
+.tape-interference::before,
+.tape-interference::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+.tape-interference::before {
+  top: -18%;
+  height: 16%;
+  background: repeating-linear-gradient(0deg, transparent 0 4px, #d6d9ff 4px 5px, transparent 5px 9px),
+    linear-gradient(180deg, transparent, #c0c5ff 43%, #e3cced 51%, transparent 85%);
+  opacity: .2;
+}
+.tape-interference::after {
+  bottom: 8%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #a3d6ea 17%, transparent 38%, #e7bbdc 62%, transparent 90%);
+  opacity: .25;
+}
+.tape-interference.is-tracking { animation: tape-interference-envelope 1.4s ease-in-out both; }
+.tape-interference.is-tracking::before { animation: tape-interference-sweep 1.4s linear both; }
+@keyframes tape-interference-envelope {
+  0%, 100% { opacity: 0; }
+  22%, 72% { opacity: .7; }
+}
+@keyframes tape-interference-sweep {
+  from { transform: translateY(0); }
+  to { transform: translateY(740%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tape-interference.is-tracking, .tape-interference.is-tracking::before { animation: none; opacity: 0; }
+}

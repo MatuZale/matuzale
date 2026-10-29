@@ -234,18 +234,53 @@ test('BENTOS keeps its own identity across themes', async ({ page }) => {
   await expect.poll(() => tape.evaluate(el => getComputedStyle(el).animationName)).toBe('none');
 });
 
-test('VHS ribbons really morph and BENTOS controls remain clickable', async ({ page }) => {
+test('VHS ident moves its T-120 title and BENTOS controls remain clickable', async ({ page }) => {
   await page.goto('/?lang=en');
   await page.locator('.project-tape--bentos').click();
   const screen = page.locator('#tape-player-screen');
   const ident = page.locator('.tape-ident');
   await page.locator('.tape-player__secret').click();
   await expect(ident).toBeVisible();
-  const first = await ident.locator('path').first().getAttribute('d');
+  const title = ident.locator('.tape-ident__title');
+  await expect(title).toContainText('120');
+  const first = await title.evaluate(el => getComputedStyle(el).transform);
   await page.waitForTimeout(1600);
-  const second = await ident.locator('path').first().getAttribute('d');
+  const second = await title.evaluate(el => getComputedStyle(el).transform);
   expect(second).not.toBe(first);
   await page.locator('.tape-player__close').click();
   await expect(ident).toBeHidden();
   await expect(screen).not.toHaveAttribute('inert', '');
+});
+
+test('rare VHS tracking stays inside the screen and pauses safely', async ({ page }) => {
+  await page.addInitScript(() => {
+    const native = window.setTimeout;
+    window.setTimeout = function (fn, delay, ...args) {
+      return native(fn, fn?.name === 'showInterference' ? 250 : delay, ...args);
+    };
+  });
+  await page.goto('/?lang=en');
+  await page.getByRole('button', { name: /^Kodlab:/ }).click();
+  const screen = page.locator('#tape-player-screen');
+  await screen.scrollIntoViewIfNeeded();
+  const overlay = screen.locator('.tape-interference');
+  await expect(overlay).toHaveClass(/is-tracking/, { timeout: 10000 });
+  expect(await overlay.evaluate(el => getComputedStyle(el).pointerEvents)).toBe('none');
+  await page.evaluate(() => document.documentElement.classList.add('is-tape-paused'));
+  await expect(overlay).not.toHaveClass(/is-tracking/);
+  await page.waitForTimeout(500);
+  await expect(overlay).not.toHaveClass(/is-tracking/);
+  await page.evaluate(() => document.documentElement.classList.remove('is-tape-paused'));
+  await expect(overlay).toHaveClass(/is-tracking/, { timeout: 10000 });
+  await page.locator('.tape-player__secret').click();
+  await expect(overlay).not.toHaveClass(/is-tracking/);
+  await expect(screen).toHaveAttribute('inert', '');
+  await page.locator('.tape-player__close').click();
+  await expect(overlay).not.toHaveClass(/is-tracking/);
+  await expect(screen).not.toHaveAttribute('inert', '');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.getByRole('button', { name: /^Kodlab:/ }).click();
+  await screen.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(500);
+  await expect(overlay).not.toHaveClass(/is-tracking/);
 });
