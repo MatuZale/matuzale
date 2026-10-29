@@ -141,7 +141,9 @@
         <div class="about__aside">
           <figure class="about__photo reveal">
             <img data-i18n-attr="alt:about.alt" src="assets/profile.jpg" alt="Portrait of Tomasz Młynik" width="720" height="720" loading="lazy" />
+            <canvas class="about__ascii" aria-hidden="true" width="640" height="640" hidden></canvas>
           </figure>
+          <button class="about__ascii-toggle" type="button" aria-pressed="false" aria-label="Show portrait as ASCII art" hidden>ASCII <span aria-hidden="true">◌</span></button>
           <div data-i18n-attr="aria-label:about.terminal" class="about-terminal reveal" role="group" aria-label="A few things about me, in terminal form">
             <div class="about-terminal__bar"><span class="about-terminal__lights" aria-hidden="true"><i></i><i></i><i></i></span><span>tomasz@gdansk: ~</span><span aria-hidden="true">⌘</span></div>
             <div class="about-terminal__body">
@@ -911,5 +913,6 @@
   <script src="js/script.js"></script>
   <script src="js/transmission.js" defer></script>
   <script type="module" src="js/channels.js"></script>
+  <script type="module" src="js/portrait-ascii.js"></script>
 </body>
 </html>
