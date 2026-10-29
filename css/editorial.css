@@ -9,6 +9,10 @@
 .nav, .nav.is-scrolled, .nav.is-menu-open { background: transparent; border-color: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; }
 .nav__brand, .nav__links, .nav__actions { pointer-events: auto; }
 .nav__brand { font-size: 1.35rem; padding: .3rem .6rem; border: 1px solid var(--line); border-radius: 8px; background: color-mix(in srgb, var(--bg) 90%, transparent); }
+.nav__brand { transition: border-color .18s ease, box-shadow .18s ease; }
+@media (hover: hover) and (pointer: fine) {
+  .nav__brand:hover { border-color: var(--retro-lit-edge); box-shadow: 0 0 10px -4px var(--retro-lit-glow); }
+}
 .js .nav__progress { display: none; }
 .nav__links { gap: clamp(1.2rem, 2.8vw, 2.7rem); }
 .nav__links a { font-size: .82rem; }
@@ -54,14 +58,23 @@
 .hero .btn--primary::after, .contact .btn--primary::after { content: ""; position: absolute; left: 8px; right: 8px; bottom: 2px; height: 3px; border-radius: 2px; background: var(--tape-stripes); }
 .hero .btn--ghost, .btn--ghost, .icon-btn, .socials a, .back-top { border-color: var(--line); background: var(--surface); box-shadow: none; }
 .hero .btn--ghost:hover, .btn--ghost:hover, .icon-btn:hover, .socials a:hover, .back-top:hover { border-color: var(--text); background: var(--surface); box-shadow: none; }
-/* The cassette colours frame a focused or hovered action without covering its label. */
-:is(.btn--ghost, .contact .socials a):is(:hover, :focus-visible) {
-  border-color: transparent;
-  background: linear-gradient(var(--surface), var(--surface)) padding-box, var(--tape-stripes) border-box;
+/* A restrained warm edge ties page actions to the lit keys on the tape deck. */
+:is(.btn--ghost, .contact .socials a, .hero .btn--primary, .contact .btn--primary):focus-visible {
+  border-color: var(--retro-lit-edge);
 }
-:is(.hero .btn--primary, .contact .btn--primary):is(:hover, :focus-visible) {
-  border-color: transparent;
-  background: var(--retro-bezel) padding-box, var(--tape-stripes) border-box;
+@media (hover: hover) and (pointer: fine) {
+  :is(.btn--ghost, .contact .socials a, .hero .btn--primary, .contact .btn--primary):hover {
+    border-color: var(--retro-lit-edge);
+    box-shadow: 0 3px 12px -6px var(--retro-lit-glow), inset 0 0 8px -3px var(--retro-lit-glow);
+  }
+  :is(.nav__burger, .cassette-btn):hover {
+    border-color: var(--retro-lit-edge);
+    box-shadow: 0 0 10px -4px var(--retro-lit-glow);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(.btn, .contact .socials a, .nav__burger, .cassette-btn):hover { transform: none; }
+  .nav__brand { transition: none; }
 }
 @media (forced-colors: active) {
   :is(.btn--ghost, .hero .btn, .contact .btn, .contact .socials a):is(:hover, :focus-visible) { border-color: ButtonText; }

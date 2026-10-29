@@ -139,9 +139,11 @@
   color: var(--retro-key-text);
   box-shadow: 0 2px 0 var(--retro-key-drop), inset 0 1px #ffffff26;
   cursor: pointer;
-  transition: border-color .2s, color .2s, transform .15s;
+  transition: border-color .18s, color .18s, box-shadow .18s, transform .12s;
 }
-.footer-tape__transport button:hover { color: var(--retro-lit); }
+@media (hover: hover) and (pointer: fine) {
+  .footer-tape__transport button:hover { color: var(--text); border-color: var(--retro-lit-edge); box-shadow: 0 2px 0 var(--retro-key-drop), inset 0 0 8px -2px var(--retro-lit-glow); }
+}
 .footer-tape__transport button:active { transform: translateY(2px); box-shadow: inset 0 1px 3px #0004; }
 .footer-tape__transport.is-paused [data-tape-action="pause"] { color: var(--retro-lit); background: var(--retro-lit-key); border-color: var(--retro-lit-edge); box-shadow: inset 0 1px 4px #0004, 0 0 8px var(--retro-lit-glow); }
 .footer-tape__transport button:focus-visible { outline: 2px solid var(--link); outline-offset: 3px; }

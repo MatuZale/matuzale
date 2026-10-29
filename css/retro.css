@@ -74,9 +74,11 @@ html[data-channel-pending] body { visibility: hidden; }
   background: var(--retro-key); border: 1px solid var(--retro-key-edge); color: var(--retro-key-text);
   font: inherit; letter-spacing: .05em;
   box-shadow: 0 2px 0 var(--retro-key-drop), inset 0 1px 0 #ffffff1c;
-  transition: transform .08s, box-shadow .08s, color .2s;
+  transition: transform .12s, box-shadow .18s, color .18s, border-color .18s;
 }
-.channel__key:hover { color: var(--text); }
+@media (hover: hover) and (pointer: fine) {
+  .channel__key:hover { color: var(--text); border-color: var(--retro-lit-edge); box-shadow: 0 2px 0 var(--retro-key-drop), inset 0 0 8px -2px var(--retro-lit-glow); }
+}
 .channel__key:active { transform: translateY(2px); box-shadow: 0 0 0 var(--retro-key-drop); }
 .channel__key[aria-pressed="true"] {
   color: var(--retro-lit); text-shadow: 0 0 6px var(--retro-lit-glow);
@@ -109,6 +111,7 @@ html[data-channel-pending] body { visibility: hidden; }
   100% { transform: rotateY(180deg) scaleX(-1); }
 }
 @media (prefers-reduced-motion: reduce) { .cassette-btn.is-inserting .cassette { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .channel__key { transition: none; } }
 
 /* ───────── Back to top: a VCR key ───────── */
 

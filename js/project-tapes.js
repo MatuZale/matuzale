@@ -95,6 +95,9 @@
     clearTimeout(tuningTimer);
     tuningTimer = 0;
     screen.querySelector('.tape-test-pattern--tuning')?.remove();
+    const noise = screen.querySelector('.tape-static--tuning');
+    noise?.dispose?.();
+    noise?.remove();
   }
   function disposeStatic() {
     screen.querySelector('.tape-static')?.dispose?.();
@@ -102,12 +105,21 @@
   function tunePicture(firstPlay) {
     stopTuning();
     if (motion.matches || document.documentElement.classList.contains('is-tape-paused') ||
-        typeof window.createTapeTestPattern !== 'function') return;
-    const pattern = window.createTapeTestPattern();
-    pattern.classList.add('tape-test-pattern--tuning');
-    screen.append(pattern);
-    // Let the CRT open before the short calibration signal gives way to the project.
-    tuningTimer = setTimeout(stopTuning, firstPlay ? 750 : 240);
+        typeof window.createTapeTestPattern !== 'function' || typeof window.createTapeStatic !== 'function') return;
+    const noise = window.createTapeStatic();
+    noise.classList.add('tape-static--tuning');
+    screen.append(noise);
+    // A quick burst of noise, a single test-card flash, then noise again.
+    // At power-on let the tube open before showing the flash.
+    tuningTimer = setTimeout(() => {
+      const pattern = window.createTapeTestPattern();
+      pattern.classList.add('tape-test-pattern--tuning');
+      screen.append(pattern);
+      tuningTimer = setTimeout(() => {
+        pattern.remove();
+        tuningTimer = setTimeout(stopTuning, 70);
+      }, 70);
+    }, firstPlay ? 420 : 70);
   }
   function ejectTape() {
     if (!active || ejectTimer) return;
@@ -253,9 +265,11 @@
     }
   });
   motion.addEventListener('change', () => { if (motion.matches) { stopTuning(); completeEject?.(); } });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) stopTuning(); });
   eject.addEventListener('click', ejectTape);
   power.addEventListener('click', () => powerOff());
   player.addEventListener('click', event => {
+    if (event.target.closest('.tape-player__secret, .tape-image-open')) stopTuning();
     if (event.target.closest('a[href^="#"]')) powerOff(false, true);
   }, true);
   document.addEventListener('keydown', event => {

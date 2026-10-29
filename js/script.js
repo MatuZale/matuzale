@@ -117,7 +117,7 @@ function updateNavigation() {
   }
   if (pageTravel > 0 && y >= pageTravel - 2) active = watched[watched.length - 1];
   // The shorter navigation groups the featured case study and supporting sections.
-  const navSection = { bentos: "projects", skills: "about", journey: "about" }[active.id] || active.id;
+  const navSection = { bentos: "projects", skills: "about" }[active.id] || active.id;
   navAnchors.forEach((a) => {
     const isActive = a.hash === "#" + navSection;
     a.classList.toggle("is-active", isActive);

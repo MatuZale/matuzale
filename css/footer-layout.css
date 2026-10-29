@@ -51,52 +51,26 @@
   margin: 3rem 1rem 2rem 0;
   align-self: center;
   padding: .55rem .55rem .35rem;
-  border: 1px solid #0a0b12;
+  border: 1px solid var(--retro-bezel-edge);
   border-radius: 7px;
-  background: linear-gradient(#302d32, #1a1820);
+  background: var(--retro-bezel);
   box-shadow: inset 0 1px #ffffff2b, 0 3px 0 #0003;
-  --tear-bg: #1b1020;
-  --tear-grid: #4a303a;
-  --tear-comment: #c1a9b2;
-  --tear-prop: #ffc05d;
-  --tear-glow: #9570ef22;
-  --pcb-trace: #664450;
-  --pcb-part: #2a1c2a;
-  --pcb-part-edge: #765261;
-  --snake-a: #ac80f6;
-  --snake-b: #d365e0;
-  --snake-head: #ffc05d;
-  --snake-food: #ff80c8;
-  --tc-i: #ffc05d;
-  --tc-o: #ffd56b;
-  --tc-t: #b28bff;
-  --tc-s: #ff8a61;
-  --tc-z: #ff7a9a;
-  --tc-j: #db85ed;
-  --tc-l: #ffad6b;
-  --pac-wall: #ba84ed;
-  --pac-pellet: #f3e3b8;
-  --pac: #ffd24a;
-  --pac-edge: #ffd24a;
-  --ghost-0: #ff5e7e;
-  --ghost-1: #ff9bd8;
-  --ghost-2: #ffc05d;
-  --ghost-scared: #b28bff;
+  --tear-comment: color-mix(in srgb, var(--text) 70%, var(--tear-bg));
 }
 .footer__circuit .circuit-window {
   display: block;
-  border: 1px solid #77707d;
+  border: 1px solid var(--pcb-part-edge);
   border-radius: 4px;
-  background: #1b1020;
-  box-shadow: inset 0 0 12px #000b;
+  background: var(--tear-bg);
+  box-shadow: inset 0 0 12px color-mix(in srgb, var(--text) 14%, transparent);
   filter: none;
 }
 .footer__circuit .circuit-window > use { opacity: 0; }
 .footer__circuit .circuit-window__traces { opacity: .35; }
-.footer__circuit .circuit-caption { padding: .4rem .1rem 0; color: #e8dfe1; }
-.footer__circuit .circuit-caption strong { color: #e1bbff; }
-.footer__circuit .circuit-caption__pause { color: #f5e3cf; }
-.footer__circuit .circuit-caption__pause:focus-visible { outline: 2px solid #ffcf75; outline-offset: 3px; }
+.footer__circuit .circuit-caption { padding: .4rem .1rem 0; color: var(--text); }
+.footer__circuit .circuit-caption strong { color: var(--link); }
+.footer__circuit .circuit-caption__pause { color: var(--text); }
+.footer__circuit .circuit-caption__pause:focus-visible { outline: 2px solid var(--link); outline-offset: 3px; }
 @media (max-width: 800px) {
   .footer__inner { grid-template-columns: minmax(0, 1fr) minmax(180px, 230px) minmax(180px, 250px); }
 }

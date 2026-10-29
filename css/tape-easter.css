@@ -4,9 +4,13 @@
   flex: 0 0 auto; cursor: pointer; padding: .28rem .38rem;
   border: 1px solid #b8aa9d75; border-radius: 3px; background: #29252a; color: #f6eadd;
   font: 800 .7rem/1 Arial, sans-serif; letter-spacing: -.06em;
+  transition: border-color .18s, box-shadow .18s, color .18s, transform .12s;
 }
 .tape-player__secret span { color: #f4bd70; font-size: .55rem; }
-.tape-player__secret:hover { color: #ffe1ab; border-color: #e1ccaa; }
+@media (hover: hover) and (pointer: fine) {
+  .tape-player__secret:hover { color: #fff5dc; border-color: #e4c58c; box-shadow: inset 0 0 8px #e8b76933, 0 0 9px -4px #e8b76988; }
+}
+.tape-player__secret:active { transform: translateY(1px); }
 .tape-player__secret:focus-visible { outline: 2px solid #ffe391; outline-offset: 3px; }
 .tape-ident[hidden] { display: none; }
 .tape-ident {
@@ -95,15 +99,17 @@
 }
 @keyframes ident-grid { 0%, 10% { opacity: 0; } 30%, 72% { opacity: .12; } 90%, 100% { opacity: 0; } }
 @keyframes ident-stripe {
-  0%, 5% { transform: translateX(-110%); }
+  0%, 5% { transform: translateX(110%); }
   24%, 66% { transform: translateX(0); }
   86%, 100% { transform: translateX(110%); }
 }
 @keyframes ident-title {
-  0%, 8% { transform: translate(-160%, -50%) skewX(-8deg); color: var(--ident-ink); }
-  30%, 46% { transform: translate(-50%, -50%) skewX(0); color: var(--ident-ink); }
-  58%, 68% { transform: translate(-50%, -50%) skewX(0); color: var(--ident-accent); }
-  88%, 100% { transform: translate(75%, -50%) skewX(-8deg); color: var(--ident-accent); }
+  /* Position the right edge beyond the left of the composition at both ends;
+     unlike a percentage translation alone, this works at every screen width. */
+  0%, 8% { left: -10%; transform: translate(-100%, -50%) skewX(-8deg); color: var(--ident-ink); }
+  30%, 46% { left: 50%; transform: translate(-50%, -50%) skewX(0); color: var(--ident-ink); }
+  58%, 68% { left: 50%; transform: translate(-50%, -50%) skewX(0); color: var(--ident-accent); }
+  88%, 100% { left: -10%; transform: translate(-100%, -50%) skewX(-8deg); color: var(--ident-accent); }
 }
 @keyframes ident-caption { 0%, 19% { opacity: 0; transform: translate(-50%, 7px); } 32%, 66% { opacity: 1; transform: translate(-50%, 0); } 80%, 100% { opacity: 0; transform: translate(-50%, -5px); } }
 @media (max-width: 480px) {
@@ -113,6 +119,8 @@
   .tape-ident__masthead { gap: .45rem; }
 }
 @media (prefers-reduced-motion: reduce) {
+  .tape-player__secret { transition: none; }
+  .tape-player__secret:active { transform: none; }
   .tape-ident.is-running .tape-ident__art, .tape-ident.is-running .tape-ident__sun,
   .tape-ident.is-running .tape-ident__grid, .tape-ident.is-running .tape-ident__bars i,
   .tape-ident.is-running .tape-ident__title, .tape-ident.is-running .tape-ident__subtitle { animation: none; }

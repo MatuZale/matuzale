@@ -32,8 +32,7 @@
 .tape-player__screen .tape-preview figcaption { color: #cbd7df; }
 .tape-player__controls { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 3.3rem; padding: .7rem .6rem .15rem; color: #f2e8d6; font: 600 .65rem/1.4 var(--font-mono); letter-spacing: .08em; }
 .tape-player__controls::before { content: ""; flex: 0 0 30px; height: 30px; border-radius: 50%; background: radial-gradient(circle at 36% 30%, #746d67 0 10%, #343137 16% 54%, #161419 57% 68%, #bdb3a3 70% 73%, #4b4544 76%); box-shadow: 0 1px 2px #0009; }
-.tape-player__close { cursor: pointer; flex: 0 0 auto; padding: .55rem .7rem; border: 1px solid #cbbfaf80; border-radius: 4px; background: #211f23; color: #fff4de; font: 600 .65rem/1 var(--font-mono); letter-spacing: .04em; }
-.tape-player__close:hover { background: #504749; }
+.tape-player__close { cursor: pointer; flex: 0 0 auto; padding: .55rem .7rem; border: 1px solid #cbbfaf80; border-radius: 4px; background: #211f23; color: #fff4de; font: 600 .65rem/1 var(--font-mono); letter-spacing: .04em; transition: border-color .18s, background .18s, box-shadow .18s, transform .12s; }
 .tape-player__close:focus-visible { outline: 2px solid #ffe391; outline-offset: 3px; }
 .tape-player__close:disabled { opacity: .4; cursor: default; }
 .tape-player__status { flex: 1 1 auto; min-width: 0; }
@@ -42,10 +41,16 @@
   display: grid; place-items: center; border: 1px solid #b9aaa088; border-radius: 50%;
   background: radial-gradient(circle at 35% 25%, #615b59, #29262b 70%);
   color: #f2ddbd; box-shadow: inset 0 1px 1px #ffffff30, 0 2px 3px #0008;
-  font: 600 1.05rem/1 Arial, sans-serif;
+  font: 600 1.05rem/1 Arial, sans-serif; transition: border-color .18s, box-shadow .18s, color .18s, transform .12s;
 }
-.tape-player__power:hover { color: #fff5dc; border-color: #e4c58c; }
 .tape-player__power:focus-visible { outline: 2px solid #ffe391; outline-offset: 3px; }
+@media (hover: hover) and (pointer: fine) {
+  .tape-player__close:not(:disabled):hover, .tape-player__power:hover {
+    color: #fff5dc; border-color: #e4c58c; box-shadow: inset 0 0 8px #e8b76933, 0 0 9px -4px #e8b76988;
+  }
+  .tape-player__close:not(:disabled):hover { background: #3b3032; }
+}
+.tape-player__close:not(:disabled):active, .tape-player__power:active { transform: translateY(1px); }
 @media (max-width: 680px) {
   .tape-player__stage { grid-template-columns: 1fr; gap: .8rem; }
   .tape-player__case { padding: .2rem .5rem .5rem; }
@@ -86,6 +91,8 @@ html.is-tape-paused .tape-player .tape-player__screen::after { animation: none !
 html.is-tape-paused .tape-player, html.is-tape-paused .tape-player__tv, html.is-tape-paused .tape-player__screen { transition: none !important; }
 @media (prefers-reduced-motion: reduce) {
   .tape-player, .tape-player__tv, .tape-player__screen { transition: none; }
+  .tape-player__close, .tape-player__power { transition: none; }
+  .tape-player__close:not(:disabled):active, .tape-player__power:active { transform: none; }
   .tape-player.is-playing .tape-player__case .tape-cover,
   .tape-player.is-playing .tape-player__tv,
   .tape-player.is-playing .tape-player__screen,

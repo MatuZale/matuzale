@@ -14,7 +14,7 @@ export const PL = {
   "nav.skills": "Narzędzia",
   "nav.projects": "Projekty",
   "nav.research": "Badania",
-  "nav.journey": "Ścieżka",
+  "nav.journey": "Doświadczenie",
   "nav.contact": "Kontakt",
   "channel.label": "Kanały",
   "backtop": "Przewiń na początek",

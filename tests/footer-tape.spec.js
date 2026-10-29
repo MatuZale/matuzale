@@ -1,6 +1,68 @@
 import { test, expect } from '@playwright/test';
 test.use({ hasTouch: true });
 
+test('footer games follow explicit and system themes while preserving readable game pixels', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'light' });
+  await page.goto('/');
+  const board = page.locator('#footer-game');
+  await board.scrollIntoViewIfNeeded();
+  await expect.poll(() => board.evaluate(el => typeof el.play)).toBe('function');
+
+  // Read the actual computed SVG colours, including color-mix(), in the browser.
+  const sample = () => board.evaluate(el => {
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 1;
+    const ctx = canvas.getContext('2d');
+    const rgba = value => {
+      ctx.clearRect(0, 0, 1, 1);
+      ctx.fillStyle = value;
+      ctx.fillRect(0, 0, 1, 1);
+      return [...ctx.getImageData(0, 0, 1, 1).data];
+    };
+    const background = rgba(getComputedStyle(el.querySelector('.circuit-window__bg')).fill);
+    const selectors = ['.circuit-window__head', '.circuit-window__food', '.g-block', '.g-wall', '.g-pellet', '.g-pac', '.g-ghost--0'];
+    const colors = selectors.map(selector => {
+      const item = el.querySelector(selector);
+      if (!item) return null;
+      const style = getComputedStyle(item);
+      return rgba(selector === '.g-wall' ? style.stroke : style.fill);
+    }).filter(Boolean);
+    return { background, colors };
+  });
+  const luminance = rgb => {
+    const [r, g, b] = rgb.slice(0, 3).map(x => {
+      x /= 255;
+      return x <= .04045 ? x / 12.92 : ((x + .055) / 1.055) ** 2.4;
+    });
+    return .2126 * r + .7152 * g + .0722 * b;
+  };
+  const states = [
+    { system: 'dark', explicit: 'light', light: true },
+    { system: 'light', explicit: 'dark', light: false },
+    { system: 'dark', explicit: null, light: false },
+    { system: 'light', explicit: null, light: true },
+  ];
+  for (const game of ['snake', 'tetris', 'pacman']) {
+    await board.evaluate((el, name) => el.play(name), game);
+    await expect(page.locator('#game-name')).toHaveText(game === 'pacman' ? 'pac-man' : game);
+    for (const state of states) {
+      await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: state.system });
+      await page.evaluate(value => {
+        if (value) document.documentElement.dataset.theme = value;
+        else delete document.documentElement.dataset.theme;
+      }, state.explicit);
+      const result = await sample();
+      const bg = luminance(result.background);
+      expect(state.light ? bg : 1 - bg).toBeGreaterThan(.65);
+      expect(result.colors.length).toBeGreaterThanOrEqual(game === 'snake' ? 2 : game === 'tetris' ? 1 : 4);
+      for (const color of result.colors) {
+        const ink = luminance(color);
+        expect((Math.max(bg, ink) + .05) / (Math.min(bg, ink) + .05)).toBeGreaterThan(1.5);
+      }
+    }
+  }
+});
+
 for (const width of [1280, 390]) {
   test(`cassette pauses the picture and resumes away from the footer at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: width < 600 ? 844 : 900 });

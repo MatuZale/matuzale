@@ -25,7 +25,7 @@
   .tape-test-pattern svg { width: 112%; max-width: none; }
 }
 
-/* Off-air snow moves as a cached tile: subdued analogue grain, not a strobe. */
+/* Two gently drifting layers of cached grain keep the off-air snow continuous. */
 .tape-player__screen .tape-static {
   position: absolute;
   inset: 0;
@@ -33,13 +33,24 @@
   background: #777;
   pointer-events: none;
 }
+.tape-player__screen .tape-static--tuning { z-index: 2; }
+.tape-static--tuning .tape-static__grain { animation-duration: .45s; }
+.tape-static--tuning .tape-static__grain::before { animation-duration: .7s; }
 .tape-static__grain {
   position: absolute;
   inset: -12%;
   background-repeat: repeat;
   background-size: 192px 192px;
   image-rendering: pixelated;
-  animation: tape-static-shift 1.8s steps(1, end) infinite;
+  animation: tape-static-shift 1.8s linear infinite;
+}
+.tape-static__grain::before {
+  content: '';
+  position: absolute;
+  inset: -12%;
+  background: inherit;
+  opacity: .3;
+  animation: tape-static-drift 2.7s linear infinite;
 }
 .tape-static::after {
   content: '';
@@ -57,9 +68,18 @@
   62.5% { transform: translate(-5%, 1%); }
   75% { transform: translate(1%, -4%); }
   87.5% { transform: translate(-3%, 5%); }
+  100% { transform: translate(0, 0); }
+}
+@keyframes tape-static-drift {
+  0%, 100% { transform: translate(3%, -2%); }
+  25% { transform: translate(-3%, 3%); }
+  50% { transform: translate(2%, 4%); }
+  75% { transform: translate(-4%, -3%); }
 }
 .tape-static.is-suspended .tape-static__grain,
-html.is-tape-paused .tape-static__grain { animation-play-state: paused; }
+html.is-tape-paused .tape-static__grain,
+.tape-static.is-suspended .tape-static__grain::before,
+html.is-tape-paused .tape-static__grain::before { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) {
-  .tape-static__grain { animation: none; }
+  .tape-static__grain, .tape-static__grain::before { animation: none; }
 }

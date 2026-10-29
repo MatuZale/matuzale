@@ -80,15 +80,37 @@
   background: var(--retro-key); border: 1px solid var(--retro-key-edge); color: var(--retro-key-text);
   font: inherit; font-size: 1.12rem; letter-spacing: .06em; text-transform: uppercase;
   box-shadow: 0 3px 0 var(--retro-key-drop), inset 0 1px 0 #ffffff1c, inset 0 -2px 0 color-mix(in srgb, var(--fastext) 55%, transparent);
-  transition: transform .08s, box-shadow .08s, color .2s;
+  transition: transform .12s, box-shadow .18s, color .18s, border-color .18s;
 }
-.remote__key:hover { color: var(--text); }
 .remote__key:active { transform: translateY(3px); box-shadow: 0 0 0 var(--retro-key-drop), inset 0 1px 0 #ffffff1c; }
 .remote__key.is-lit {
   color: var(--retro-lit); text-shadow: 0 0 6px var(--retro-lit-glow);
   background: var(--retro-lit-key); border-color: var(--retro-lit-edge);
   transform: translateY(2px); box-shadow: 0 1px 0 var(--retro-key-drop), inset 0 0 9px var(--retro-lit-glow);
 }
+/* A short tracking glitch in the lettering, confined to the service remote.
+   The physical key and its hit target stay still and the label settles quickly. */
+@media (hover: hover) and (pointer: fine) {
+  .remote__key:not(.is-lit, :active):hover {
+    color: var(--text); border-color: var(--retro-lit-edge);
+    box-shadow: 0 3px 0 var(--retro-key-drop), inset 0 0 8px -2px var(--retro-lit-glow), inset 0 -2px 0 color-mix(in srgb, var(--fastext) 55%, transparent);
+  }
+  .remote__key:hover { animation: remote-key-glitch 620ms steps(1, end); }
+}
+.remote__key:focus-visible { animation: remote-key-glitch 620ms steps(1, end); }
+@keyframes remote-key-glitch {
+  0%, 30%, 65%, 100% { text-shadow: none; }
+  10% { text-shadow: 2px 0 #ea517d, -2px 0 #48b9d5; }
+  20% { text-shadow: -1px 0 #ea517d, 1px 0 #48b9d5; }
+  45% { text-shadow: -2px 0 #ea517d, 2px 0 #48b9d5; }
+  55% { text-shadow: 1px 0 #ea517d, -1px 0 #48b9d5; }
+  80% { text-shadow: 1px 0 #ea517d, -1px 0 #48b9d5; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .remote__key { transition: none; }
+  .remote__key:hover, .remote__key:focus-visible { animation: none; }
+}
+html.is-tape-paused .remote__key:hover, html.is-tape-paused .remote__key:focus-visible { animation: none; }
 /* The culmination only comes on wide screens, Spacewar! only on a computer. */
 @media (max-width: 839px) { .remote__key[data-cue="luminet"] { display: none; } }
 .remote__group--spacewar { display: none; }

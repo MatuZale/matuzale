@@ -2,6 +2,32 @@ import { test, expect } from '@playwright/test';
 
 test.use({ hasTouch: true });
 
+test.describe('service remote hover', () => {
+  test.use({ hasTouch: false });
+
+  test('glitches its keys on hover and respects motion controls', async ({ page }) => {
+    await page.goto('/');
+    const learning = page.locator('.skill--learning');
+    await learning.scrollIntoViewIfNeeded();
+    for (let i = 0; i < 3; i++) {
+      await learning.click();
+      await page.waitForTimeout(750);
+    }
+    const key = page.locator('.remote__key[data-cue="tapesun"]');
+    await expect(key).toBeVisible();
+    await key.hover();
+    await expect(key).toHaveCSS('animation-name', 'remote-key-glitch');
+    await expect(page.locator('[data-tape-action="pause"]')).not.toHaveCSS('animation-name', 'remote-key-glitch');
+
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await expect(key).toHaveCSS('animation-name', 'none');
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await expect(key).toHaveCSS('animation-name', 'remote-key-glitch');
+    await page.locator('[data-tape-action="pause"]').evaluate(el => el.click());
+    await expect(key).toHaveCSS('animation-name', 'none');
+  });
+});
+
 for (const width of [1280, 390]) test(`service remote winds to and plays the VHS sun and photons at ${width}px`, async ({ page }) => {
   await page.setViewportSize({ width, height: width < 600 ? 844 : 900 });
   await page.addInitScript(viewportWidth => {
@@ -36,8 +62,8 @@ for (const width of [1280, 390]) test(`service remote winds to and plays the VHS
   const learning = page.locator('.skill--learning');
   await learning.scrollIntoViewIfNeeded();
   for (let i = 0; i < 3; i++) {
-    if (width < 600) await learning.tap({ position: { x: 10, y: 20 } });
-    else await learning.click({ position: { x: 10, y: 20 } });
+    if (width < 600) await learning.tap();
+    else await learning.click();
     await page.waitForTimeout(750);
   }
   const looseCard = page.locator('.loose-air > .skill--learning');

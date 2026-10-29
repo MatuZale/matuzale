@@ -248,6 +248,43 @@ html.is-crt.sw-open:not(:has(.sw.is-off)) body { animation: none; text-shadow: n
 .sw__panel button:disabled { opacity: .45; cursor: default; }
 .sw__panel button:not(:disabled):hover { background: #0b2a18; color: #fff; }
 
+/* In the light theme the vector display becomes a warm-paper oscilloscope;
+   the dark theme keeps the original green phosphor. */
+.sw__screen { background: light-dark(#f2eee0, #010402); }
+.sw__canvas {
+  filter: drop-shadow(1px 0 0 light-dark(#ed466d22, #ffc05d8c))
+    drop-shadow(-1px 0 0 light-dark(#8264e622, #ff799f73));
+}
+.sw__glass {
+  background: radial-gradient(circle at 32% 24%, #ffffff1c, transparent 28%),
+    radial-gradient(circle, transparent 60%, light-dark(#59505c38, #000000b8) 100%);
+}
+.sw__scope {
+  --phosphor: light-dark(#31574a, #8dffb0);
+  background:
+    linear-gradient(90deg, transparent calc(50% - .5px), color-mix(in srgb, var(--phosphor) 25%, transparent) calc(50% - .5px) calc(50% + .5px), transparent calc(50% + .5px)),
+    linear-gradient(transparent calc(50% - .5px), color-mix(in srgb, var(--phosphor) 25%, transparent) calc(50% - .5px) calc(50% + .5px), transparent calc(50% + .5px)),
+    linear-gradient(90deg, color-mix(in srgb, var(--phosphor) 10%, transparent) 1px, transparent 1px) 0 0 / 10% 100%,
+    linear-gradient(color-mix(in srgb, var(--phosphor) 10%, transparent) 1px, transparent 1px) 0 0 / 100% 25%,
+    radial-gradient(ellipse at 50% 40%, light-dark(#e9ecdc, #0b2116), light-dark(#ccd8c6, #030a06) 75%);
+  text-shadow: 0 0 6px light-dark(#668a7833, #4dff8a99);
+}
+.sw__trace { background: light-dark(#31574a, #d8ffe6); box-shadow: 0 0 4px 1px light-dark(#72978055, #5dffb0), 0 0 12px 2px light-dark(#72978033, #4dff8a66); }
+.sw__score { color: light-dark(#203b31, #e9fff2); }
+.sw__panel {
+  border-color: light-dark(#718b7977, #5dffb055);
+  background: light-dark(#f2eee8f5, #010806ee);
+  color: light-dark(#2d4137, #c8ffe0);
+  text-shadow: 0 0 6px light-dark(#668a7822, #5dffb066);
+}
+.sw__panel h3, .sw__big { color: light-dark(#21392f, #e9fff2); }
+.sw__panel th { color: light-dark(#4d6e5c, #7fdca7); }
+.sw__note, .sw__credit { color: light-dark(#53695d, #8fbfa3); }
+.sw__panel kbd, .sw__panel input, .sw__panel button { border-color: light-dark(#718b79aa, #5dffb088); }
+.sw__panel input, .sw__panel button { background: light-dark(#faf8f0, #04180d); color: light-dark(#293e34, #c8ffe0); }
+.sw__panel button:not(:disabled):hover { background: light-dark(#dce8d9, #0b2a18); color: light-dark(#172d23, #fff); }
+.sw__table tr.is-new td { color: light-dark(#203b31, #fff); background: light-dark(#9dc6a944, #5dffb026); }
+
 @media (prefers-reduced-motion: reduce) {
   .sw__trace, .sw__stick, .sw__button, .sw__key, .sw .sw__scope, .sw__knob { transition: none; }
   .sw::backdrop, .sw .sw__scene, .sw .sw__scope, .sw__crt::after, .sw__grain, .sw__roll, .sw__scope::after { animation: none; }

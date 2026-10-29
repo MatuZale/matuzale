@@ -17,7 +17,9 @@ const HOLE = .045;              // fall closer than this and the ship is gone
 const THRUST = .32, TURN = 3.4, FUEL_USE = .085;
 const TORPS = 32, TORP_SPEED = .75, TORP_LIFE = 1.9, RELOAD = .22;
 const JUMPS = 3, SHIP_R = .034, STEP = 1 / 120, ROUND_LIMIT = 120;
-const PHOSPHOR = "#d8f6ff", GLOW = "#5dffb0";
+const systemDark = window.matchMedia("(prefers-color-scheme: dark)");
+const lightMode = () => document.documentElement.dataset.theme === "light" ||
+  (!document.documentElement.dataset.theme && !systemDark.matches);
 const STORE = "spacewar-scores", INITIALS = "spacewar-initials";
 const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -101,7 +103,7 @@ function makeShip(kind, x, y) {
 
 /* ───────── The game ───────── */
 
-let dialog, canvas, ctx, screen, picture, beam, panel, scopes, boxes, scoreEl, dpr = 1, closing = false, tunedAway = false;
+let dialog, canvas, ctx, screen, picture, beam, panel, scopes, boxes, scoreEl, dpr = 1, closing = false, tunedAway = false, previousLight;
 let state = "title", players = 1, round = 1, score = 0, wins = [0, 0], roundTime = 0, timer = 0, message = "";
 let ships = [], torps = [], sparks = [], stars = [], paused = false, raf = 0, last = 0, acc = 0, refresh = 0;
 const held = new Set(), tapped = new Set();
@@ -272,21 +274,24 @@ function finish() {
 function draw() {
   const W = canvas.width, h = W / 2, t = say();
   if (!W) return;
+  const light = lightMode(), phosphor = light ? "#322946" : "#d8f6ff", glow = light ? "#a58bb2" : "#5dffb0";
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.shadowBlur = 0; ctx.globalAlpha = 1;
   // Phosphor afterglow: the last frames fade instead of vanishing.
-  ctx.fillStyle = "rgba(1, 6, 4, .3)"; ctx.fillRect(0, 0, W, W);
+  ctx.fillStyle = light ? `rgba(242, 238, 224, ${previousLight === light ? .3 : 1})` : `rgba(1, 6, 4, ${previousLight === light ? .3 : 1})`;
+  ctx.fillRect(0, 0, W, W);
+  previousLight = light;
   ctx.setTransform(h, 0, 0, h, h, h);
   const px = 1 / h;
 
-  ctx.fillStyle = PHOSPHOR;
+  ctx.fillStyle = phosphor;
   for (const st of stars) { ctx.globalAlpha = st.b * rand(.5, .7); ctx.fillRect(st.x, st.y, 1.5 * dpr * px, 1.5 * dpr * px); }
   ctx.globalAlpha = 1;
 
   // The hole eats the afterglow that crosses it; a faint ring and a few flickering sparks mark it.
-  ctx.fillStyle = "#000"; ctx.beginPath(); ctx.arc(0, 0, .04, 0, 2 * Math.PI); ctx.fill();
-  ctx.shadowColor = GLOW; ctx.shadowBlur = 8 * dpr;
-  ctx.strokeStyle = PHOSPHOR; ctx.lineWidth = 1.3 * dpr * px; ctx.lineCap = "round"; ctx.lineJoin = "round";
+  ctx.fillStyle = light ? "#292032" : "#000"; ctx.beginPath(); ctx.arc(0, 0, .04, 0, 2 * Math.PI); ctx.fill();
+  ctx.shadowColor = glow; ctx.shadowBlur = (light ? 3 : 8) * dpr;
+  ctx.strokeStyle = phosphor; ctx.lineWidth = 1.3 * dpr * px; ctx.lineCap = "round"; ctx.lineJoin = "round";
   ctx.globalAlpha = rand(.3, .55); ctx.beginPath(); ctx.arc(0, 0, .047, 0, 2 * Math.PI); ctx.stroke();
   ctx.beginPath();
   for (let i = 0; i < 12; i++) {
@@ -309,7 +314,7 @@ function draw() {
         ctx.beginPath(); ctx.moveTo(...at([back, 0])); ctx.lineTo(...at([back - rand(.02, .055), 0])); ctx.stroke();
       }
     }
-    ctx.fillStyle = PHOSPHOR;
+    ctx.fillStyle = phosphor;
     for (const p of torps) { ctx.beginPath(); ctx.arc(p.x, p.y, 2 * dpr * px, 0, 2 * Math.PI); ctx.fill(); }
   }
   for (const p of sparks) { ctx.globalAlpha = Math.min(1, p.life * 1.5); ctx.fillRect(p.x, p.y, 2 * dpr * px, 2 * dpr * px); }
@@ -317,7 +322,7 @@ function draw() {
 
   // Words, in the tube's own lettering.
   ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillStyle = PHOSPHOR;
+  ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillStyle = phosphor;
   const write = (text, y, size, alpha = 1) => { ctx.globalAlpha = alpha; ctx.font = `${Math.round(W * size)}px VT323, monospace`; ctx.fillText(text, h, h + y * h); };
   if (state === "title") {
     write("SPACEWAR!", -.36, .12);
@@ -663,7 +668,13 @@ function build() {
   new ResizeObserver(() => {
     dpr = Math.min(2, window.devicePixelRatio || 1);
     canvas.width = canvas.height = Math.round(screen.clientWidth * dpr);
+    if (dialog.open && document.documentElement.classList.contains("is-tape-paused")) { previousLight = undefined; draw(); }
   }).observe(screen);
+  const redrawStill = () => {
+    if (dialog.open && document.documentElement.classList.contains("is-tape-paused")) draw();
+  };
+  new MutationObserver(redrawStill).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  systemDark.addEventListener("change", redrawStill);
 
   dialog.addEventListener("keydown", onKey);
   dialog.addEventListener("keyup", onKey);

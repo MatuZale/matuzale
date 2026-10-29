@@ -266,6 +266,48 @@ test('VHS ident moves its T-120 title and BENTOS controls remain clickable', asy
   await expect(screen).not.toHaveAttribute('inert', '');
 });
 
+for (const width of [1280, 375]) {
+  test(`TM ident enters from opposite sides and leaves the frame at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.goto('/?lang=en');
+    await page.locator('.project-tape--kodlab').evaluate(el => el.click());
+    await page.locator('.tape-player__secret').evaluate(el => el.click());
+    const ident = page.locator('.tape-ident');
+    await expect(ident).toBeVisible();
+    const frames = await ident.evaluate(el => {
+      const composition = el.querySelector('.tape-ident__composition');
+      const title = el.querySelector('.tape-ident__title');
+      const stripes = [...el.querySelectorAll('.tape-ident__bars i')];
+      const animations = el.getAnimations({ subtree: true });
+      animations.forEach(animation => animation.pause());
+      return [0, 3800, 7000].map(time => {
+        animations.forEach(animation => { animation.currentTime = time; });
+        const frame = composition.getBoundingClientRect();
+        const logo = title.getBoundingClientRect();
+        const bars = stripes.map(stripe => stripe.getBoundingClientRect());
+        return {
+          frame: { left: frame.left, right: frame.right },
+          logo: { left: logo.left, right: logo.right },
+          bars: bars.map(bar => ({ left: bar.left, right: bar.right })),
+        };
+      });
+    });
+    for (const frame of [frames[0], frames[2]]) {
+      // The multicolour title shadow extends 10 px beyond the text's box.
+      expect(frame.logo.right + 10).toBeLessThan(frame.frame.left);
+      for (const stripe of frame.bars) expect(stripe.left).toBeGreaterThan(frame.frame.right);
+    }
+    const middle = frames[1];
+    expect(middle.logo.left).toBeGreaterThanOrEqual(middle.frame.left);
+    expect(middle.logo.right).toBeLessThanOrEqual(middle.frame.right);
+    for (const stripe of middle.bars) {
+      expect(stripe.left).toBeLessThan(middle.frame.right);
+      expect(stripe.right).toBeGreaterThan(middle.frame.left);
+    }
+  });
+}
+
 test('rare VHS tracking stays inside the screen and pauses safely', async ({ page }) => {
   await page.addInitScript(() => {
     const native = window.setTimeout;
