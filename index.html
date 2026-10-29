@@ -42,6 +42,7 @@
   <link rel="stylesheet" href="css/tape-shelf-glow.css" />
   <link rel="stylesheet" href="css/tape-shelf-3d.css" />
   <link rel="stylesheet" href="css/tape-shelf-depth.css" />
+  <link rel="stylesheet" href="css/tape-spacewar.css" />
   <link rel="stylesheet" href="css/tape-themes.css" />
   <link rel="stylesheet" href="css/tape-bentos.css" />
   <link rel="stylesheet" href="css/tape-image-view.css" />
@@ -105,7 +106,6 @@
         <button class="channel__key" type="button" data-channel="pl" lang="pl" title="Polski (klawisz 2)" aria-keyshortcuts="2" aria-pressed="false">PL</button>
         <button class="channel__key" type="button" data-channel="bin" title="Binary: point at a text to decode it (key 3)" aria-label="01, binary" aria-keyshortcuts="3" aria-pressed="false">01</button>
         <button class="channel__key channel__key--av" type="button" data-av title="AV: the page on an old CRT screen (key 0)" aria-label="AV, old CRT screen" aria-keyshortcuts="0" aria-pressed="false">AV</button>
-        <button class="channel__key channel__key--game" type="button" data-game title="CH 04: Spacewar! (key 4)" aria-label="04, Spacewar!" aria-keyshortcuts="4">04</button>
       </div>
       <!-- A miniature cassette takes the colour of the current theme. -->
       <button class="icon-btn cassette-btn" id="theme-toggle" type="button" aria-label="Toggle light / dark theme">
@@ -283,7 +283,7 @@
               <div class="tape-player__case" id="tape-player-cover"></div>
               <div class="tape-player__tv">
                 <div class="tape-player__screen" id="tape-player-screen" role="region" aria-labelledby="tape-player-title"></div>
-                <div class="tape-player__controls"><button type="button" class="tape-player__secret" aria-label="Play hidden VHS ident" title="Play hidden VHS ident" data-i18n-attr="aria-label:tapes.ident;title:tapes.ident">TM<span aria-hidden="true">✦</span></button><span class="tape-player__status"><span data-i18n="tapes.nowPlaying">NOW PLAYING / PROJECT ARCHIVE</span><span data-i18n="tapes.noSignal" hidden>NO SIGNAL / SELECT A TAPE</span></span><button type="button" class="tape-player__close" data-i18n="tapes.eject">EJECT ×</button><button type="button" class="tape-player__power" aria-label="Turn off TV" title="Turn off TV" data-i18n-attr="aria-label:tapes.power;title:tapes.power"><span aria-hidden="true">⏻</span></button></div>
+                <div class="tape-player__controls"><button type="button" class="tape-player__secret" aria-label="Play hidden VHS ident" title="Play hidden VHS ident" data-i18n-attr="aria-label:tapes.ident;title:tapes.ident">TM<span aria-hidden="true">✦</span></button><span class="tape-player__status"><span data-i18n="tapes.nowPlaying">NOW PLAYING / PROJECT ARCHIVE</span><span data-i18n="tapes.nowGame" hidden>NOW PLAYING / SPACEWAR!</span><span data-i18n="tapes.noSignal" hidden>NO SIGNAL / SELECT A TAPE</span></span><button type="button" class="tape-player__close" data-i18n="tapes.eject">EJECT ×</button><button type="button" class="tape-player__power" aria-label="Turn off TV" title="Turn off TV" data-i18n-attr="aria-label:tapes.power;title:tapes.power"><span aria-hidden="true">⏻</span></button></div>
               </div>
             </div>
           </div>

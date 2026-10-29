@@ -28,6 +28,32 @@ test.describe('service remote hover', () => {
   });
 });
 
+test.describe('service remote game', () => {
+  test.use({ hasTouch: false });
+
+  test('Spacewar key switches on AV and winds to the game cassette in the TV', async ({ page }) => {
+    await page.addInitScript(() => { Math.random = () => 0.5; });
+    await page.goto('/?lang=en');
+    await expect(page.locator('html')).not.toHaveClass(/is-crt/);
+    const learning = page.locator('.skill--learning');
+    await learning.scrollIntoViewIfNeeded();
+    for (let i = 0; i < 3; i++) {
+      await learning.click();
+      await page.waitForTimeout(750);
+    }
+    const key = page.locator('.remote__key[data-cue="spacewar"]');
+    await expect(key).toBeVisible();
+    await key.click();
+    await expect(page.locator('html')).toHaveClass(/is-crt/, { timeout: 15_000 });
+    await expect(page.locator('#project-shelf [data-tape-spacewar]')).toHaveAttribute('aria-expanded', 'true', { timeout: 15_000 });
+    await expect(page.locator('#tape-player-screen')).toHaveAttribute('data-project', 'spacewar', { timeout: 15_000 });
+    await expect(page.locator('#tape-player-screen .sw-embed')).toBeVisible({ timeout: 15_000 });
+    await expect(key).not.toHaveClass(/is-lit/, { timeout: 15_000 });
+    await expect(page.locator('#tape-player-screen')).toBeInViewport();
+    await expect(page.locator('[data-game], dialog.sw')).toHaveCount(0);
+  });
+});
+
 for (const width of [1280, 390]) test(`service remote winds to and plays the VHS sun and photons at ${width}px`, async ({ page }) => {
   await page.setViewportSize({ width, height: width < 600 ? 844 : 900 });
   await page.addInitScript(viewportWidth => {

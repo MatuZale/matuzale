@@ -78,6 +78,12 @@
 /* On narrower layouts the spines need the full row to remain individually
    visible and clickable; keep the original flat shelf, as on phones. */
 @media (max-width: 1023px) { .tape-shelf__showcase { display: none; } }
+/* AV adds a twelfth sleeve; use the flat shelf until there is room for every
+   spine beside the presented cover. */
+@media (min-width: 1024px) and (max-width: 1099px) {
+  html.is-crt .tape-shelf__showcase { display: none; }
+  html.is-crt .tape-shelf__stacks { overflow-x: auto; overflow-y: hidden; }
+}
 @media (prefers-reduced-motion: reduce) {
   .tape-showcase__spine, .tape-showcase__front, .tape-shelf__stacks .project-tape { transition: none; }
 }

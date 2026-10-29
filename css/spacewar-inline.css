@@ -1,0 +1,83 @@
+/* Spacewar is a cartridge on the portfolio's existing CRT, with its controls
+   built into the lower bezel. The television retains its normal dimensions. */
+.tape-player__screen .sw-embed {
+  position: absolute; inset: 0; z-index: 1; display: grid; place-items: center;
+  overflow: hidden; background: light-dark(#f2eee0, #010604);
+  color: light-dark(#29223e, #d8f6ff);
+}
+.sw-embed .sw__screen {
+  width: 100%; max-width: 100%; max-height: 100%; aspect-ratio: 1;
+  border-radius: 0; box-shadow: none; overflow: hidden;
+  background: light-dark(#f2eee0, #010604);
+}
+.sw-embed .sw__canvas { cursor: crosshair; }
+.sw-embed .sw__canvas:focus-visible { outline: 2px solid #ffd28a; outline-offset: -4px; }
+.sw-embed__meta, .sw-embed__footer { display: none; }
+.tape-player__screen .sw-embed .sw__panel {
+  inset: 2%; overflow: hidden; padding: clamp(.4rem, 1.2vw, 1rem);
+  font: 400 clamp(.76rem, 1.3vw, 1rem)/1.12 'VT323', var(--font-mono);
+  color: light-dark(#2d4137, #c8ffe0); background: light-dark(#f2eee8f7, #010806f4);
+  border-color: light-dark(#718b7999, #5dffb077);
+}
+.tape-player__screen .sw-embed .sw__panel h3 { font: inherit; font-size: 1.4em; margin: 0 0 .35em; color: light-dark(#21392f, #e9fff2); }
+.tape-player__screen .sw-embed .sw__panel p { font: inherit; line-height: 1.17; margin: 0 0 .45em; color: inherit; }
+.sw-embed .sw__panel table { font: inherit; margin-bottom: .4em; }
+.sw-embed .sw__panel button { font: inherit; min-height: 27px; padding: .2em .55em; }
+.sw-embed .sw__panel input { font: inherit; width: 4em; }
+.sw-controls {
+  position: relative; margin: .65rem 0 0; padding: .6rem .7rem .65rem;
+  border: 1px solid #817269; border-radius: 5px;
+  color: #f5e8d4; background: linear-gradient(#463e3e, #29272d);
+  box-shadow: inset 0 1px #ffffff22, 0 2px 3px #0007;
+  font: 400 1rem/1 'VT323', var(--font-mono);
+}
+.sw-controls-slot { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 420ms cubic-bezier(.22,.7,.25,1); }
+.sw-controls-slot.is-expanded { grid-template-rows: 1fr; }
+.sw-controls-slot__clip { min-height: 0; overflow: hidden; }
+.sw-controls-slot .sw-controls { transition: opacity 220ms ease; }
+.sw-controls-slot:not(.is-expanded) .sw-controls { opacity: 0; }
+.sw-controls__header { display: flex; justify-content: space-between; align-items: center; gap: .5rem; padding: 0 .1rem .4rem; color: #f3d2a5; letter-spacing: .08em; }
+.sw-controls__header strong { font-size: 1.1rem; }
+.sw-controls__header .sw__score { font-size: clamp(.8rem, 1.3vw, 1rem); color: #d2e9cb; letter-spacing: .04em; }
+.sw-controls__deck { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.sw-controls .sw__keys { flex: 1; flex-wrap: wrap; min-width: 0; gap: 3px; padding: 4px; }
+.sw-controls .sw__key { flex: 1 1 auto; min-width: 0; height: 32px; padding: 0 .45rem; font-size: .92rem; white-space: nowrap; }
+.sw-controls .sw__key:disabled { cursor: default; opacity: .55; }
+.sw-controls .sw__tape-control { display: none; }
+.sw-controls .sw__key:focus-visible, .sw-controls__pad button:focus-visible { outline: 2px solid #ffe391; outline-offset: 2px; }
+.sw-controls .sw__volume { width: 50px; height: 50px; }
+.sw-controls .sw__knob, .sw-controls .sw__volume::after { inset: 12px; }
+.sw-controls .sw__knob::before { height: 7px; top: 2px; }
+.sw-controls .sw__scale { color: #e5d9cb; stroke: #e5d9cb; fill: #e5d9cb; }
+.sw-controls__pad { display: none; }
+@media (hover: none), (pointer: coarse) {
+  .sw-controls__pad { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; margin-top: .55rem; }
+  .sw-controls__pad button { min-height: 44px; touch-action: none; user-select: none; cursor: pointer; border: 1px solid #b5a491; border-radius: 5px; background: linear-gradient(#e6ddca, #b5aa96); color: #32272c; box-shadow: inset 0 1px #fff8, 0 2px #161316; font: 700 1rem/1 Arial, sans-serif; }
+  .sw-controls__pad button span, .sw-controls__pad button small { display: block; }
+  .sw-controls__pad button small { margin-top: .25rem; font: 700 .48rem/1 var(--font-mono); letter-spacing: 0; }
+  .sw-controls__pad button:disabled { cursor: default; opacity: .55; }
+  .sw-controls__pad button.is-on, .sw-controls__pad button:active { transform: translateY(2px); box-shadow: inset 0 1px 4px #0005; background: #f1be77; }
+}
+@media (max-width: 480px) {
+  .sw-embed__meta, .sw-embed__footer { position: absolute; left: 10%; right: 10%; display: flex; justify-content: space-between; gap: .5rem; color: light-dark(#63566c, #96c9aa); font: 600 .58rem/1.2 var(--font-mono); letter-spacing: .09em; }
+  .sw-embed__meta { top: 10%; }
+  .sw-embed__footer { bottom: 10%; }
+  .sw-controls { padding: .5rem; }
+  .sw-controls__header strong { font-size: .95rem; }
+  .sw-controls__header .sw__score { font-size: .8rem; }
+  .sw-controls .sw__key { font-size: .78rem; height: 30px; padding: 0 .3rem; }
+  .sw-controls .sw__volume { width: 42px; height: 42px; }
+  .sw-controls .sw__knob, .sw-controls .sw__volume::after { inset: 10px; }
+  .tape-player__screen .sw-embed .sw__panel { font-size: clamp(.75rem, 3.5vw, .95rem); }
+}
+@media (max-width: 680px) {
+  html.sw-controls-on-screen .footer-tape__transport,
+  html.sw-controls-on-screen .back-top { visibility: hidden; pointer-events: none; }
+  html.sw-controls-on-screen .sw-controls .sw__tape-control { display: inline-block; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sw-controls-slot, .sw-controls-slot .sw-controls { transition: none; }
+  .sw-controls .sw__knob { transition: none; }
+  .sw-controls__pad button:active { transform: none; }
+}
+html.is-tape-paused .sw-controls-slot, html.is-tape-paused .sw-controls-slot .sw-controls { transition: none !important; }

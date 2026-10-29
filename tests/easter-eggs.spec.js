@@ -51,13 +51,15 @@ test('Spacewar canvas and help panel follow explicit and system themes while pau
   await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
   await page.goto('/');
   await page.locator('[data-tape-action="pause"]').evaluate(el => el.click());
-  await page.evaluate(async () => (await import('/js/spacewar.js')).openSpacewar());
-  const dialog = page.locator('dialog.sw');
-  await expect(dialog).toBeVisible();
-  const canvas = dialog.locator('.sw__canvas');
+  await page.locator('[data-av]').evaluate(el => el.click());
+  await page.locator('.project-tape--spacewar').evaluate(el => el.click());
+  const player = page.locator('#project-player');
+  const game = player.locator('.sw-embed');
+  await expect(game).toBeVisible();
+  const canvas = game.locator('.sw__canvas');
   await expect.poll(() => canvas.evaluate(el => el.width)).toBeGreaterThan(1);
-  await dialog.locator('[data-sw="help"]').evaluate(el => el.click());
-  const panel = dialog.locator('.sw__panel');
+  await player.locator('[data-sw="help"]').evaluate(el => el.click());
+  const panel = game.locator('.sw__panel');
   await expect(panel).toBeVisible();
 
   const states = [
@@ -90,7 +92,7 @@ test('Spacewar canvas and help panel follow explicit and system themes while pau
       return count;
     }, state.light);
     expect(inkPixels).toBeGreaterThan(20);
-    await expect(dialog.locator('.sw__screen')).toHaveCSS('background-color', state.light ? 'rgb(242, 238, 224)' : 'rgb(1, 4, 2)');
+    await expect(game.locator('.sw__screen')).toHaveCSS('background-color', state.light ? 'rgb(242, 238, 224)' : 'rgb(1, 6, 4)');
     const panelColors = await panel.evaluate(el => ({ foreground: getComputedStyle(el).color, background: getComputedStyle(el).backgroundColor }));
     expect(panelColors.foreground).not.toBe(panelColors.background);
   }

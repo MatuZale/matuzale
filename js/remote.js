@@ -329,13 +329,16 @@ const CUES = {
   crash: { at: footer, osd: ["FOOTER · CRASH", "STOPKA · AWARIA"], play: () => footerGame(() => board.crash()) },
 };
 
-// CH 04 is on the AV input: AV goes on first if need be, and the tube warms up before the channel changes.
+// AV reveals the game tape; the service remote winds to its television after selecting it.
 async function spacewar() {
-  const av = document.querySelector("[data-av]"), game = document.querySelector("[data-game]");
-  if (!av || !game) return false;
+  const av = document.querySelector("[data-av]");
+  if (!av) return false;
   if (!root.classList.contains("is-crt")) { av.click(); await wait(1100); }
+  const game = await ready(() => document.querySelector("[data-tape-spacewar]"));
+  if (!game) return false;
   game.click();
-  return true;
+  const shelf = document.querySelector("#project-shelf");
+  return shelf ? wind(shelf.getBoundingClientRect().bottom + scrollY - innerHeight * .2) : true;
 }
 
 /* ───────── The remote ───────── */

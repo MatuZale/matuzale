@@ -8,7 +8,7 @@
 
 const LOUDEST = .9, KEY = "spacewar-volume";
 const clamp = n => Math.min(10, Math.max(0, Math.round(n)));
-let audio, out, noise, setting = 6, resting = 0;
+let audio, out, noise, setting = 6, resting = 0, visible = true;
 const engines = [];
 try {
   const saved = localStorage.getItem(KEY);
@@ -26,6 +26,7 @@ export function setLevel(n) {
 
 // Browsers let sound start only after a key press or a click: the console wakes it on each.
 export function wake() {
+  if (!visible) return;
   clearTimeout(resting);
   if (!audio) {
     const Context = window.AudioContext || window.webkitAudioContext;
@@ -49,7 +50,8 @@ export function rest() {
 }
 
 // Sounds asked for while the context is still resuming wait for it, a moment at most.
-const ready = () => setting > 0 && !!audio && audio.state !== "closed";
+export function setVisible(value) { visible = value; if (!visible) hush(); }
+const ready = () => visible && setting > 0 && !!audio && audio.state !== "closed";
 const side = x => Math.max(-1, Math.min(1, x * .7));
 
 // One note, sliding from one pitch to another, struck and fading.
@@ -107,7 +109,7 @@ export function jump(x, away) {
 }
 // A ship's engine: low noise, chugging a little, for as long as it burns.
 export function engine(i, on, x) {
-  if (!audio) return;
+  if (!audio || !visible) return;
   let e = engines[i];
   if (!e && !on) return;
   if (!e) {
@@ -138,7 +140,7 @@ export const gameOver = () => ready() && tune([67, 64, 60, 55, 48], .19, .09, "t
 // The volume knob's detents: a soft mechanical tick each, and the click of the switch at 0. They come from
 // the knob, not the speaker, so they do not follow the volume.
 export function detent() {
-  if (!audio || audio.state === "closed") return;
+  if (!visible || !audio || audio.state === "closed") return;
   const t = audio.currentTime, tick = new AudioBufferSourceNode(audio, { buffer: noise });
   const [frequency, loud, length] = setting === 0 ? [1600, .1, .03] : [4200, .05, .018];
   tick.connect(new BiquadFilterNode(audio, { type: "bandpass", frequency })).connect(envelope(t, length, loud)).connect(audio.destination);

@@ -1,14 +1,8 @@
-// CH 04, an easter egg on the AV input: Spacewar!, after the 1962 original for the PDP-1, round a black hole.
-// Two ships, the needle and the wedge, duel in its gravity: an inverse-square pull, limited fuel and 32
-// torpedoes, three jumps into hyperspace, each riskier than the last, stars drifting behind, and space
-// wrapping round the edges of a square field seen through a round tube (the corners fall outside it, as on
-// the original display). One player flies the needle against the computer for a high score; two share the
-// keyboard. Drawn as a vector display with phosphor afterglow, in a console after the original display,
-// with wooden control boxes whose levers move with the keys (and with the computer's moves), oscilloscope
-// readouts and latching piano keys. The screens are under the AV glass; the machine stands in front of the
-// page, out of focus behind it. The tube switches on from a bright line and off into a dot.
-// Sound (spacewar-sound.js) has a volume knob on the console. High scores stay in this browser and can be
-// saved to a file. Desktop only; opened by channels.js (key 4, or CH 04, in AV).
+// Spacewar!, after the 1962 PDP-1 original, plays from an AV cassette in the
+// portfolio's television. Two ships duel around a black hole, with limited
+// fuel, torpedoes and hyperspace jumps. One player faces the computer; two can
+// share a keyboard. Touch controls provide the first player's controls on phones.
+// The vector picture supports both page themes; sound and high scores stay local.
 
 import * as sound from "./spacewar-sound.js";
 
@@ -40,7 +34,7 @@ const TEXT = {
     model: "Precision CRT display · CH 04", help: "How to play", scores: "Scores", exit: "Power", volume: "Volume", off: "off",
     one: "1 player", two: "2 players", cpu: "WEDGE · CPU", wedge: "WEDGE", needle: "NEEDLE",
     ctl: ["Rotate", "Thrust", "Fire", "Hyper"], fuel: "FUEL", torp: "TORP", jump: "JUMP",
-    start: "PRESS ENTER TO START", hint: "M  1 / 2 PLAYERS   ·   ?  HOW TO PLAY", paused: "PAUSED",
+    start: "PRESS PLAY OR ENTER", hint: "M  1 / 2 PLAYERS   ·   ?  HOW TO PLAY", paused: "PAUSED",
     round: n => `ROUND ${n}`, score: "SCORE", cleared: n => `ROUND ${n} CLEARED`, draw: "DRAW",
     needleWins: "NEEDLE WINS", wedgeWins: "WEDGE WINS", over: "GAME OVER", best: "HI",
     newBest: "New high score", initials: "Your initials", save: "Save", empty: "No scores yet. Be the first.",
@@ -62,7 +56,7 @@ const TEXT = {
     model: "Precyzyjny wyświetlacz CRT · CH 04", help: "Jak grać", scores: "Wyniki", exit: "Zasilanie", volume: "Głośność", off: "wyłączona",
     one: "1 gracz", two: "2 graczy", cpu: "WEDGE · KOMPUTER", wedge: "WEDGE", needle: "NEEDLE",
     ctl: ["Obrót", "Ciąg", "Strzał", "Skok"], fuel: "PALIWO", torp: "TORP", jump: "SKOK",
-    start: "ENTER, ŻEBY ZACZĄĆ", hint: "M  1 / 2 GRACZY   ·   ?  JAK GRAĆ", paused: "PAUZA",
+    start: "GRAJ LUB ENTER", hint: "M  1 / 2 GRACZY   ·   ?  JAK GRAĆ", paused: "PAUZA",
     round: n => `RUNDA ${n}`, score: "WYNIK", cleared: n => `RUNDA ${n} WYGRANA`, draw: "REMIS",
     needleWins: "WYGRYWA NEEDLE", wedgeWins: "WYGRYWA WEDGE", over: "KONIEC GRY", best: "REKORD",
     newBest: "Nowy rekord", initials: "Twoje inicjały", save: "Zapisz", empty: "Jeszcze nikt nie grał. Bądź pierwszy.",
@@ -103,7 +97,8 @@ function makeShip(kind, x, y) {
 
 /* ───────── The game ───────── */
 
-let dialog, canvas, ctx, screen, picture, beam, panel, scopes, boxes, scoreEl, dpr = 1, closing = false, tunedAway = false, previousLight;
+let dialog, canvas, ctx, screen, picture, beam, panel, scopes, boxes, scoreEl, dpr = 1, previousLight;
+let mounted = false, destroyActive = null, scoresPage = 0, acceptsInput = () => false;
 let state = "title", players = 1, round = 1, score = 0, wins = [0, 0], roundTime = 0, timer = 0, message = "";
 let ships = [], torps = [], sparks = [], stars = [], paused = false, raf = 0, last = 0, acc = 0, refresh = 0;
 const held = new Set(), tapped = new Set();
@@ -119,10 +114,14 @@ function newRound() {
   sound.roundStart();
 }
 function start() {
+  if (document.documentElement.classList.contains('is-tape-paused')) return;
   closePanel();
+  paused = false;
+  dialog.querySelector('[data-sw="pause"]')?.setAttribute('aria-pressed', 'false');
   round = 1; score = 0; wins = [0, 0]; sparks = [];
   newRound();
-  canvas.focus();
+  refreshUi();
+  canvas.focus({ preventScroll: true });
 }
 
 function pad(map) {
@@ -364,6 +363,21 @@ function showControls() {
   });
 }
 
+function refreshUi() {
+  if (!mounted || !canvas?.isConnected) return;
+  canvas.closest('.sw-embed').dataset.state = state;
+  const tapePaused = document.documentElement.classList.contains('is-tape-paused');
+  const playing = state === 'play' || state === 'ending' || state === 'between' || state === 'over';
+  for (const button of dialog.querySelectorAll('[data-sw="mode"]')) button.disabled = playing || tapePaused;
+  const pauseKey = dialog.querySelector('[data-sw="pause"]');
+  pauseKey.disabled = tapePaused || (state !== 'play' && state !== 'ending') || !panel.hidden;
+  pauseKey.setAttribute('aria-pressed', String(paused));
+  for (const button of dialog.querySelectorAll('[data-pad]')) button.disabled = tapePaused;
+  const startKey = dialog.querySelector('[data-sw="start"]');
+  startKey.disabled = tapePaused;
+  const startLabel = document.documentElement.lang === 'pl' ? (playing ? 'OD NOWA' : 'GRAJ') : (playing ? 'RESTART' : 'PLAY');
+  if (startKey.textContent !== startLabel) startKey.textContent = startLabel;
+}
 function frame(now) {
   if (document.documentElement.classList.contains("is-tape-paused")) { raf = 0; sound.hush(); return; }
   raf = requestAnimationFrame(frame);
@@ -371,6 +385,7 @@ function frame(now) {
   last = now;
   while (acc >= STEP) { update(STEP); acc -= STEP; }
   draw();
+  refreshUi();
   showControls();
   const live = (state === "play" || state === "ending") && !paused;
   for (let i = 0; i < 2; i++) {
@@ -388,22 +403,26 @@ function openPanel(html, kind) {
   panel.hidden = false;
   paused = state === "play" || state === "ending";
   latchKeys();
-  panel.querySelector("input, button")?.focus() ?? panel.focus();
+  refreshUi();
+  (panel.querySelector("input, button") || panel).focus({ preventScroll: true });
 }
 function closePanel() {
   if (panel.hidden) return;
   panel.hidden = true;
   paused = false;
   latchKeys();
-  canvas.focus();
+  refreshUi();
+  canvas.focus({ preventScroll: true });
 }
-const toggleHelp = () => panel.dataset.kind === "help" && !panel.hidden ? closePanel() : openPanel(say().helpHTML, "help");
+const compactHelp = () => document.documentElement.lang === "pl" ? `<h3>JAK GRAĆ</h3><p>Walka statków wokół czarnej dziury. Uważaj na grawitację, paliwo i torpedy.</p><p><kbd>A</kbd> <kbd>D</kbd> obrót · <kbd>W</kbd> ciąg<br><kbd>S</kbd> / <kbd>SPACJA</kbd> strzał · <kbd>Q</kbd> skok</p><p>Drugi gracz: strzałki i <kbd>ENTER</kbd>.<br><kbd>P</kbd> pauza · <kbd>M</kbd> tryb · <kbd>V</kbd> dźwięk</p><button type="button" data-sw="back">WRÓĆ</button>` : `<h3>HOW TO PLAY</h3><p>Two ships duel around a black hole. Watch gravity, fuel and torpedoes.</p><p><kbd>A</kbd> <kbd>D</kbd> rotate · <kbd>W</kbd> thrust<br><kbd>S</kbd> / <kbd>SPACE</kbd> fire · <kbd>Q</kbd> jump</p><p>Player two: arrow keys and <kbd>ENTER</kbd>.<br><kbd>P</kbd> pause · <kbd>M</kbd> mode · <kbd>V</kbd> sound</p><button type="button" data-sw="back">BACK</button>`;
+const toggleHelp = () => panel.dataset.kind === "help" && !panel.hidden ? closePanel() : openPanel(compactHelp(), "help");
 
 function showScores(highlight = -1) {
   const t = say(), list = stored(), lang = document.documentElement.lang || "en";
-  const rows = list.map((e, i) => `<tr${i === highlight ? ' class="is-new"' : ""}><td>${i + 1}</td><td>${e.name}</td><td>${String(e.score).padStart(6, "0")}</td><td>${e.round}</td><td>${new Date(e.date).toLocaleDateString(lang)}</td></tr>`).join("");
-  openPanel(`<h3>${t.scores}</h3>${list.length ? `<table class="sw__table"><tr>${t.table.map(h => `<th>${h}</th>`).join("")}</tr>${rows}</table>` : `<p>${t.empty}</p>`}
-    <p class="sw__row"><button type="button" data-sw="file"${list.length ? "" : " disabled"}>${t.file}</button><button type="button" data-sw="back">${t.back}</button></p>`, "scores");
+  scoresPage = Math.min(scoresPage, Math.max(0, Math.ceil(list.length / 5) - 1));
+  const rows = list.slice(scoresPage * 5, scoresPage * 5 + 5).map((e, i) => `<tr${i + scoresPage * 5 === highlight ? ' class="is-new"' : ""}><td>${i + 1 + scoresPage * 5}</td><td>${e.name}</td><td>${String(e.score).padStart(6, "0")}</td><td>${e.round}</td></tr>`).join("");
+  openPanel(`<h3>${t.scores}</h3>${list.length ? `<table class="sw__table"><tr>${t.table.slice(0, 4).map(h => `<th>${h}</th>`).join("")}</tr>${rows}</table>` : `<p>${t.empty}</p>`}
+    <p class="sw__row">${list.length > 5 ? `<button type="button" data-sw="scores-page">${scoresPage ? '← 1–5' : '6–10 →'}</button>` : ''}<button type="button" data-sw="file"${list.length ? "" : " disabled"}>${document.documentElement.lang === 'pl' ? 'ZAPISZ JSON' : 'EXPORT JSON'}</button><button type="button" data-sw="back">${t.back}</button></p>`, "scores");
 }
 function askInitials() {
   const t = say();
@@ -418,6 +437,7 @@ function saveScore(name) {
   const entry = { name, score, round: round, date: new Date().toISOString() };
   const list = [...stored(), entry].sort((a, b) => b.score - a.score).slice(0, 10);
   keep(list);
+  scoresPage = Math.floor(list.indexOf(entry) / 5);
   showScores(list.indexOf(entry));
 }
 function saveFile() {
@@ -433,11 +453,19 @@ function saveFile() {
 /* ───────── Keys ───────── */
 
 function toggleMode(to = players === 1 ? 2 : 1) {
+  if (document.documentElement.classList.contains('is-tape-paused')) return;
   if ((state !== "title" && state !== "done") || to === players) return;
   players = to;
   ships = []; wins = [0, 0]; score = 0; round = 1;
   state = "title";
   latchKeys();
+  refreshUi();
+}
+function togglePause() {
+  if (document.documentElement.classList.contains('is-tape-paused')) return;
+  if ((state !== "play" && state !== "ending") || !panel.hidden) return;
+  paused = !paused;
+  refreshUi();
 }
 // Piano keys latch like an old radio's, with a clack: the chosen player count stays down, an open panel
 // keeps its key down.
@@ -445,27 +473,32 @@ function latchKeys(audible = true) {
   const kind = panel.hidden ? "" : panel.dataset.kind;
   let moved = false;
   dialog.querySelectorAll(".sw__key[data-sw]").forEach(key => {
+    if (key.dataset.sw === 'tape') return;
     const on = String(key.dataset.sw === "mode" ? +key.dataset.players === players : key.dataset.sw === kind);
     if (key.getAttribute("aria-pressed") !== on) { key.setAttribute("aria-pressed", on); moved = true; }
   });
   if (moved && audible) sound.clack();
-  boxes[1].el.classList.toggle("is-cpu", players === 1);
+  boxes[1]?.el.classList.toggle("is-cpu", players === 1);
   dialog.querySelectorAll(".sw__keyhint--wedge").forEach(hint => { hint.hidden = players === 1; });
 }
 function onKey(event) {
   const down = event.type === "keydown", code = event.code;
-  if (closing || event.target.closest?.("input")) return;
+  if (!mounted) return;
   if (down && code === "Escape") {
     if (!panel.hidden) { event.preventDefault(); event.stopPropagation(); closePanel(); }
     return;                                          // otherwise the console switches off (the dialog's cancel)
   }
-  // Buttons keep their own Enter and Space outside play.
-  if (event.target.closest?.("button") && state !== "play" && state !== "ending") return;
+  if (!acceptsInput()) return;
+  if (event.target.closest?.("input")) return;
+  if (!panel.hidden) return;
+  // The controls and knob always keep native keyboard activation. Ship keys
+  // belong to the focused picture, not to a button that happens to have focus.
+  if (event.target.closest?.('button, [role="slider"]')) return;
   if (down) sound.wake();
   if (down && !event.repeat) {
     if (event.key === "?" || code === "KeyI") { event.preventDefault(); toggleHelp(); return; }
     if (code === "KeyV") { toggleMute(); return; }
-    if (code === "KeyP" && state !== "title" && state !== "done" && panel.hidden) { paused = !paused; return; }
+    if (code === "KeyP" && panel.hidden) { event.preventDefault(); togglePause(); return; }
     if (code === "KeyM") { toggleMode(); return; }
     if ((state === "title" || state === "done") && (code === "Enter" || code === "Space") && panel.hidden) { event.preventDefault(); start(); return; }
     tapped.add(code);
@@ -537,220 +570,231 @@ function wireKnob() {
   });
 }
 
-/* ───────── Power ───────── */
+/* ───────── The cassette game in the portfolio's television ───────── */
 
-// The tube switching on draws a bright line out and opens the picture from it; switching off folds the
-// picture into the line and the line into a dot, as the page's CRT does (retro.js).
-const OFF = 480, DOT = .75 * OFF;            // ms: the whole switch-off, and the moment the picture is a dot
-function tube(on) {
-  const easing = "cubic-bezier(.6, 0, .4, 1)";
-  [picture, beam].forEach(el => el.getAnimations().forEach(a => a.cancel()));
-  sound.power(on, on && !motion.matches ? .3 : 0);
-  if (motion.matches) return;
-  if (on) {
-    const timing = { duration: 560, delay: 300, easing, fill: "backwards" };
-    picture.animate([{ transform: "scaleY(.004)" }, { transform: "scaleY(.004)", offset: .4 }, { transform: "none" }], timing);
-    beam.animate([
-      { opacity: 1, transform: "scaleX(0)" }, { opacity: 1, transform: "scaleX(1)", offset: .4 },
-      { opacity: .9, transform: "scaleX(1) scaleY(6)", offset: .55 }, { opacity: 0, transform: "scaleX(1) scaleY(40)" },
-    ], timing);
-    return;
-  }
-  const timing = { duration: OFF, easing, fill: "forwards" };
-  picture.animate([{ transform: "none" }, { transform: "scaleY(.004)", offset: .4 }, { transform: "scale(0, .004)" }], timing);
-  beam.animate([
-    { opacity: 0, transform: "scaleX(1)" }, { opacity: 1, transform: "scaleX(1)", offset: .35 },
-    { opacity: 1, transform: "scaleX(.012)", offset: DOT / OFF }, { opacity: 0, transform: "scaleX(0)" },
-  ], timing);
-}
-// Power (or Esc): the tube and the scopes go dark and, the moment the dot is gone, the TV changes channel:
-// the static runs over the machine as it leaves and the page comes back into focus beneath it.
-function switchOff() {
-  if (closing || !dialog.open) return;
-  closing = true;
-  paused = true;
-  dialog.classList.add("is-shutting");
-  sound.hush();
-  tube(false);
-  if (motion.matches) { tuneAway(); dialog.close(); return; }
-  setTimeout(() => {
-    tuneAway();
-    dialog.classList.add("is-off");
-    setTimeout(() => dialog.close(), 420);    // as long as the static lasts
-  }, DOT);
-}
-// Once per session, also when the dialog is closed some other way.
-function tuneAway() {
-  if (tunedAway) return;
-  tunedAway = true;
-  sound.staticHiss();
-  dialog.dispatchEvent(new Event("poweroff"));
-}
-
-/* ───────── The console ───────── */
-
-const loadStyles = () => new Promise(resolve => {
-  const href = new URL("../css/spacewar.css", import.meta.url).href;
-  if (document.querySelector(`link[href="${href}"]`)) return resolve();
-  const link = Object.assign(document.createElement("link"), { rel: "stylesheet", href });
+let stylesReady;
+const loadStyles = () => stylesReady ||= Promise.all(['spacewar.css', 'spacewar-inline.css'].map(name => new Promise(resolve => {
+  const href = new URL(`../css/${name}`, import.meta.url).href;
+  const existing = document.querySelector(`link[href="${href}"]`);
+  if (existing) return resolve();
+  const link = Object.assign(document.createElement('link'), { rel: 'stylesheet', href });
   link.onload = link.onerror = () => resolve();
   document.head.append(link);
-});
+})));
 
-function build() {
-  dialog = document.createElement("dialog");
-  dialog.className = "sw";
-  dialog.setAttribute("aria-label", "Spacewar!");
-  const box = (side, keys) => `
-    <div class="sw__box sw__box--${side}">
-      <div class="sw__scope"><span class="sw__scope-name"></span><span class="sw__scope-fuel"></span><i class="sw__trace"></i><span class="sw__scope-data"></span></div>
-      <div class="sw__levers">
-        ${["rotate", "thrust", "fire", "hyper"].map((name, i) => `
-        <div class="sw__lever sw__lever--${name}" data-ctl="${name}">
-          ${name === "fire" ? '<i class="sw__button"></i>' : '<i class="sw__nut"></i><i class="sw__stick"></i>'}
-          <span class="sw__engrave" data-ctl-label="${i}"></span>
-          <kbd class="sw__keyhint sw__keyhint--${side}">${keys[i]}</kbd>
-        </div>`).join("")}
-      </div>
-      <span class="sw__box-plate">${side === "needle" ? "1" : "2"}</span>
-    </div>`;
-  dialog.innerHTML = `
-    <div class="sw__scene">
-      ${box("needle", ["A D", "W", "S", "Q"])}
-      <div class="sw__cabinet">
-        <div class="sw__trim"><span class="sw__brand">SPACEWAR!</span><span class="sw__model"></span></div>
-        <div class="sw__face">
-          <i class="sw__screw"></i><i class="sw__screw"></i><i class="sw__screw"></i><i class="sw__screw"></i>
-          <div class="sw__screen">
-            <div class="sw__picture">
-              <canvas class="sw__canvas" tabindex="-1" aria-label="Spacewar!"></canvas>
-              <div class="sw__panel" tabindex="-1" hidden></div>
-            </div>
-            <i class="sw__beam" aria-hidden="true"></i>
-            <div class="sw__crt" aria-hidden="true"><i class="sw__grain"></i><i class="sw__roll"></i></div>
-            <div class="sw__glass" aria-hidden="true"></div>
-          </div>
-        </div>
-        <div class="sw__scope sw__scope--score"><span class="sw__score" aria-live="polite"></span></div>
-        <div class="sw__deck">
-          <div class="sw__keys">
-            <button type="button" class="sw__key" data-sw="mode" data-players="1"></button>
-            <button type="button" class="sw__key" data-sw="mode" data-players="2"></button>
-            <button type="button" class="sw__key" data-sw="help"></button>
-            <button type="button" class="sw__key" data-sw="scores"></button>
-            <button type="button" class="sw__key sw__key--power" data-sw="close"></button>
-          </div>
-          <div class="sw__volume" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="10">
-            <svg class="sw__scale" viewBox="0 0 72 72" aria-hidden="true">${scale()}<text x="13" y="62">0</text><text x="59" y="62">10</text><text class="sw__scale-name" x="36" y="70"></text></svg>
-            <i class="sw__knob"></i>
-          </div>
-        </div>
-      </div>
-      ${box("wedge", ["← →", "↑", "↓", "Enter"])}
-    </div>`;
-  document.body.append(dialog);
-  canvas = dialog.querySelector("canvas");
-  ctx = canvas.getContext("2d");
-  screen = dialog.querySelector(".sw__screen");
-  picture = dialog.querySelector(".sw__picture");
-  beam = dialog.querySelector(".sw__beam");
-  panel = dialog.querySelector(".sw__panel");
-  dial = dialog.querySelector(".sw__volume");
-  knob = dialog.querySelector(".sw__knob");
-  wireKnob();
-  scoreEl = dialog.querySelector(".sw__score");
-  scopes = [...dialog.querySelectorAll(".sw__box .sw__scope")].map(el => ({
-    el, name: el.querySelector(".sw__scope-name"), fuel: el.querySelector(".sw__scope-fuel"), data: el.querySelector(".sw__scope-data") }));
-  boxes = [...dialog.querySelectorAll(".sw__box")].map(el => ({
-    el, ...Object.fromEntries([...el.querySelectorAll("[data-ctl]")].map(lever => [lever.dataset.ctl, lever])) }));
-  stars = Array.from({ length: 150 }, () => ({ x: rand(-1, 1), y: rand(-1, 1), b: rand(.2, 1) ** 2 }));
-
-  new ResizeObserver(() => {
-    dpr = Math.min(2, window.devicePixelRatio || 1);
-    canvas.width = canvas.height = Math.round(screen.clientWidth * dpr);
-    if (dialog.open && document.documentElement.classList.contains("is-tape-paused")) { previousLight = undefined; draw(); }
-  }).observe(screen);
-  const redrawStill = () => {
-    if (dialog.open && document.documentElement.classList.contains("is-tape-paused")) draw();
-  };
-  new MutationObserver(redrawStill).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-  systemDark.addEventListener("change", redrawStill);
-
-  dialog.addEventListener("keydown", onKey);
-  dialog.addEventListener("keyup", onKey);
-  dialog.addEventListener("click", event => {
-    sound.wake();
-    const action = event.target.closest("[data-sw]")?.dataset.sw;
-    if (action === "help") toggleHelp();
-    else if (action === "mode") toggleMode(+event.target.closest("[data-sw]").dataset.players);
-    else if (action === "scores") panel.dataset.kind === "scores" && !panel.hidden ? closePanel() : showScores();
-    else if (action === "close") { sound.clack(); switchOff(); }
-    else if (action === "file") saveFile();
-    else if (action === "back") closePanel();
-  });
-  dialog.addEventListener("submit", event => {
-    event.preventDefault();
-    saveScore(new FormData(event.target).get("name") || "");
-  });
-  window.addEventListener("blur", () => { held.clear(); if (state === "play") paused = true; });
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) return;
-    sound.hush();
-    if (state === "play") paused = true;
-  });
-  document.addEventListener("tape-pause-change", () => {
-    if (!dialog.open) return;
-    if (document.documentElement.classList.contains("is-tape-paused")) {
-      cancelAnimationFrame(raf); raf = 0; sound.hush();
-    } else if (!raf) {
-      last = performance.now();
-      raf = requestAnimationFrame(frame);
-    }
-  });
-  dialog.addEventListener("cancel", event => { event.preventDefault(); switchOff(); });
-  dialog.addEventListener("close", () => {
-    tuneAway();
-    tunedAway = false;
-    cancelAnimationFrame(raf); raf = 0;
-    held.clear(); tapped.clear();
-    panel.hidden = true; paused = false;
-    state = "title"; ships = [];
-    closing = false;
-    sound.rest();
-    dialog.classList.remove("is-shutting", "is-off");
-    [picture, beam].forEach(el => el.getAnimations().forEach(a => a.cancel()));
-    document.documentElement.classList.remove("sw-open");
-  });
-}
-
-// Opens the console and returns it; switched off, it fires "poweroff" as its tube goes dark, then "close".
-export async function openSpacewar() {
+// One instance is mounted at a time. The caller owns cassette changes and calls
+// destroy when the tape is removed; an abort prevents stale async mounts.
+export async function mountSpacewar(hostScreen, player, { signal } = {}) {
   await loadStyles();
-  if (!dialog) build();
-  const t = say();
-  dialog.querySelector(".sw__model").textContent = t.model;
-  dialog.querySelector('[data-players="1"]').textContent = t.one;
-  dialog.querySelector('[data-players="2"]').textContent = t.two;
-  dialog.querySelector('[data-sw="help"]').textContent = t.help;
-  dialog.querySelector('[data-sw="scores"]').textContent = t.scores;
-  dialog.querySelector('[data-sw="close"]').textContent = t.exit;
-  dialog.querySelectorAll("[data-ctl-label]").forEach(label => { label.textContent = t.ctl[label.dataset.ctlLabel]; });
-  dialog.querySelector(".sw__scale-name").textContent = t.volume.toUpperCase();
-  dial.setAttribute("aria-label", t.volume);
-  showLevel();
-  // The glass on the screens shares the page's grain.
-  const grain = document.querySelector("body > .crt-screen")?.style.getPropertyValue("--grain");
-  if (grain) dialog.style.setProperty("--grain", grain);
-  state = "title"; ships = []; score = 0; round = 1; wins = [0, 0];
-  latchKeys(false); showReadouts();
-  document.documentElement.classList.add("sw-open");
-  dialog.showModal();
-  canvas.focus();
-  sound.wake();
-  sound.staticHiss();
-  tube(true);
-  last = performance.now(); acc = 0;
-  if (document.documentElement.classList.contains("is-tape-paused")) draw();
-  if (!raf) raf = requestAnimationFrame(frame);
-  return dialog;
+  if (signal?.aborted || !hostScreen.isConnected || !player.isConnected) return null;
+  destroyActive?.();
+  const life = new AbortController();
+  const element = document.createElement('div');
+  element.className = 'sw-embed';
+  element.dataset.state = 'title';
+  element.setAttribute('role', 'region');
+  element.setAttribute('aria-label', 'Spacewar!');
+  element.innerHTML = `<div class="sw-embed__meta" aria-hidden="true"><span>TM / GAME SIGNAL</span><span>CH 04</span></div><div class="sw__screen"><div class="sw__picture"><canvas class="sw__canvas" tabindex="0" aria-label="Spacewar!"></canvas><div class="sw__panel" tabindex="-1" hidden></div></div></div><div class="sw-embed__footer" aria-hidden="true"><span>PDP-1 / 1962</span><span>VECTOR DISPLAY</span></div>`;
+  const deck = document.createElement('div');
+  deck.className = 'sw-controls';
+  deck.innerHTML = `<div class="sw-controls__header"><strong>SPACEWAR!</strong><span class="sw__score" aria-live="polite"></span></div>
+    <div class="sw-controls__deck"><div class="sw__keys"><button type="button" class="sw__key" data-sw="start"></button><button type="button" class="sw__key" data-sw="mode" data-players="1"></button><button type="button" class="sw__key" data-sw="mode" data-players="2"></button><button type="button" class="sw__key" data-sw="pause" aria-pressed="false"></button><button type="button" class="sw__key" data-sw="help"></button><button type="button" class="sw__key" data-sw="scores"></button><button type="button" class="sw__key sw__tape-control" data-sw="tape" aria-pressed="false"></button></div>
+    <div class="sw__volume" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="10"><svg class="sw__scale" viewBox="0 0 72 72" aria-hidden="true">${scale()}<text x="13" y="62">0</text><text x="59" y="62">10</text><text class="sw__scale-name" x="36" y="70"></text></svg><i class="sw__knob"></i></div></div>
+    <div class="sw-controls__pad" aria-label="Game controls"><button type="button" data-pad="KeyA"><span>◀</span><small></small></button><button type="button" data-pad="KeyD"><span>▶</span><small></small></button><button type="button" data-pad="KeyW"><span>▲</span><small></small></button><button type="button" data-pad="KeyS"><span>●</span><small></small></button><button type="button" data-pad="KeyQ"><span>✦</span><small></small></button></div>`;
+  hostScreen.append(element);
+  let slot = player.querySelector('.sw-controls-slot');
+  if (slot) {
+    clearTimeout(slot.closeTimer);
+    slot.inert = false;
+    slot.querySelector('.sw-controls-slot__clip').replaceChildren(deck);
+  } else {
+    slot = document.createElement('div');
+    slot.className = 'sw-controls-slot';
+    const clip = document.createElement('div');
+    clip.className = 'sw-controls-slot__clip';
+    clip.append(deck);
+    slot.append(clip);
+    hostScreen.insertAdjacentElement('afterend', slot);
+  }
+  void slot.offsetWidth;
+  slot.classList.add('is-expanded');
+  dialog = player.querySelector('.tape-player__tv');
+  canvas = element.querySelector('canvas');
+  ctx = canvas.getContext('2d');
+  screen = element.querySelector('.sw__screen');
+  picture = element.querySelector('.sw__picture');
+  panel = element.querySelector('.sw__panel');
+  beam = null;
+  dial = deck.querySelector('.sw__volume');
+  knob = deck.querySelector('.sw__knob');
+  scoreEl = deck.querySelector('.sw__score');
+  scopes = []; boxes = [];
+  mounted = true;
+  state = 'title'; players = 1; ships = []; torps = []; sparks = []; score = 0; round = 1; wins = [0, 0]; paused = false; scoresPage = 0; previousLight = undefined;
+  stars = Array.from({ length: 150 }, () => ({ x: rand(-1, 1), y: rand(-1, 1), b: rand(.2, 1) ** 2 }));
+  held.clear(); tapped.clear();
+  wireKnob();
+
+  function relabel() {
+    const t = say();
+    deck.querySelector('[data-sw="start"]').textContent = document.documentElement.lang === 'pl' ? 'GRAJ' : 'PLAY';
+    deck.querySelector('[data-players="1"]').textContent = t.one;
+    deck.querySelector('[data-players="2"]').textContent = t.two;
+    deck.querySelector('[data-sw="pause"]').textContent = document.documentElement.lang === 'pl' ? 'PAUZA' : 'PAUSE';
+    deck.querySelector('[data-sw="help"]').textContent = t.help;
+    deck.querySelector('[data-sw="scores"]').textContent = t.scores;
+    const tapeKey = deck.querySelector('[data-sw="tape"]');
+    const tapePaused = document.documentElement.classList.contains('is-tape-paused');
+    tapeKey.textContent = `${document.documentElement.lang === 'pl' ? 'TAŚMA' : 'TAPE'} ${tapePaused ? '▶' : 'Ⅱ'}`;
+    tapeKey.setAttribute('aria-label', document.documentElement.lang === 'pl'
+      ? (tapePaused ? 'Wznów całą taśmę' : 'Pauza całej taśmy')
+      : (tapePaused ? 'Resume the whole tape' : 'Pause the whole tape'));
+    deck.querySelector('.sw__scale-name').textContent = t.volume.toUpperCase();
+    dial.setAttribute('aria-label', t.volume);
+    const names = document.documentElement.lang === 'pl' ? ['Obrót w lewo', 'Obrót w prawo', 'Ciąg', 'Strzał', 'Skok w hiperprzestrzeń'] : ['Rotate left', 'Rotate right', 'Thrust', 'Fire', 'Hyperspace'];
+    const labels = document.documentElement.lang === 'pl' ? ['LEWO', 'PRAWO', 'CIĄG', 'STRZAŁ', 'SKOK'] : ['LEFT', 'RIGHT', 'THRUST', 'FIRE', 'HYPER'];
+    deck.querySelectorAll('[data-pad]').forEach((button, i) => { button.setAttribute('aria-label', names[i]); button.title = names[i]; button.querySelector('small').textContent = labels[i]; });
+    deck.querySelector('.sw-controls__pad').setAttribute('aria-label', document.documentElement.lang === 'pl' ? 'Sterowanie grą' : 'Game controls');
+    showLevel(); showReadouts(); refreshUi();
+    if (!panel.hidden && panel.dataset.kind === 'help') panel.innerHTML = compactHelp();
+    else if (!panel.hidden && panel.dataset.kind === 'scores') showScores();
+    if (mounted && document.documentElement.classList.contains('is-tape-paused')) draw();
+  }
+  relabel(); latchKeys(false);
+
+  const size = () => {
+    if (!mounted) return;
+    // The inner vector field remains square inside the existing 4:3 or phone CRT.
+    const side = Math.floor(Math.min(hostScreen.clientWidth, hostScreen.clientHeight));
+    if (!side) return;
+    screen.style.width = `${side}px`;
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    const pixels = Math.round(side * dpr);
+    if (canvas.width !== pixels || canvas.height !== pixels) {
+      canvas.width = canvas.height = pixels;
+      previousLight = undefined;
+      draw();
+    }
+  };
+  const resize = new ResizeObserver(size);
+  resize.observe(hostScreen);
+  size();
+  // The fixed tape transport can sit directly over game/EJECT controls on a
+  // phone. Hide it only while either control row is in view, then restore it.
+  const narrow = matchMedia('(max-width: 680px)');
+  const visibleControls = new Set();
+  const setTransportVisibility = () => document.documentElement.classList.toggle('sw-controls-on-screen', mounted && narrow.matches && visibleControls.size > 0);
+  const controlsObserver = new IntersectionObserver(entries => {
+    if (!element.isConnected) return;
+    for (const entry of entries) {
+      if (entry.isIntersecting) visibleControls.add(entry.target);
+      else visibleControls.delete(entry.target);
+    }
+    setTransportVisibility();
+  });
+  controlsObserver.observe(deck);
+  controlsObserver.observe(player.querySelector('.tape-player__controls'));
+  narrow.addEventListener('change', setTransportVisibility, { signal: life.signal });
+  const initialBounds = hostScreen.getBoundingClientRect();
+  let gameVisible = initialBounds.bottom > 0 && initialBounds.top < innerHeight && initialBounds.right > 0 && initialBounds.left < innerWidth;
+  const inactive = () => !gameVisible || hostScreen.inert || document.hidden || document.documentElement.classList.contains('is-tape-paused');
+  acceptsInput = () => gameVisible && !hostScreen.inert && !document.hidden && !document.documentElement.classList.contains('is-tape-paused');
+  function syncActivity() {
+    if (!mounted) return;
+    deck.inert = hostScreen.inert;
+    const tapePaused = document.documentElement.classList.contains('is-tape-paused');
+    const tapeKey = deck.querySelector('[data-sw="tape"]');
+    tapeKey.setAttribute('aria-pressed', String(tapePaused));
+    tapeKey.textContent = `${document.documentElement.lang === 'pl' ? 'TAŚMA' : 'TAPE'} ${tapePaused ? '▶' : 'Ⅱ'}`;
+    tapeKey.setAttribute('aria-label', document.documentElement.lang === 'pl'
+      ? (tapePaused ? 'Wznów całą taśmę' : 'Pauza całej taśmy')
+      : (tapePaused ? 'Resume the whole tape' : 'Pause the whole tape'));
+    sound.setVisible(!inactive());
+    refreshUi();
+    if (inactive()) {
+      cancelAnimationFrame(raf); raf = 0; held.clear(); tapped.clear(); sound.hush();
+      deck.querySelectorAll('[data-pad].is-on').forEach(key => key.classList.remove('is-on'));
+    }
+    else if (!raf) { last = performance.now(); acc = 0; raf = requestAnimationFrame(frame); }
+  }
+  const inertObserver = new MutationObserver(syncActivity);
+  inertObserver.observe(hostScreen, { attributes: true, attributeFilter: ['inert'] });
+  const gameVisibility = new IntersectionObserver(([entry]) => { gameVisible = entry.isIntersecting; syncActivity(); });
+  gameVisibility.observe(hostScreen);
+  const redrawStill = () => { if (mounted && inactive()) draw(); };
+  const themeObserver = new MutationObserver(redrawStill);
+  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  systemDark.addEventListener('change', redrawStill, { signal: life.signal });
+  document.addEventListener('tape-pause-change', syncActivity, { signal: life.signal });
+  document.addEventListener('visibilitychange', syncActivity, { signal: life.signal });
+  document.addEventListener('channelchange', relabel, { signal: life.signal });
+  window.addEventListener('blur', () => { held.clear(); if (state === 'play') paused = true; sound.hush(); }, { signal: life.signal });
+
+  // Keyboard handling stays scoped to the game and its own controls. The page's
+  // Escape/EJECT control continues to work, unless Escape closes a game panel.
+  for (const target of [element, deck]) {
+    target.addEventListener('keydown', onKey, { signal: life.signal });
+    target.addEventListener('keyup', onKey, { signal: life.signal });
+  }
+  const click = event => {
+    const control = event.target.closest('[data-sw]');
+    if (!control) return;
+    sound.wake();
+    const action = control.dataset.sw;
+    if (action === 'tape') { document.querySelector('[data-tape-action="pause"]')?.click(); return; }
+    if (action === 'start') start();
+    else if (action === 'pause') togglePause();
+    else if (action === 'help') toggleHelp();
+    else if (action === 'mode') toggleMode(+control.dataset.players);
+    else if (action === 'scores') { scoresPage = 0; panel.dataset.kind === 'scores' && !panel.hidden ? closePanel() : showScores(); }
+    else if (action === 'scores-page') { scoresPage = scoresPage ? 0 : 1; showScores(); }
+    else if (action === 'file') saveFile();
+    else if (action === 'back') closePanel();
+  };
+  element.addEventListener('click', click, { signal: life.signal });
+  deck.addEventListener('click', click, { signal: life.signal });
+  element.addEventListener('submit', event => { event.preventDefault(); saveScore(new FormData(event.target).get('name') || ''); }, { signal: life.signal });
+  const release = event => {
+    const key = event.target.closest('[data-pad]');
+    if (!key) return;
+    held.delete(key.dataset.pad); key.classList.remove('is-on');
+  };
+  deck.addEventListener('pointerdown', event => {
+    const key = event.target.closest('[data-pad]');
+    if (!key || event.button !== 0) return;
+    event.preventDefault();
+    if (inactive()) return;
+    sound.wake();
+    key.setPointerCapture(event.pointerId); key.classList.add('is-on');
+    if (!held.has(key.dataset.pad)) tapped.add(key.dataset.pad);
+    held.add(key.dataset.pad);
+    canvas.focus({ preventScroll: true });
+  }, { signal: life.signal });
+  for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) deck.addEventListener(type, release, { signal: life.signal });
+
+  const destroy = () => {
+    if (!mounted || destroyActive !== destroy) return;
+    mounted = false;
+    cancelAnimationFrame(raf); raf = 0;
+    life.abort(); resize.disconnect(); controlsObserver.disconnect(); gameVisibility.disconnect(); inertObserver.disconnect(); themeObserver.disconnect();
+    document.documentElement.classList.remove('sw-controls-on-screen');
+    held.clear(); tapped.clear(); paused = false; state = 'title'; ships = [];
+    acceptsInput = () => false;
+    sound.setVisible(false); sound.rest();
+    element.remove();
+    slot.inert = true;
+    slot.classList.remove('is-expanded');
+    if (motion.matches || document.documentElement.classList.contains('is-tape-paused')) slot.remove();
+    else slot.closeTimer = setTimeout(() => { if (!slot.classList.contains('is-expanded')) slot.remove(); }, 420);
+    destroyActive = null;
+  };
+  destroyActive = destroy;
+  signal?.addEventListener('abort', destroy, { once: true, signal: life.signal });
+  if (signal?.aborted) { destroy(); return null; }
+  syncActivity();
+  if (!inactive()) { sound.wake(); sound.staticHiss(.15); }
+  const bounds = hostScreen.getBoundingClientRect();
+  if (bounds.bottom > 0 && bounds.top < innerHeight && bounds.right > 0 && bounds.left < innerWidth)
+    canvas.focus({ preventScroll: true });
+  return { element, destroy };
 }

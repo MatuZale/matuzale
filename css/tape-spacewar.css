@@ -1,0 +1,82 @@
+/* An arcade release on a VHS sleeve: paper stock, a vector star map and a
+   restrained five-colour edge. The game has its own identity in both themes. */
+:root {
+  --sw-tape-case: #d1bc9d;
+  --sw-tape-label: #f2e7d3;
+  --sw-tape-paper: #f4ebdb;
+  --sw-tape-ink: #201a2c;
+  --sw-tape-sky: #1b1b31;
+  --sw-tape-ring: #ed9951;
+}
+:root[data-theme="dark"] {
+  --sw-tape-case: #252034;
+  --sw-tape-label: #262139;
+  --sw-tape-paper: #171526;
+  --sw-tape-ink: #f7eddd;
+  --sw-tape-sky: #11101f;
+  --sw-tape-ring: #f4ac65;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --sw-tape-case: #252034;
+    --sw-tape-label: #262139;
+    --sw-tape-paper: #171526;
+    --sw-tape-ink: #f7eddd;
+    --sw-tape-sky: #11101f;
+    --sw-tape-ring: #f4ac65;
+  }
+}
+
+.project-tape.project-tape--spacewar {
+  --case: var(--sw-tape-case);
+  --label: var(--sw-tape-label);
+  --ink: var(--sw-tape-ink);
+  --case-ink: var(--sw-tape-ink);
+  --stripe: #ed8a50;
+}
+.project-tape--spacewar .project-tape__label {
+  border-top: 4px solid #e86b58;
+}
+.project-tape--spacewar .project-tape__name { letter-spacing: .02em; }
+.project-tape--spacewar .project-tape__bands {
+  background: linear-gradient(to bottom, #f3b539 0 20%, #ee7848 20% 40%, #df5172 40% 60%, #ab63bb 60% 80%, #7770c8 80%);
+}
+
+.tape-cover.tape-cover--spacewar {
+  --sleeve-paper: var(--sw-tape-paper);
+  --sleeve-ink: var(--sw-tape-ink);
+  --sleeve-accent: #e77751;
+}
+.tape-cover--spacewar .tape-cover__brand { border-bottom: 3px solid #e77751; }
+.tape-cover--spacewar .tape-cover__title { letter-spacing: -.055em; }
+.tape-cover--spacewar .tape-cover__art {
+  inset: 38% 0 12%;
+  background:
+    radial-gradient(circle at 53% 50%, #fbd37d 0 2px, #e97857 3px 6px, #e9785733 7px 11px, transparent 12px),
+    repeating-radial-gradient(ellipse at 53% 50%, transparent 0 20px, #d99e714d 21px 22px, transparent 23px 33px),
+    radial-gradient(circle at 15% 22%, #f9dfb7 0 1px, transparent 1.5px),
+    radial-gradient(circle at 75% 14%, #f9dfb7 0 1px, transparent 1.5px),
+    radial-gradient(circle at 87% 70%, #f9dfb7 0 1px, transparent 1.5px),
+    radial-gradient(circle at 21% 79%, #f9dfb7 0 1px, transparent 1.5px),
+    linear-gradient(155deg, #30243e, var(--sw-tape-sky) 65%);
+}
+/* Two ships orbit the central star, drawn as crisp printed vector silhouettes. */
+.tape-cover--spacewar .tape-cover__art::before,
+.tape-cover--spacewar .tape-cover__art::after {
+  width: 25%; height: 17%; background: #f6dfb9;
+  clip-path: polygon(100% 50%, 17% 0, 32% 43%, 0 50%, 32% 57%, 17% 100%);
+  filter: drop-shadow(0 0 3px #ffe1a280);
+}
+.tape-cover--spacewar .tape-cover__art::before { left: 15%; top: 20%; transform: rotate(20deg); }
+.tape-cover--spacewar .tape-cover__art::after { right: 10%; bottom: 17%; transform: rotate(205deg) scale(.85); background: #f38a6c; }
+.tape-cover--spacewar .tape-cover__foot { border-top-color: #e77751; }
+.tape-showcase__front:has(> .tape-cover--spacewar) { --edge-stock: var(--sw-tape-paper); }
+/* The television is labelled for assistive technology while the game draws its own title. */
+.tape-game-title {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+.tape-game-loading {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  color: #d7eddf; font: 700 .75rem/1.2 var(--font-mono); letter-spacing: .1em;
+}

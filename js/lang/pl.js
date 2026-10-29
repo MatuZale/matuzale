@@ -87,6 +87,7 @@ export const PL = {
   "tape.summary.quantum": "Narzędzia badawcze: test rozkładalności oparty na SDP i generator bazy Younga–Yamanouchiego dla informacji kwantowej.",
   "tapes.label": "Kasety z projektami",
   "tapes.nowPlaying": "TERAZ ODTWARZANE / ARCHIWUM PROJEKTÓW",
+  "tapes.nowGame": "TERAZ ODTWARZANE / SPACEWAR!",
   "tapes.close": "Zamknij szczegóły projektu",
   "tapes.private": "Projekt własny · Prywatne repozytorium",
   "kodlab.text": "Własne laboratorium do nauki web developmentu i informatyki: roadmapa, ćwiczenia z kodem w przeglądarce, testy i trening samodzielności.",

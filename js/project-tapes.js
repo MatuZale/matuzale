@@ -9,6 +9,7 @@
   const eject = player.querySelector('.tape-player__close');
   const power = player.querySelector('.tape-player__power');
   const playingStatus = player.querySelector('[data-i18n="tapes.nowPlaying"]');
+  const gameStatus = player.querySelector('[data-i18n="tapes.nowGame"]');
   const idleStatus = player.querySelector('[data-i18n="tapes.noSignal"]');
 
   // The markings are a visual nod to blank tape packaging, not a claim about playback time.
@@ -49,6 +50,9 @@
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const systemDark = matchMedia('(prefers-color-scheme: dark)');
   const desktopShelf = matchMedia('(min-width: 1024px)');
+  const desktopAvShelf = matchMedia('(min-width: 1100px)');
+  const shelfHasRoom = () => desktopShelf.matches &&
+    (!document.documentElement.classList.contains('is-crt') || desktopAvShelf.matches);
   const showcase = document.createElement('div');
   showcase.className = 'tape-shelf__showcase';
   showcase.setAttribute('aria-hidden', 'true');
@@ -143,8 +147,17 @@
     paint(button, replica);
     [...button.children].forEach((source, index) => paint(source, replica.children[index]));
   }
+  function partShelf(button) {
+    const buttons = [...stacks.children];
+    const index = buttons.indexOf(button);
+    buttons.forEach((other, i) => {
+      other.classList.toggle('is-parting-left', i < index);
+      other.classList.toggle('is-parting-right', i > index);
+      other.classList.toggle('is-adjacent', Math.abs(i - index) === 1);
+    });
+  }
   function showCase(button, cover) {
-    if (!desktopShelf.matches || !button || !cover) return;
+    if (!shelfHasRoom() || !button || !cover) return;
     // A rapidly reselected tape should not have a second closing copy over it.
     [...showcase.children].filter(item => item.source === button).forEach(item => {
       clearTimeout(item.removeTimer);
@@ -170,13 +183,7 @@
     item.append(box);
     showcase.append(item);
     paintShowcase(item);
-    const buttons = [...stacks.children];
-    const index = buttons.indexOf(button);
-    buttons.forEach((other, i) => {
-      if (i < index) other.classList.add('is-parting-left');
-      if (i > index) other.classList.add('is-parting-right');
-      if (Math.abs(i - index) === 1) other.classList.add('is-adjacent');
-    });
+    partShelf(button);
     positionShowcase(item, true);
     button.classList.add('is-presented');
     void item.offsetWidth;
@@ -192,9 +199,13 @@
   };
   window.addEventListener('resize', updateShowcase, { passive: true });
   stacks.addEventListener('scroll', updateShowcase, { passive: true });
-  desktopShelf.addEventListener('change', () => {
+  function syncShelfMode() {
     closeShowcase(true);
-    if (desktopShelf.matches && active) showCase(active.button, caseSlot.querySelector('.tape-cover'));
+    if (shelfHasRoom() && active) showCase(active.button, caseSlot.querySelector('.tape-cover'));
+  }
+  desktopShelf.addEventListener('change', syncShelfMode);
+  desktopAvShelf.addEventListener('change', () => {
+    if (document.documentElement.classList.contains('is-crt')) syncShelfMode();
   });
   const kodlabPreview = document.querySelector('[data-kodlab-preview]');
   function updateKodlabPreview() {
@@ -212,9 +223,22 @@
   }
   new MutationObserver(updateTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
   systemDark.addEventListener('change', updateTheme);
+  function stopGame() {
+    if (!active?.game) return;
+    active.abort.abort();
+    active.gameController?.destroy();
+    active.gameController = null;
+  }
   function restore() {
     if (!active) return;
     closeShowcase();
+    if (active.game) {
+      stopGame();
+      active.title.removeAttribute('id');
+      active.button.setAttribute('aria-expanded', 'false');
+      active = null;
+      return;
+    }
     active.title.removeAttribute('id');
     active.title.removeAttribute('tabindex');
     active.body.querySelector('.tape-art-preview')?.remove();
@@ -225,7 +249,8 @@
   }
   function setIdle(idle) {
     eject.disabled = idle;
-    playingStatus.hidden = idle;
+    playingStatus.hidden = idle || Boolean(active?.game);
+    gameStatus.hidden = idle || !active?.game;
     idleStatus.hidden = !idle;
     player.classList.toggle('is-idle', idle);
     for (const region of [player, screen]) {
@@ -274,10 +299,11 @@
       }, 70);
     }, firstPlay ? 420 : 70);
   }
-  function ejectTape() {
+  function ejectTape(immediate = false, returnFocus = true) {
     if (!active || ejectTimer) return;
     closeShowcase();
     stopTuning();
+    stopGame();
     const button = active.button;
     const finish = () => {
       cancelPending();
@@ -297,11 +323,11 @@
       player.classList.remove('is-ejecting', 'is-playing', 'is-changing');
       setIdle(true);
     };
-    button.focus({ preventScroll: true });
+    if (returnFocus) button.focus({ preventScroll: true });
     eject.disabled = true;
     player.classList.remove('is-playing', 'is-changing');
     player.classList.add('is-ejecting');
-    if (motion.matches || document.documentElement.classList.contains('is-tape-paused')) return finish();
+    if (immediate || motion.matches || document.documentElement.classList.contains('is-tape-paused')) return finish();
     completeEject = finish;
     ejectTimer = setTimeout(finish, 520);
   }
@@ -309,6 +335,7 @@
     if (player.hidden || player.classList.contains('is-powering-off')) return;
     closeShowcase(immediate);
     stopTuning();
+    stopGame();
     cancelPending();
     clearTimeout(revealTimer);
     if (returnFocus) (active?.button || lastButton)?.focus({ preventScroll: true });
@@ -407,11 +434,101 @@
   });
   // Keep DOM and keyboard order aligned with the leaning final spine.
   stacks.append(stacks.querySelector('.project-tape--art'));
+
+  // AV reveals a playable tape alongside the project archive. It is kept
+  // separate from the project cards so the non-JavaScript fallback remains intact.
+  const gameTape = document.createElement('button');
+  gameTape.type = 'button';
+  gameTape.className = 'project-tape project-tape--spacewar';
+  gameTape.dataset.tapeSpacewar = '';
+  gameTape.setAttribute('aria-controls', 'project-player');
+  gameTape.setAttribute('aria-expanded', 'false');
+  gameTape.innerHTML = `<span class="project-tape__brand">TM<span> /</span></span><span class="project-tape__label"><span class="project-tape__name">SPACEWAR!</span><span class="project-tape__category"></span></span><span class="project-tape__bands" aria-hidden="true"></span><span class="project-tape__format">T-120<small>VHS</small></span>`;
+  function labelGameTape() {
+    const description = document.documentElement.lang === 'pl' ? 'Kosmiczny pojedynek arcade' : 'Arcade duel in space';
+    gameTape.querySelector('.project-tape__category').textContent = description;
+    gameTape.setAttribute('aria-label', `Spacewar!: ${description}`);
+  }
+  labelGameTape();
+  gameTape.addEventListener('click', () => {
+    // Reselecting the current game is normally a no-op, but during EJECT or
+    // POWER it must cancel the pending close just like any other cassette.
+    if (!document.documentElement.classList.contains('is-crt') || (active?.game && !ejectTimer)) return;
+    const firstPlay = player.hidden;
+    cancelPending();
+    stopTuning();
+    clearTimeout(revealTimer);
+    player.inert = false;
+    player.classList.remove('is-playing', 'is-changing', 'is-ejecting', 'is-powering-off');
+    restore();
+    const title = document.createElement('h3');
+    title.id = 'tape-player-title';
+    title.className = 'tape-game-title';
+    title.tabIndex = -1;
+    title.textContent = 'Spacewar!';
+    const loading = document.createElement('div');
+    loading.className = 'tape-game-loading';
+    loading.setAttribute('role', 'status');
+    loading.textContent = document.documentElement.lang === 'pl' ? 'WCZYTYWANIE GRY…' : 'LOADING GAME…';
+    const session = { game: true, button: gameTape, title, abort: new AbortController(), gameController: null };
+    active = session;
+    lastButton = gameTape;
+    gameTape.setAttribute('aria-expanded', 'true');
+    setIdle(false);
+    screen.dataset.project = 'spacewar';
+    const cover = document.createElement('div');
+    cover.className = 'tape-cover tape-cover--spacewar';
+    cover.setAttribute('aria-hidden', 'true');
+    cover.innerHTML = `<span class="tape-cover__brand">TM / VIDEO LIBRARY</span><span class="tape-cover__format">T-120 <b>VHS</b></span><strong class="tape-cover__title">SPACEWAR!</strong><span class="tape-cover__subtitle">ARCADE / 1962</span><span class="tape-cover__art"></span><span class="tape-cover__foot">HIGH QUALITY VIDEO <b>VHS</b></span>`;
+    caseSlot.replaceChildren(cover);
+    showCase(gameTape, cover);
+    disposeStatic();
+    screen.replaceChildren(title, loading);
+    player.hidden = false;
+    void player.offsetWidth;
+    player.classList.add('is-expanded', 'is-revealing', firstPlay ? 'is-playing' : 'is-changing');
+    revealTimer = setTimeout(() => player.classList.remove('is-revealing'), 650);
+    tunePicture(firstPlay);
+    title.focus({ preventScroll: true });
+    import('./spacewar.js').then(async module => {
+      if (active !== session || session.abort.signal.aborted) return;
+      const controller = await module.mountSpacewar(screen, player, { signal: session.abort.signal });
+      if (active !== session || session.abort.signal.aborted) { controller?.destroy(); return; }
+      session.gameController = controller;
+      loading.remove();
+    }).catch(error => {
+      if (active !== session || session.abort.signal.aborted) return;
+      loading.textContent = document.documentElement.lang === 'pl' ? 'NIE UDAŁO SIĘ WCZYTAĆ GRY' : 'COULD NOT LOAD GAME';
+      console.error('Could not load Spacewar', error);
+    });
+  });
+  function syncGameTape() {
+    const on = document.documentElement.classList.contains('is-crt');
+    if (on && !gameTape.isConnected) {
+      stacks.insertBefore(gameTape, stacks.querySelector('.project-tape--art'));
+      const open = showcase.querySelector('.tape-showcase.is-open');
+      if (open) partShelf(open.source);
+      updateShowcase();
+    } else if (!on && gameTape.isConnected) {
+      if (active?.game) {
+        if (player.classList.contains('is-powering-off')) stopGame();
+        else { cancelPending(); ejectTape(true, false); }
+      }
+      gameTape.remove();
+      const open = showcase.querySelector('.tape-showcase.is-open');
+      if (open) partShelf(open.source);
+      updateShowcase();
+    }
+    if (desktopShelf.matches && !desktopAvShelf.matches) syncShelfMode();
+  }
+  document.addEventListener('crtchange', syncGameTape);
+  syncGameTape();
   document.addEventListener('channelchange', () => {
     updateKodlabPreview();
     if (player.classList.contains('is-idle')) setIdle(true);
-    const image = active?.body.querySelector('.tape-art-preview img');
-    const source = active?.article.querySelector('.card__print img');
+    labelGameTape();
+    const image = active?.body?.querySelector('.tape-art-preview img');
+    const source = active?.article?.querySelector('.card__print img');
     if (image && source) image.alt = source.alt;
   });
   document.addEventListener('tape-pause-change', () => {
@@ -422,7 +539,7 @@
   });
   motion.addEventListener('change', () => { if (motion.matches) { stopTuning(); completeEject?.(); } });
   document.addEventListener('visibilitychange', () => { if (document.hidden) stopTuning(); });
-  eject.addEventListener('click', ejectTape);
+  eject.addEventListener('click', () => ejectTape());
   power.addEventListener('click', () => powerOff());
   player.addEventListener('click', event => {
     if (event.target.closest('.tape-player__secret, .tape-image-open')) stopTuning();
