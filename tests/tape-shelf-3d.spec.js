@@ -1,5 +1,40 @@
 import { test, expect } from '@playwright/test';
 
+for (const mode of ['light', 'dark']) {
+  test(`moving spines retain their printed accents in ${mode} mode`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme: mode });
+    await page.goto('/?lang=en');
+    await page.evaluate(value => document.documentElement.setAttribute('data-theme', value), mode);
+    for (const key of ['kodlab', 'agent']) {
+      await page.locator(`.project-tape--${key}`).evaluate(el => el.click());
+      const matching = await page.evaluate(key => {
+        const source = document.querySelector(`.project-tape--${key}`);
+        const replica = [...document.querySelectorAll('.tape-showcase')].find(item => item.source === source);
+        const properties = ['background-image', 'background-color', 'border-top-width', 'border-top-style', 'border-top-color', 'color', 'font-size', 'letter-spacing', 'order'];
+        const copies = replica.querySelectorAll('.tape-showcase__replica *');
+        return [...source.querySelectorAll('*')].map((child, index) => {
+          const original = getComputedStyle(child), copy = getComputedStyle(copies[index]);
+          return properties.map(property => [original.getPropertyValue(property), copy.getPropertyValue(property)]);
+        }).flat();
+      }, key);
+      for (const [original, copy] of matching) expect(copy).toBe(original);
+      // Begin putting this sleeve back while the other one comes forward. The
+      // closing copy must carry the same top stripe throughout the handover.
+      await page.locator(`.project-tape--${key === 'kodlab' ? 'agent' : 'kodlab'}`).evaluate(el => el.click());
+      await expect(page.locator(`.project-tape--${key}`)).toHaveClass(/is-presented/);
+      const stripe = await page.evaluate(key => {
+        const source = document.querySelector(`.project-tape--${key}`);
+        const replica = [...document.querySelectorAll('.tape-showcase')].find(item => item.source === source);
+        const label = getComputedStyle(source.querySelector('.project-tape__label'));
+        const moving = getComputedStyle(replica.querySelector('.project-tape__label'));
+        return [label.borderTopWidth, label.borderTopColor, moving.borderTopWidth, moving.borderTopColor];
+      }, key);
+      expect(stripe.slice(2)).toEqual(stripe.slice(0, 2));
+      expect(stripe[0]).toBe('5px');
+    }
+  });
+}
+
 test('replicas stay attached to moving spines during rapid changes', async ({ page }) => {
   await page.goto('/?lang=en');
   await page.locator('#project-shelf').scrollIntoViewIfNeeded();

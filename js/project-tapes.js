@@ -139,13 +139,19 @@
     const button = item.source;
     const replica = item.querySelector('.tape-showcase__replica');
     if (!button || !replica) return;
-    const properties = ['background', 'color', 'border', 'box-shadow'];
-    const paint = (source, target) => {
+    // `border` is empty for mixed sides, such as Kodlab's yellow and Agent
+    // Control's pink top rules. Copy each side so the moving spine matches the
+    // real one before the handover, instead of those accents popping in late.
+    const properties = ['background', 'color', 'border-top', 'border-right', 'border-bottom', 'border-left', 'box-shadow', 'order', 'font-size', 'letter-spacing'];
+    const sources = [button, ...button.querySelectorAll('*')];
+    const targets = [replica, ...replica.querySelectorAll('*')];
+    // Read all computed values before writing, avoiding a layout flush for
+    // each child while neighbouring tapes are already in motion.
+    const paint = sources.map(source => {
       const style = getComputedStyle(source);
-      properties.forEach(property => target.style.setProperty(property, style.getPropertyValue(property)));
-    };
-    paint(button, replica);
-    [...button.children].forEach((source, index) => paint(source, replica.children[index]));
+      return properties.map(property => style.getPropertyValue(property));
+    });
+    targets.forEach((target, index) => properties.forEach((property, i) => target.style.setProperty(property, paint[index][i])));
   }
   function partShelf(button) {
     const buttons = [...stacks.children];
@@ -194,7 +200,7 @@
   const updateShowcase = () => {
     cancelAnimationFrame(shelfResizeFrame);
     shelfResizeFrame = requestAnimationFrame(() => {
-      [...showcase.children].forEach(positionShowcase);
+      [...showcase.children].forEach(item => { positionShowcase(item); paintShowcase(item); });
     });
   };
   window.addEventListener('resize', updateShowcase, { passive: true });

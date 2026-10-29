@@ -23,6 +23,11 @@
   --ident-line: #47365c;
   --ident-sun: #f2b05a;
   --ident-shadow: #f0eadd;
+  --ident-title-yellow: #956300;
+  --ident-title-orange: #ae4d19;
+  --ident-title-red: #b52c42;
+  --ident-title-purple: #713e92;
+  --ident-title-pink: #a12e68;
   position: absolute; z-index: 6; overflow: hidden; box-sizing: border-box;
   border: 7px solid #161a20; border-radius: 28px / 22px; pointer-events: none; background: var(--ident-border-bg);
 }
@@ -89,7 +94,9 @@
 .tape-ident.is-running .tape-ident__sun { animation: ident-sun 7.6s cubic-bezier(.22,.8,.25,1) both; }
 .tape-ident.is-running .tape-ident__grid { animation: ident-grid 7.6s ease both; }
 .tape-ident.is-running .tape-ident__bars i { animation: ident-stripe 7.6s cubic-bezier(.65,0,.25,1) var(--stripe-delay) both; }
-.tape-ident.is-running .tape-ident__title { animation: ident-title 7.6s cubic-bezier(.65,0,.25,1) both; }
+.tape-ident.is-running .tape-ident__title {
+  animation: ident-title 7.6s cubic-bezier(.65,0,.25,1) both, ident-title-colours 1.6667s linear infinite;
+}
 .tape-ident.is-running .tape-ident__subtitle { animation: ident-caption 7.6s ease both; }
 @keyframes ident-stage { 0% { opacity: 0; } 6%, 91% { opacity: 1; } 100% { opacity: 0; } }
 @keyframes ident-sun {
@@ -106,10 +113,19 @@
 @keyframes ident-title {
   /* Position the right edge beyond the left of the composition at both ends;
      unlike a percentage translation alone, this works at every screen width. */
-  0%, 8% { left: -10%; transform: translate(-100%, -50%) skewX(-8deg); color: var(--ident-ink); }
-  30%, 46% { left: 50%; transform: translate(-50%, -50%) skewX(0); color: var(--ident-ink); }
-  58%, 68% { left: 50%; transform: translate(-50%, -50%) skewX(0); color: var(--ident-accent); }
-  88%, 100% { left: -10%; transform: translate(-100%, -50%) skewX(-8deg); color: var(--ident-accent); }
+  0%, 8% { left: -10%; transform: translate(-100%, -50%) skewX(-8deg); }
+  30%, 46% { left: 50%; transform: translate(-50%, -50%) skewX(0); }
+  58%, 68% { left: 50%; transform: translate(-50%, -50%) skewX(0); }
+  88%, 100% { left: -10%; transform: translate(-100%, -50%) skewX(-8deg); }
+}
+/* Five inks advance about three times per second, with a short soft blend. */
+@keyframes ident-title-colours {
+  0%, 15% { color: var(--ident-title-yellow); }
+  20%, 35% { color: var(--ident-title-orange); }
+  40%, 55% { color: var(--ident-title-red); }
+  60%, 75% { color: var(--ident-title-purple); }
+  80%, 95% { color: var(--ident-title-pink); }
+  100% { color: var(--ident-title-yellow); }
 }
 @keyframes ident-caption { 0%, 19% { opacity: 0; transform: translate(-50%, 7px); } 32%, 66% { opacity: 1; transform: translate(-50%, 0); } 80%, 100% { opacity: 0; transform: translate(-50%, -5px); } }
 @media (max-width: 480px) {
@@ -131,11 +147,15 @@
   --ident-paper: #171627; --ident-border-bg: #11101d; --ident-ink: #f8f2e7;
   --ident-muted: #cfc7db; --ident-accent: #dfceff; --ident-scan: #c8c0ea;
   --ident-line: #cebbe4; --ident-sun: #a95d9b; --ident-shadow: #171627;
+  --ident-title-yellow: #ffcf54; --ident-title-orange: #ff925f; --ident-title-red: #ff667c;
+  --ident-title-purple: #c78be4; --ident-title-pink: #ff8fc4;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .tape-ident {
     --ident-paper: #171627; --ident-border-bg: #11101d; --ident-ink: #f8f2e7;
     --ident-muted: #cfc7db; --ident-accent: #dfceff; --ident-scan: #c8c0ea;
     --ident-line: #cebbe4; --ident-sun: #a95d9b; --ident-shadow: #171627;
+    --ident-title-yellow: #ffcf54; --ident-title-orange: #ff925f; --ident-title-red: #ff667c;
+    --ident-title-purple: #c78be4; --ident-title-pink: #ff8fc4;
   }
 }
