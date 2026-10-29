@@ -61,6 +61,8 @@ export const PL = {
   "tapes.scrollHint": "PRZEWIŃ, ABY PRZEGLĄDAĆ ↔",
   "tapes.ident": "Odtwórz ukrytą planszę VHS",
   "tapes.eject": "WYSUŃ ×",
+  "tapes.power": "Wyłącz telewizor",
+  "tapes.noSignal": "BRAK SYGNAŁU / WYBIERZ KASETĘ",
   "tape.desc.bentos": "Monitoring jakości wody",
   "tape.desc.kodlab": "Laboratorium nauki kodu",
   "tape.desc.agent": "Zadania agentów AI",

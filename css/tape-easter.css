@@ -1,4 +1,4 @@
-/* An original, understated station ident, hidden behind the TV's TM key. */
+/* A small station ident, hidden behind the TV's TM key. */
 .tape-player__tv { position: relative; }
 .tape-player__secret {
   flex: 0 0 auto; cursor: pointer; padding: .28rem .38rem;
@@ -10,96 +10,124 @@
 .tape-player__secret:focus-visible { outline: 2px solid #ffe391; outline-offset: 3px; }
 .tape-ident[hidden] { display: none; }
 .tape-ident {
-  --ident-paper: #eee9dc;
+  --ident-paper: #f0eadd;
   --ident-border-bg: #ece7da;
-  --ident-ink: #25223a;
-  --ident-muted: #413c49;
-  --ident-accent: #6654a8;
-  --ident-dash-start: #d94f60;
-  --ident-dash-end: #ee9144;
+  --ident-ink: #29223e;
+  --ident-muted: #51485b;
+  --ident-accent: #483270;
   --ident-scan: #161323;
+  --ident-line: #47365c;
+  --ident-sun: #f2b05a;
+  --ident-shadow: #f0eadd;
   position: absolute; z-index: 6; overflow: hidden; box-sizing: border-box;
   border: 7px solid #161a20; border-radius: 28px / 22px; pointer-events: none; background: var(--ident-border-bg);
 }
 .tape-ident__announce { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .tape-ident__art { position: absolute; inset: 0; overflow: hidden; background: var(--ident-paper); color: var(--ident-ink); }
+.tape-ident__art::before {
+  content: ''; position: absolute; inset: 5%; z-index: 4; pointer-events: none;
+  border: 1px solid var(--ident-line); opacity: .23;
+}
 .tape-ident__art::after {
   content: ''; position: absolute; z-index: 6; inset: 0; pointer-events: none;
-  background: repeating-linear-gradient(0deg, var(--ident-scan) 0 1px, transparent 1px 4px); opacity: .055;
+  background: repeating-linear-gradient(0deg, var(--ident-scan) 0 1px, transparent 1px 4px); opacity: .06;
 }
-.tape-ident__masthead { position: absolute; top: 8%; left: 8%; display: flex; align-items: baseline; gap: .7rem; }
+.tape-ident__masthead { position: absolute; z-index: 5; top: 8%; left: 8%; display: flex; align-items: baseline; gap: .7rem; }
 .tape-ident__masthead b { font: 900 clamp(1rem, 2.2vw, 1.55rem)/1 Arial, sans-serif; letter-spacing: -.08em; }
 .tape-ident__masthead b span { color: #d94f60; }
 .tape-ident__masthead small { font: 700 clamp(.46rem, .75vw, .6rem)/1 var(--font-mono); letter-spacing: .1em; }
-.tape-ident__composition { position: absolute; left: 0; top: 28%; width: 100%; height: 48%; overflow: hidden; }
-.tape-ident__bars { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; gap: clamp(3px, .65vw, 8px); transform: translateX(0); }
-.tape-ident__bars i { display: block; width: 100%; height: clamp(7px, 1.25vw, 15px); transform-origin: left center; }
-.tape-ident__bars i:nth-child(1) { background: #f4b72e; }
-.tape-ident__bars i:nth-child(2) { background: #ee7848; }
-.tape-ident__bars i:nth-child(3) { background: #df5172; }
-.tape-ident__bars i:nth-child(4) { background: #ab63bb; }
-.tape-ident__bars i:nth-child(5) { background: #7770c8; }
+.tape-ident__composition { position: absolute; inset: 13% 0 14%; overflow: hidden; }
+/* A sunset disc, ruled in the same way as the old tape sleeves. */
+.tape-ident__sun {
+  position: absolute; left: 50%; top: 47%; width: min(40%, 15rem); aspect-ratio: 1;
+  transform: translate(-50%, -50%); border: 1px solid var(--ident-line); border-radius: 50%;
+  background: repeating-linear-gradient(to bottom, var(--ident-sun) 0 10%, transparent 10% 12%);
+  opacity: .6;
+}
+.tape-ident__sun::before, .tape-ident__sun::after {
+  content: ''; position: absolute; border: 1px solid var(--ident-line); border-radius: 50%; inset: -7%; opacity: .6;
+}
+.tape-ident__sun::after { inset: -14%; opacity: .35; }
+.tape-ident__grid {
+  position: absolute; inset: 45% 7% -60%; opacity: .12; transform-origin: 50% 0;
+  background: repeating-linear-gradient(90deg, var(--ident-line) 0 1px, transparent 1px 9%),
+    repeating-linear-gradient(0deg, var(--ident-line) 0 1px, transparent 1px 13%);
+  transform: perspective(220px) rotateX(58deg);
+  mask-image: linear-gradient(transparent, #000 25%, transparent 78%);
+  -webkit-mask-image: linear-gradient(transparent, #000 25%, transparent 78%);
+}
+.tape-ident__bars { position: absolute; inset: 55% 0 auto; display: flex; flex-direction: column; gap: clamp(2px, .34vw, 4px); transform: skewX(-18deg); }
+.tape-ident__bars i { display: block; width: 114%; margin-left: -7%; height: clamp(4px, .8vw, 9px); transform-origin: left center; }
+.tape-ident__bars i:nth-child(1) { background: #f4b72e; --stripe-delay: 0s; }
+.tape-ident__bars i:nth-child(2) { background: #ee7848; --stripe-delay: .08s; }
+.tape-ident__bars i:nth-child(3) { background: #df5172; --stripe-delay: .16s; }
+.tape-ident__bars i:nth-child(4) { background: #ab63bb; --stripe-delay: .24s; }
+.tape-ident__bars i:nth-child(5) { background: #7770c8; --stripe-delay: .32s; }
 .tape-ident__title {
-  position: absolute; left: 16%; top: 50%; transform: translateY(-50%);
-  display: flex; align-items: baseline; padding: .01em .08em .08em .03em;
-  color: var(--ident-ink); background: var(--ident-paper);
-  font: 900 clamp(3.7rem, 12vw, 7.6rem)/.9 Arial, sans-serif; letter-spacing: -.095em; white-space: nowrap;
+  position: absolute; left: 50%; top: 47%; transform: translate(-50%, -50%);
+  display: flex; align-items: baseline; padding: .12em .16em .2em .06em;
+  color: var(--ident-ink); font: italic 900 clamp(3.5rem, 13vw, 8.6rem)/.9 Arial, sans-serif;
+  letter-spacing: -.095em; white-space: nowrap;
+  /* Offset coloured print layers, like a physical multi-pass title card. */
+  text-shadow: 1px 1px var(--ident-shadow), 2px 2px var(--ident-shadow),
+    3px 3px #f2b33c, 4px 4px #f2b33c, 5px 5px #ec7653, 6px 6px #ec7653,
+    7px 7px #d85e8a, 8px 8px #d85e8a, 9px 9px #9c70bf, 10px 10px #7770c8;
 }
-.tape-ident__dash { padding: 0 .06em; color: var(--ident-dash-start); font-weight: 400; }
+.tape-ident__dash { padding: 0 .04em; font-weight: 400; }
 .tape-ident__subtitle {
-  position: absolute; left: 16%; bottom: 1%; padding: .32em .45em; background: var(--ident-paper);
-  font: 700 clamp(.45rem, .8vw, .65rem)/1 var(--font-mono); letter-spacing: .12em;
+  position: absolute; left: 50%; bottom: 10%; transform: translateX(-50%);
+  padding: .36em .65em; background: var(--ident-paper); color: var(--ident-ink);
+  border: 1px solid var(--ident-line); white-space: nowrap;
+  font: 700 clamp(.45rem, .8vw, .65rem)/1 var(--font-mono); letter-spacing: .15em;
 }
-.tape-ident__details { position: absolute; left: 8%; right: 8%; bottom: 8%; display: flex; justify-content: space-between; gap: 1rem; color: var(--ident-muted); font: 700 clamp(.42rem, .8vw, .62rem)/1.2 var(--font-mono); letter-spacing: .07em; }
+.tape-ident__details { position: absolute; z-index: 5; left: 8%; right: 8%; bottom: 8%; display: flex; justify-content: space-between; gap: 1rem; color: var(--ident-muted); font: 700 clamp(.42rem, .8vw, .62rem)/1.2 var(--font-mono); letter-spacing: .07em; }
 .tape-ident.is-running .tape-ident__art { animation: ident-stage 7.6s ease both; }
-.tape-ident.is-running .tape-ident__bars { animation: ident-bars 7.6s cubic-bezier(.65,0,.25,1) both; }
+.tape-ident.is-running .tape-ident__sun { animation: ident-sun 7.6s cubic-bezier(.22,.8,.25,1) both; }
+.tape-ident.is-running .tape-ident__grid { animation: ident-grid 7.6s ease both; }
+.tape-ident.is-running .tape-ident__bars i { animation: ident-stripe 7.6s cubic-bezier(.65,0,.25,1) var(--stripe-delay) both; }
 .tape-ident.is-running .tape-ident__title { animation: ident-title 7.6s cubic-bezier(.65,0,.25,1) both; }
-.tape-ident.is-running .tape-ident__dash { animation: ident-ink 7.6s ease both; }
 .tape-ident.is-running .tape-ident__subtitle { animation: ident-caption 7.6s ease both; }
-@keyframes ident-stage { 0% { opacity: 0; } 7%, 90% { opacity: 1; } 100% { opacity: 0; } }
-@keyframes ident-bars {
-  0%, 7% { transform: translateX(-105%); }
-  26%, 65% { transform: translateX(0); }
-  86%, 100% { transform: translateX(105%); }
+@keyframes ident-stage { 0% { opacity: 0; } 6%, 91% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes ident-sun {
+  0%, 7% { opacity: 0; transform: translate(-50%, -50%) scale(.55) rotate(-20deg); }
+  28%, 68% { opacity: .6; transform: translate(-50%, -50%) scale(1) rotate(0); }
+  90%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.15) rotate(12deg); }
+}
+@keyframes ident-grid { 0%, 10% { opacity: 0; } 30%, 72% { opacity: .12; } 90%, 100% { opacity: 0; } }
+@keyframes ident-stripe {
+  0%, 5% { transform: translateX(-110%); }
+  24%, 66% { transform: translateX(0); }
+  86%, 100% { transform: translateX(110%); }
 }
 @keyframes ident-title {
-  0%, 10% { transform: translate(-135%, -50%); color: var(--ident-ink); }
-  30%, 43% { transform: translate(0, -50%); color: var(--ident-ink); }
-  58%, 66% { transform: translate(0, -50%); color: var(--ident-accent); }
-  88%, 100% { transform: translate(135%, -50%); color: var(--ident-accent); }
+  0%, 8% { transform: translate(-160%, -50%) skewX(-8deg); color: var(--ident-ink); }
+  30%, 46% { transform: translate(-50%, -50%) skewX(0); color: var(--ident-ink); }
+  58%, 68% { transform: translate(-50%, -50%) skewX(0); color: var(--ident-accent); }
+  88%, 100% { transform: translate(75%, -50%) skewX(-8deg); color: var(--ident-accent); }
 }
-@keyframes ident-ink { 0%, 40% { color: var(--ident-dash-start); } 60%, 100% { color: var(--ident-dash-end); } }
-@keyframes ident-caption { 0%, 18% { opacity: 0; } 30%, 65% { opacity: 1; } 78%, 100% { opacity: 0; } }
+@keyframes ident-caption { 0%, 19% { opacity: 0; transform: translate(-50%, 7px); } 32%, 66% { opacity: 1; transform: translate(-50%, 0); } 80%, 100% { opacity: 0; transform: translate(-50%, -5px); } }
 @media (max-width: 480px) {
-  .tape-ident__title { font-size: clamp(3rem, 15vw, 4rem); }
+  .tape-ident__sun { width: 52%; }
+  .tape-ident__title { font-size: clamp(3rem, 18vw, 4.5rem); text-shadow: 1px 1px var(--ident-shadow), 2px 2px #f2b33c, 3px 3px #ec7653, 4px 4px #d85e8a, 5px 5px #9c70bf, 6px 6px #7770c8; }
+  .tape-ident__subtitle { top: 70%; bottom: auto; }
   .tape-ident__masthead { gap: .45rem; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .tape-ident.is-running .tape-ident__art, .tape-ident.is-running .tape-ident__bars,
-  .tape-ident.is-running .tape-ident__title, .tape-ident.is-running .tape-ident__dash,
-  .tape-ident.is-running .tape-ident__subtitle { animation: none; }
+  .tape-ident.is-running .tape-ident__art, .tape-ident.is-running .tape-ident__sun,
+  .tape-ident.is-running .tape-ident__grid, .tape-ident.is-running .tape-ident__bars i,
+  .tape-ident.is-running .tape-ident__title, .tape-ident.is-running .tape-ident__subtitle { animation: none; }
 }
 
 /* The ident follows the page theme, including the system preference. */
 :root[data-theme="dark"] .tape-ident {
-  --ident-paper: #171627;
-  --ident-border-bg: #11101d;
-  --ident-ink: #f3edf6;
-  --ident-muted: #cfc7db;
-  --ident-accent: #c7afff;
-  --ident-dash-start: #ff90a3;
-  --ident-dash-end: #ffbd70;
-  --ident-scan: #c8c0ea;
+  --ident-paper: #171627; --ident-border-bg: #11101d; --ident-ink: #f8f2e7;
+  --ident-muted: #cfc7db; --ident-accent: #dfceff; --ident-scan: #c8c0ea;
+  --ident-line: #cebbe4; --ident-sun: #a95d9b; --ident-shadow: #171627;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .tape-ident {
-    --ident-paper: #171627;
-    --ident-border-bg: #11101d;
-    --ident-ink: #f3edf6;
-    --ident-muted: #cfc7db;
-    --ident-accent: #c7afff;
-    --ident-dash-start: #ff90a3;
-    --ident-dash-end: #ffbd70;
-    --ident-scan: #c8c0ea;
+    --ident-paper: #171627; --ident-border-bg: #11101d; --ident-ink: #f8f2e7;
+    --ident-muted: #cfc7db; --ident-accent: #dfceff; --ident-scan: #c8c0ea;
+    --ident-line: #cebbe4; --ident-sun: #a95d9b; --ident-shadow: #171627;
   }
 }

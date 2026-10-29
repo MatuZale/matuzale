@@ -6,6 +6,10 @@
   const screen = document.querySelector('#tape-player-screen');
   const caseSlot = document.querySelector('#tape-player-cover');
   if (!stacks || !cards || !player || !screen || !caseSlot) return;
+  const eject = player.querySelector('.tape-player__close');
+  const power = player.querySelector('.tape-player__power');
+  const playingStatus = player.querySelector('[data-i18n="tapes.nowPlaying"]');
+  const idleStatus = player.querySelector('[data-i18n="tapes.noSignal"]');
 
   // The markings are a visual nod to blank tape packaging, not a claim about playback time.
   const covers = [
@@ -38,6 +42,10 @@
   if (articles.length !== covers.length) return;
   let active = null;
   let ejectTimer = 0;
+  let revealTimer = 0;
+  let tuningTimer = 0;
+  let completeEject = null;
+  let lastButton = null;
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const systemDark = matchMedia('(prefers-color-scheme: dark)');
   const kodlabPreview = document.querySelector('[data-kodlab-preview]');
@@ -62,24 +70,100 @@
     active.button.setAttribute('aria-expanded', 'false');
     active = null;
   }
-  function closePlayer(returnFocus = true, immediate = false) {
+  function setIdle(idle) {
+    eject.disabled = idle;
+    playingStatus.hidden = idle;
+    idleStatus.hidden = !idle;
+    player.classList.toggle('is-idle', idle);
+    for (const region of [player, screen]) {
+      if (idle) {
+        region.removeAttribute('aria-labelledby');
+        region.setAttribute('aria-label', document.documentElement.lang === 'pl'
+          ? 'Szum telewizora, brak kasety' : 'TV static, no cassette inserted');
+      } else {
+        region.removeAttribute('aria-label');
+        region.setAttribute('aria-labelledby', 'tape-player-title');
+      }
+    }
+  }
+  function cancelPending() {
+    clearTimeout(ejectTimer);
+    ejectTimer = 0;
+    completeEject = null;
+  }
+  function stopTuning() {
+    clearTimeout(tuningTimer);
+    tuningTimer = 0;
+    screen.querySelector('.tape-test-pattern--tuning')?.remove();
+  }
+  function disposeStatic() {
+    screen.querySelector('.tape-static')?.dispose?.();
+  }
+  function tunePicture(firstPlay) {
+    stopTuning();
+    if (motion.matches || document.documentElement.classList.contains('is-tape-paused') ||
+        typeof window.createTapeTestPattern !== 'function') return;
+    const pattern = window.createTapeTestPattern();
+    pattern.classList.add('tape-test-pattern--tuning');
+    screen.append(pattern);
+    // Let the CRT open before the short calibration signal gives way to the project.
+    tuningTimer = setTimeout(stopTuning, firstPlay ? 750 : 240);
+  }
+  function ejectTape() {
     if (!active || ejectTimer) return;
+    stopTuning();
     const button = active.button;
     const finish = () => {
-      ejectTimer = 0;
+      cancelPending();
       restore();
-      player.hidden = true;
+      // Keep the sleeve's footprint on phones so the TV never jumps upward.
+      const spacer = document.createElement('div');
+      spacer.className = 'tape-cover tape-cover--placeholder';
+      spacer.style.visibility = 'hidden';
+      spacer.setAttribute('aria-hidden', 'true');
+      caseSlot.replaceChildren(spacer);
+      const noise = typeof window.createTapeStatic === 'function'
+        ? window.createTapeStatic() : document.createElement('div');
+      noise.classList.add('tape-static');
+      noise.setAttribute('aria-hidden', 'true');
+      screen.replaceChildren(noise);
+      delete screen.dataset.project;
       player.classList.remove('is-ejecting', 'is-playing', 'is-changing');
-      caseSlot.replaceChildren();
-      if (returnFocus) button?.focus({ preventScroll: true });
+      setIdle(true);
     };
-    if (immediate || motion.matches || document.documentElement.classList.contains('is-tape-paused')) {
-      finish();
-      return;
-    }
+    button.focus({ preventScroll: true });
+    eject.disabled = true;
     player.classList.remove('is-playing', 'is-changing');
     player.classList.add('is-ejecting');
-    ejectTimer = setTimeout(finish, 300);
+    if (motion.matches || document.documentElement.classList.contains('is-tape-paused')) return finish();
+    completeEject = finish;
+    ejectTimer = setTimeout(finish, 520);
+  }
+  function powerOff(returnFocus = true, immediate = false) {
+    if (player.hidden || player.classList.contains('is-powering-off')) return;
+    stopTuning();
+    cancelPending();
+    clearTimeout(revealTimer);
+    if (returnFocus) (active?.button || lastButton)?.focus({ preventScroll: true });
+    const finish = () => {
+      cancelPending();
+      restore();
+      player.hidden = true;
+      player.inert = false;
+      player.classList.remove('is-ejecting', 'is-powering-off', 'is-playing', 'is-changing', 'is-expanded', 'is-revealing', 'is-idle');
+      caseSlot.replaceChildren();
+      disposeStatic();
+      screen.replaceChildren();
+      delete screen.dataset.project;
+      setIdle(false);
+    };
+    if (immediate || motion.matches || document.documentElement.classList.contains('is-tape-paused')) return finish();
+    player.inert = true;
+    player.classList.remove('is-playing', 'is-changing');
+    player.classList.add('is-powering-off', 'is-ejecting', 'is-revealing');
+    player.classList.remove('is-expanded');
+    completeEject = finish;
+    ejectTimer = setTimeout(finish, 650);
   }
   articles.forEach((article, i) => {
     const [name, category, style, format, subtitle] = covers[i];
@@ -108,17 +192,21 @@
     observer.observe(description, { subtree: true, childList: true, characterData: true });
     button.addEventListener('click', () => {
       const firstPlay = player.hidden;
-      clearTimeout(ejectTimer);
-      ejectTimer = 0;
-      player.classList.remove('is-playing', 'is-changing', 'is-ejecting');
+      cancelPending();
+      stopTuning();
+      clearTimeout(revealTimer);
+      player.inert = false;
+      player.classList.remove('is-playing', 'is-changing', 'is-ejecting', 'is-powering-off');
       restore();
       const body = article.querySelector('.card__body');
       active = { article, body, next: body.nextSibling, button, title, summary };
+      lastButton = button;
       summary.hidden = false;
       screen.dataset.project = style;
       button.setAttribute('aria-expanded', 'true');
       title.id = 'tape-player-title';
       title.tabIndex = -1;
+      setIdle(false);
       const cover = document.createElement('div');
       cover.className = `tape-cover tape-cover--${style}`;
       cover.setAttribute('aria-hidden', 'true');
@@ -135,10 +223,16 @@
         body.append(preview);
       }
       caseSlot.replaceChildren(cover);
+      disposeStatic();
       screen.replaceChildren(body);
       player.hidden = false;
-      void player.offsetWidth; // Restart the appropriate transition without restarting the TV.
+      // Commit the closed compartment before revealing it. On a tape change or
+      // interrupted eject, its current height reverses smoothly instead.
+      void player.offsetWidth;
+      player.classList.add('is-expanded', 'is-revealing');
       player.classList.add(firstPlay ? 'is-playing' : 'is-changing');
+      revealTimer = setTimeout(() => player.classList.remove('is-revealing'), 650);
+      tunePicture(firstPlay);
       title.focus({ preventScroll: true });
     });
     stacks.append(button);
@@ -147,19 +241,29 @@
   stacks.append(stacks.querySelector('.project-tape--art'));
   document.addEventListener('channelchange', () => {
     updateKodlabPreview();
+    if (player.classList.contains('is-idle')) setIdle(true);
     const image = active?.body.querySelector('.tape-art-preview img');
     const source = active?.article.querySelector('.card__print img');
     if (image && source) image.alt = source.alt;
   });
-  player.querySelector('.tape-player__close').addEventListener('click', () => closePlayer());
+  document.addEventListener('tape-pause-change', () => {
+    if (document.documentElement.classList.contains('is-tape-paused')) {
+      stopTuning();
+      completeEject?.();
+    }
+  });
+  motion.addEventListener('change', () => { if (motion.matches) { stopTuning(); completeEject?.(); } });
+  eject.addEventListener('click', ejectTape);
+  power.addEventListener('click', () => powerOff());
   player.addEventListener('click', event => {
-    if (event.target.closest('a[href^="#"]')) closePlayer(false, true);
+    if (event.target.closest('a[href^="#"]')) powerOff(false, true);
   }, true);
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && !player.hidden && !document.querySelector('dialog[open]') &&
         (player.contains(document.activeElement) || shelf.contains(document.activeElement))) {
       event.preventDefault();
-      closePlayer();
+      if (active) ejectTape();
+      else powerOff();
     }
   });
   cards.hidden = true;

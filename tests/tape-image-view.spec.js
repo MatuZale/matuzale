@@ -22,6 +22,9 @@ test('image fills the TV, Escape returns focus, and the screen keeps its size', 
   await expect(screen.locator('.card__body')).not.toHaveAttribute('inert', '');
   await expect(page.locator('#project-player')).toBeVisible();
   await page.keyboard.press('Escape');
+  await expect(page.locator('.tape-static')).toBeVisible();
+  await expect(page.locator('#project-player')).toBeVisible();
+  await page.keyboard.press('Escape');
   await expect(page.locator('#project-player')).toBeHidden();
 });
 
@@ -40,6 +43,20 @@ test('zoomed Kodlab image follows language and theme', async ({ page }) => {
   await full.click();
   await expect(full).toHaveCount(0);
   await expect(page.locator('.tape-image-interruption')).toHaveCount(0);
+});
+
+test('eject clears an enlarged image while keeping the TV on', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/?lang=en');
+  await page.getByRole('button', { name: /^Kodlab:/ }).click();
+  await page.locator('.tape-image-open').click();
+  await expect(page.locator('.tape-image-full')).toBeVisible();
+  await page.locator('.tape-player__close').click();
+  await expect(page.locator('.tape-image-full')).toHaveCount(0);
+  await expect(page.locator('.tape-static')).toBeVisible();
+  await expect(page.locator('#project-player')).toBeVisible();
+  await page.locator('.tape-player__power').click();
+  await expect(page.locator('#project-player')).toBeHidden();
 });
 
 test('artwork zoom is cleared when selecting another tape or playing TM', async ({ page }) => {

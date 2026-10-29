@@ -24,12 +24,16 @@ test('selecting and changing tapes plays projects on the TV', async ({ page }) =
   await expect(player).toBeVisible();
   await expect(galleryLink).toBeFocused();
   await player.locator('.tape-player__close').click();
-  await expect(player).not.toBeVisible();
+  await expect(player).toBeVisible();
+  await expect(player.locator('.tape-static')).toBeVisible();
   await expect(shelf.locator('#art')).toBeFocused();
   await kodlab.click();
   await expect(player.locator('.tape-cover--kodlab')).toBeVisible();
   await page.keyboard.press('Escape');
-  await expect(player).not.toBeVisible();
+  await expect(player.locator('.tape-static')).toBeVisible();
+  await expect(kodlab).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(player).toBeHidden();
   await expect(kodlab).toBeFocused();
 });
 
@@ -79,12 +83,18 @@ test('eject remains usable with reduced motion and tape paused', async ({ page }
   const kodlab = page.getByRole('button', { name: /^Kodlab:/ });
   await kodlab.click();
   await player.locator('.tape-player__close').click();
+  await expect(player.locator('.tape-static')).toBeVisible();
+  await expect(player).toBeVisible();
+  await player.locator('.tape-player__power').click();
   await expect(player).toBeHidden();
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.evaluate(() => document.documentElement.classList.add('is-tape-paused'));
   await kodlab.click();
   await expect(player).toBeVisible();
   await player.locator('.tape-player__close').click();
+  await expect(player.locator('.tape-static')).toBeVisible();
+  await expect(player).toBeVisible();
+  await player.locator('.tape-player__power').click();
   await expect(player).toBeHidden();
 });
 
@@ -140,8 +150,12 @@ test('hidden station ident returns control and cancels on tape change', async ({
   await expect(screen).not.toHaveAttribute('inert', '');
   await player.getByRole('button', { name: 'Play hidden VHS ident' }).click();
   await player.locator('.tape-player__close').click();
-  await expect(player).toBeHidden();
+  await expect(player.locator('.tape-static')).toBeVisible();
+  await expect(player).toBeVisible();
   await expect(screen).not.toHaveAttribute('inert', '');
+  await expect(ident).toBeHidden();
+  await player.locator('.tape-player__power').click();
+  await expect(player).toBeHidden();
 });
 
 test('selecting a tape does not move the page', async ({ page }) => {
@@ -298,6 +312,60 @@ test('TM ident follows both page themes', async ({ page }) => {
   expect(dark).not.toBe(light);
   await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'light'));
   expect(await ident.evaluate(el => getComputedStyle(el).backgroundColor)).toBe(light);
+});
+
+test('still ident keeps its title readable on desktop and phone in both themes', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'light' });
+  await page.goto('/?lang=en');
+  await page.getByRole('button', { name: /^Kodlab:/ }).click();
+  const trigger = page.locator('.tape-player__secret');
+  const ident = page.locator('.tape-ident');
+  const title = ident.locator('.tape-ident__title');
+  for (const width of [1280, 375]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const theme of ['light', 'dark']) {
+      await page.evaluate(value => document.documentElement.setAttribute('data-theme', value), theme);
+      await trigger.evaluate(el => el.click());
+      await expect(ident).toHaveClass(/is-still/);
+      await expect(title).toBeVisible();
+      await expect(title).toContainText('120');
+      await expect(title).toHaveCSS('animation-name', 'none');
+      const bounds = await ident.evaluate(el => {
+        const outer = el.getBoundingClientRect();
+        const text = el.querySelector('.tape-ident__title').getBoundingClientRect();
+        return { left: text.left - outer.left, right: outer.right - text.right,
+          top: text.top - outer.top, bottom: outer.bottom - text.bottom };
+      });
+      // Allow subpixel rounding, but never crop the title at the CRT's edge.
+      for (const distance of Object.values(bounds)) expect(distance).toBeGreaterThanOrEqual(-1);
+    }
+  }
+});
+
+test('replaying a paused ident resets its timer and restores the screen', async ({ page }) => {
+  await page.goto('/?lang=en');
+  await page.getByRole('button', { name: /^Kodlab:/ }).click();
+  const pause = page.locator('[data-tape-action="pause"]');
+  const trigger = page.locator('.tape-player__secret');
+  const screen = page.locator('#tape-player-screen');
+  const ident = page.locator('.tape-ident');
+  await pause.evaluate(el => el.click());
+  await trigger.evaluate(el => el.click());
+  await expect(ident).toHaveClass(/is-still/);
+  await expect(ident.locator('.tape-ident__title')).toBeVisible();
+  await expect(screen).toHaveAttribute('inert', '');
+  await page.waitForTimeout(1400);
+  await trigger.evaluate(el => el.click());
+  await page.waitForTimeout(1300);
+  await expect(ident).toBeVisible();
+  await expect(ident).toBeHidden({ timeout: 2500 });
+  await expect(screen).not.toHaveAttribute('inert', '');
+  await pause.evaluate(el => el.click());
+  await trigger.evaluate(el => el.click());
+  await expect(ident).toHaveClass(/is-running/);
+  await pause.evaluate(el => el.click());
+  await expect(ident).toBeHidden();
+  await expect(screen).not.toHaveAttribute('inert', '');
 });
 
 test('all tape sleeves share one size and T-120 format', async ({ page }) => {

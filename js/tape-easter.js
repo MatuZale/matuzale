@@ -1,4 +1,4 @@
-/* A quiet, original VHS station ident, played only from the TV's TM key. */
+/* An original VHS station ident, played only from the TV's TM key. */
 (() => {
   const player = document.querySelector('#project-player');
   const screen = document.querySelector('#tape-player-screen');
@@ -11,7 +11,7 @@
   overlay.hidden = true;
   overlay.setAttribute('role', 'status');
   overlay.setAttribute('aria-live', 'polite');
-  overlay.innerHTML = `<span class="tape-ident__announce"></span><div class="tape-ident__art" aria-hidden="true"><div class="tape-ident__masthead"><b>TM<span>.</span></b><small>VIDEO LIBRARY</small></div><div class="tape-ident__composition"><div class="tape-ident__bars"><i></i><i></i><i></i><i></i><i></i></div><div class="tape-ident__title"><span>T</span><span class="tape-ident__dash">−</span><span>120</span></div><div class="tape-ident__subtitle">HIGH GRADE / COLOUR</div></div><div class="tape-ident__details"><span>PERSONAL ARCHIVE</span><span>VHS · 01</span></div></div>`;
+  overlay.innerHTML = `<span class="tape-ident__announce"></span><div class="tape-ident__art" aria-hidden="true"><div class="tape-ident__masthead"><b>TM<span>.</span></b><small>VIDEO LIBRARY</small></div><div class="tape-ident__composition"><div class="tape-ident__sun"></div><div class="tape-ident__grid"></div><div class="tape-ident__bars"><i></i><i></i><i></i><i></i><i></i></div><div class="tape-ident__title"><span>T</span><span class="tape-ident__dash">−</span><span>120</span></div><div class="tape-ident__subtitle">HIGH GRADE / COLOUR</div></div><div class="tape-ident__details"><span>PERSONAL ARCHIVE</span><span>VHS · 01</span></div></div>`;
   tv.append(overlay);
   let timer = 0, observer = null;
 
