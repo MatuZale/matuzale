@@ -208,9 +208,10 @@ test('five-colour glow follows hover, not selection, and respects reduced motion
   await page.mouse.move(1, 1);
   await expect(tape).toHaveAttribute('aria-expanded', 'true');
   await expect.poll(() => tape.evaluate(el => getComputedStyle(el).animationName)).toBe('none');
-  await tape.hover();
+  const neighbour = page.locator('.project-tape--cold');
+  await neighbour.hover();
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await expect.poll(() => tape.evaluate(el => getComputedStyle(el).animationName)).toBe('none');
+  await expect.poll(() => neighbour.evaluate(el => getComputedStyle(el).animationName)).toBe('none');
 });
 
 test('Kodlab preview follows the language and theme, including the system theme', async ({ page }) => {
@@ -237,6 +238,8 @@ test('Kodlab preview follows the language and theme, including the system theme'
 test('BENTOS keeps its own identity across themes', async ({ page }) => {
   await page.goto('/?lang=en');
   const tape = page.locator('.project-tape--bentos');
+  await tape.hover();
+  await expect.poll(() => tape.evaluate(el => getComputedStyle(el).animationName)).toBe('none');
   await tape.click();
   const screen = page.locator('#tape-player-screen');
   await expect(screen).toHaveAttribute('data-project', 'bentos');
@@ -244,8 +247,6 @@ test('BENTOS keeps its own identity across themes', async ({ page }) => {
   await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'dark'));
   const after = await screen.evaluate(el => getComputedStyle(el).backgroundImage);
   expect(after).toBe(before);
-  await tape.hover();
-  await expect.poll(() => tape.evaluate(el => getComputedStyle(el).animationName)).toBe('none');
 });
 
 test('VHS ident moves its T-120 title and BENTOS controls remain clickable', async ({ page }) => {

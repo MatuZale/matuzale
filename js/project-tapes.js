@@ -48,6 +48,119 @@
   let lastButton = null;
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const systemDark = matchMedia('(prefers-color-scheme: dark)');
+  const desktopShelf = matchMedia('(min-width: 1024px)');
+  const showcase = document.createElement('div');
+  showcase.className = 'tape-shelf__showcase';
+  showcase.setAttribute('aria-hidden', 'true');
+  shelf.append(showcase);
+
+  function positionShowcase(item, updateSpread = item.classList.contains('is-open')) {
+    const button = item.source;
+    if (!button?.isConnected) return;
+    const shelfBox = shelf.getBoundingClientRect();
+    const width = button.offsetWidth, height = button.offsetHeight;
+    // A narrower desktop has fewer spare pixels around the row. Keep the
+    // physical spines equal, while sizing the presented face to that space.
+    const scale = Math.max(.8, Math.min(1, .8 + (window.innerWidth - 800) / 1500));
+    const coverHeight = height * scale;
+    const coverWidth = coverHeight * 3 / 4.35;
+    // offsetLeft/Top ignore hover and the neighbours' ongoing transition, so a
+    // fast switch still starts from the tape's actual slot, not a moving edge.
+    const centre = shelfBox.left + shelf.clientLeft + button.offsetLeft - stacks.scrollLeft + width / 2;
+    const leftLimit = shelfBox.left + coverWidth / 2 + 18;
+    const rightLimit = shelfBox.right - coverWidth / 2 - 18;
+    const target = Math.max(leftLimit, Math.min(rightLimit, centre));
+    item.style.left = `${centre - shelfBox.left - width / 2}px`;
+    item.style.top = `${shelf.clientTop + button.offsetTop - stacks.scrollTop}px`;
+    item.style.setProperty('--spine-width', `${width}px`);
+    item.style.setProperty('--case-height', `${height}px`);
+    item.style.setProperty('--cover-height', `${coverHeight}px`);
+    item.style.setProperty('--cover-width', `${coverWidth}px`);
+    item.style.setProperty('--open-offset', `${target - centre}px`);
+    if (updateSpread) {
+      const first = stacks.firstElementChild, last = stacks.lastElementChild;
+      const leftSpace = Math.max(0, first.offsetLeft - 14);
+      const rightSpace = Math.max(0, shelf.clientWidth - last.offsetLeft - last.offsetWidth - 30);
+      const leftWanted = Math.max(0, centre - width / 2 - (target - coverWidth / 2) + 12);
+      const rightWanted = Math.max(0, target + coverWidth / 2 - (centre + width / 2) + 12);
+      stacks.style.setProperty('--part-left', `${-Math.min(leftSpace, leftWanted)}px`);
+      stacks.style.setProperty('--part-right', `${Math.min(rightSpace, rightWanted)}px`);
+    }
+  }
+
+  function removeShowcase(item) {
+    const button = item.source;
+    item.remove();
+    if (![...showcase.children].some(other => other.source === button)) button?.classList.remove('is-presented');
+  }
+  function closeShowcase(immediate = false) {
+    stacks.querySelectorAll('.is-parting-left, .is-parting-right').forEach(button =>
+      button.classList.remove('is-parting-left', 'is-parting-right', 'is-adjacent'));
+    [...showcase.children].filter(item => immediate || item.classList.contains('is-open')).forEach(item => {
+      clearTimeout(item.removeTimer);
+      item.classList.remove('is-open');
+      if (immediate || motion.matches || document.documentElement.classList.contains('is-tape-paused')) removeShowcase(item);
+      else item.removeTimer = setTimeout(() => removeShowcase(item), 720);
+    });
+  }
+  function showCase(button, cover) {
+    if (!desktopShelf.matches || !button || !cover) return;
+    // A rapidly reselected tape should not have a second closing copy over it.
+    [...showcase.children].filter(item => item.source === button).forEach(item => {
+      clearTimeout(item.removeTimer);
+      removeShowcase(item);
+    });
+    const item = document.createElement('div');
+    item.className = 'tape-showcase';
+    item.source = button;
+    const box = document.createElement('div');
+    box.className = 'tape-showcase__box';
+    const spine = document.createElement('div');
+    spine.className = 'tape-showcase__spine';
+    const replica = document.createElement('div');
+    replica.className = 'tape-showcase__replica';
+    replica.innerHTML = button.innerHTML;
+    // Copy the existing printed stock rather than creating another element
+    // matching the shelf's actionable .project-tape selectors.
+    const properties = ['background', 'color', 'border', 'box-shadow'];
+    const paint = (source, target) => {
+      const style = getComputedStyle(source);
+      properties.forEach(property => target.style.setProperty(property, style.getPropertyValue(property)));
+    };
+    paint(button, replica);
+    [...button.children].forEach((source, index) => paint(source, replica.children[index]));
+    spine.append(replica);
+    const front = document.createElement('div');
+    front.className = 'tape-showcase__front';
+    front.append(cover.cloneNode(true));
+    box.append(spine, front);
+    item.append(box);
+    showcase.append(item);
+    const buttons = [...stacks.children];
+    const index = buttons.indexOf(button);
+    buttons.forEach((other, i) => {
+      if (i < index) other.classList.add('is-parting-left');
+      if (i > index) other.classList.add('is-parting-right');
+      if (Math.abs(i - index) === 1) other.classList.add('is-adjacent');
+    });
+    positionShowcase(item, true);
+    button.classList.add('is-presented');
+    void item.offsetWidth;
+    item.classList.add('is-open');
+  }
+  let shelfResizeFrame = 0;
+  const updateShowcase = () => {
+    cancelAnimationFrame(shelfResizeFrame);
+    shelfResizeFrame = requestAnimationFrame(() => {
+      [...showcase.children].forEach(positionShowcase);
+    });
+  };
+  window.addEventListener('resize', updateShowcase, { passive: true });
+  stacks.addEventListener('scroll', updateShowcase, { passive: true });
+  desktopShelf.addEventListener('change', () => {
+    closeShowcase(true);
+    if (desktopShelf.matches && active) showCase(active.button, caseSlot.querySelector('.tape-cover'));
+  });
   const kodlabPreview = document.querySelector('[data-kodlab-preview]');
   function updateKodlabPreview() {
     if (!kodlabPreview) return;
@@ -62,6 +175,7 @@
   systemDark.addEventListener('change', updateKodlabPreview);
   function restore() {
     if (!active) return;
+    closeShowcase();
     active.title.removeAttribute('id');
     active.title.removeAttribute('tabindex');
     active.body.querySelector('.tape-art-preview')?.remove();
@@ -123,6 +237,7 @@
   }
   function ejectTape() {
     if (!active || ejectTimer) return;
+    closeShowcase();
     stopTuning();
     const button = active.button;
     const finish = () => {
@@ -153,6 +268,7 @@
   }
   function powerOff(returnFocus = true, immediate = false) {
     if (player.hidden || player.classList.contains('is-powering-off')) return;
+    closeShowcase(immediate);
     stopTuning();
     cancelPending();
     clearTimeout(revealTimer);
@@ -235,6 +351,7 @@
         body.append(preview);
       }
       caseSlot.replaceChildren(cover);
+      showCase(button, cover);
       disposeStatic();
       screen.replaceChildren(body);
       player.hidden = false;

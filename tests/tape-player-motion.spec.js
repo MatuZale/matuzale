@@ -71,7 +71,7 @@ test('eject leaves the TV on with static and selecting a new cassette keeps its 
   expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(before.height);
   expect(Math.abs(await page.evaluate(() => window.scrollY) - before.scroll)).toBeLessThanOrEqual(1);
   await page.locator('.project-tape--art').evaluate(el => el.click());
-  await expect(page.locator('.tape-cover--art')).toBeVisible();
+  await expect(page.locator('#tape-player-cover .tape-cover--art')).toBeVisible();
   await expect(page.locator('.tape-static')).toBeHidden();
   expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(before.height);
 });
@@ -174,7 +174,7 @@ test('selecting another cassette interrupts power-off without a stale close', as
   await page.locator('.tape-player__power').evaluate(el => el.click());
   await page.waitForTimeout(100);
   await page.locator('.project-tape--art').evaluate(el => el.click());
-  await expect(page.locator('.tape-cover--art')).toBeVisible();
+  await expect(page.locator('#tape-player-cover .tape-cover--art')).toBeVisible();
   await page.waitForTimeout(1000);
   await expect(page.locator('#project-player')).toBeVisible();
   await expect(page.locator('#tape-player-screen')).toHaveAttribute('data-project', 'art');
