@@ -28,9 +28,18 @@
   --ident-title-red: #b52c42;
   --ident-title-purple: #713e92;
   --ident-title-pink: #a12e68;
+  --ident-title-depth: 1px 1px var(--ident-shadow), 2px 2px var(--ident-shadow),
+    3px 3px #f2b33c, 4px 4px #f2b33c, 5px 5px #ec7653, 6px 6px #ec7653,
+    7px 7px #d85e8a, 8px 8px #d85e8a, 9px 9px #9c70bf, 10px 10px #7770c8;
+  --ident-title-solid-depth: 1px 1px var(--ident-shadow), 2px 2px var(--ident-shadow),
+    3px 3px var(--ident-ink), 4px 4px var(--ident-ink), 5px 5px var(--ident-ink), 6px 6px var(--ident-ink),
+    7px 7px var(--ident-ink), 8px 8px var(--ident-ink), 9px 9px var(--ident-ink), 10px 10px var(--ident-ink);
   position: absolute; z-index: 6; overflow: hidden; box-sizing: border-box;
   border: 7px solid #161a20; border-radius: 28px / 22px; pointer-events: none; background: var(--ident-border-bg);
 }
+/* Let the last frames dissolve into the picture underneath, instead of
+   exposing an opaque rectangle when the ident is removed. */
+.tape-ident.is-running { background: transparent; }
 .tape-ident__announce { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .tape-ident__art { position: absolute; inset: 0; overflow: hidden; background: var(--ident-paper); color: var(--ident-ink); }
 .tape-ident__art::before {
@@ -46,6 +55,14 @@
 .tape-ident__masthead b span { color: #d94f60; }
 .tape-ident__masthead small { font: 700 clamp(.46rem, .75vw, .6rem)/1 var(--font-mono); letter-spacing: .1em; }
 .tape-ident__composition { position: absolute; inset: 13% 0 14%; overflow: hidden; }
+/* A narrow light streak gathers the colours into a final broadcast glint. */
+.tape-ident__composition::after {
+  content: ''; position: absolute; z-index: 1; left: 50%; top: 47%; width: 85%; height: 2px;
+  border-radius: 50%; pointer-events: none; opacity: 0;
+  background: linear-gradient(90deg, transparent, #ee7848, #fff0c8 50%, #ab63bb, transparent);
+  box-shadow: 0 0 10px 2px #f5b98b88;
+  transform: translate(-50%, -50%) scaleX(0);
+}
 /* A sunset disc, ruled in the same way as the old tape sleeves. */
 .tape-ident__sun {
   position: absolute; left: 50%; top: 47%; width: min(40%, 15rem); aspect-ratio: 1;
@@ -73,14 +90,12 @@
 .tape-ident__bars i:nth-child(4) { background: #ab63bb; --stripe-delay: .24s; }
 .tape-ident__bars i:nth-child(5) { background: #7770c8; --stripe-delay: .32s; }
 .tape-ident__title {
-  position: absolute; left: 50%; top: 47%; transform: translate(-50%, -50%);
+  position: absolute; z-index: 2; left: 50%; top: 47%; transform: translate(-50%, -50%);
   display: flex; align-items: baseline; padding: .12em .16em .2em .06em;
   color: var(--ident-ink); font: italic 900 clamp(3.5rem, 13vw, 8.6rem)/.9 Arial, sans-serif;
   letter-spacing: -.095em; white-space: nowrap;
   /* Offset coloured print layers, like a physical multi-pass title card. */
-  text-shadow: 1px 1px var(--ident-shadow), 2px 2px var(--ident-shadow),
-    3px 3px #f2b33c, 4px 4px #f2b33c, 5px 5px #ec7653, 6px 6px #ec7653,
-    7px 7px #d85e8a, 8px 8px #d85e8a, 9px 9px #9c70bf, 10px 10px #7770c8;
+  text-shadow: var(--ident-title-depth);
 }
 .tape-ident__dash { padding: 0 .04em; font-weight: 400; }
 .tape-ident__subtitle {
@@ -95,8 +110,12 @@
 .tape-ident.is-running .tape-ident__grid { animation: ident-grid 7.6s ease both; }
 .tape-ident.is-running .tape-ident__bars i { animation: ident-stripe 7.6s cubic-bezier(.65,0,.25,1) var(--stripe-delay) both; }
 .tape-ident.is-running .tape-ident__title {
-  animation: ident-title 7.6s cubic-bezier(.65,0,.25,1) both, ident-title-colours 1.6667s linear infinite;
+  animation: ident-title 7.6s cubic-bezier(.65,0,.25,1) both,
+    ident-title-colours 555.56ms linear 2.85s 3 both,
+    ident-title-resolve 350ms ease-out 4.517s forwards,
+    ident-title-depth 7.6s ease both;
 }
+.tape-ident.is-running .tape-ident__composition::after { animation: ident-glint 7.6s ease-out both; }
 .tape-ident.is-running .tape-ident__subtitle { animation: ident-caption 7.6s ease both; }
 @keyframes ident-stage { 0% { opacity: 0; } 6%, 91% { opacity: 1; } 100% { opacity: 0; } }
 @keyframes ident-sun {
@@ -118,7 +137,8 @@
   58%, 68% { left: 50%; transform: translate(-50%, -50%) skewX(0); }
   88%, 100% { left: -10%; transform: translate(-100%, -50%) skewX(-8deg); }
 }
-/* Five inks advance about three times per second, with a short soft blend. */
+/* The title arrives in one ink, holds, then changes ink nine times a second
+   before resolving to the theme's neutral ink for its exit. */
 @keyframes ident-title-colours {
   0%, 15% { color: var(--ident-title-yellow); }
   20%, 35% { color: var(--ident-title-orange); }
@@ -127,10 +147,22 @@
   80%, 95% { color: var(--ident-title-pink); }
   100% { color: var(--ident-title-yellow); }
 }
+@keyframes ident-title-resolve { from { color: var(--ident-title-yellow); } to { color: var(--ident-ink); } }
+@keyframes ident-title-depth {
+  0%, 37.5% { text-shadow: var(--ident-title-solid-depth); }
+  42%, 59% { text-shadow: var(--ident-title-depth); }
+  64%, 100% { text-shadow: var(--ident-title-solid-depth); }
+}
+@keyframes ident-glint {
+  0%, 58% { opacity: 0; transform: translate(-50%, -50%) scaleX(0); }
+  62% { opacity: .65; transform: translate(-50%, -50%) scaleX(.18); }
+  68% { opacity: .45; transform: translate(-50%, -50%) scaleX(1); }
+  73%, 100% { opacity: 0; transform: translate(-50%, -50%) scaleX(1.08); }
+}
 @keyframes ident-caption { 0%, 19% { opacity: 0; transform: translate(-50%, 7px); } 32%, 66% { opacity: 1; transform: translate(-50%, 0); } 80%, 100% { opacity: 0; transform: translate(-50%, -5px); } }
 @media (max-width: 480px) {
   .tape-ident__sun { width: 52%; }
-  .tape-ident__title { font-size: clamp(3rem, 18vw, 4.5rem); text-shadow: 1px 1px var(--ident-shadow), 2px 2px #f2b33c, 3px 3px #ec7653, 4px 4px #d85e8a, 5px 5px #9c70bf, 6px 6px #7770c8; }
+  .tape-ident__title { font-size: clamp(3rem, 18vw, 4.5rem); --ident-title-depth: 1px 1px var(--ident-shadow), 2px 2px #f2b33c, 3px 3px #ec7653, 4px 4px #d85e8a, 5px 5px #9c70bf, 6px 6px #7770c8; }
   .tape-ident__subtitle { top: 70%; bottom: auto; }
   .tape-ident__masthead { gap: .45rem; }
 }
@@ -139,7 +171,8 @@
   .tape-player__secret:active { transform: none; }
   .tape-ident.is-running .tape-ident__art, .tape-ident.is-running .tape-ident__sun,
   .tape-ident.is-running .tape-ident__grid, .tape-ident.is-running .tape-ident__bars i,
-  .tape-ident.is-running .tape-ident__title, .tape-ident.is-running .tape-ident__subtitle { animation: none; }
+  .tape-ident.is-running .tape-ident__title, .tape-ident.is-running .tape-ident__subtitle,
+  .tape-ident.is-running .tape-ident__composition::after { animation: none; }
 }
 
 /* The ident follows the page theme, including the system preference. */
