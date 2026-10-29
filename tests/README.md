@@ -96,10 +96,8 @@ turn fails. The click may be labelled `mouse` by WebKit; the original press must
 the action. WebKit/cards also checks that a subsequent native mouse click selects the mouse
 flourish and can put the card back. This catches a stale touch source on hybrid input.
 
-The entrance check excludes only the known infinite `rgb-split` text-shadow animation
-on deck buttons (from `css/style.css`). Close receives focus on opening, so waiting for
-every descendant animation to finish previously timed out on desktop. All other animations,
-including `deck-in`, `deal` and transitions, must still finish; the text effect remains enabled.
+The entrance check excludes the decorative infinite deck backdrop animation. All other
+animations, including `deck-in`, `deal` and transitions, must still finish.
 Off-screen fixture cards are positioned with DOM `scrollIntoView` (instant, programmatic),
 then their real face geometry is checked. The subsequent native tap/click targets the stable
 hit surface with normal Playwright actionability checks, including stability and hit testing.

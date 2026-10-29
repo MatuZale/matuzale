@@ -343,48 +343,7 @@ main[tabindex="-1"]:focus, main [tabindex="-1"]:focus { outline: none; }
 .btn--ghost:hover { border-color: var(--accent); }
 .btn--lg { padding: 1.05rem 1.9rem; font-size: 1.15rem; }
 
-/* Brief RGB interference in the lettering; hit areas and outlines stay steady.
-   Start near the burst so a quick hover catches it, then leave a quiet interval. */
-:where(.btn, button, .back-top, .socials a) {
-  --glitch-a: color-mix(in srgb, var(--accent) 85%, transparent);
-  --glitch-b: color-mix(in srgb, var(--accent-3) 85%, transparent);
-  animation: var(--glitch-text, none) 2.4s steps(1, end) -2.05s infinite;
-  text-shadow: var(--glitch-rest, none);
-}
-:where(.icon-btn, .back-top, .socials a) > svg {
-  animation: var(--glitch-icon, none) 2.4s steps(1, end) -2.05s infinite;
-}
-:where(.btn, button, .back-top, .socials a):not(:disabled, [aria-disabled="true"]):is(:focus-visible, :active) {
-  --glitch-text: rgb-split;
-  --glitch-icon: rgb-split-icon;
-  --glitch-rest: .6px 0 var(--glitch-a), -.6px 0 var(--glitch-b);
-}
-@media (hover: hover) and (pointer: fine) {
-  :where(.btn, button, .back-top, .socials a):not(:disabled, [aria-disabled="true"]):hover {
-    --glitch-text: rgb-split;
-    --glitch-icon: rgb-split-icon;
-    --glitch-rest: .6px 0 var(--glitch-a), -.6px 0 var(--glitch-b);
-  }
-}
-/* Touch browsers can keep :active after a tap: let that pulse finish once. */
-@media (hover: none) {
-  :where(.btn, button, .back-top, .socials a),
-  :where(.icon-btn, .back-top, .socials a) > svg { animation-iteration-count: 1; }
-}
-@keyframes rgb-split {
-  0%, 86%, 96%, 100% { text-shadow: none; }
-  88% { text-shadow: 2px 0 var(--glitch-a), -2px 0 var(--glitch-b); }
-  90% { text-shadow: -3px 0 var(--glitch-a), 3px 0 var(--glitch-b); }
-  92% { text-shadow: 4px 1px var(--glitch-a), -4px -1px var(--glitch-b); }
-  94% { text-shadow: -1px 0 var(--glitch-a), 1px 0 var(--glitch-b); }
-}
-@keyframes rgb-split-icon {
-  0%, 86%, 96%, 100% { filter: none; }
-  88% { filter: drop-shadow(2px 0 var(--glitch-a)) drop-shadow(-2px 0 var(--glitch-b)); }
-  90% { filter: drop-shadow(-2px 0 var(--glitch-a)) drop-shadow(2px 0 var(--glitch-b)); }
-  92% { filter: drop-shadow(3px 1px var(--glitch-a)) drop-shadow(-3px -1px var(--glitch-b)); }
-  94% { filter: drop-shadow(-1px 0 var(--glitch-a)) drop-shadow(1px 0 var(--glitch-b)); }
-}
+/* Hover colour lives on the button frame, keeping its label steady and legible. */
 
 /* ───────────────────────── Hero (follows the theme) ───────────────────────── */
 .hero {

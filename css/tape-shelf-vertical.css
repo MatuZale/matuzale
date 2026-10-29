@@ -15,7 +15,7 @@
 }
 .project-tape {
   position: relative;
-  flex: 1 0 0;
+  flex: 1 1 65px;
   flex-direction: column;
   align-items: stretch;
   width: auto;
@@ -28,8 +28,6 @@
   transform-origin: bottom center;
   box-shadow: inset 1px 0 #ffffff20, inset -2px 0 #0007, 2px 2px 4px #000b;
 }
-.project-tape:nth-child(3n + 2) { height: 290px; }
-.project-tape:nth-child(4n + 3) { height: 303px; }
 .project-tape__brand { min-width: 0; min-height: 32px; flex: 0 0 32px; font-size: 16px; }
 .project-tape__label {
   flex: 1 1 auto;
@@ -53,7 +51,6 @@
 .project-tape--cold .project-tape__bands, .project-tape--cloud .project-tape__bands { order: 0; }
 .project-tape--kodlab .project-tape__label { border-left: 0; border-top: 5px solid #d6a12d; }
 .project-tape--art {
-  flex-grow: .9;
   margin-left: 27px;
   margin-right: 10px;
   transform: rotate(-8deg);
@@ -64,8 +61,6 @@
 @media (max-width: 760px) {
   .tape-shelf__stacks { justify-content: flex-start; padding-inline: 16px 34px; }
   .project-tape { flex: 0 0 61px; max-width: none; height: 275px; }
-  .project-tape:nth-child(3n + 2) { height: 269px; }
-  .project-tape:nth-child(4n + 3) { height: 280px; }
   .project-tape__name { font-size: .88rem; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -88,8 +83,6 @@
   --glitch-rest: none;
   text-shadow: none;
 }
-.project-tape:nth-child(3n + 2) { height: 312px; }
-.project-tape:nth-child(4n + 3) { height: 325px; }
 .project-tape:is(:hover, :focus-visible, :active), .project-tape * {
   --glitch-text: none;
   --glitch-icon: none;
@@ -115,7 +108,5 @@
 .project-tape--art:hover, .project-tape--art:focus-visible { transform: translateY(-8px) rotate(-6deg); }
 @media (max-width: 760px) {
   .project-tape { flex-basis: 55px; height: 310px; }
-  .project-tape:nth-child(3n + 2) { height: 302px; }
-  .project-tape:nth-child(4n + 3) { height: 315px; }
   .project-tape__name { font-size: .82rem; }
 }

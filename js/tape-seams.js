@@ -45,6 +45,14 @@
     const style = getComputedStyle(document.documentElement);
     const violet = style.getPropertyValue('--accent-2').trim();
     const cyan = style.getPropertyValue('--accent-3').trim();
+    // On either side of BENTOS, let the portfolio's violet meet the project's
+    // lime. Darker ink on the light page keeps the lime visible on both sides.
+    const theme = document.documentElement.getAttribute?.('data-theme');
+    const darkPage = theme === 'dark' || (theme !== 'light' && scheme.matches);
+    const transitionViolet = darkPage ? violet : '#6d28d9';
+    const seaViolet = '#bd9aff';
+    const pageLime = darkPage ? '#aaff00' : '#568600';
+    const seaLime = '#aaff00';
     const phase = item.index * 1.2 + (motion.matches ? 0 : elapsed * .00035);
     const bendAt = u => influence.strength * .055 * (1 + .4 * (.5 - influence.y)) * Math.exp(-Math.pow((u - influence.x) / .16, 2));
     const surface = u => .5 + .15 * Math.sin(u * 6.5 + phase) + .045 * Math.sin(u * 15 - phase * .7) + bendAt(u);
@@ -104,7 +112,10 @@
         const value = clamp((a * .78 + b * .65) * envelope + glow, 0, 1);
         const glyph = glyphs[Math.round(value * (glyphs.length - 1))];
         if (glyph === ' ') continue;
-        ctx.fillStyle = a >= b ? violet : cyan;
+        if (item.transition) {
+          const seaSide = item.transition === 'to' ? v >= first : v < first;
+          ctx.fillStyle = a >= b ? (seaSide ? seaViolet : transitionViolet) : (seaSide ? seaLime : pageLime);
+        } else ctx.fillStyle = a >= b ? violet : cyan;
         ctx.globalAlpha = .23 + value * .57;
         ctx.fillText(glyph, (x + .5) * cellW, (y + .5) * cellH);
       }

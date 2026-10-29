@@ -8,20 +8,24 @@
   let current = null, imageObserver = null, transitionTimer = 0;
   const pl = () => root.lang === 'pl';
   const openLabel = image => `${pl() ? 'Powiększ obraz' : 'Enlarge image'}: ${image.alt}`;
-  const closeLabel = image => `${image.alt}. ${pl() ? 'Wróć do opisu projektu' : 'Return to the project description'}`;
+  const closeLabel = (image, logistic) => logistic
+    ? (pl() ? 'Mapa logistyczna, wykres bifurkacyjny. Wróć do opisu projektu' : 'Logistic map, bifurcation diagram. Return to the project description')
+    : `${image.alt}. ${pl() ? 'Wróć do opisu projektu' : 'Return to the project description'}`;
 
   function syncLabels() {
     screen.querySelectorAll('.tape-image-open').forEach(button => {
       const image = button.querySelector('img');
       if (!image) return;
-      button.setAttribute('aria-label', openLabel(image));
-      button.setAttribute('title', pl() ? 'Powiększ obraz' : 'Enlarge image');
+      const logistic = Boolean(button.closest('.tape-art-preview--art'));
+      const title = logistic ? (pl() ? 'Zobacz mapę logistyczną ASCII' : 'View the ASCII logistic map') : (pl() ? 'Powiększ obraz' : 'Enlarge image');
+      button.setAttribute('aria-label', logistic ? title : openLabel(image));
+      button.setAttribute('title', title);
       const hint = button.querySelector('.tape-image-open__hint');
-      const label = pl() ? 'POWIĘKSZ ↗' : 'ENLARGE ↗';
+      const label = logistic ? (pl() ? 'MAPA ASCII ↗' : 'ASCII MAP ↗') : (pl() ? 'POWIĘKSZ ↗' : 'ENLARGE ↗');
       if (hint.textContent !== label) hint.textContent = label;
     });
     if (current) {
-      current.view.setAttribute('aria-label', closeLabel(current.source));
+      current.view.setAttribute('aria-label', closeLabel(current.source, current.logistic));
       const hint = current.view.querySelector('.tape-image-full__hint');
       const label = pl() ? '← WRÓĆ DO OPISU' : '← BACK TO PROJECT';
       if (hint.textContent !== label) hint.textContent = label;
@@ -60,10 +64,11 @@
 
   function close(restoreFocus = true, animate = true) {
     if (!current) return;
-    const { body, button, view, wasInert } = current;
+    const { body, button, view, wasInert, cleanup } = current;
     current = null;
     imageObserver?.disconnect();
     imageObserver = null;
+    cleanup?.();
     body.inert = wasInert;
     view.remove();
     if (animate && screen.contains(body) && !player.hidden) transition();
@@ -84,9 +89,11 @@
     hint.className = 'tape-image-full__hint';
     hint.setAttribute('aria-hidden', 'true');
     view.append(image, hint);
-    current = { body, source, button, view, image, wasInert: body.inert };
+    const logistic = screen.dataset.project === 'art' && typeof window.createTapeLogistic === 'function';
+    current = { body, source, button, view, image, logistic, cleanup: null, wasInert: body.inert };
     body.inert = true;
     screen.append(view);
+    if (logistic) current.cleanup = window.createTapeLogistic(view);
     syncLabels();
     imageObserver = new MutationObserver(syncLabels);
     imageObserver.observe(source, { attributes: true, attributeFilter: ['src', 'alt'] });

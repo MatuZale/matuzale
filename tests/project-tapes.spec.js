@@ -299,3 +299,32 @@ test('TM ident follows both page themes', async ({ page }) => {
   await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'light'));
   expect(await ident.evaluate(el => getComputedStyle(el).backgroundColor)).toBe(light);
 });
+
+test('all tape sleeves share one size and T-120 format', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/?lang=en');
+  const shelf = page.locator('#project-shelf');
+  await expect(shelf.locator('button')).toHaveCount(11);
+  for (const width of [375, 800, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    const result = await shelf.locator('button').evaluateAll(buttons => {
+      const sizes = buttons.map(button => `${button.offsetWidth}x${button.offsetHeight}`);
+      const formats = buttons.map(button => button.querySelector('.project-tape__format').textContent.trim());
+      const last = buttons.at(-1);
+      const previous = buttons.at(-2).getBoundingClientRect();
+      const gap = last.getBoundingClientRect().left - previous.right;
+      const tilted = getComputedStyle(last).transform !== 'none';
+      const covers = buttons.map(button => {
+        button.click();
+        return document.querySelector('#project-player .tape-cover__format').textContent.trim();
+      });
+      return { sizes: [...new Set(sizes)], formats, covers, gap, tilted, lastId: last.id };
+    });
+    expect(result.sizes).toHaveLength(1);
+    expect(result.formats.every(format => format.startsWith('T-120'))).toBe(true);
+    expect(result.covers.every(format => format.startsWith('T-120'))).toBe(true);
+    expect(result.lastId).toBe('art');
+    expect(result.tilted).toBe(true);
+    expect(result.gap).toBeGreaterThanOrEqual(0);
+  }
+});

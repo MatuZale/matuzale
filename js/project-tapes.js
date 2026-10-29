@@ -10,15 +10,15 @@
   // The markings are a visual nod to blank tape packaging, not a claim about playback time.
   const covers = [
     ['BENTOS', 'Water quality monitoring', 'bentos', 'T-120', 'OCEAN SIGNAL'],
-    ['KODLAB', 'Coding practice lab', 'kodlab', 'E-180', 'LEARNING LAB'],
+    ['KODLAB', 'Coding practice lab', 'kodlab', 'T-120', 'LEARNING LAB'],
     ['AGENT CONTROL', 'AI coding task manager', 'agent', 'T-120', 'WORKFLOW SYSTEM'],
-    ['ATTRACTORS', 'Chaos maps and fractals', 'art', 'E-180', 'CHAOS ON TAPE'],
+    ['ATTRACTORS', 'Chaos maps and fractals', 'art', 'T-120', 'CHAOS ON TAPE'],
     ['COLDCHAIN', 'Sensor data analysis', 'cold', 'T-120', 'TEMPERATURE DATA'],
-    ['FINANCE', 'Spending analysis', 'finance', 'E-180', 'DATA / PYTHON'],
+    ['FINANCE', 'Spending analysis', 'finance', 'T-120', 'DATA / PYTHON'],
     ['STUDENT DATA', 'Student data pipeline', 'cloud', 'T-120', 'CLOUD / ML'],
-    ['PENDULUM', 'Pendulum wave sounds', 'sound', 'E-180', 'SOUND / CANVAS'],
+    ['PENDULUM', 'Pendulum wave sounds', 'sound', 'T-120', 'SOUND / CANVAS'],
     ['N-BODY', 'Gravity simulation in 3D', 'nbody', 'T-120', 'GRAVITY SIMULATION'],
-    ['PHYSICS LAB', 'Interactive physics demos', 'physics', 'E-180', 'INTERACTIVE SCIENCE'],
+    ['PHYSICS LAB', 'Interactive physics demos', 'physics', 'T-120', 'INTERACTIVE SCIENCE'],
     ['QUANTUM', 'Quantum research code', 'quantum', 'T-120', 'RESEARCH ARCHIVE']
   ];
   const summaries = {
