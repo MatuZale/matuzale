@@ -1,0 +1,37 @@
+/* Curved glass is a separate, non-interactive layer above the whole picture.
+   It also covers the ident and enlarged images, while leaving the controls untouched. */
+.tape-player__tv { position: relative; }
+.tape-player__screen {
+  border-radius: 9% / 8%;
+  box-shadow: inset 0 0 0 1px #b9c9da30, inset 0 0 35px #000a,
+    0 0 0 1px #ddd5c528, 0 3px 4px #0009;
+}
+.tape-player__tv::after {
+  content: "";
+  position: absolute;
+  z-index: 8;
+  top: clamp(.65rem, 1.6vw, 1.1rem);
+  left: clamp(.65rem, 1.6vw, 1.1rem);
+  right: clamp(.65rem, 1.6vw, 1.1rem);
+  aspect-ratio: 4 / 3;
+  border-radius: 9% / 8%;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 100% 85% at 50% 48%, transparent 53%, #070a1018 76%, #05060d65 100%),
+    radial-gradient(ellipse 100% 43% at 43% -8%, #f5ffff29 0, #dbeaff0b 45%, transparent 72%),
+    linear-gradient(90deg, #080d141a, transparent 9% 91%, #080d141a);
+  box-shadow: inset 0 1px 2px #e5f5ff55, inset 0 -2px 7px #0009,
+    inset 8px 0 12px -10px #a9c7df55, inset -8px 0 12px -10px #a9c7df55;
+}
+.tape-player__tv .tape-ident { border-radius: 9% / 8%; }
+@media (max-width: 680px) {
+  .tape-player__tv::after { aspect-ratio: 3 / 5; }
+}
+@media (max-width: 380px) {
+  .tape-player__tv::after { aspect-ratio: 1 / 1.86; }
+}
+@media (forced-colors: active) {
+  .tape-player__tv::after { display: none; }
+}
+/* A tiny perspective change gives photographs depth without warping body text. */
+.tape-image-full > img { transform: perspective(1100px) rotateX(-1.3deg) scale(1.015); }

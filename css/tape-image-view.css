@@ -1,0 +1,59 @@
+/* A small invitation on the print; the film still occupies the same TV screen. */
+.tape-player__screen .tape-image-open {
+  position: relative;
+  display: block;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  background: #0b0d18;
+  color: #fff;
+  cursor: zoom-in;
+  --glitch-text: none;
+  --glitch-rest: none;
+}
+.tape-player__screen .tape-image-open:focus-visible { outline: 2px solid #ffdf8c; outline-offset: 3px; }
+.tape-image-open__hint, .tape-image-full__hint {
+  position: absolute;
+  z-index: 1;
+  padding: .35rem .45rem;
+  border: 1px solid #ffffff77;
+  border-radius: 2px;
+  background: #11101de8;
+  color: #fff7e9;
+  font: 600 .58rem/1.1 var(--font-mono);
+  letter-spacing: .04em;
+  text-shadow: none;
+}
+.tape-image-open__hint { right: 4px; bottom: 4px; }
+.tape-player__screen .tape-image-full {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: .6rem;
+  border: 0;
+  border-radius: inherit;
+  background: #070912;
+  color: #fff;
+  cursor: zoom-out;
+  --glitch-text: none;
+  --glitch-rest: none;
+}
+.tape-image-full img { width: 100%; height: 100%; max-width: 100%; max-height: 100%; object-fit: contain; }
+.tape-image-full__hint { right: .65rem; bottom: .65rem; }
+.tape-player__screen .tape-image-full:focus-visible { outline: 3px solid #ffdf8c; outline-offset: -5px; }
+/* A brief tracking interruption masks the cut in both directions. */
+.tape-image-interruption { position: absolute; z-index: 7; inset: 0; pointer-events: none; border-radius: inherit; background: linear-gradient(180deg, #15172580, #7a89a055 48%, #19182580); animation: tape-image-cut 580ms ease-out both; }
+.tape-image-interruption::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, #d9e8f3aa 0 1px, transparent 1px 5px); opacity: .32; }
+.tape-image-interruption::after { content: ''; position: absolute; left: 0; right: 0; top: 26%; height: 5%; background: #d7d9ed99; box-shadow: 0 3px 12px #a3b9ee77; animation: tape-image-band 580ms ease-out both; }
+@keyframes tape-image-cut { 0% { opacity: .8; } 22% { opacity: .55; } 100% { opacity: 0; } }
+@keyframes tape-image-band { from { transform: translateY(-250%); } to { transform: translateY(900%); } }
+@media (prefers-reduced-motion: reduce) { .tape-image-interruption, .tape-image-interruption::after { animation: none; opacity: 0; } }
+
+/* The ambient tracking line remains above the enlarged picture. */
+.tape-player__screen:has(.tape-image-full) .tape-interference { z-index: 6; }
