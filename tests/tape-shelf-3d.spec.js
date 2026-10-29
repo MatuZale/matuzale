@@ -1,5 +1,80 @@
 import { test, expect } from '@playwright/test';
 
+test('replicas stay attached to moving spines during rapid changes', async ({ page }) => {
+  await page.goto('/?lang=en');
+  await page.locator('#project-shelf').scrollIntoViewIfNeeded();
+  const result = await page.evaluate(async () => {
+    const samples = [], angles = [];
+    const rotation = element => {
+      const value = getComputedStyle(element).transform;
+      if (value === 'none') return 0;
+      const matrix = new DOMMatrixReadOnly(value);
+      return Math.atan2(matrix.b, matrix.a) * 180 / Math.PI;
+    };
+    const keys = ['kodlab', 'agent', 'bentos', 'physics', 'art', 'cold'];
+    for (const key of keys) {
+      document.querySelector(`.project-tape--${key}`).click();
+      await new Promise(resolve => {
+        const start = performance.now();
+        const frame = now => {
+          for (const replica of document.querySelectorAll('.tape-showcase')) {
+            const box = replica.getBoundingClientRect();
+            const spine = replica.source.getBoundingClientRect();
+            samples.push(Math.max(Math.abs(box.left + box.width / 2 - spine.left - spine.width / 2),
+              Math.abs(box.top + box.height / 2 - spine.top - spine.height / 2)));
+            angles.push(Math.abs(rotation(replica.source) - rotation(replica.querySelector('.tape-showcase__replica'))));
+          }
+          if (now - start < 110) requestAnimationFrame(frame);
+          else resolve();
+        };
+        requestAnimationFrame(frame);
+      });
+    }
+    await new Promise(resolve => setTimeout(resolve, 850));
+    return { samples, angles, replicas: document.querySelectorAll('.tape-showcase').length,
+      hidden: document.querySelectorAll('.project-tape.is-presented').length };
+  });
+  expect(result.samples.length).toBeGreaterThan(10);
+  // Allow one rendered frame of motion and small rounding differences in WebKit.
+  expect(Math.max(...result.samples)).toBeLessThan(8);
+  expect(Math.max(...result.angles)).toBeLessThan(1);
+  expect(result.replicas).toBe(1);
+  expect(result.hidden).toBe(1);
+  await expect(page.locator('#tape-player-screen')).toHaveAttribute('data-project', 'cold');
+});
+
+for (const mode of ['reduced motion', 'tape pause']) {
+  test(`rapid changes settle in place with ${mode}`, async ({ page }) => {
+    if (mode === 'reduced motion') await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/?lang=en');
+    if (mode === 'tape pause') await page.locator('[data-tape-action="pause"]').evaluate(el => el.click());
+    const result = await page.evaluate(() => {
+      const deviations = [], angles = [];
+      for (const key of ['kodlab', 'agent', 'bentos', 'physics', 'art', 'cold']) {
+        document.querySelector(`.project-tape--${key}`).click();
+        const replica = document.querySelector('.tape-showcase.is-open');
+        const box = replica.getBoundingClientRect(), spine = replica.source.getBoundingClientRect();
+        deviations.push(Math.max(Math.abs(box.left + box.width / 2 - spine.left - spine.width / 2),
+          Math.abs(box.top + box.height / 2 - spine.top - spine.height / 2)));
+        const angle = element => {
+          const value = getComputedStyle(element).transform;
+          if (value === 'none') return 0;
+          const matrix = new DOMMatrixReadOnly(value);
+          return Math.atan2(matrix.b, matrix.a) * 180 / Math.PI;
+        };
+        angles.push(Math.abs(angle(replica.source) - angle(replica.querySelector('.tape-showcase__replica'))));
+      }
+      return { deviations, angles, replicas: document.querySelectorAll('.tape-showcase').length,
+        hidden: document.querySelectorAll('.project-tape.is-presented').length };
+    });
+    expect(Math.max(...result.deviations)).toBeLessThan(4);
+    expect(Math.max(...result.angles)).toBeLessThan(.1);
+    expect(result.replicas).toBe(1);
+    expect(result.hidden).toBe(1);
+    await expect(page.locator('#tape-player-screen')).toHaveAttribute('data-project', 'cold');
+  });
+}
+
 test('a selected tape comes forward without blocking its neighbours or moving the page', async ({ page }) => {
   await page.goto('/?lang=en');
   const shelf = page.locator('#project-shelf');
@@ -120,10 +195,15 @@ test('the selected cover follows both themes and reduced motion or pause stays u
   await shelf.locator('.project-tape--kodlab').click();
   const scene = shelf.locator('.tape-showcase');
   const cover = scene.locator('.tape-cover--kodlab');
+  const sourceLabel = shelf.locator('.project-tape--kodlab .project-tape__label');
+  const replicaLabel = scene.locator('.tape-showcase__replica .project-tape__label');
   await expect(cover).toBeVisible();
   const light = await cover.evaluate(el => getComputedStyle(el).backgroundColor);
+  const lightLabel = await replicaLabel.evaluate(el => getComputedStyle(el).backgroundColor);
   await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'dark'));
   await expect.poll(() => cover.evaluate(el => getComputedStyle(el).backgroundColor)).not.toBe(light);
+  await expect.poll(() => replicaLabel.evaluate(el => getComputedStyle(el).backgroundColor)).not.toBe(lightLabel);
+  expect(await replicaLabel.evaluate(el => getComputedStyle(el).backgroundColor)).toBe(await sourceLabel.evaluate(el => getComputedStyle(el).backgroundColor));
   await expect(page.locator('#tape-player-screen')).toHaveAttribute('data-project', 'kodlab');
   await page.locator('[data-tape-action="pause"]').evaluate(el => el.click());
   await shelf.locator('.project-tape--bentos').click();

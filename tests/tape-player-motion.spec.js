@@ -141,7 +141,7 @@ test('reduced motion and pause skip tuning and hold static still', async ({ page
   expect(await screen.locator('.tape-static__grain').evaluate(el => getComputedStyle(el, '::before').animationPlayState)).toBe('paused');
 });
 
-test('off-air snow drifts continuously on both layers', async ({ page }) => {
+test('off-air snow moves continuously on both layers', async ({ page }) => {
   await page.goto('/?lang=en');
   await page.locator('.project-tape--kodlab').evaluate(el => el.click());
   await page.locator('.tape-player__screen').scrollIntoViewIfNeeded();
@@ -152,14 +152,14 @@ test('off-air snow drifts continuously on both layers', async ({ page }) => {
   const before = await grain.evaluate(el => ({
     timing: getComputedStyle(el).animationTimingFunction,
     secondTiming: getComputedStyle(el, '::before').animationTimingFunction,
-    first: getComputedStyle(el).transform,
+    first: getComputedStyle(el).backgroundPosition,
     second: getComputedStyle(el, '::before').transform,
   }));
   expect(before.timing).toBe('linear');
   expect(before.secondTiming).toBe('linear');
   await page.waitForTimeout(100);
   const after = await grain.evaluate(el => ({
-    first: getComputedStyle(el).transform,
+    first: getComputedStyle(el).backgroundPosition,
     second: getComputedStyle(el, '::before').transform,
   }));
   expect(after.first).not.toBe(before.first);

@@ -1,0 +1,43 @@
+/* The presented cover is still a single plane in WebKit. These thin, shaded
+   paper edges travel with that plane and suggest the thickness of the sleeve. */
+.tape-showcase__front { --edge-stock: #ad9d8d; }
+.tape-showcase__front:has(> .tape-cover--bentos) { --edge-stock: #002578; }
+.tape-showcase__front:has(> .tape-cover--kodlab) { --edge-stock: var(--tape-kodlab-paper); }
+.tape-showcase__front:has(> .tape-cover--agent) { --edge-stock: var(--tape-agent-paper); }
+.tape-showcase__front:has(> .tape-cover--art) { --edge-stock: var(--tape-art-paper); }
+.tape-showcase__front:has(> .tape-cover--cold) { --edge-stock: var(--tape-cold-paper); }
+.tape-showcase__front:has(> .tape-cover--finance) { --edge-stock: var(--tape-finance-paper); }
+.tape-showcase__front:has(> .tape-cover--cloud) { --edge-stock: var(--tape-cloud-paper); }
+.tape-showcase__front:has(> .tape-cover--sound) { --edge-stock: var(--tape-sound-paper); }
+.tape-showcase__front:has(> .tape-cover--nbody) { --edge-stock: var(--tape-nbody-paper); }
+.tape-showcase__front:has(> .tape-cover--physics) { --edge-stock: var(--tape-physics-paper); }
+.tape-showcase__front:has(> .tape-cover--quantum) { --edge-stock: var(--tape-quantum-paper); }
+.tape-showcase__front::before,
+.tape-showcase__front::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--edge-stock);
+}
+.tape-showcase__front::before {
+  top: 0;
+  bottom: 0;
+  right: calc(100% - 1px);
+  width: 10px;
+  clip-path: polygon(100% 0, 100% 100%, 0 calc(100% - 7px), 0 7px);
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--edge-stock) 45%, #14101b),
+    color-mix(in srgb, var(--edge-stock) 80%, #211a26) 70%,
+    color-mix(in srgb, var(--edge-stock) 80%, white));
+}
+.tape-showcase__front::after {
+  top: calc(100% - 1px);
+  left: -9px;
+  right: 0;
+  height: 8px;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 8px 100%);
+  background: linear-gradient(color-mix(in srgb, var(--edge-stock) 65%, #18121c),
+    color-mix(in srgb, var(--edge-stock) 32%, #18121c));
+}
+.tape-showcase__front .tape-cover { box-shadow: 1px 2px 1px #0006; }

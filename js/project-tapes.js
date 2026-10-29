@@ -64,19 +64,25 @@
     const scale = Math.max(.8, Math.min(1, .8 + (window.innerWidth - 800) / 1500));
     const coverHeight = height * scale;
     const coverWidth = coverHeight * 3 / 4.35;
-    // offsetLeft/Top ignore hover and the neighbours' ongoing transition, so a
-    // fast switch still starts from the tape's actual slot, not a moving edge.
+    // The target is based on the stable slot, but the replica must start at
+    // the visible spine, which may still be moving from the previous selection.
     const centre = shelfBox.left + shelf.clientLeft + button.offsetLeft - stacks.scrollLeft + width / 2;
+    const visible = button.getBoundingClientRect();
+    const visibleCentre = visible.left + visible.width / 2;
+    const transform = getComputedStyle(button).transform;
+    const matrix = transform === 'none' ? null : new DOMMatrixReadOnly(transform);
+    const angle = matrix ? Math.atan2(matrix.b, matrix.a) * 180 / Math.PI : 0;
     const leftLimit = shelfBox.left + coverWidth / 2 + 18;
     const rightLimit = shelfBox.right - coverWidth / 2 - 18;
     const target = Math.max(leftLimit, Math.min(rightLimit, centre));
-    item.style.left = `${centre - shelfBox.left - width / 2}px`;
-    item.style.top = `${shelf.clientTop + button.offsetTop - stacks.scrollTop}px`;
+    item.style.left = `${visibleCentre - shelfBox.left - width / 2}px`;
+    item.style.top = `${visible.top + visible.height / 2 - shelfBox.top - height / 2}px`;
     item.style.setProperty('--spine-width', `${width}px`);
     item.style.setProperty('--case-height', `${height}px`);
     item.style.setProperty('--cover-height', `${coverHeight}px`);
     item.style.setProperty('--cover-width', `${coverWidth}px`);
     item.style.setProperty('--open-offset', `${target - centre}px`);
+    item.style.setProperty('--spine-angle', `${angle}deg`);
     if (updateSpread) {
       const first = stacks.firstElementChild, last = stacks.lastElementChild;
       const leftSpace = Math.max(0, first.offsetLeft - 14);
@@ -86,6 +92,27 @@
       stacks.style.setProperty('--part-left', `${-Math.min(leftSpace, leftWanted)}px`);
       stacks.style.setProperty('--part-right', `${Math.min(rightSpace, rightWanted)}px`);
     }
+  }
+
+  // Keep closing and opening replicas attached to their real spines while the
+  // row is moving. This loop only runs during a transition, never at idle.
+  let trackingFrame = 0, trackUntil = 0;
+  function trackShowcases() {
+    if (motion.matches || document.documentElement.classList.contains('is-tape-paused')) {
+      cancelAnimationFrame(trackingFrame);
+      trackingFrame = 0;
+      [...showcase.children].forEach(item => positionShowcase(item, false));
+      return;
+    }
+    trackUntil = performance.now() + 780;
+    if (trackingFrame) return;
+    const frame = () => {
+      trackingFrame = 0;
+      [...showcase.children].forEach(item => positionShowcase(item, false));
+      if (showcase.children.length && performance.now() < trackUntil && !motion.matches &&
+          !document.documentElement.classList.contains('is-tape-paused')) trackingFrame = requestAnimationFrame(frame);
+    };
+    trackingFrame = requestAnimationFrame(frame);
   }
 
   function removeShowcase(item) {
@@ -102,6 +129,19 @@
       if (immediate || motion.matches || document.documentElement.classList.contains('is-tape-paused')) removeShowcase(item);
       else item.removeTimer = setTimeout(() => removeShowcase(item), 720);
     });
+    if (showcase.children.length) trackShowcases();
+  }
+  function paintShowcase(item) {
+    const button = item.source;
+    const replica = item.querySelector('.tape-showcase__replica');
+    if (!button || !replica) return;
+    const properties = ['background', 'color', 'border', 'box-shadow'];
+    const paint = (source, target) => {
+      const style = getComputedStyle(source);
+      properties.forEach(property => target.style.setProperty(property, style.getPropertyValue(property)));
+    };
+    paint(button, replica);
+    [...button.children].forEach((source, index) => paint(source, replica.children[index]));
   }
   function showCase(button, cover) {
     if (!desktopShelf.matches || !button || !cover) return;
@@ -122,13 +162,6 @@
     replica.innerHTML = button.innerHTML;
     // Copy the existing printed stock rather than creating another element
     // matching the shelf's actionable .project-tape selectors.
-    const properties = ['background', 'color', 'border', 'box-shadow'];
-    const paint = (source, target) => {
-      const style = getComputedStyle(source);
-      properties.forEach(property => target.style.setProperty(property, style.getPropertyValue(property)));
-    };
-    paint(button, replica);
-    [...button.children].forEach((source, index) => paint(source, replica.children[index]));
     spine.append(replica);
     const front = document.createElement('div');
     front.className = 'tape-showcase__front';
@@ -136,6 +169,7 @@
     box.append(spine, front);
     item.append(box);
     showcase.append(item);
+    paintShowcase(item);
     const buttons = [...stacks.children];
     const index = buttons.indexOf(button);
     buttons.forEach((other, i) => {
@@ -147,6 +181,7 @@
     button.classList.add('is-presented');
     void item.offsetWidth;
     item.classList.add('is-open');
+    trackShowcases();
   }
   let shelfResizeFrame = 0;
   const updateShowcase = () => {
@@ -171,8 +206,12 @@
     if (kodlabPreview.getAttribute('src') !== src) kodlabPreview.setAttribute('src', src);
   }
   updateKodlabPreview();
-  new MutationObserver(updateKodlabPreview).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-  systemDark.addEventListener('change', updateKodlabPreview);
+  function updateTheme() {
+    updateKodlabPreview();
+    [...showcase.children].forEach(paintShowcase);
+  }
+  new MutationObserver(updateTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  systemDark.addEventListener('change', updateTheme);
   function restore() {
     if (!active) return;
     closeShowcase();

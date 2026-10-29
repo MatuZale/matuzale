@@ -27,7 +27,7 @@
     screen.setAttribute('aria-hidden', 'true');
     const grain = document.createElement('div');
     grain.className = 'tape-static__grain';
-    grain.style.backgroundImage = `url("${noiseTexture()}")`;
+    grain.style.setProperty('--tape-static-texture', `url("${noiseTexture()}")`);
     screen.append(grain);
     // The animation is paused when the TV is out of view. Removing the screen
     // also disconnects the observer, even if a different cassette is selected.

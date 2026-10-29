@@ -52,6 +52,7 @@
 .tape-showcase__replica {
   box-sizing: border-box; position: relative; display: flex; flex-direction: column; align-items: stretch;
   width: 100%; height: 100%; min-width: 0; padding: 4px; border-radius: 3px; text-align: center;
+  transform: rotate(var(--spine-angle, 0deg));
 }
 .tape-showcase__front .tape-cover {
   width: 100%; height: 100%; max-width: none; aspect-ratio: auto;
@@ -60,7 +61,9 @@
   /* Desktop has enough room for the spines; letting them use the shelf's
      padding keeps the moving row and its soft shadows out of a clipping box. */
   .tape-shelf__stacks { overflow: visible; }
-  .tape-shelf__stacks .project-tape { transition: transform 620ms cubic-bezier(.2,.7,.18,1), opacity 180ms ease, box-shadow .18s; }
+  /* Hand over between the real spine and its replica in one frame. Fading the
+     original after the replica disappears leaves a visible gap in the row. */
+  .tape-shelf__stacks .project-tape { transition: transform 620ms cubic-bezier(.2,.7,.18,1), box-shadow .18s; }
   .tape-shelf__stacks .project-tape.is-presented { opacity: 0; }
   .tape-shelf__stacks .project-tape.is-parting-left { transform: translateX(var(--part-left)); }
   .tape-shelf__stacks .project-tape.is-parting-right { transform: translateX(var(--part-right)); }
