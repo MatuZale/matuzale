@@ -42,7 +42,7 @@ const textNodes = el => {
 // own words here, and the element holding it becomes a "plain" unit. Left alone: the channel keys (the way
 // back), text that is never drawn, and text that scripts keep rewriting (the sample feed, the footer game,
 // the year, the observer readout).
-const UNTOUCHED = ".channel, [data-i18n], title, desc, script, style, #observer-trace, [data-feed-clock], .feed__value b, [data-feed-sample], #year, #game-name, #game-toggle";
+const UNTOUCHED = ".channel, .about__ascii-toggle, [data-i18n], title, desc, script, style, #observer-trace, [data-feed-clock], .feed__value b, [data-feed-sample], #year, #game-name, #game-toggle";
 const original = new Map();
 for (const node of textNodes(document.body)) {
   if (node.data.trim() && !node.parentElement.closest(UNTOUCHED)) original.set(node, node.data);
