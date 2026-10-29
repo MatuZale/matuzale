@@ -31,8 +31,8 @@ export default defineConfig({
     // Retina rendering and physical-device performance require separate checks.
     { name: 'webkit-iphone', testMatch: '**/deck-touch.spec.js', use: { ...devices['iPhone 13'], browserName: 'webkit', deviceScaleFactor: 1 } },
     { name: 'chromium-touch', testMatch: '**/deck-touch.spec.js', use: { ...devices['Pixel 7'], browserName: 'chromium', deviceScaleFactor: 1 } },
-    { name: 'chromium-desktop', testMatch: ['**/deck-desktop.spec.js', '**/server.spec.js', '**/retro.spec.js', '**/easter-eggs.spec.js', '**/service-remote.spec.js', '**/footer-tape.spec.js', '**/global-pause.spec.js', '**/card-typography.spec.js', '**/project-tapes.spec.js'], use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 900 } } },
-    { name: 'webkit-desktop', testMatch: ['**/deck-desktop.spec.js', '**/retro.spec.js', '**/easter-eggs.spec.js', '**/service-remote.spec.js', '**/footer-tape.spec.js', '**/global-pause.spec.js', '**/card-typography.spec.js', '**/project-tapes.spec.js'], use: { ...devices['Desktop Safari'], viewport: { width: 1280, height: 900 } } },
+    { name: 'chromium-desktop', testMatch: ['**/deck-desktop.spec.js', '**/server.spec.js', '**/retro.spec.js', '**/easter-eggs.spec.js', '**/service-remote.spec.js', '**/footer-tape.spec.js', '**/global-pause.spec.js', '**/card-typography.spec.js', '**/project-tapes.spec.js', '**/theme-transition.spec.js', '**/about-matrix.spec.js'], use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 900 } } },
+    { name: 'webkit-desktop', testMatch: ['**/deck-desktop.spec.js', '**/retro.spec.js', '**/easter-eggs.spec.js', '**/service-remote.spec.js', '**/footer-tape.spec.js', '**/global-pause.spec.js', '**/card-typography.spec.js', '**/project-tapes.spec.js', '**/theme-transition.spec.js', '**/about-matrix.spec.js'], use: { ...devices['Desktop Safari'], viewport: { width: 1280, height: 900 } } },
   ],
   webServer: {
     command: 'node tests/server.js',

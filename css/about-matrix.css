@@ -1,0 +1,39 @@
+/* A rare message on the terminal, isolated from the regular About text. */
+.about-matrix[hidden] { display: none; }
+.about-matrix {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  pointer-events: none;
+  padding: clamp(1.2rem, 3vw, 2rem);
+  color: #83f4a0;
+  background: radial-gradient(ellipse at 48% 45%, #092916, #020a05 75%);
+  border: 1px solid #27643b;
+  border-radius: inherit;
+  box-shadow: inset 0 0 30px #000b, inset 0 0 1px #9dffad;
+  font: 500 clamp(.7rem, 1vw, .82rem)/1.65 var(--font-mono);
+  letter-spacing: .025em;
+  white-space: pre-wrap;
+  text-shadow: 0 0 5px #23c55e99;
+}
+.about-matrix::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, #0006 0 1px, transparent 1px 4px);
+  opacity: .18;
+}
+.about-matrix__cursor {
+  display: inline-block;
+  width: .6em;
+  height: 1em;
+  vertical-align: -.18em;
+  background: #83f4a0;
+  box-shadow: 0 0 7px #39e870;
+  animation: about-matrix-cursor 1.2s steps(1) infinite;
+}
+@keyframes about-matrix-cursor { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .about-matrix__cursor { animation: none; } }

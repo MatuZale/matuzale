@@ -284,3 +284,18 @@ test('rare VHS tracking stays inside the screen and pauses safely', async ({ pag
   await page.waitForTimeout(500);
   await expect(overlay).not.toHaveClass(/is-tracking/);
 });
+
+test('TM ident follows both page themes', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'light' });
+  await page.goto('/?lang=en');
+  await page.getByRole('button', { name: /^Kodlab:/ }).click();
+  await page.locator('.tape-player__secret').click();
+  const ident = page.locator('.tape-ident__art');
+  await expect(ident).toBeVisible();
+  const light = await ident.evaluate(el => getComputedStyle(el).backgroundColor);
+  await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'dark'));
+  const dark = await ident.evaluate(el => getComputedStyle(el).backgroundColor);
+  expect(dark).not.toBe(light);
+  await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'light'));
+  expect(await ident.evaluate(el => getComputedStyle(el).backgroundColor)).toBe(light);
+});

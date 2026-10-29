@@ -8,7 +8,7 @@ const say = (en, pl) => root.lang === "pl" ? pl : en;
 /* ───────── Theme toggle ───────── */
 const themeBtn = document.getElementById("theme-toggle");
 const systemDark = window.matchMedia("(prefers-color-scheme: dark)");
-let pendingTheme = null, themeTimer = 0;
+let pendingTheme = null;
 
 function currentTheme() {
   return root.getAttribute("data-theme") || (systemDark.matches ? "dark" : "light");
@@ -16,7 +16,6 @@ function currentTheme() {
 
 themeBtn.addEventListener("click", () => {
   const next = (pendingTheme || currentTheme()) === "dark" ? "light" : "dark";
-  clearTimeout(themeTimer);
   pendingTheme = next;
   if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     themeBtn.classList.remove("is-inserting");
@@ -29,9 +28,9 @@ themeBtn.addEventListener("click", () => {
     pendingTheme = null;
     updateThemeLabel();
   };
-  // Swap sides as the cassette turns edge-on.
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) apply();
-  else themeTimer = setTimeout(apply, 325);
+  // The CRT closes around the theme change, while the cassette turns edge-on.
+  if (window.crtPower) window.crtPower(next === "light", apply);
+  else apply();
 });
 themeBtn.addEventListener("animationend", event => { if (event.animationName === "cassette-flip") themeBtn.classList.remove("is-inserting"); });
 

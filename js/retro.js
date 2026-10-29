@@ -70,37 +70,62 @@ export function staticBurst(duration = 420) {
 
 // Switching off folds the picture into a bright line and the line into a dot; switching on draws the line
 // out and opens the picture again. `swap` changes the theme while the screen is shut.
-let crt;
+let crt, powerRun = 0, swapTimer = 0, fadeTimer = 0, pendingSwap = null;
 export function power(on, swap) {
+  const run = ++powerRun;
+  clearTimeout(swapTimer);
+  clearTimeout(fadeTimer);
+  if (crt) {
+    // Include the shutter children and the overlay itself when replacing an in-flight switch.
+    crt.getAnimations({ subtree: true }).forEach(animation => animation.cancel());
+    crt.classList.remove("is-on");
+  }
+  pendingSwap = null;
   if (motion.matches) { swap(); return; }
+  pendingSwap = swap;
   crt ??= layer("crt");
   crt.innerHTML = '<i class="crt__shutter crt__shutter--top"></i><i class="crt__shutter crt__shutter--bottom"></i><i class="crt__line"></i>';
   const [top, bottom, line] = crt.children;
   const timing = (duration, delay = 0) => ({ duration, delay, easing: "cubic-bezier(.6, 0, .4, 1)", fill: "both" });
-  crt.getAnimations().forEach(a => a.cancel());
   crt.classList.add("is-on");
   let total;
   if (!on) {
     const shut = [{ transform: "scaleY(0)" }, { transform: "scaleY(1)" }];
-    top.animate(shut, timing(200)); bottom.animate(shut, timing(200));
+    top.animate(shut, timing(250)); bottom.animate(shut, timing(250));
     line.animate([
       { opacity: 0, transform: "scaleX(1)" }, { opacity: 1, transform: "scaleX(1)", offset: .25 },
       { opacity: 1, transform: "scaleX(.004)", offset: .8 }, { opacity: 0, transform: "scaleX(0)" },
     ], timing(420, 170));
-    setTimeout(swap, 210);
-    total = 600;
+    total = 650;
   } else {
     const open = [{ transform: "scaleY(1)" }, { transform: "scaleY(1)", offset: .45 }, { transform: "scaleY(0)" }];
-    top.animate(open, timing(520)); bottom.animate(open, timing(520));
+    top.animate(open, timing(720)); bottom.animate(open, timing(720));
     line.animate([
       { opacity: 1, transform: "scaleX(0)" }, { opacity: 1, transform: "scaleX(1)", offset: .4 },
       { opacity: 1, transform: "scaleX(1) scaleY(6)", offset: .55 }, { opacity: 0, transform: "scaleX(1) scaleY(40)" },
-    ], timing(520));
-    setTimeout(swap, 120);
-    total = 540;
+    ], timing(720));
+    total = 740;
   }
-  setTimeout(() => crt.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160 }).finished.then(() => crt.classList.remove("is-on")), total);
+  // Both directions swap just before the screen opens, as the cassette reaches its edge.
+  swapTimer = setTimeout(() => { if (run === powerRun) { pendingSwap = null; swap(); } }, 300);
+  fadeTimer = setTimeout(() => {
+    if (run !== powerRun) return;
+    const fade = crt.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160 });
+    fade.onfinish = () => { if (run === powerRun) crt.classList.remove("is-on"); };
+  }, total);
 }
+// If the OS requests reduced motion mid-transition, finish immediately instead of leaving a shutter.
+motion.addEventListener("change", () => {
+  if (!motion.matches || !crt?.classList.contains("is-on")) return;
+  ++powerRun;
+  clearTimeout(swapTimer);
+  clearTimeout(fadeTimer);
+  crt.getAnimations({ subtree: true }).forEach(animation => animation.cancel());
+  crt.classList.remove("is-on");
+  const swap = pendingSwap;
+  pendingSwap = null;
+  if (swap) swap();
+});
 window.crtPower = power;
 
 /* ───────── AV: the whole page on a worn CRT ───────── */
