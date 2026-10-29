@@ -638,6 +638,14 @@ export async function createDeck() {
 
   dialog.addEventListener("pointermove", event => {
     if (!active || gesture || touchCount() || event.pointerType === "touch") return;
+    // WebKit may emit a mouse move at the touch-release coordinates after its
+    // compatibility click. It is not a hover; a real mouse move elsewhere still works.
+    if (event.pointerType === "mouse" && lastPress?.type === "touch" && lastPress.compatMovePending) {
+      if (Math.hypot(event.clientX - lastPress.endX, event.clientY - lastPress.endY) < 1) return;
+      // A mouse actually moved elsewhere: subsequent movement is genuine, including
+      // when it later returns to the old touch location.
+      lastPress.compatMovePending = false;
+    }
     if (event.pointerType) dialog.dataset.input = event.pointerType;
     // Over the buttons the card faces the viewer instead of craning towards the pointer.
     if (event.target.closest(".deck__tools")) { active.aim(.5, .5, 0); return; }
@@ -653,6 +661,8 @@ export async function createDeck() {
       press.suppress = true;
     }
     if (event.type === "pointercancel") press.suppress = true;
+    press.endX = event.clientX; press.endY = event.clientY;
+    press.compatMovePending = press.type === "touch";
     if (gesture?.id === event.pointerId) finishGesture(event.type === "pointercancel");
     pointers.delete(event.pointerId);
     lastPress = press;

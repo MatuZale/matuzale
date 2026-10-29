@@ -79,8 +79,14 @@ for (const entry of ['cards', 'home']) {
             // A new real mouse press must replace the preceding touch source. Keep
             // this hybrid-input regression once, alongside the native WebKit tap.
             const angle = (await values(card)).ry;
+            const baseTurn = Math.round(angle / 360) * 360;
+            const sampleStart = await page.evaluate(() => window.deckAudit.samples.length);
             await lift(page, card, false);
-            expect((await values(card)).ry - angle).toBeCloseTo(360, 1);
+            const angles = await page.evaluate(start => window.deckAudit.samples.slice(start), sampleStart);
+            // The flourish is a full turn; the final mouse hover can add up to
+            // 17° of tilt. Check both an intermediate frame and the final turn.
+            expect(angles.some(value => value > baseTurn + 120 && value < baseTurn + 240)).toBe(true);
+            expect(Math.abs((await values(card)).ry - (baseTurn + 360))).toBeLessThan(17.1);
             await card.click();
             await backInSlot(page, card);
           }
@@ -230,6 +236,25 @@ for (const entry of ['cards', 'home']) {
       await page.locator('[data-deck-back]').tap();
       await backInSlot(page, card);
     } finally { await driver.dispose(); }
+  });
+
+  if (entry === 'cards') test(`${entry}: a real mouse movement works after touch`, async ({ page }) => {
+    await openDeck(page, entry, true);
+    const card = page.locator('.tcard').first();
+    await lift(page, card);
+    const touch = await page.evaluate(() => window.deckAudit.events.findLast(e => e.type === 'pointerup' && e.input === 'touch'));
+    const r = await card.boundingBox();
+    await page.mouse.move(r.x + r.width * .8, r.y + r.height * .25);
+    await idle(page);
+    const state = await values(card);
+    expect(state.mx).toBeGreaterThan(65);
+    expect(Math.abs(state.ry)).toBeGreaterThan(2);
+    // Returning a real mouse to the earlier touch point must not remain suppressed.
+    await page.mouse.move(touch.x, touch.y);
+    await idle(page);
+    expect((await values(card)).mx).toBeLessThan(state.mx - 5);
+    await page.locator('[data-deck-back]').click();
+    await backInSlot(page, card);
   });
 
   if (entry === 'cards') test(`${entry}: synthetic remaining finger cannot inherit the cancelled gesture`, async ({ page, browserName }, info) => {

@@ -53,6 +53,7 @@ export const test = base.extend({
           const button = event.target.closest?.('button');
           window.deckAudit.events.push({
             type, id: event.pointerId, input: event.pointerType, trusted: event.isTrusted,
+            x: event.clientX, y: event.clientY,
             detail: event.detail, foil: event.target.closest?.('.tcard')?.dataset.foil,
             action: button?.hasAttribute('data-deck-flip') ? 'flip' :
               button?.hasAttribute('data-deck-back') ? 'back' : button?.className,
