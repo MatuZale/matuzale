@@ -1,0 +1,35 @@
+/* A small channel readout, like the OSD on a VHS-era television. */
+.tape-channel-osd {
+  position: absolute;
+  z-index: 4;
+  top: 7%;
+  right: 7%;
+  max-width: 42%;
+  padding: .18em .42em .24em;
+  color: #c6ffb8;
+  background: #071912c9;
+  border-radius: 2px;
+  text-align: right;
+  text-shadow: 0 0 5px #71ff8199, 1px 1px #071912;
+  font: 400 clamp(1rem, 2.6vw, 1.45rem)/.9 'VT323', monospace;
+  letter-spacing: .04em;
+  pointer-events: none;
+  animation: tape-channel-osd 1.8s linear both;
+}
+.tape-channel-osd__name {
+  display: block;
+  overflow: hidden;
+  margin-top: .18em;
+  font-size: .7em;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@keyframes tape-channel-osd {
+  0%, 82% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tape-channel-osd { animation: none; }
+}
+html.is-tape-paused .tape-channel-osd { animation: none; }

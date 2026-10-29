@@ -280,24 +280,29 @@
   function disposeStatic() {
     screen.querySelector('.tape-static')?.dispose?.();
   }
-  function tunePicture(firstPlay) {
+  function tunePicture() {
     stopTuning();
-    if (motion.matches || document.documentElement.classList.contains('is-tape-paused') ||
+    if (document.hidden || motion.matches || document.documentElement.classList.contains('is-tape-paused') ||
         typeof window.createTapeTestPattern !== 'function' || typeof window.createTapeStatic !== 'function') return;
+    // Occasionally the signal locks immediately. Most interruptions are brief;
+    // the skewed distribution leaves room for a rare, longer burst (max 1 s).
+    if (Math.random() < .03) return;
+    const duration = Math.round(80 + 920 * Math.random() ** 2.5);
+    const firstNoise = Math.round(duration * .4);
+    const cardFlash = Math.max(20, Math.round(duration * .2));
+    const finalNoise = duration - firstNoise - cardFlash;
     const noise = window.createTapeStatic();
     noise.classList.add('tape-static--tuning');
     screen.append(noise);
-    // A quick burst of noise, a single test-card flash, then noise again.
-    // At power-on let the tube open before showing the flash.
     tuningTimer = setTimeout(() => {
       const pattern = window.createTapeTestPattern();
       pattern.classList.add('tape-test-pattern--tuning');
       screen.append(pattern);
       tuningTimer = setTimeout(() => {
         pattern.remove();
-        tuningTimer = setTimeout(stopTuning, 70);
-      }, 70);
-    }, firstPlay ? 420 : 70);
+        tuningTimer = setTimeout(stopTuning, finalNoise);
+      }, cardFlash);
+    }, firstNoise);
   }
   function ejectTape(immediate = false, returnFocus = true) {
     if (!active || ejectTimer) return;
@@ -308,12 +313,7 @@
     const finish = () => {
       cancelPending();
       restore();
-      // Keep the sleeve's footprint on phones so the TV never jumps upward.
-      const spacer = document.createElement('div');
-      spacer.className = 'tape-cover tape-cover--placeholder';
-      spacer.style.visibility = 'hidden';
-      spacer.setAttribute('aria-hidden', 'true');
-      caseSlot.replaceChildren(spacer);
+      caseSlot.replaceChildren();
       const noise = typeof window.createTapeStatic === 'function'
         ? window.createTapeStatic() : document.createElement('div');
       noise.classList.add('tape-static');
@@ -427,7 +427,10 @@
       player.classList.add('is-expanded', 'is-revealing');
       player.classList.add(firstPlay ? 'is-playing' : 'is-changing');
       revealTimer = setTimeout(() => player.classList.remove('is-revealing'), 650);
-      tunePicture(firstPlay);
+      tunePicture();
+      document.dispatchEvent(new CustomEvent('tape-channel-change', {
+        detail: { channel: String(i < 3 ? i + 1 : i + 2).padStart(2, '0'), title: name }
+      }));
       title.focus({ preventScroll: true });
     });
     stacks.append(button);
@@ -488,7 +491,10 @@
     void player.offsetWidth;
     player.classList.add('is-expanded', 'is-revealing', firstPlay ? 'is-playing' : 'is-changing');
     revealTimer = setTimeout(() => player.classList.remove('is-revealing'), 650);
-    tunePicture(firstPlay);
+    tunePicture();
+    document.dispatchEvent(new CustomEvent('tape-channel-change', {
+      detail: { channel: '04', title: 'SPACEWAR!' }
+    }));
     title.focus({ preventScroll: true });
     import('./spacewar.js').then(async module => {
       if (active !== session || session.abort.signal.aborted) return;

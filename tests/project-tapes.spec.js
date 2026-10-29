@@ -1,5 +1,12 @@
 import { test, expect } from '@playwright/test';
 
+async function expectProject(page, style) {
+  await expect(page.locator('#tape-player-screen')).toHaveAttribute('data-project', style);
+  // The source is retained for cloning, while the selected cover is shown on the shelf.
+  await expect(page.locator('#tape-player-cover')).toBeHidden();
+  await expect(page.locator(`#project-shelf .tape-showcase.is-open .tape-cover--${style}`)).toBeVisible();
+}
+
 test('selecting and changing tapes plays projects on the TV', async ({ page }) => {
   await page.goto('/?lang=pl');
   const shelf = page.locator('#project-shelf');
@@ -9,12 +16,12 @@ test('selecting and changing tapes plays projects on the TV', async ({ page }) =
   const kodlab = shelf.getByRole('button', { name: /^Kodlab:/ });
   await kodlab.click();
   await expect(player).toBeVisible();
-  await expect(player.locator('.tape-cover--kodlab')).toBeVisible();
+  await expectProject(page, 'kodlab');
   await expect(player).toContainText('Prywatne repozytorium', { ignoreCase: true });
   await expect(kodlab).toHaveAttribute('aria-expanded', 'true');
   await shelf.locator('#art').click();
   await expect(kodlab).toHaveAttribute('aria-expanded', 'false');
-  await expect(player.locator('.tape-cover--art')).toBeVisible();
+  await expectProject(page, 'art');
   await expect(player.locator('.tape-art-preview--art img')).toBeVisible();
   const galleryLink = player.locator('[data-deck-open]');
   await galleryLink.click();
@@ -28,7 +35,7 @@ test('selecting and changing tapes plays projects on the TV', async ({ page }) =
   await expect(player.locator('.tape-static')).toBeVisible();
   await expect(shelf.locator('#art')).toBeFocused();
   await kodlab.click();
-  await expect(player.locator('.tape-cover--kodlab')).toBeVisible();
+  await expectProject(page, 'kodlab');
   await page.keyboard.press('Escape');
   await expect(player.locator('.tape-static')).toBeVisible();
   await expect(kodlab).toBeFocused();
@@ -64,12 +71,12 @@ test('eject can be interrupted by selecting another tape', async ({ page }) => {
   const player = page.locator('#project-player');
   const kodlab = shelf.getByRole('button', { name: /^Kodlab:/ });
   await kodlab.click();
-  await expect(player.locator('.tape-cover--kodlab')).toBeVisible();
+  await expectProject(page, 'kodlab');
   await page.evaluate(() => {
     document.querySelector('.tape-player__close').click();
     document.querySelector('#art').click();
   });
-  await expect(player.locator('.tape-cover--art')).toBeVisible();
+  await expectProject(page, 'art');
   await page.waitForTimeout(400);
   await expect(player).toBeVisible();
   await expect(shelf.locator('#art')).toHaveAttribute('aria-expanded', 'true');

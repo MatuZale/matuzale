@@ -47,7 +47,8 @@ for (const width of [1280, 375]) {
     await expect(player).toBeVisible();
     const beforeSwitch = await page.evaluate(() => ({ height: document.documentElement.scrollHeight, scroll: window.scrollY }));
     await page.locator('.project-tape--agent').evaluate(el => el.click());
-    await expect(player.locator('.tape-cover--agent')).toBeVisible();
+    await expect(player.locator('.tape-cover--agent')).toHaveCount(1);
+    await expect(player.locator('.tape-cover--agent')).toBeHidden();
     await page.waitForTimeout(700);
     expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(beforeSwitch.height);
     expect(Math.abs(await page.evaluate(() => window.scrollY) - beforeSwitch.scroll)).toBeLessThanOrEqual(1);
@@ -71,8 +72,9 @@ test('eject leaves the TV on with static and selecting a new cassette keeps its 
   expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(before.height);
   expect(Math.abs(await page.evaluate(() => window.scrollY) - before.scroll)).toBeLessThanOrEqual(1);
   await page.locator('.project-tape--art').evaluate(el => el.click());
-  await expect(page.locator('#tape-player-cover .tape-cover--art')).toBeVisible();
-  await expect(page.locator('.tape-static')).toBeHidden();
+  await expect(page.locator('#tape-player-cover .tape-cover--art')).toHaveCount(1);
+  await expect(page.locator('#tape-player-cover .tape-cover--art')).toBeHidden();
+  await expect(page.locator('.tape-static:not(.tape-static--tuning)')).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(before.height);
 });
 
@@ -88,7 +90,10 @@ test('tuning goes from snow to test card to snow, then the latest project', asyn
       if (states.at(-1) !== state) states.push(state);
     };
     new MutationObserver(sample).observe(screen, { childList: true });
+    const random = Math.random;
+    Math.random = () => .5;
     document.querySelector('.project-tape--kodlab').click();
+    Math.random = random;
     sample();
     return states[0];
   });
@@ -98,8 +103,11 @@ test('tuning goes from snow to test card to snow, then the latest project', asyn
 
   const snapshot = await page.evaluate(() => {
     window.tuningStates.length = 0;
+    const random = Math.random;
+    Math.random = () => .5;
     document.querySelector('.project-tape--art').click();
     document.querySelector('.project-tape--quantum').click();
+    Math.random = random;
     return {
       snow: document.querySelectorAll('.tape-static--tuning').length,
       card: document.querySelectorAll('.tape-test-pattern--tuning').length,
@@ -174,7 +182,8 @@ test('selecting another cassette interrupts power-off without a stale close', as
   await page.locator('.tape-player__power').evaluate(el => el.click());
   await page.waitForTimeout(100);
   await page.locator('.project-tape--art').evaluate(el => el.click());
-  await expect(page.locator('#tape-player-cover .tape-cover--art')).toBeVisible();
+  await expect(page.locator('#tape-player-cover .tape-cover--art')).toHaveCount(1);
+  await expect(page.locator('#tape-player-cover .tape-cover--art')).toBeHidden();
   await page.waitForTimeout(1000);
   await expect(page.locator('#project-player')).toBeVisible();
   await expect(page.locator('#tape-player-screen')).toHaveAttribute('data-project', 'art');
