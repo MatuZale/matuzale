@@ -1,11 +1,15 @@
 import { test, expect } from '@playwright/test';
 
-// Record the flow of the page itself, so an opacity animation over a sudden layout
-// jump cannot pass. DOM clicks avoid Playwright scrolling a control into view.
+// Sample actual document geometry during transitions, not just their final state.
+// DOM clicks avoid Playwright scrolling the controls into view.
 async function recordChange(page, selector) {
   return page.evaluate(async selector => {
     const samples = [];
-    const sample = () => samples.push({ height: document.documentElement.scrollHeight, scroll: window.scrollY });
+    const sample = () => samples.push({
+      nextTop: document.querySelector('#bentos').getBoundingClientRect().top + window.scrollY,
+      playerHeight: document.querySelector('#project-player').getBoundingClientRect().height,
+      scroll: window.scrollY,
+    });
     sample();
     document.querySelector(selector).click();
     const start = performance.now();
@@ -21,40 +25,157 @@ async function recordChange(page, selector) {
   }, selector);
 }
 
-function expectSmoothFlow(samples, direction) {
-  const first = samples[0].height;
-  const last = samples.at(-1).height;
-  const delta = last - first;
-  expect(Math.sign(delta)).toBe(direction);
-  expect(Math.abs(delta)).toBeGreaterThan(100);
-  const progress = samples.map(sample => (sample.height - first) / delta);
-  expect(progress.filter(value => value > .05 && value < .95).length).toBeGreaterThan(2);
-  // A single large layout shift would remain visible even if some frames animate.
-  const steps = samples.slice(1).map((sample, index) => Math.abs(sample.height - samples[index].height));
-  expect(Math.max(...steps)).toBeLessThan(Math.abs(delta) * .6);
-  expect(Math.max(...samples.map(sample => Math.abs(sample.scroll - samples[0].scroll)))).toBeLessThanOrEqual(1);
+function expectStableFlow(samples, baseline) {
+  for (const key of ['nextTop', 'playerHeight', 'scroll']) {
+    expect(Math.max(...samples.map(sample => Math.abs(sample[key] - baseline[key])))).toBeLessThanOrEqual(1);
+  }
 }
 
+// Sample the actual CSS animation at two instants in one browser task. Pausing
+// it avoids depending on how many frames a busy renderer can present.
+async function samplePower(page, selector, animationName) {
+  return page.evaluate(({ selector, animationName }) => {
+    document.querySelector(selector).click();
+    const player = document.querySelector('#project-player');
+    const screen = document.querySelector('#tape-player-screen');
+    const tube = player.querySelector('.tape-player__tube');
+    const animation = screen.getAnimations().find(item => item.animationName === animationName);
+    if (!animation) return { classes: player.className, animation: null };
+    animation.pause();
+    const clips = [70, 400].map(time => {
+      animation.currentTime = time;
+      return getComputedStyle(screen).clipPath;
+    });
+    const beam = getComputedStyle(tube, '::after').animationName;
+    animation.play();
+    return { classes: player.className, animation: animation.animationName, clips, beam };
+  }, { selector, animationName });
+}
+
+test('power transitions collapse and restore the picture inside the stationary TV', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/?lang=en');
+  const player = page.locator('#project-player');
+  const on = await samplePower(page, '.project-tape--kodlab', 'crt-power-on');
+  expect(on.classes).toContain('is-powering-on');
+  expect(on.animation).toBe('crt-power-on');
+  expect(on.clips[0]).not.toBe(on.clips[1]);
+  expect(on.beam).toBe('crt-beam-on');
+  await expect(player).not.toHaveClass(/is-powering-on/);
+
+  const off = await samplePower(page, '.tape-player__power', 'crt-power-off');
+  expect(off.classes).toContain('is-powering-off');
+  expect(off.animation).toBe('crt-power-off');
+  expect(off.clips[0]).not.toBe(off.clips[1]);
+  expect(off.beam).toBe('crt-beam-off');
+  await expect(player).toHaveClass(/is-off/);
+  await expect(player.locator('.tape-standby')).toBeVisible();
+
+  const onFromButton = await samplePower(page, '.tape-player__power', 'crt-power-on');
+  expect(onFromButton.animation).toBe('crt-power-on');
+  expect(onFromButton.clips[0]).not.toBe(onFromButton.clips[1]);
+  await expect(player).not.toHaveClass(/is-powering-on/);
+  await expect(player.locator('.tape-static')).toBeVisible();
+});
+
+test('new selections and eject cancel power animations without a stale transition', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/?lang=en');
+  const player = page.locator('#project-player');
+  const screen = page.locator('#tape-player-screen');
+  const state = await page.evaluate(() => {
+    const player = document.querySelector('#project-player');
+    document.querySelector('.project-tape--kodlab').click();
+    const started = player.classList.contains('is-powering-on');
+    document.querySelector('.project-tape--agent').click();
+    return { started, cancelled: !player.classList.contains('is-powering-on') };
+  });
+  expect(state).toEqual({ started: true, cancelled: true });
+  await screen.locator('h3').waitFor({ state: 'visible' });
+  await page.evaluate(() => {
+    document.querySelector('.tape-player__power').click();
+    document.querySelector('.project-tape--art').click();
+  });
+  await expect(player).not.toHaveClass(/is-powering-off/);
+  await expect(screen).toHaveAttribute('data-project', 'art');
+  await page.waitForTimeout(1000);
+  await expect(player).not.toHaveClass(/is-off|is-powering-off|is-powering-on/);
+  await expect(screen).toHaveAttribute('data-project', 'art');
+
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await player.locator('.tape-player__power').evaluate(el => el.click());
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  const eject = await page.evaluate(() => {
+    const player = document.querySelector('#project-player');
+    document.querySelector('.project-tape--kodlab').click();
+    const started = player.classList.contains('is-powering-on');
+    document.querySelector('.tape-player__close').click();
+    return { started, cancelled: !player.classList.contains('is-powering-on') };
+  });
+  expect(eject).toEqual({ started: true, cancelled: true });
+  await expect(player.locator('.tape-static')).toBeVisible();
+  await expect(player).not.toHaveClass(/is-off|is-powering-on/);
+});
+
+test('reduced motion and tape pause finish power transitions immediately', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/?lang=en');
+  const player = page.locator('#project-player');
+  const screen = page.locator('#tape-player-screen');
+  await page.locator('.project-tape--kodlab').evaluate(el => el.click());
+  await expect(player).not.toHaveClass(/is-powering-on/);
+  await expect(screen).not.toHaveCSS('animation-name', 'crt-power-on');
+  await player.locator('.tape-player__power').evaluate(el => el.click());
+  await expect(player).toHaveClass(/is-off/);
+  await expect(player).not.toHaveClass(/is-powering-off/);
+
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.locator('.project-tape--kodlab').evaluate(el => el.click());
+  await expect(player).toHaveClass(/is-powering-on/);
+  await page.locator('[data-tape-action="pause"]').evaluate(el => el.click());
+  await expect(player).not.toHaveClass(/is-powering-on/);
+  await player.locator('.tape-player__power').evaluate(el => el.click());
+  await expect(player).toHaveClass(/is-off/);
+  await expect(player).not.toHaveClass(/is-powering-off/);
+
+  // Changing the preference while a transition is in flight must also settle it.
+  await page.locator('[data-tape-action="pause"]').evaluate(el => el.click());
+  await player.locator('.tape-player__power').evaluate(el => el.click());
+  await expect(player).toHaveClass(/is-powering-on/);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect(player).not.toHaveClass(/is-powering-on/);
+  await player.locator('.tape-player__power').evaluate(el => el.click());
+  await expect(player).toHaveClass(/is-off/);
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.locator('.project-tape--kodlab').evaluate(el => el.click());
+  await player.locator('.tape-player__power').evaluate(el => el.click());
+  await expect(player).toHaveClass(/is-powering-off/);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect(player).toHaveClass(/is-off/);
+  await expect(player).not.toHaveClass(/is-powering-off/);
+});
+
 for (const width of [1280, 375]) {
-  test(`TV space opens and closes smoothly without scrolling at ${width}px`, async ({ page }) => {
+  test(`TV and following section stay in place through playback at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto('/?lang=en');
     await page.evaluate(() => document.fonts.ready);
     await page.locator('#project-shelf').scrollIntoViewIfNeeded();
     const player = page.locator('#project-player');
-    const opening = await recordChange(page, '.project-tape--kodlab');
-    expectSmoothFlow(opening, 1);
     await expect(player).toBeVisible();
-    const beforeSwitch = await page.evaluate(() => ({ height: document.documentElement.scrollHeight, scroll: window.scrollY }));
-    await page.locator('.project-tape--agent').evaluate(el => el.click());
-    await expect(player.locator('.tape-cover--agent')).toHaveCount(1);
-    await expect(player.locator('.tape-cover--agent')).toBeHidden();
-    await page.waitForTimeout(700);
-    expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(beforeSwitch.height);
-    expect(Math.abs(await page.evaluate(() => window.scrollY) - beforeSwitch.scroll)).toBeLessThanOrEqual(1);
-    const closing = await recordChange(page, '.tape-player__power');
-    expectSmoothFlow(closing, -1);
-    await expect(player).toBeHidden();
+    await expect(player).toHaveClass(/is-off/);
+    const opening = await recordChange(page, '.project-tape--kodlab');
+    const baseline = opening[0];
+    expectStableFlow(opening, baseline);
+    await expect(player).not.toHaveClass(/is-off/);
+    await expect(page.locator('#tape-player-screen')).toHaveAttribute('data-project', 'kodlab');
+    expectStableFlow(await recordChange(page, '.project-tape--agent'), baseline);
+    await expect(page.locator('#tape-player-screen')).toHaveAttribute('data-project', 'agent');
+    expectStableFlow(await recordChange(page, '.tape-player__close'), baseline);
+    await expect(player.locator('.tape-static')).toBeVisible();
+    expectStableFlow(await recordChange(page, '.tape-player__power'), baseline);
+    await expect(player).toBeVisible();
+    await expect(player).toHaveClass(/is-off/);
     await expect(page.locator('.project-tape--agent')).toBeFocused();
   });
 }
@@ -203,14 +324,14 @@ test('reduced motion and a tape pause settle the player immediately', async ({ p
   await page.waitForTimeout(100);
   expect(await player.evaluate(el => el.getBoundingClientRect().height)).toBe(openedHeight);
   await page.locator('.tape-player__power').evaluate(el => el.click());
-  await expect(player).toBeHidden();
+  await expect(player).toHaveClass(/is-off/);
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   const pause = page.locator('[data-tape-action="pause"]');
   await pause.evaluate(el => el.click());
   await tape.evaluate(el => el.click());
   await expect(player).toBeVisible();
   await page.locator('.tape-player__power').evaluate(el => el.click());
-  await expect(player).toBeHidden();
+  await expect(player).toHaveClass(/is-off/);
   // Pausing during the exit must not leave a half-closed, inaccessible player.
   await pause.evaluate(el => el.click());
   await tape.evaluate(el => el.click());
@@ -218,6 +339,6 @@ test('reduced motion and a tape pause settle the player immediately', async ({ p
   await page.locator('.tape-player__power').evaluate(el => el.click());
   await page.waitForTimeout(80);
   await pause.evaluate(el => el.click());
-  await expect(player).toBeHidden({ timeout: 2000 });
+  await expect(player).toHaveClass(/is-off/, { timeout: 2000 });
   await expect(tape).toBeFocused();
 });

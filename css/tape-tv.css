@@ -134,3 +134,91 @@ html.is-tape-paused .tape-player .tape-player__screen .card__body { animation: n
 @media (max-width: 680px) {
   .tape-player__screen { aspect-ratio: 1 / 1; }
 }
+
+/* The television is part of the archive even before a tape is selected.
+   Only the picture changes; the cabinet keeps its place in the page. */
+.tape-player, .tape-player.is-expanded {
+  grid-template-rows: 1fr;
+  margin-top: clamp(1.75rem, 4vw, 3rem);
+  transition: none;
+}
+.tape-player .tape-player__reveal { overflow: visible; }
+.tape-player:not(.is-expanded) .tape-player__tv { opacity: 1; transform: none; }
+.tape-player:not(.is-expanded) .tape-player__screen { clip-path: inset(0 round 20px); filter: none; }
+.tape-standby {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: .85rem;
+  padding: 1.5rem;
+  text-align: center;
+  color: #d2dbe0;
+  background: radial-gradient(ellipse at center, #29374a, #141d2b 76%);
+}
+.tape-standby__mark {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding-left: .12rem;
+  border: 1px solid #d5e7ed66;
+  border-radius: 50%;
+  color: #e5d3ad;
+  font-size: .7rem;
+}
+.tape-player__screen .tape-standby p {
+  margin: 0;
+  color: #d2dbe0;
+  font: 500 .7rem/1.5 var(--font-mono);
+  letter-spacing: .05em;
+}
+.tape-player.is-off .tape-player__screen { background: #101217; }
+.tape-player.is-off .tape-standby { background: radial-gradient(ellipse at center, #1a202a, #0b0e14 76%); }
+.tape-player.is-off .tape-standby__mark { border-color: #b2c3c933; color: #b9a98d; }
+.tape-player.is-off .tape-standby p { color: #aebbc1; }
+.tape-player.is-off .tape-player__screen::before,
+.tape-player.is-off .tape-player__screen::after { visibility: hidden; }
+
+/* The picture collapses inside a fixed, dark tube; the cabinet never moves. */
+.tape-player__tube { position: relative; overflow: hidden; border-radius: 9% / 8%; background: #080a0e; }
+.tape-player__tube::after {
+  content: ''; position: absolute; z-index: 5; left: 50%; top: 50%; width: 90%; height: 2px;
+  pointer-events: none; opacity: 0; transform: translate(-50%, -50%) scaleX(0);
+  background: #fff; border-radius: 50%; box-shadow: 0 0 8px 2px #c8e5ff, 0 0 24px 4px #8aafff99;
+}
+.tape-player.is-powering-off .tape-player__screen { animation: crt-power-off 650ms ease-in both; }
+.tape-player.is-powering-on .tape-player__screen { animation: crt-power-on 700ms ease-out both; }
+.tape-player.is-powering-off .tape-player__tube::after { animation: crt-beam-off 650ms ease-out both; }
+.tape-player.is-powering-on .tape-player__tube::after { animation: crt-beam-on 700ms ease-out both; }
+@keyframes crt-power-off {
+  0%, 12% { clip-path: inset(0 round 20px); filter: brightness(1); }
+  52% { clip-path: inset(49.5% 1% 49.5% round 2px); filter: brightness(2); }
+  76%, 100% { clip-path: inset(49.9% 49.9% round 1px); filter: brightness(1.2); }
+}
+@keyframes crt-power-on {
+  0%, 10% { clip-path: inset(49.9% 49.9% round 1px); filter: brightness(1.8); }
+  35% { clip-path: inset(49.5% 1% 49.5% round 2px); filter: brightness(2); }
+  75%, 100% { clip-path: inset(0 round 20px); filter: brightness(1); }
+}
+@keyframes crt-beam-off {
+  0%, 22% { opacity: 0; transform: translate(-50%, -50%) scaleX(.95); }
+  52% { opacity: .9; transform: translate(-50%, -50%) scaleX(.95); }
+  76% { opacity: .9; transform: translate(-50%, -50%) scaleX(.008); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scaleX(.008); }
+}
+@keyframes crt-beam-on {
+  0% { opacity: 0; transform: translate(-50%, -50%) scaleX(.008); }
+  12% { opacity: .8; transform: translate(-50%, -50%) scaleX(.008); }
+  35% { opacity: .7; transform: translate(-50%, -50%) scaleX(.95); }
+  58%, 100% { opacity: 0; transform: translate(-50%, -50%) scaleX(.95); }
+}
+html.is-tape-paused .tape-player .tape-player__tube::after { animation: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  .tape-player.is-powering-on .tape-player__screen,
+  .tape-player.is-powering-off .tape-player__screen,
+  .tape-player.is-powering-on .tape-player__tube::after,
+  .tape-player.is-powering-off .tape-player__tube::after { animation: none; }
+}

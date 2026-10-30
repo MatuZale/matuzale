@@ -13,7 +13,7 @@
 
   const allowed = () => visible && !player.hidden && !document.hidden && !motion.matches &&
     !root.classList.contains('is-tape-paused') && !root.classList.contains('deck-open') &&
-    !player.classList.contains('is-ejecting') && !screen.inert;
+    !player.classList.contains('is-ejecting') && !player.classList.contains('is-off') && !screen.inert;
 
   function clear() {
     clearTimeout(next);

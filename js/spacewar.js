@@ -15,7 +15,6 @@ const systemDark = window.matchMedia("(prefers-color-scheme: dark)");
 const lightMode = () => document.documentElement.dataset.theme === "light" ||
   (!document.documentElement.dataset.theme && !systemDark.matches);
 const STORE = "spacewar-scores", INITIALS = "spacewar-initials";
-const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 // Outlines, nose along +x.
 const NEEDLE = [[.065, 0], [.005, .01], [-.044, .01], [-.06, .02], [-.06, -.02], [-.044, -.01], [.005, -.01]];
@@ -601,23 +600,11 @@ export async function mountSpacewar(hostScreen, player, { signal } = {}) {
     <div class="sw-controls__deck"><div class="sw__keys"><button type="button" class="sw__key" data-sw="start"></button><button type="button" class="sw__key" data-sw="mode" data-players="1"></button><button type="button" class="sw__key" data-sw="mode" data-players="2"></button><button type="button" class="sw__key" data-sw="pause" aria-pressed="false"></button><button type="button" class="sw__key" data-sw="help"></button><button type="button" class="sw__key" data-sw="scores"></button><button type="button" class="sw__key sw__tape-control" data-sw="tape" aria-pressed="false"></button></div>
     <div class="sw__volume" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="10"><svg class="sw__scale" viewBox="0 0 72 72" aria-hidden="true">${scale()}<text x="13" y="62">0</text><text x="59" y="62">10</text><text class="sw__scale-name" x="36" y="70"></text></svg><i class="sw__knob"></i></div></div>
     <div class="sw-controls__pad" aria-label="Game controls"><button type="button" data-pad="KeyA"><span>◀</span><small></small></button><button type="button" data-pad="KeyD"><span>▶</span><small></small></button><button type="button" data-pad="KeyW"><span>▲</span><small></small></button><button type="button" data-pad="KeyS"><span>●</span><small></small></button><button type="button" data-pad="KeyQ"><span>✦</span><small></small></button></div>`;
+  const slot = document.createElement('div');
+  slot.className = 'sw-controls-slot is-expanded';
+  slot.append(deck);
+  element.append(slot);
   hostScreen.append(element);
-  let slot = player.querySelector('.sw-controls-slot');
-  if (slot) {
-    clearTimeout(slot.closeTimer);
-    slot.inert = false;
-    slot.querySelector('.sw-controls-slot__clip').replaceChildren(deck);
-  } else {
-    slot = document.createElement('div');
-    slot.className = 'sw-controls-slot';
-    const clip = document.createElement('div');
-    clip.className = 'sw-controls-slot__clip';
-    clip.append(deck);
-    slot.append(clip);
-    hostScreen.insertAdjacentElement('afterend', slot);
-  }
-  void slot.offsetWidth;
-  slot.classList.add('is-expanded');
   dialog = player.querySelector('.tape-player__tv');
   canvas = element.querySelector('canvas');
   ctx = canvas.getContext('2d');
@@ -664,9 +651,13 @@ export async function mountSpacewar(hostScreen, player, { signal } = {}) {
 
   const size = () => {
     if (!mounted) return;
-    // The inner vector field remains square inside the existing 4:3 or phone CRT.
-    const side = Math.floor(Math.min(hostScreen.clientWidth, hostScreen.clientHeight));
-    if (!side) return;
+    // The controls share the fixed CRT; reserve their measured height so the
+    // square vector field never overlaps them or changes the surrounding page.
+    const controlsHeight = deck.offsetHeight + 16; // breathing room for the curved CRT corners
+    const side = Math.floor(Math.min(hostScreen.clientWidth, hostScreen.clientHeight - controlsHeight));
+    if (side <= 0) return;
+    element.style.setProperty('--sw-controls-height', `${controlsHeight}px`);
+    element.style.setProperty('--sw-field-size', `${side}px`);
     screen.style.width = `${side}px`;
     dpr = Math.min(2, window.devicePixelRatio || 1);
     const pixels = Math.round(side * dpr);
@@ -678,6 +669,7 @@ export async function mountSpacewar(hostScreen, player, { signal } = {}) {
   };
   const resize = new ResizeObserver(size);
   resize.observe(hostScreen);
+  resize.observe(deck);
   size();
   // The fixed tape transport can sit directly over game/EJECT controls on a
   // phone. Hide it only while either control row is in view, then restore it.
@@ -732,10 +724,8 @@ export async function mountSpacewar(hostScreen, player, { signal } = {}) {
 
   // Keyboard handling stays scoped to the game and its own controls. The page's
   // Escape/EJECT control continues to work, unless Escape closes a game panel.
-  for (const target of [element, deck]) {
-    target.addEventListener('keydown', onKey, { signal: life.signal });
-    target.addEventListener('keyup', onKey, { signal: life.signal });
-  }
+  element.addEventListener('keydown', onKey, { signal: life.signal });
+  element.addEventListener('keyup', onKey, { signal: life.signal });
   const click = event => {
     const control = event.target.closest('[data-sw]');
     if (!control) return;
@@ -752,7 +742,6 @@ export async function mountSpacewar(hostScreen, player, { signal } = {}) {
     else if (action === 'back') closePanel();
   };
   element.addEventListener('click', click, { signal: life.signal });
-  deck.addEventListener('click', click, { signal: life.signal });
   element.addEventListener('submit', event => { event.preventDefault(); saveScore(new FormData(event.target).get('name') || ''); }, { signal: life.signal });
   const release = event => {
     const key = event.target.closest('[data-pad]');
@@ -782,10 +771,6 @@ export async function mountSpacewar(hostScreen, player, { signal } = {}) {
     acceptsInput = () => false;
     sound.setVisible(false); sound.rest();
     element.remove();
-    slot.inert = true;
-    slot.classList.remove('is-expanded');
-    if (motion.matches || document.documentElement.classList.contains('is-tape-paused')) slot.remove();
-    else slot.closeTimer = setTimeout(() => { if (!slot.classList.contains('is-expanded')) slot.remove(); }, 420);
     destroyActive = null;
   };
   destroyActive = destroy;

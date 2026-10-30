@@ -63,6 +63,7 @@ export const PL = {
   "tapes.eject": "WYSUŃ ×",
   "tapes.power": "Wyłącz telewizor",
   "tapes.noSignal": "BRAK SYGNAŁU / WYBIERZ KASETĘ",
+  "tapes.standby": "Wybierz kasetę, aby poznać projekty",
   "tape.desc.bentos": "Monitoring jakości wody",
   "tape.desc.kodlab": "Laboratorium nauki kodu",
   "tape.desc.agent": "Zadania agentów AI",

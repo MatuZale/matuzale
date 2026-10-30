@@ -223,7 +223,7 @@ test('eject, project switching, power and leaving AV clean up the game', async (
   await playSpacewar(page);
   await player.locator('.tape-player__power').evaluate(el => el.click());
   await expect(game(page)).toHaveCount(0);
-  await expect(player).toBeHidden();
+  await expect(player).toHaveClass(/is-off/);
   await playSpacewar(page);
   await page.locator('[data-av]').evaluate(el => el.click());
   await expect(page.locator('html')).not.toHaveClass(/is-crt/);
@@ -245,27 +245,20 @@ test('quickly changing cassette cannot mount a stale game', async ({ page }) => 
 });
 
 for (const width of [1280, 375]) {
-  test(`game controls expand and collapse smoothly without moving the page at ${width}px`, async ({ page }) => {
+  test(`game controls do not move the following section at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto('/?lang=en');
+    await page.evaluate(() => document.fonts.ready);
     await tuneAV(page);
     await page.locator('#project-shelf').scrollIntoViewIfNeeded();
-    // Keep the viewport on the shelf and avoid actionability's automatic scroll.
-    await tape(page).evaluate(el => el.click());
-    await expect(game(page)).toBeVisible();
-    await expect(page.locator('.sw-controls-slot')).toHaveClass(/is-expanded/);
-    await page.waitForTimeout(850);
+    // Sample throughout the asynchronous game load and the subsequent switch.
+    // DOM clicks avoid actionability's automatic scrolling.
     const recordSwitch = selector => page.evaluate(async selector => {
       const samples = [];
-      const sample = () => {
-        const slot = document.querySelector('.sw-controls-slot');
-        samples.push({
-          time: performance.now(),
-          height: document.documentElement.scrollHeight,
-          scroll: scrollY,
-          transitioning: Boolean(slot?.getAnimations().some(animation => animation.playState === 'running')),
-        });
-      };
+      const sample = () => samples.push({
+        nextTop: document.querySelector('#bentos').getBoundingClientRect().top + scrollY,
+        scroll: scrollY,
+      });
       sample();
       document.querySelector(selector).click();
       const start = performance.now();
@@ -279,27 +272,19 @@ for (const width of [1280, 375]) {
       });
       return samples;
     }, selector);
-    const assertSmooth = (samples, direction) => {
-      const first = samples[0], last = samples.at(-1), delta = last.height - first.height;
-      expect(Math.sign(delta)).toBe(direction);
-      expect(Math.abs(delta)).toBeGreaterThan(20);
-      const progress = samples.map(sample => (sample.height - first.height) / delta);
-      expect(progress.filter(value => value > .05 && value < .95).length).toBeGreaterThanOrEqual(2);
-      // A heavily delayed browser frame may span a large part of a legitimate
-      // transition. Judge only adjacent samples taken within 50 ms while also
-      // requiring the actual slot transition and several intermediate states.
-      expect(samples.some(sample => sample.transitioning)).toBe(true);
-      const steps = samples.slice(1).map((sample, i) => ({
-        gap: sample.time - samples[i].time,
-        change: Math.abs(sample.height - samples[i].height),
-      })).filter(step => step.gap <= 50).map(step => step.change);
-      expect(steps.length).toBeGreaterThan(2);
-      expect(Math.max(...steps)).toBeLessThan(Math.abs(delta) * .6);
-      expect(Math.max(...samples.map(sample => Math.abs(sample.scroll - first.scroll)))).toBeLessThanOrEqual(1);
+    const assertStable = (samples, baseline) => {
+      for (const key of ['nextTop', 'scroll']) {
+        expect(Math.max(...samples.map(sample => Math.abs(sample[key] - baseline[key])))).toBeLessThanOrEqual(1);
+      }
     };
-    assertSmooth(await recordSwitch('.project-tape--kodlab'), -1);
+    const opening = await recordSwitch('.project-tape--spacewar');
+    const baseline = opening[0];
+    assertStable(opening, baseline);
+    await expect(game(page)).toBeVisible();
+    await expect(page.locator('.sw-controls-slot')).toHaveClass(/is-expanded/);
+    assertStable(await recordSwitch('.project-tape--kodlab'), baseline);
     await expect(screen(page)).toHaveAttribute('data-project', 'kodlab');
-    assertSmooth(await recordSwitch('.project-tape--spacewar'), 1);
+    assertStable(await recordSwitch('.project-tape--spacewar'), baseline);
     await expect(screen(page)).toHaveAttribute('data-project', 'spacewar');
     await expect(game(page)).toBeVisible();
   });

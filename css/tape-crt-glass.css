@@ -1,10 +1,30 @@
 /* Curved glass is a separate, non-interactive layer above the whole picture.
    It also covers the ident and enlarged images, while leaving the controls untouched. */
-.tape-player__tv { position: relative; }
+.tape-player__tv {
+  position: relative;
+  border-color: #877c70;
+  background:
+    repeating-linear-gradient(115deg, #ffffff05 0 1px, transparent 1px 4px),
+    linear-gradient(145deg, #898078 0%, #5a5350 16%, #373438 54%, #4e4847 100%);
+  box-shadow: inset 0 1px #e8ddd075, inset 1px 0 #d3c8bc36,
+    inset -3px -4px 0 #19171b80, 0 16px 30px -12px #000b, 0 3px 5px #0007;
+}
+/* A fine moulding line makes the cabinet feel separate from the tube. */
+.tape-player__tv::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 3px;
+  border: 1px solid #e4d5c018;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 1px 1px #fff1, inset 0 -1px 2px #0005;
+}
 .tape-player__screen {
   border-radius: 9% / 8%;
+  border-color: #17191d;
   box-shadow: inset 0 0 0 1px #b9c9da30, inset 0 0 35px #000a,
-    0 0 0 1px #ddd5c528, 0 3px 4px #0009;
+    0 0 0 1px #e3d6c336, 0 3px 4px #000b, 0 0 0 3px #17161980;
 }
 .tape-player__tv::after {
   content: "";
@@ -17,12 +37,33 @@
   border-radius: 9% / 8%;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 100% 85% at 50% 48%, transparent 53%, #070a1018 76%, #05060d65 100%),
-    radial-gradient(ellipse 100% 43% at 43% -8%, #f5ffff29 0, #dbeaff0b 45%, transparent 72%),
-    linear-gradient(90deg, #080d141a, transparent 9% 91%, #080d141a);
-  box-shadow: inset 0 1px 2px #e5f5ff55, inset 0 -2px 7px #0009,
-    inset 8px 0 12px -10px #a9c7df55, inset -8px 0 12px -10px #a9c7df55;
+    radial-gradient(ellipse 97% 88% at 50% 47%, transparent 50%, #080b1212 72%, #05060d78 100%),
+    radial-gradient(ellipse 100% 47% at 40% -12%, #f5ffff30 0, #dbeaff0d 44%, transparent 72%),
+    linear-gradient(105deg, #e6f6ff0b, transparent 26% 77%, #e3f2ff08),
+    linear-gradient(90deg, #f3767612, transparent 3% 97%, #71c7ff12);
+  box-shadow: inset 0 1px 2px #e5f5ff66, inset 0 -3px 9px #000b,
+    inset 3px 0 4px -3px #ff789b70, inset -3px 0 4px -3px #69c6ff70,
+    inset 11px 0 16px -13px #a9c7df55, inset -11px 0 16px -13px #a9c7df55;
 }
+/* Colour convergence is deliberately confined to bright type and the glass edge. */
+.tape-player__screen .card__body h3,
+.tape-player__screen .card__body p,
+.tape-player__screen .card__body a {
+  text-shadow: -.55px 0 #ff72912c, .55px 0 #71cfff30;
+}
+.tape-player__controls { box-shadow: inset 0 1px #ffffff12; }
+.tape-player__status::before {
+  content: "";
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  margin-right: .55em;
+  border-radius: 50%;
+  vertical-align: .15em;
+  background: #9bc9a2;
+  box-shadow: 0 0 5px #9bc9a288;
+}
+.tape-player.is-off .tape-player__status::before { background: #d4a276; box-shadow: none; }
 .tape-player__tv .tape-ident { border-radius: 9% / 8%; }
 @media (max-width: 680px) {
   .tape-player__tv::after { aspect-ratio: 3 / 5; }
@@ -31,7 +72,10 @@
   .tape-player__tv::after { aspect-ratio: 1 / 1.86; }
 }
 @media (forced-colors: active) {
-  .tape-player__tv::after { display: none; }
+  .tape-player__tv::before, .tape-player__tv::after { display: none; }
+  .tape-player__screen .card__body h3,
+  .tape-player__screen .card__body p,
+  .tape-player__screen .card__body a { text-shadow: none; }
 }
 /* A tiny perspective change gives photographs depth without warping body text. */
 .tape-image-full > img { transform: perspective(1100px) rotateX(-1.3deg) scale(1.015); }

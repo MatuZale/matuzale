@@ -149,7 +149,7 @@ test('a selected tape comes forward without blocking its neighbours or moving th
   await expect(shelf.locator('.tape-showcase.is-open')).toHaveCount(0);
   await expect(page.locator('.tape-static')).toBeVisible();
   await page.locator('.tape-player__power').evaluate(el => el.click());
-  await expect(player).toBeHidden();
+  await expect(player).toHaveClass(/is-off/);
 });
 
 for (const width of [375, 760, 800, 1023]) {
@@ -245,6 +245,6 @@ test('the selected cover follows both themes and reduced motion or pause stays u
   await expect(scene.locator('.tape-cover--bentos')).toBeVisible();
   await expect(page.locator('#tape-player-screen')).toHaveAttribute('data-project', 'bentos');
   await page.locator('.tape-player__power').evaluate(el => el.click());
-  await expect(page.locator('#project-player')).toBeHidden();
+  await expect(page.locator('#project-player')).toHaveClass(/is-off/);
   await expect(shelf.locator('.tape-showcase.is-open')).toHaveCount(0);
 });

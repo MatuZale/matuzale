@@ -8,6 +8,7 @@
   if (!stacks || !cards || !player || !screen || !caseSlot) return;
   const eject = player.querySelector('.tape-player__close');
   const power = player.querySelector('.tape-player__power');
+  const ident = player.querySelector('.tape-player__secret');
   const playingStatus = player.querySelector('[data-i18n="tapes.nowPlaying"]');
   const gameStatus = player.querySelector('[data-i18n="tapes.nowGame"]');
   const idleStatus = player.querySelector('[data-i18n="tapes.noSignal"]');
@@ -44,9 +45,11 @@
   let active = null;
   let ejectTimer = 0;
   let revealTimer = 0;
+  let powerOnTimer = 0;
   let tuningTimer = 0;
   let completeEject = null;
   let lastButton = null;
+  let standby = null;
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const systemDark = matchMedia('(prefers-color-scheme: dark)');
   const desktopShelf = matchMedia('(min-width: 1024px)');
@@ -262,18 +265,50 @@
     for (const region of [player, screen]) {
       if (idle) {
         region.removeAttribute('aria-labelledby');
+        const off = player.classList.contains('is-off');
         region.setAttribute('aria-label', document.documentElement.lang === 'pl'
-          ? 'Szum telewizora, brak kasety' : 'TV static, no cassette inserted');
+          ? (off ? 'Wybierz kasetę, aby poznać projekty' : 'Szum telewizora, brak kasety')
+          : (off ? 'Select a tape to explore projects' : 'TV static, no cassette inserted'));
       } else {
         region.removeAttribute('aria-label');
         region.setAttribute('aria-labelledby', 'tape-player-title');
       }
     }
   }
+  function setPowerState(off) {
+    player.classList.toggle('is-off', off);
+    power.setAttribute('aria-pressed', String(!off));
+    const label = document.documentElement.lang === 'pl'
+      ? (off ? 'Włącz telewizor' : 'Wyłącz telewizor')
+      : (off ? 'Turn on TV' : 'Turn off TV');
+    power.setAttribute('aria-label', label);
+    power.title = label;
+    ident.disabled = off;
+  }
+  function showStandby() {
+    if (!standby) {
+      standby = document.createElement('div');
+      standby.className = 'tape-standby';
+      standby.innerHTML = '<span class="tape-standby__mark" aria-hidden="true">▶</span><p data-i18n="tapes.standby">Select a tape to explore projects</p>';
+    }
+    screen.replaceChildren(standby);
+  }
   function cancelPending() {
     clearTimeout(ejectTimer);
     ejectTimer = 0;
     completeEject = null;
+  }
+  function stopPowerOn() {
+    clearTimeout(powerOnTimer);
+    powerOnTimer = 0;
+    player.classList.remove('is-powering-on');
+  }
+  function startPowerOn() {
+    stopPowerOn();
+    if (motion.matches || document.documentElement.classList.contains('is-tape-paused')) return;
+    void player.offsetWidth;
+    player.classList.add('is-powering-on');
+    powerOnTimer = setTimeout(stopPowerOn, 700);
   }
   function stopTuning() {
     clearTimeout(tuningTimer);
@@ -314,6 +349,7 @@
     if (!active || ejectTimer) return;
     closeShowcase();
     stopTuning();
+    stopPowerOn();
     stopGame();
     const button = active.button;
     const finish = () => {
@@ -338,9 +374,10 @@
     ejectTimer = setTimeout(finish, 520);
   }
   function powerOff(returnFocus = true, immediate = false) {
-    if (player.hidden || player.classList.contains('is-powering-off')) return;
+    if (player.classList.contains('is-off') || player.classList.contains('is-powering-off')) return;
     closeShowcase(immediate);
     stopTuning();
+    stopPowerOn();
     stopGame();
     cancelPending();
     clearTimeout(revealTimer);
@@ -348,20 +385,19 @@
     const finish = () => {
       cancelPending();
       restore();
-      player.hidden = true;
       player.inert = false;
-      player.classList.remove('is-ejecting', 'is-powering-off', 'is-playing', 'is-changing', 'is-expanded', 'is-revealing', 'is-idle');
+      player.classList.remove('is-ejecting', 'is-powering-off', 'is-playing', 'is-changing', 'is-revealing');
       caseSlot.replaceChildren();
       disposeStatic();
-      screen.replaceChildren();
+      showStandby();
       delete screen.dataset.project;
-      setIdle(false);
+      setPowerState(true);
+      setIdle(true);
     };
     if (immediate || motion.matches || document.documentElement.classList.contains('is-tape-paused')) return finish();
     player.inert = true;
     player.classList.remove('is-playing', 'is-changing');
     player.classList.add('is-powering-off', 'is-ejecting', 'is-revealing');
-    player.classList.remove('is-expanded');
     completeEject = finish;
     ejectTimer = setTimeout(finish, 650);
   }
@@ -391,12 +427,14 @@
     observer.observe(title, { subtree: true, childList: true, characterData: true });
     observer.observe(description, { subtree: true, childList: true, characterData: true });
     button.addEventListener('click', () => {
-      const firstPlay = player.hidden;
+      const firstPlay = player.classList.contains('is-off');
       cancelPending();
       stopTuning();
+      stopPowerOn();
       clearTimeout(revealTimer);
       player.inert = false;
       player.classList.remove('is-playing', 'is-changing', 'is-ejecting', 'is-powering-off');
+      setPowerState(false);
       restore();
       const body = article.querySelector('.card__body');
       active = { article, body, next: body.nextSibling, button, title, summary };
@@ -427,11 +465,11 @@
       disposeStatic();
       screen.replaceChildren(body);
       player.hidden = false;
-      // Commit the closed compartment before revealing it. On a tape change or
-      // interrupted eject, its current height reverses smoothly instead.
+      // Keep the cabinet in place while the picture powers up or retunes.
       void player.offsetWidth;
       player.classList.add('is-expanded', 'is-revealing');
       player.classList.add(firstPlay ? 'is-playing' : 'is-changing');
+      if (firstPlay) startPowerOn();
       revealTimer = setTimeout(() => player.classList.remove('is-revealing'), 650);
       tunePicture();
       document.dispatchEvent(new CustomEvent('tape-channel-change', {
@@ -463,12 +501,14 @@
     // Reselecting the current game is normally a no-op, but during EJECT or
     // POWER it must cancel the pending close just like any other cassette.
     if (!document.documentElement.classList.contains('is-crt') || (active?.game && !ejectTimer)) return;
-    const firstPlay = player.hidden;
+    const firstPlay = player.classList.contains('is-off');
     cancelPending();
     stopTuning();
+    stopPowerOn();
     clearTimeout(revealTimer);
     player.inert = false;
     player.classList.remove('is-playing', 'is-changing', 'is-ejecting', 'is-powering-off');
+    setPowerState(false);
     restore();
     const title = document.createElement('h3');
     title.id = 'tape-player-title';
@@ -496,6 +536,7 @@
     player.hidden = false;
     void player.offsetWidth;
     player.classList.add('is-expanded', 'is-revealing', firstPlay ? 'is-playing' : 'is-changing');
+    if (firstPlay) startPowerOn();
     revealTimer = setTimeout(() => player.classList.remove('is-revealing'), 650);
     tunePicture();
     document.dispatchEvent(new CustomEvent('tape-channel-change', {
@@ -537,6 +578,7 @@
   syncGameTape();
   document.addEventListener('channelchange', () => {
     updateKodlabPreview();
+    setPowerState(player.classList.contains('is-off'));
     if (player.classList.contains('is-idle')) setIdle(true);
     labelGameTape();
     const image = active?.body?.querySelector('.tape-art-preview img');
@@ -546,19 +588,30 @@
   document.addEventListener('tape-pause-change', () => {
     if (document.documentElement.classList.contains('is-tape-paused')) {
       stopTuning();
+      stopPowerOn();
       completeEject?.();
     }
   });
-  motion.addEventListener('change', () => { if (motion.matches) { stopTuning(); completeEject?.(); } });
+  motion.addEventListener('change', () => { if (motion.matches) { stopTuning(); stopPowerOn(); completeEject?.(); } });
   document.addEventListener('visibilitychange', () => { if (document.hidden) stopTuning(); });
   eject.addEventListener('click', () => ejectTape());
-  power.addEventListener('click', () => powerOff());
+  power.addEventListener('click', () => {
+    if (!player.classList.contains('is-off')) return powerOff();
+    setPowerState(false);
+    const noise = typeof window.createTapeStatic === 'function'
+      ? window.createTapeStatic() : document.createElement('div');
+    noise.classList.add('tape-static');
+    noise.setAttribute('aria-hidden', 'true');
+    screen.replaceChildren(noise);
+    setIdle(true);
+    startPowerOn();
+  });
   player.addEventListener('click', event => {
     if (event.target.closest('.tape-player__secret, .tape-image-open')) stopTuning();
     if (event.target.closest('a[href^="#"]')) powerOff(false, true);
   }, true);
   document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && !player.hidden && !document.querySelector('dialog[open]') &&
+    if (event.key === 'Escape' && !player.classList.contains('is-off') && !document.querySelector('dialog[open]') &&
         (player.contains(document.activeElement) || shelf.contains(document.activeElement))) {
       event.preventDefault();
       if (active) ejectTape();
@@ -567,4 +620,9 @@
   });
   cards.hidden = true;
   shelf.hidden = false;
+  player.hidden = false;
+  player.classList.add('is-expanded');
+  showStandby();
+  setPowerState(true);
+  setIdle(true);
 })();

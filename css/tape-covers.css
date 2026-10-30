@@ -83,11 +83,11 @@
 .tape-cover--bentos .tape-cover__art { background: repeating-linear-gradient(168deg, transparent 0 8px, #a5e933 9px 12px, transparent 13px 20px); }
 .tape-cover--bentos .tape-cover__art::after { width: 95px; height: 95px; right: 13px; bottom: 4px; border: 3px solid #c5f744; border-radius: 50%; box-shadow: 0 0 0 8px #073260, 0 0 0 10px #c5f744; }
 
-/* Cream stock and the bright diagonal colour bands of home-video tape. */
+/* Cream stock and folded colour bands, like a printed home-video sleeve. */
 .tape-cover--kodlab { --sleeve-paper: #f4ecda; --sleeve-ink: #242131; }
 .tape-cover--kodlab .tape-cover__brand { color: #272236; }
-.tape-cover--kodlab .tape-cover__art { inset: 44% 0 11%; background: linear-gradient(154deg, transparent 0 18%, #eead12 18% 29%, #ef6637 29% 40%, #cf4168 40% 51%, #5e84ab 51% 62%, #439b7e 62% 73%, transparent 73%); }
-.tape-cover--kodlab .tape-cover__art::after { content: "LEARN / PLAY"; right: 9px; bottom: 3px; font: 700 8px/1 var(--font-mono, monospace); }
+.tape-cover--kodlab .tape-cover__art { inset: 44% 0 13%; background: url("../assets/kodlab-vhs-bands.svg") center / 100% 100% no-repeat; }
+.tape-cover--kodlab .tape-cover__art::after { content: "LEARN / PLAY"; right: 9px; bottom: 5px; color: #f4ecda; font: 700 8px/1 var(--font-mono, monospace); }
 
 /* High-grade black shell with a glowing technical grid. */
 .tape-cover--agent { --sleeve-paper: #1b1427; --sleeve-ink: #f8edf9; }
@@ -97,9 +97,9 @@
 .tape-cover--agent .tape-cover__art::before { inset: 14% 14%; border: 2px solid #e793d1; box-shadow: 7px 7px 0 #7c4bb2; transform: skew(-12deg); }
 .tape-cover--agent .tape-cover__art::after { content: ">_"; top: 30%; left: 31%; color: #efb0d7; font: 700 26px/1 var(--font-mono, monospace); }
 
-/* A neon orbit inspired by analog test patterns and mathematical plots. */
+/* Fine, overlapping signal loops, printed on the dark stock of the art sleeve. */
 .tape-cover--art { --sleeve-paper: #120e23; --sleeve-ink: #fff2e8; }
-.tape-cover--art .tape-cover__art { inset: 38% -18% 8% 5%; background: repeating-radial-gradient(ellipse at 60% 57%, transparent 0 5px, #f056b7 6px 8px, #f1a33f 9px 10px, transparent 11px 15px); transform: rotate(-18deg); border-radius: 50%; }
+.tape-cover--art .tape-cover__art { inset: 39% 5% 12%; background: url('../assets/tape-attractor-lines.svg') center / contain no-repeat, #120e23; opacity: .85; }
 
 /* Pale tape with temperature contours and a cool cyan edge. */
 .tape-cover--cold { --sleeve-paper: #e1f1e8; --sleeve-ink: #102d38; }

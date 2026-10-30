@@ -34,7 +34,7 @@
     observer = null;
   }
   function play() {
-    if (player.hidden) return;
+    if (player.hidden || player.classList.contains('is-off')) return;
     stop();
     if (screen.contains(document.activeElement)) trigger.focus({ preventScroll: true });
     const still = motion.matches || document.documentElement.classList.contains('is-tape-paused');

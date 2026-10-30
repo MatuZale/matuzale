@@ -7,6 +7,31 @@ async function expectProject(page, style) {
   await expect(page.locator(`#project-shelf .tape-showcase.is-open .tape-cover--${style}`)).toBeVisible();
 }
 
+test('standby and power keep the TV available without a cassette', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/?lang=en');
+  const player = page.locator('#project-player');
+  const power = player.locator('.tape-player__power');
+  await expect(player).toBeVisible();
+  await expect(player).toHaveClass(/is-off/);
+  await expect(player.locator('.tape-standby')).toContainText('Select a tape');
+  await expect(player.locator('.tape-player__close')).toBeDisabled();
+  await expect(power).toHaveAttribute('aria-pressed', 'false');
+  await power.click();
+  await expect(player).not.toHaveClass(/is-off/);
+  await expect(player.locator('.tape-static')).toBeVisible();
+  await expect(power).toHaveAttribute('aria-pressed', 'true');
+  await power.click();
+  await expect(player).toHaveClass(/is-off/);
+  await expect(player.locator('.tape-static')).toHaveCount(0);
+  await expect(player.locator('.tape-standby')).toBeVisible();
+  await page.keyboard.press('2');
+  await expect(player.locator('.tape-standby')).toContainText('Wybierz kasetę');
+  await expect(power).toHaveAttribute('aria-label', 'Włącz telewizor');
+  await page.keyboard.press('1');
+  await expect(player.locator('.tape-standby')).toContainText('Select a tape');
+});
+
 test('selecting and changing tapes plays projects on the TV', async ({ page }) => {
   await page.goto('/?lang=pl');
   const shelf = page.locator('#project-shelf');
@@ -40,7 +65,7 @@ test('selecting and changing tapes plays projects on the TV', async ({ page }) =
   await expect(player.locator('.tape-static')).toBeVisible();
   await expect(kodlab).toBeFocused();
   await page.keyboard.press('Escape');
-  await expect(player).toBeHidden();
+  await expect(player).toHaveClass(/is-off/);
   await expect(kodlab).toBeFocused();
 });
 
@@ -93,7 +118,7 @@ test('eject remains usable with reduced motion and tape paused', async ({ page }
   await expect(player.locator('.tape-static')).toBeVisible();
   await expect(player).toBeVisible();
   await player.locator('.tape-player__power').click();
-  await expect(player).toBeHidden();
+  await expect(player).toHaveClass(/is-off/);
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.evaluate(() => document.documentElement.classList.add('is-tape-paused'));
   await kodlab.click();
@@ -102,7 +127,7 @@ test('eject remains usable with reduced motion and tape paused', async ({ page }
   await expect(player.locator('.tape-static')).toBeVisible();
   await expect(player).toBeVisible();
   await player.locator('.tape-player__power').click();
-  await expect(player).toBeHidden();
+  await expect(player).toHaveClass(/is-off/);
 });
 
 test('TV keeps its dimensions and contains each project without scrolling', async ({ page }) => {
@@ -162,7 +187,7 @@ test('hidden station ident returns control and cancels on tape change', async ({
   await expect(screen).not.toHaveAttribute('inert', '');
   await expect(ident).toBeHidden();
   await player.locator('.tape-player__power').click();
-  await expect(player).toBeHidden();
+  await expect(player).toHaveClass(/is-off/);
 });
 
 test('selecting a tape does not move the page', async ({ page }) => {

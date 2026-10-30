@@ -6,6 +6,8 @@
   color: light-dark(#29223e, #d8f6ff);
 }
 .sw-embed .sw__screen {
+  position: absolute; top: calc((100% - var(--sw-controls-height, 0px) - var(--sw-field-size, 0px)) / 2);
+  left: 50%; transform: translateX(-50%);
   width: 100%; max-width: 100%; max-height: 100%; aspect-ratio: 1;
   border-radius: 0; box-shadow: none; overflow: hidden;
   background: light-dark(#f2eee0, #010604);
@@ -31,11 +33,8 @@
   box-shadow: inset 0 1px #ffffff22, 0 2px 3px #0007;
   font: 400 1rem/1 'VT323', var(--font-mono);
 }
-.sw-controls-slot { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 420ms cubic-bezier(.22,.7,.25,1); }
-.sw-controls-slot.is-expanded { grid-template-rows: 1fr; }
-.sw-controls-slot__clip { min-height: 0; overflow: hidden; }
-.sw-controls-slot .sw-controls { transition: opacity 220ms ease; }
-.sw-controls-slot:not(.is-expanded) .sw-controls { opacity: 0; }
+.sw-controls-slot { position: absolute; z-index: 2; inset: auto 8px 8px; }
+.sw-controls-slot .sw-controls { margin: 0; }
 .sw-controls__header { display: flex; justify-content: space-between; align-items: center; gap: .5rem; padding: 0 .1rem .4rem; color: #f3d2a5; letter-spacing: .08em; }
 .sw-controls__header strong { font-size: 1.1rem; }
 .sw-controls__header .sw__score { font-size: clamp(.8rem, 1.3vw, 1rem); color: #d2e9cb; letter-spacing: .04em; }
@@ -61,7 +60,7 @@
 @media (max-width: 480px) {
   .sw-embed__meta, .sw-embed__footer { position: absolute; left: 10%; right: 10%; display: flex; justify-content: space-between; gap: .5rem; color: light-dark(#63566c, #96c9aa); font: 600 .58rem/1.2 var(--font-mono); letter-spacing: .09em; }
   .sw-embed__meta { top: 10%; }
-  .sw-embed__footer { bottom: 10%; }
+  .sw-embed__footer { bottom: calc(var(--sw-controls-height, 0px) + .25rem); }
   .sw-controls { padding: .5rem; }
   .sw-controls__header strong { font-size: .95rem; }
   .sw-controls__header .sw__score { font-size: .8rem; }
@@ -71,13 +70,15 @@
   .tape-player__screen .sw-embed .sw__panel { font-size: clamp(.75rem, 3.5vw, .95rem); }
 }
 @media (max-width: 680px) {
+  /* Reserve the key's place before the viewport observer reveals it. Adding
+     it with display would reflow the deck and could change the intersection
+     that controls its visibility in the first place. */
+  .sw-controls .sw__tape-control { display: inline-block; visibility: hidden; }
   html.sw-controls-on-screen .footer-tape__transport,
   html.sw-controls-on-screen .back-top { visibility: hidden; pointer-events: none; }
-  html.sw-controls-on-screen .sw-controls .sw__tape-control { display: inline-block; }
+  html.sw-controls-on-screen .sw-controls .sw__tape-control { visibility: visible; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .sw-controls-slot, .sw-controls-slot .sw-controls { transition: none; }
   .sw-controls .sw__knob { transition: none; }
   .sw-controls__pad button:active { transform: none; }
 }
-html.is-tape-paused .sw-controls-slot, html.is-tape-paused .sw-controls-slot .sw-controls { transition: none !important; }
