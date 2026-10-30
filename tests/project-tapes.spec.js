@@ -14,7 +14,9 @@ test('standby and power keep the TV available without a cassette', async ({ page
   const power = player.locator('.tape-player__power');
   await expect(player).toBeVisible();
   await expect(player).toHaveClass(/is-off/);
-  await expect(player.locator('.tape-standby')).toContainText('Select a tape');
+  await expect(player.locator('#tape-player-screen')).toHaveAttribute('aria-label', 'TV off. Select a tape to explore projects');
+  await expect(player.locator('#tape-player-screen')).toHaveText('');
+  await expect(player.locator('#tape-player-screen')).toHaveCSS('background-color', 'rgb(8, 10, 12)');
   await expect(player.locator('.tape-player__close')).toBeDisabled();
   await expect(power).toHaveAttribute('aria-pressed', 'false');
   await power.click();
@@ -24,12 +26,33 @@ test('standby and power keep the TV available without a cassette', async ({ page
   await power.click();
   await expect(player).toHaveClass(/is-off/);
   await expect(player.locator('.tape-static')).toHaveCount(0);
-  await expect(player.locator('.tape-standby')).toBeVisible();
+  await expect(player.locator('#tape-player-screen')).toHaveText('');
   await page.keyboard.press('2');
-  await expect(player.locator('.tape-standby')).toContainText('Wybierz kasetę');
+  await expect(player.locator('#tape-player-screen')).toHaveAttribute('aria-label', 'Telewizor wyłączony. Wybierz kasetę, aby poznać projekty');
   await expect(power).toHaveAttribute('aria-label', 'Włącz telewizor');
   await page.keyboard.press('1');
-  await expect(player.locator('.tape-standby')).toContainText('Select a tape');
+  await expect(player.locator('#tape-player-screen')).toHaveAttribute('aria-label', 'TV off. Select a tape to explore projects');
+});
+
+test('cabinet keeps its controls outside the tube on desktop and phone', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  for (const width of [1280, 375]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto('/?lang=en');
+    const geometry = await page.locator('.tape-player__tv').evaluate(tv => {
+      const screen = tv.querySelector('.tape-player__screen').getBoundingClientRect();
+      const controls = tv.querySelector('.tape-player__controls').getBoundingClientRect();
+      const glass = getComputedStyle(tv, '::after');
+      return { screen: { right: screen.right, bottom: screen.bottom, width: screen.width },
+        controls: { left: controls.left, top: controls.top }, glassWidth: parseFloat(glass.width) };
+    });
+    expect(Math.abs(geometry.glassWidth - geometry.screen.width)).toBeLessThan(2);
+    if (width > 1000) expect(geometry.controls.left).toBeGreaterThan(geometry.screen.right);
+    else expect(geometry.controls.top).toBeGreaterThan(geometry.screen.bottom);
+    await page.locator('.project-tape--kodlab').evaluate(el => el.click());
+    await expect(page.locator('#tape-player-screen')).toHaveAttribute('data-project', 'kodlab');
+    await expect(page.locator('.tape-player__power')).toBeEnabled();
+  }
 });
 
 test('selecting and changing tapes plays projects on the TV', async ({ page }) => {

@@ -69,7 +69,7 @@ test('power transitions collapse and restore the picture inside the stationary T
   expect(off.clips[0]).not.toBe(off.clips[1]);
   expect(off.beam).toBe('crt-beam-off');
   await expect(player).toHaveClass(/is-off/);
-  await expect(player.locator('.tape-standby')).toBeVisible();
+  await expect(player.locator('#tape-player-screen')).toHaveText('');
 
   const onFromButton = await samplePower(page, '.tape-player__power', 'crt-power-on');
   expect(onFromButton.animation).toBe('crt-power-on');

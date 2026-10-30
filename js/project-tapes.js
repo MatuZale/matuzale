@@ -49,7 +49,6 @@
   let tuningTimer = 0;
   let completeEject = null;
   let lastButton = null;
-  let standby = null;
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const systemDark = matchMedia('(prefers-color-scheme: dark)');
   const desktopShelf = matchMedia('(min-width: 1024px)');
@@ -267,8 +266,8 @@
         region.removeAttribute('aria-labelledby');
         const off = player.classList.contains('is-off');
         region.setAttribute('aria-label', document.documentElement.lang === 'pl'
-          ? (off ? 'Wybierz kasetę, aby poznać projekty' : 'Szum telewizora, brak kasety')
-          : (off ? 'Select a tape to explore projects' : 'TV static, no cassette inserted'));
+          ? (off ? 'Telewizor wyłączony. Wybierz kasetę, aby poznać projekty' : 'Szum telewizora, brak kasety')
+          : (off ? 'TV off. Select a tape to explore projects' : 'TV static, no cassette inserted'));
       } else {
         region.removeAttribute('aria-label');
         region.setAttribute('aria-labelledby', 'tape-player-title');
@@ -284,14 +283,6 @@
     power.setAttribute('aria-label', label);
     power.title = label;
     ident.disabled = off;
-  }
-  function showStandby() {
-    if (!standby) {
-      standby = document.createElement('div');
-      standby.className = 'tape-standby';
-      standby.innerHTML = '<span class="tape-standby__mark" aria-hidden="true">▶</span><p data-i18n="tapes.standby">Select a tape to explore projects</p>';
-    }
-    screen.replaceChildren(standby);
   }
   function cancelPending() {
     clearTimeout(ejectTimer);
@@ -389,7 +380,7 @@
       player.classList.remove('is-ejecting', 'is-powering-off', 'is-playing', 'is-changing', 'is-revealing');
       caseSlot.replaceChildren();
       disposeStatic();
-      showStandby();
+      screen.replaceChildren();
       delete screen.dataset.project;
       setPowerState(true);
       setIdle(true);
@@ -622,7 +613,6 @@
   shelf.hidden = false;
   player.hidden = false;
   player.classList.add('is-expanded');
-  showStandby();
   setPowerState(true);
   setIdle(true);
 })();
