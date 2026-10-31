@@ -22,8 +22,6 @@
 .tape-player__screen::before { opacity: .12; background: repeating-linear-gradient(0deg, #02070b 0 1px, transparent 1px 4px); }
 .tape-player__screen::after { opacity: .16; background: linear-gradient(108deg, #e7f7ff14, transparent 33%), linear-gradient(transparent 0 47%, #b5e5ff 49%, transparent 51%); background-size: auto, 100% 190%; animation: tape-tv-tracking 9s linear infinite; }
 @keyframes tape-tv-tracking { from { background-position: 0 0, 0 -140%; } to { background-position: 0 0, 0 240%; } }
-/* The full-screen card gallery covers the TV; its tracking line can rest until it closes. */
-html.deck-open .tape-player .tape-player__screen::after { animation-play-state: paused; }
 .tape-player__screen .card__body { position: relative; z-index: 1; min-width: 0; padding: clamp(1.3rem, 3.5vw, 2.5rem); }
 .tape-player__screen .badge { background: #d9efff12; border-color: #bed8e35c; color: #dbeaf3; }
 .tape-player__screen h3 { color: #fffdf8; font-size: clamp(1.5rem, 3vw, 2.3rem); margin: .8rem 0; }
@@ -189,3 +187,7 @@ html.is-tape-paused .tape-player .tape-player__tube::after { animation: none !im
   .tape-player.is-powering-on .tape-player__tube::after,
   .tape-player.is-powering-off .tape-player__tube::after { animation: none; }
 }
+/* Apply after the playback animation shorthand, which otherwise resets the
+   play state. The tracking line rests while the picture cannot be seen. */
+html.deck-open .tape-player .tape-player__screen::after,
+.tape-player:is(.is-tv-offscreen, .is-off) .tape-player__screen::after { animation-play-state: paused; }

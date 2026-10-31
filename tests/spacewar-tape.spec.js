@@ -51,6 +51,83 @@ test('AV reveals a Spacewar cassette and plays inside the existing TV', async ({
   await expect(page.locator('#project-player')).toBeVisible();
 });
 
+test('the cabinet volume knob controls and remembers the game sound', async ({ page }, testInfo) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/?lang=en');
+  await page.evaluate(() => localStorage.setItem('spacewar-volume', '6'));
+  const slot = page.locator('.tape-player__volume-slot');
+  await expect(slot).toHaveAttribute('aria-hidden', 'true');
+  await tuneAV(page);
+  await playSpacewar(page);
+  const volume = slot.locator('.sw__volume');
+  await expect(volume).toHaveAttribute('aria-valuenow', '6');
+  await expect(slot).not.toHaveAttribute('aria-hidden', 'true');
+  await volume.focus();
+  await page.keyboard.press('Home');
+  await expect(volume).toHaveAttribute('aria-valuenow', '0');
+  await page.keyboard.press('End');
+  await page.keyboard.press('ArrowLeft');
+  await expect(volume).toHaveAttribute('aria-valuenow', '9');
+  const canvas = game(page).locator('canvas');
+  await canvas.focus();
+  await expect(canvas).toBeFocused();
+  await expect(screen(page)).not.toHaveAttribute('inert', '');
+  // The game suppresses input until its visibility observer reports that the
+  // screen is in view. Wait for a real observation after focus/scroll; the
+  // game's observer was registered before this one.
+  const visibility = await screen(page).evaluate(el => new Promise(resolve => {
+    const observer = new IntersectionObserver(entries => {
+      const entry = entries.find(item => item.isIntersecting);
+      if (!entry) return;
+      observer.disconnect();
+      resolve({ ratio: entry.intersectionRatio, time: entry.time });
+    });
+    observer.observe(el);
+  }));
+  await expect(canvas).toBeFocused();
+  await page.evaluate(() => {
+    window.__spacewarVolumeKey = null;
+    window.addEventListener('keydown', event => {
+      const canvas = document.querySelector('.sw-embed canvas');
+      const screen = document.querySelector('#tape-player-screen');
+      const rect = screen.getBoundingClientRect();
+      window.__spacewarVolumeKey = {
+        key: event.key, code: event.code,
+        target: event.target?.outerHTML?.slice(0, 300),
+        canvasFocused: document.activeElement === canvas,
+        screenInert: screen.inert,
+        playerInert: document.querySelector('#project-player').inert,
+        panelHidden: document.querySelector('.sw-embed .sw__panel').hidden,
+        documentHidden: document.hidden,
+        tapePaused: document.documentElement.classList.contains('is-tape-paused'),
+        rect: { top: rect.top, right: rect.right, bottom: rect.bottom, left: rect.left },
+        viewport: { width: innerWidth, height: innerHeight },
+      };
+    }, { capture: true, once: true });
+  });
+  await page.keyboard.press('v');
+  try {
+    await expect(volume).toHaveAttribute('aria-valuenow', '0');
+  } catch (error) {
+    const key = await page.evaluate(() => window.__spacewarVolumeKey);
+    await testInfo.attach('spacewar-volume-key', {
+      body: JSON.stringify({ visibility, key }, null, 2), contentType: 'application/json',
+    });
+    throw error;
+  }
+  await page.keyboard.press('v');
+  await expect(volume).toHaveAttribute('aria-valuenow', '9');
+  await page.locator('.project-tape--kodlab').evaluate(el => el.click());
+  await expect(slot.locator('.sw__volume')).toHaveCount(0);
+  await expect(slot).toHaveAttribute('aria-hidden', 'true');
+  await playSpacewar(page);
+  await expect(slot.locator('.sw__volume')).toHaveAttribute('aria-valuenow', '9');
+  await slot.locator('.sw__volume').focus();
+  await page.locator('[data-av]').evaluate(el => el.click());
+  await expect(slot.locator('.sw__volume')).toHaveCount(0);
+  await expect(page.locator('#tape-tuner')).toBeFocused();
+});
+
 test('AV keeps all twelve tapes reachable at 1024px, then restores the normal 3D shelf', async ({ page }) => {
   await page.setViewportSize({ width: 1024, height: 900 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -307,6 +384,24 @@ test('global pause holds the game and resumes without discarding it', async ({ p
   await expect(game(page)).toHaveAttribute('data-state', 'play');
 });
 
+test('a running game does not rewrite unchanged control states every frame', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/?lang=en');
+  await tuneAV(page);
+  await playSpacewar(page);
+  await page.locator('#project-player [data-sw="start"]').evaluate(el => el.click());
+  await expect(game(page)).toHaveAttribute('data-state', 'play');
+  const writes = await page.locator('.sw-controls').evaluate(async deck => {
+    let count = 0;
+    const observer = new MutationObserver(records => { count += records.length; });
+    observer.observe(deck, { attributes: true, subtree: true, attributeFilter: ['disabled', 'aria-pressed'] });
+    await new Promise(resolve => setTimeout(resolve, 500));
+    observer.disconnect();
+    return count;
+  });
+  expect(writes).toBe(0);
+});
+
 test('TM ident temporarily holds the game without resetting it', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/?lang=en');
@@ -318,10 +413,55 @@ test('TM ident temporarily holds the game without resetting it', async ({ page }
   await player.locator('.tape-player__secret').evaluate(el => el.click());
   await expect(screen(page)).toHaveAttribute('inert', '');
   await expect(player.locator('.sw-controls')).toHaveAttribute('inert', '');
-  await expect(player.locator('.tape-ident')).toBeHidden({ timeout: 4000 });
+  await expect(player.locator('.tape-player__volume-slot .sw__volume')).toHaveAttribute('inert', '');
+  // The timer is 2.4 s, but a software-rendered browser can deliver it late.
+  await expect(player.locator('.tape-ident')).toBeHidden();
   await expect(screen(page)).not.toHaveAttribute('inert', '');
   await expect(player.locator('.sw-controls')).not.toHaveAttribute('inert', '');
+  await expect(player.locator('.tape-player__volume-slot .sw__volume')).not.toHaveAttribute('inert', '');
   await expect(game(page)).toHaveAttribute('data-state', 'play');
+});
+
+test('reduced-motion ident holds the game for exactly 2.4 seconds', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.clock.install();
+  await page.goto('/?lang=en');
+  await tuneAV(page);
+  await playSpacewar(page);
+  const player = page.locator('#project-player');
+  await player.locator('[data-sw="start"]').evaluate(el => el.click());
+  await expect(game(page)).toHaveAttribute('data-state', 'play');
+  // Freeze only after the real game has started; its normal loading is not mocked.
+  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 5000));
+  await player.locator('.tape-player__secret').evaluate(el => el.click());
+  await expect(player.locator('.tape-ident')).toBeVisible();
+  await expect(screen(page)).toHaveAttribute('inert', '');
+  await page.clock.fastForward(2399);
+  await expect(player.locator('.tape-ident')).toBeVisible();
+  await expect(screen(page)).toHaveAttribute('inert', '');
+  await page.clock.fastForward(1);
+  await expect(player.locator('.tape-ident')).toBeHidden();
+  await expect(screen(page)).not.toHaveAttribute('inert', '');
+  await expect(game(page)).toHaveAttribute('data-state', 'play');
+});
+
+test('game controls do not hide the focused tape transport on a phone', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 844 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/?lang=en');
+  await tuneAV(page);
+  await playSpacewar(page);
+  const transport = page.locator('.footer-tape__transport');
+  const pause = transport.locator('[data-tape-action="pause"]');
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await expect(page.locator('html')).not.toHaveClass(/sw-controls-on-screen|tv-controls-on-screen/);
+  await pause.focus();
+  await page.locator('.sw-controls').evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'instant' }));
+  await expect(page.locator('html')).toHaveClass(/sw-controls-on-screen/);
+  await expect(pause).toBeFocused();
+  await expect(transport).toHaveCSS('visibility', 'visible');
+  await page.locator('#tape-tuner').evaluate(el => el.focus({ preventScroll: true }));
+  await expect(transport).toHaveCSS('visibility', 'hidden');
 });
 
 for (const width of [320, 375, 1280]) {

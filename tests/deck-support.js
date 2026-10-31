@@ -173,8 +173,15 @@ export async function lift(page, card, touch = true) {
     expect(events.filter(e => e.trusted && e.type === 'pointerup').at(-1)?.input).toBe('touch');
     expect(events.some(e => e.trusted && e.type === 'click')).toBe(true);
     const angles = await page.evaluate(start => window.deckAudit.samples.slice(start), sampleStart);
-    expect([...(angles || []), (await values(card)).ry].every(angle => Math.abs(angle - initialAngle) < .1),
+    const finalAngle = (await values(card)).ry;
+    // A card may already be tilted by a compatibility mouse move on the home
+    // page. Touch lift returns that tilt to neutral; it must not add a turn.
+    // Check unwrapped angles so an unwanted 360-degree flourish still fails.
+    const neutral = Math.round(initialAngle / 360) * 360;
+    const limit = Math.max(2, Math.abs(initialAngle - neutral) + 3);
+    expect([...(angles || []), finalAngle].every(angle => Math.abs(angle - neutral) <= limit),
       'Native touch lift must not rotate, including compatibility clicks labelled mouse').toBe(true);
+    expect(Math.abs(finalAngle - neutral)).toBeLessThan(.1);
   }
   await stableFace(page, card);
   await expect(card).toHaveAttribute('aria-pressed', 'true');

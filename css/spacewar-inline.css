@@ -48,6 +48,11 @@
 .sw-controls .sw__knob, .sw-controls .sw__volume::after { inset: 12px; }
 .sw-controls .sw__knob::before { height: 7px; top: 2px; }
 .sw-controls .sw__scale { color: #e5d9cb; stroke: #e5d9cb; fill: #e5d9cb; }
+/* The same functional volume pot sits on the TV cabinet when the game runs. */
+.tape-player__volume-slot .sw__volume { width: 50px; height: 50px; }
+.tape-player__volume-slot .sw__knob, .tape-player__volume-slot .sw__volume::after { inset: 12px; }
+.tape-player__volume-slot .sw__knob::before { height: 7px; top: 2px; }
+.tape-player__volume-slot .sw__scale { color: #e5d9cb; stroke: #e5d9cb; fill: #e5d9cb; }
 .sw-controls__pad { display: none; }
 @media (hover: none), (pointer: coarse) {
   .sw-controls__pad { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; margin-top: .55rem; }
@@ -67,6 +72,8 @@
   .sw-controls .sw__key { font-size: .78rem; height: 30px; padding: 0 .3rem; }
   .sw-controls .sw__volume { width: 42px; height: 42px; }
   .sw-controls .sw__knob, .sw-controls .sw__volume::after { inset: 10px; }
+  .tape-player__volume-slot .sw__volume { width: 44px; height: 44px; }
+  .tape-player__volume-slot .sw__knob, .tape-player__volume-slot .sw__volume::after { inset: 10px; }
   .tape-player__screen .sw-embed .sw__panel { font-size: clamp(.75rem, 3.5vw, .95rem); }
 }
 @media (max-width: 680px) {
@@ -74,8 +81,8 @@
      it with display would reflow the deck and could change the intersection
      that controls its visibility in the first place. */
   .sw-controls .sw__tape-control { display: inline-block; visibility: hidden; }
-  html.sw-controls-on-screen .footer-tape__transport,
-  html.sw-controls-on-screen .back-top { visibility: hidden; pointer-events: none; }
+  html.sw-controls-on-screen:not(:has(.footer-tape__transport:focus-within, .back-top:focus)) .footer-tape__transport,
+  html.sw-controls-on-screen:not(:has(.footer-tape__transport:focus-within, .back-top:focus)) .back-top { visibility: hidden; pointer-events: none; }
   html.sw-controls-on-screen .sw-controls .sw__tape-control { visibility: visible; }
 }
 @media (prefers-reduced-motion: reduce) {

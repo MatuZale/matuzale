@@ -13,21 +13,27 @@
 .tape-showcase__front:has(> .tape-cover--physics) { --edge-stock: var(--tape-physics-paper); }
 .tape-showcase__front:has(> .tape-cover--quantum) { --edge-stock: var(--tape-quantum-paper); }
 .tape-showcase__front::before {
-  content: '';
+  content: attr(data-spine);
   position: absolute;
   z-index: -1;
   pointer-events: none;
-  background: var(--edge-stock);
-}
-.tape-showcase__front::before {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: #f5f0e5;
+  font: 700 7px/1 Arial, sans-serif;
+  letter-spacing: .02em;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  white-space: nowrap;
   top: 0;
   bottom: 0;
-  left: calc(100% - 1px);
-  width: 11px;
-  clip-path: polygon(0 0, 100% 5px, 100% calc(100% - 5px), 0 100%);
-  background: linear-gradient(90deg,
-    color-mix(in srgb, var(--edge-stock) 76%, #17121d),
-    color-mix(in srgb, var(--edge-stock) 52%, #17121d) 70%,
-    color-mix(in srgb, var(--edge-stock) 32%, #100d14));
+  right: calc(100% - 1px);
+  width: 16px;
+  clip-path: polygon(0 5px, 100% 0, 100% 100%, 0 calc(100% - 5px));
+  background: linear-gradient(90deg, #17141b,
+    color-mix(in srgb, var(--edge-stock) 45%, #17121d) 70%,
+    color-mix(in srgb, var(--edge-stock) 62%, #17121d));
 }
 .tape-showcase__front .tape-cover { box-shadow: inset -1px 0 #0002, 1px 1px 1px #0005; }

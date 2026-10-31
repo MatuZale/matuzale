@@ -1,0 +1,294 @@
+/* Full-bleed print artwork: four different visual languages, composed for the
+   entire sleeve. Artwork stays decorative; the real title remains in the DOM. */
+.tape-cover--bentos .tape-cover__art,
+.tape-cover--kodlab .tape-cover__art,
+.tape-cover--agent .tape-cover__art,
+.tape-cover--art .tape-cover__art {
+  inset: 0;
+}
+.tape-cover--bentos .tape-cover__art::before,
+.tape-cover--bentos .tape-cover__art::after,
+.tape-cover--kodlab .tape-cover__art::before,
+.tape-cover--kodlab .tape-cover__art::after,
+.tape-cover--agent .tape-cover__art::before,
+.tape-cover--agent .tape-cover__art::after,
+.tape-cover--art .tape-cover__art::before,
+.tape-cover--art .tape-cover__art::after { content: none; }
+
+/* BENTOS: oceanographic globe and fine orbital lines, printed edge to edge. */
+.tape-cover--bentos .tape-cover__art {
+  background: url('../assets/tape-bentos-orbit.svg') center / 100% 100% no-repeat;
+}
+.tape-cover--bentos .tape-cover__title {
+  width: min(85%, 140px);
+  height: 29px;
+}
+.tape-cover--bentos .tape-cover__subtitle { color: #e4f7fa; }
+.tape-cover--bentos .tape-cover__foot {
+  color: #e4f7fa;
+  text-shadow: 0 1px 2px #00104d;
+}
+
+/* KODLAB: cream/dark stock with a folded diagonal spectrum wrapping the box. */
+.tape-cover--kodlab .tape-cover__art {
+  background: url('../assets/tape-kodlab-full.svg') center / 100% 100% no-repeat;
+}
+.tape-cover--kodlab .tape-cover__brand { width: 80%; }
+.tape-cover--kodlab .tape-cover__title { font-size: 26px; }
+.tape-cover--kodlab .tape-cover__subtitle { max-width: 70%; }
+.tape-cover--kodlab .tape-cover__foot {
+  padding-inline: 3px;
+  background: var(--sleeve-paper);
+}
+
+/* AGENT CONTROL: a technical grid with a four-channel control diagram. */
+.tape-cover--agent .tape-cover__art {
+  background: url('../assets/tape-agent-full.svg') center / 100% 100% no-repeat;
+}
+.tape-cover--agent .tape-cover__brand { width: 86%; }
+.tape-cover--agent .tape-cover__title {
+  max-width: 85%;
+  font-size: 21px;
+  line-height: .95;
+}
+.tape-cover--agent .tape-cover__subtitle { max-width: 75%; }
+.tape-cover--agent .tape-cover__foot {
+  padding-inline: 3px;
+  background: var(--sleeve-paper);
+}
+
+/* ATTRACTORS: a dark, printed stock makes the fine spectral lines visible
+   even when the surrounding portfolio uses its light theme. */
+.tape-cover--art { --sleeve-paper: #120e23; --sleeve-ink: #fff2e8; }
+.tape-showcase__front:has(> .tape-cover--art) { --edge-stock: #120e23; }
+.tape-cover--art .tape-cover__art {
+  background:
+    linear-gradient(to bottom, #120e23 0%, #120e23e8 25%, transparent 46%, transparent 77%, #120e23 96%),
+    url('../assets/tape-attractor-lines.svg') center / auto 98% no-repeat;
+}
+.tape-cover--art .tape-cover__brand { border-bottom-width: 3px; }
+.tape-cover--art .tape-cover__title { font-size: 21px; letter-spacing: -.055em; }
+.tape-cover--art .tape-cover__subtitle { max-width: 75%; }
+
+/* Vary the printed hierarchy as well as the illustration: some sleeves carry
+   the catalogue number at the edge, others put the project title near the foot. */
+.tape-cover--kodlab .tape-cover__format {
+  position: absolute;
+  top: 13px;
+  right: 10px;
+  width: auto;
+  margin: 0;
+}
+.tape-cover--agent .tape-cover__title {
+  position: absolute;
+  top: 70%;
+  left: 10px;
+  margin: 0;
+  padding: 3px 4px;
+  max-width: 78%;
+  background: var(--sleeve-paper);
+}
+.tape-cover--agent .tape-cover__subtitle {
+  position: absolute;
+  top: 86%;
+  left: 14px;
+  margin: 0;
+  padding: 2px;
+  background: var(--sleeve-paper);
+}
+.tape-cover--art .tape-cover__format {
+  position: absolute;
+  top: 40%;
+  right: 8px;
+  width: auto;
+  margin: 0;
+  padding: 3px 2px;
+  background: var(--sleeve-paper);
+  writing-mode: vertical-rl;
+}
+
+/* Four individual sleeves, printed edge to edge like their paper ancestors.
+   The artwork is decorative; the existing text remains above it. */
+.tape-cover:where(.tape-cover--cold, .tape-cover--finance, .tape-cover--cloud, .tape-cover--sound) .tape-cover__art {
+  inset: 0;
+}
+.tape-cover:where(.tape-cover--cold, .tape-cover--finance, .tape-cover--cloud, .tape-cover--sound) .tape-cover__art::before,
+.tape-cover:where(.tape-cover--cold, .tape-cover--finance, .tape-cover--cloud, .tape-cover--sound) .tape-cover__art::after {
+  all: unset;
+  position: absolute;
+  content: "";
+  pointer-events: none;
+}
+
+/* COLDCHAIN / instrumentation: a tall temperature scale and travelling bands. */
+.tape-cover--cold .tape-cover__brand {
+  width: 82%;
+  border-bottom: 2px solid var(--tape-cold-foil);
+}
+.tape-cover--cold .tape-cover__title { font-size: 20px; }
+.tape-cover--cold .tape-cover__subtitle { max-width: 75%; }
+.tape-cover--cold .tape-cover__art {
+  background:
+    linear-gradient(90deg, transparent 0 91%, var(--tape-cold-foil) 91% 93%, transparent 93%),
+    repeating-linear-gradient(0deg, transparent 0 12px, color-mix(in srgb, var(--sleeve-ink) 9%, transparent) 12px 13px),
+    var(--sleeve-paper);
+}
+.tape-cover--cold .tape-cover__art::before {
+  inset: 30% 0 10%;
+  background: linear-gradient(155deg,
+    transparent 0 28%, #206b7d 28% 37%, #51b1b4 37% 46%,
+    #9ad3c4 46% 55%, #e3bc78 55% 64%, transparent 64%);
+}
+.tape-cover--cold .tape-cover__art::after {
+  right: 9%;
+  top: 43%;
+  width: 5px;
+  height: 37%;
+  border: 1px solid var(--sleeve-ink);
+  background: linear-gradient(to top, #e49070 0 23%, #e9c97b 23% 42%, #57bdc0 42% 74%, var(--sleeve-paper) 74%);
+  box-shadow: 4px 0 0 var(--sleeve-paper);
+}
+
+/* FINANCE / ledger: an ascending chart, a ruled margin and a data stamp. */
+.tape-cover--finance .tape-cover__brand { width: 75%; }
+.tape-cover--finance .tape-cover__title { font-size: 25px; letter-spacing: -.07em; }
+.tape-cover--finance .tape-cover__subtitle { max-width: 78%; }
+.tape-cover--finance .tape-cover__art {
+  background:
+    linear-gradient(90deg, transparent 0 88%, var(--tape-finance-foil) 88% 90%, transparent 90%),
+    repeating-linear-gradient(0deg, transparent 0 9px, color-mix(in srgb, var(--sleeve-ink) 8%, transparent) 9px 10px),
+    var(--sleeve-paper);
+}
+.tape-cover--finance .tape-cover__art::before {
+  inset: 32% 15% 23% 10%;
+  border-bottom: 2px solid var(--tape-finance-foil);
+  background:
+    linear-gradient(var(--tape-finance-foil), var(--tape-finance-foil)) 0 100% / 13% 24% no-repeat,
+    linear-gradient(var(--tape-finance-foil), var(--tape-finance-foil)) 20% 100% / 13% 40% no-repeat,
+    linear-gradient(var(--tape-finance-foil), var(--tape-finance-foil)) 40% 100% / 13% 34% no-repeat,
+    linear-gradient(var(--tape-finance-foil), var(--tape-finance-foil)) 60% 100% / 13% 59% no-repeat,
+    linear-gradient(var(--tape-finance-foil), var(--tape-finance-foil)) 80% 100% / 13% 78% no-repeat,
+    linear-gradient(var(--tape-finance-foil), var(--tape-finance-foil)) 100% 100% / 13% 95% no-repeat;
+  opacity: .8;
+}
+.tape-cover--finance .tape-cover__art::after {
+  content: "DATA / 01";
+  left: 12%;
+  bottom: 17%;
+  padding: 4px 6px;
+  border: 1px solid currentColor;
+  color: var(--sleeve-ink);
+  background: var(--sleeve-paper);
+  font: 700 7px/1 var(--font-mono, monospace);
+  letter-spacing: .04em;
+}
+
+/* STUDENT DATA / data library: a stacked colour index on gridded paper. */
+.tape-cover--cloud .tape-cover__brand { border-bottom: 3px solid #d06951; }
+.tape-cover--cloud .tape-cover__title { max-width: 92%; font-size: 21px; }
+.tape-cover--cloud .tape-cover__art {
+  background:
+    linear-gradient(90deg, #d06951 0 3%, transparent 3% 5%, #edb85f 5% 7%, transparent 7%),
+    repeating-linear-gradient(90deg, transparent 0 15px, color-mix(in srgb, var(--sleeve-ink) 8%, transparent) 15px 16px),
+    var(--sleeve-paper);
+}
+.tape-cover--cloud .tape-cover__art::before {
+  inset: 36% 0 20% 7%;
+  background:
+    linear-gradient(#5c9ea5, #5c9ea5) 0 0 / 66% 20% no-repeat,
+    linear-gradient(#9eae78, #9eae78) 0 25% / 80% 20% no-repeat,
+    linear-gradient(#e5bd6b, #e5bd6b) 0 50% / 92% 20% no-repeat,
+    linear-gradient(#e68e58, #e68e58) 0 75% / 75% 20% no-repeat,
+    linear-gradient(#c75964, #c75964) 0 100% / 84% 20% no-repeat;
+}
+.tape-cover--cloud .tape-cover__art::after {
+  content: "INPUT  /  PROCESS  /  OUTPUT";
+  left: 12%;
+  right: 8%;
+  bottom: 17%;
+  padding: 4px;
+  border-top: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  color: var(--sleeve-ink);
+  background: var(--sleeve-paper);
+  font: 700 6px/1.2 var(--font-mono, monospace);
+  text-align: center;
+}
+
+/* PENDULUM / sound archive: concentric grooves cut through the whole field. */
+.tape-cover--sound .tape-cover__brand { width: 78%; border-bottom: 2px solid var(--tape-sound-foil); }
+.tape-cover--sound .tape-cover__title { font-size: 23px; }
+.tape-cover--sound .tape-cover__art {
+  background:
+    linear-gradient(90deg, transparent 0 94%, var(--tape-sound-foil) 94% 96%, transparent 96%),
+    repeating-linear-gradient(0deg, transparent 0 15px, color-mix(in srgb, var(--sleeve-ink) 7%, transparent) 15px 16px),
+    var(--sleeve-paper);
+}
+.tape-cover--sound .tape-cover__art::before {
+  left: -27.5%;
+  top: 12%;
+  width: 155%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: repeating-radial-gradient(circle, transparent 0 9px, var(--tape-sound-foil) 9.5px 10.5px, transparent 11px 18px);
+  opacity: .85;
+}
+.tape-cover--sound .tape-cover__art::after {
+  left: 41%;
+  top: 59%;
+  width: 18%;
+  aspect-ratio: 1;
+  border: 2px solid var(--sleeve-paper);
+  border-radius: 50%;
+  background: #e98e76;
+  box-shadow: 0 0 0 1px var(--tape-sound-foil);
+}
+
+/* Four distinct, full-bleed printed sleeves. The artwork scales with the box;
+   the accessible project labels continue to live on the tape buttons. */
+.tape-cover:is(.tape-cover--nbody, .tape-cover--physics, .tape-cover--quantum, .tape-cover--spacewar) .tape-cover__art {
+  inset: 0;
+  z-index: 0;
+  background-position: center;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+.tape-cover:is(.tape-cover--nbody, .tape-cover--physics, .tape-cover--quantum, .tape-cover--spacewar) .tape-cover__art::before,
+.tape-cover:is(.tape-cover--nbody, .tape-cover--physics, .tape-cover--quantum, .tape-cover--spacewar) .tape-cover__art::after { content: none; }
+
+/* A star map and orbital rings printed right across deep charcoal stock. */
+.tape-cover.tape-cover--nbody { --sleeve-paper: #191923; --sleeve-ink: #f8ece0; padding-left: 20px; }
+.tape-cover--nbody .tape-cover__art { background-image: url('../assets/tape-nbody-full.svg'); }
+.tape-cover--nbody .tape-cover__brand { width: 75%; border-bottom-color: #d38f73; }
+.tape-cover--nbody .tape-cover__title { font-size: 26px; }
+.tape-cover--nbody .tape-cover__foot { border-top-color: #d38f73; }
+
+/* Scientific illustration over a diagonal, five-colour printed sweep. */
+.tape-cover.tape-cover--physics { --sleeve-paper: #f1dc9f; --sleeve-ink: #28263b; padding-top: 16px; }
+.tape-cover--physics .tape-cover__art { background-image: url('../assets/tape-physics-full.svg'); }
+.tape-cover--physics .tape-cover__brand { width: 70%; border-bottom: 1px solid currentColor; }
+.tape-cover--physics .tape-cover__format { color: #a33d48; }
+.tape-cover--physics .tape-cover__title { font-size: 24px; }
+.tape-cover--physics .tape-cover__subtitle { max-width: 75%; }
+
+/* A research archive label: squared paper, tilted plate and fine atomic paths. */
+.tape-cover.tape-cover--quantum { --sleeve-paper: #e9e4e6; --sleeve-ink: #332942; padding-left: 25px; }
+.tape-cover--quantum .tape-cover__art { background-image: url('../assets/tape-quantum-full.svg'); }
+.tape-cover--quantum .tape-cover__brand { width: 78%; border-bottom: 2px solid #756081; }
+.tape-cover--quantum .tape-cover__title { font-size: 24px; letter-spacing: -.045em; }
+.tape-cover--quantum .tape-cover__format { color: #76516e; }
+.tape-cover--quantum .tape-cover__foot { border-top-color: #756081; }
+
+/* The hidden game gets a dark arcade sleeve, with a diagonal launch trail. */
+.tape-cover.tape-cover--spacewar { --sleeve-paper: #171b2c; --sleeve-ink: #f7e9d1; padding-top: 16px; }
+.tape-cover--spacewar .tape-cover__art { background-image: url('../assets/tape-spacewar-full.svg'); }
+.tape-cover--spacewar .tape-cover__brand { width: 75%; border-bottom: 1px solid #e77751; }
+.tape-cover--spacewar .tape-cover__title { font-size: 24px; }
+.tape-cover--spacewar .tape-cover__subtitle { color: #f0bb89; }
+.tape-cover--spacewar .tape-cover__foot { border-top-color: #e77751; }
+
+/* Match the visible spine to the fixed printed stock in either site theme. */
+.tape-showcase__front:has(> .tape-cover--nbody) { --edge-stock: #191923; }
+.tape-showcase__front:has(> .tape-cover--physics) { --edge-stock: #f1dc9f; }
+.tape-showcase__front:has(> .tape-cover--quantum) { --edge-stock: #e9e4e6; }
+.tape-showcase__front:has(> .tape-cover--spacewar) { --edge-stock: #171b2c; }

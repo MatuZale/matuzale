@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 290">
+  <defs>
+    <radialGradient id="planet" cx="30%" cy="25%" r="75%">
+      <stop stop-color="#c4ff52"/><stop offset=".3" stop-color="#55e0b2"/><stop offset=".67" stop-color="#1889d7"/><stop offset="1" stop-color="#163cb2"/>
+    </radialGradient>
+    <linearGradient id="field" x2="1" y2="1"><stop stop-color="#072d95"/><stop offset="1" stop-color="#000d43"/></linearGradient>
+  </defs>
+  <path fill="url(#field)" d="M0 0h200v290H0z"/>
+  <path fill="#aaff00" d="M0 0h5v290H0z"/>
+  <path d="M138 0v290M144 0v290M150 0v290" fill="none" stroke="#70bbff" stroke-opacity=".13"/>
+  <g fill="none" stroke="#aaff00" stroke-width="1" opacity=".75">
+    <circle cx="122" cy="170" r="75"/><circle cx="122" cy="170" r="81"/>
+    <ellipse cx="122" cy="170" rx="103" ry="42" transform="rotate(-24 122 170)"/>
+  </g>
+  <circle cx="122" cy="170" r="57" fill="url(#planet)"/>
+  <g fill="none" stroke="#b7f9ca" stroke-opacity=".38" stroke-width=".8">
+    <ellipse cx="122" cy="170" rx="21" ry="57"/><ellipse cx="122" cy="170" rx="42" ry="57"/>
+    <path d="M69 150h106M65 163h114M66 176h112M70 189h104"/>
+  </g>
+  <path d="M0 237h200M0 242h200M0 247h200" stroke="#9cf348" stroke-width="2" opacity=".8"/>
+  <circle cx="23" cy="105" r="2" fill="#aaff00"/><path d="M23 108v44h20" fill="none" stroke="#aaff00" stroke-width=".8"/>
+</svg>

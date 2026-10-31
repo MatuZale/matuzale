@@ -98,6 +98,7 @@ function makeShip(kind, x, y) {
 
 let dialog, canvas, ctx, screen, picture, beam, panel, scopes, boxes, scoreEl, dpr = 1, previousLight;
 let mounted = false, destroyActive = null, scoresPage = 0, acceptsInput = () => false;
+let lastUiSignature = '';
 let state = "title", players = 1, round = 1, score = 0, wins = [0, 0], roundTime = 0, timer = 0, message = "";
 let ships = [], torps = [], sparks = [], stars = [], paused = false, raf = 0, last = 0, acc = 0, refresh = 0;
 const held = new Set(), tapped = new Set();
@@ -364,8 +365,13 @@ function showControls() {
 
 function refreshUi() {
   if (!mounted || !canvas?.isConnected) return;
-  canvas.closest('.sw-embed').dataset.state = state;
   const tapePaused = document.documentElement.classList.contains('is-tape-paused');
+  // Rendering runs at game speed, but the controls only need DOM updates when
+  // their actual state changes. Avoid repeated style/attribute writes each frame.
+  const signature = `${state}|${paused}|${panel.hidden}|${tapePaused}|${document.documentElement.lang}`;
+  if (signature === lastUiSignature) return;
+  lastUiSignature = signature;
+  canvas.closest('.sw-embed').dataset.state = state;
   const playing = state === 'play' || state === 'ending' || state === 'between' || state === 'over';
   for (const button of dialog.querySelectorAll('[data-sw="mode"]')) button.disabled = playing || tapePaused;
   const pauseKey = dialog.querySelector('[data-sw="pause"]');
@@ -534,10 +540,11 @@ function toggleMute() {
   if (sound.level()) { before = sound.level(); turnTo(0); }
   else turnTo(before || 6);
 }
-function wireKnob() {
+function wireKnob(signal) {
   dial.addEventListener("pointerdown", event => {
     if (event.button) return;
     event.preventDefault();
+    dial.focus({ preventScroll: true });
     dial.setPointerCapture(event.pointerId);
     const x0 = event.clientX, y0 = event.clientY, from = sound.level();
     const move = e => turnTo(from + ((e.clientX - x0) + (y0 - e.clientY)) / 14);
@@ -545,11 +552,13 @@ function wireKnob() {
       dial.removeEventListener("pointermove", move);
       dial.removeEventListener("pointerup", drop);
       dial.removeEventListener("pointercancel", drop);
+      dial.removeEventListener("lostpointercapture", drop);
     };
-    dial.addEventListener("pointermove", move);
-    dial.addEventListener("pointerup", drop);
-    dial.addEventListener("pointercancel", drop);
-  });
+    dial.addEventListener("pointermove", move, { signal });
+    dial.addEventListener("pointerup", drop, { signal });
+    dial.addEventListener("pointercancel", drop, { signal });
+    dial.addEventListener("lostpointercapture", drop, { signal });
+  }, { signal });
   // A notch of a mouse wheel is a detent; a trackpad's small rolls add up to one.
   let roll = 0;
   dial.addEventListener("wheel", event => {
@@ -558,7 +567,7 @@ function wireKnob() {
     if (Math.abs(roll) < 50) return;
     turnTo(sound.level() + Math.sign(roll));
     roll = 0;
-  }, { passive: false });
+  }, { passive: false, signal });
   dial.addEventListener("keydown", event => {
     const step = { ArrowUp: 1, ArrowRight: 1, ArrowDown: -1, ArrowLeft: -1, PageUp: 3, PageDown: -3 }[event.key];
     const to = event.key === "Home" ? 0 : event.key === "End" ? 10 : step && sound.level() + step;
@@ -566,7 +575,7 @@ function wireKnob() {
     event.preventDefault();
     event.stopPropagation();
     turnTo(to);
-  });
+  }, { signal });
 }
 
 /* ───────── The cassette game in the portfolio's television ───────── */
@@ -583,7 +592,7 @@ const loadStyles = () => stylesReady ||= Promise.all(['spacewar.css', 'spacewar-
 
 // One instance is mounted at a time. The caller owns cassette changes and calls
 // destroy when the tape is removed; an abort prevents stale async mounts.
-export async function mountSpacewar(hostScreen, player, { signal } = {}) {
+export async function mountSpacewar(hostScreen, player, { signal, focusGame = true } = {}) {
   await loadStyles();
   if (signal?.aborted || !hostScreen.isConnected || !player.isConnected) return null;
   destroyActive?.();
@@ -606,21 +615,30 @@ export async function mountSpacewar(hostScreen, player, { signal } = {}) {
   element.append(slot);
   hostScreen.append(element);
   dialog = player.querySelector('.tape-player__tv');
+  // The TV owns a reserved place for the game's volume control. Move the
+  // existing dial there, so mouse, touch, keyboard and V share one level.
+  const volumeSlot = player.querySelector('.tape-player__volume-slot');
+  const gameDial = deck.querySelector('.sw__volume');
+  if (volumeSlot) {
+    volumeSlot.append(gameDial);
+    volumeSlot.removeAttribute('aria-hidden');
+  }
   canvas = element.querySelector('canvas');
   ctx = canvas.getContext('2d');
   screen = element.querySelector('.sw__screen');
   picture = element.querySelector('.sw__picture');
   panel = element.querySelector('.sw__panel');
   beam = null;
-  dial = deck.querySelector('.sw__volume');
-  knob = deck.querySelector('.sw__knob');
+  dial = gameDial;
+  knob = dial.querySelector('.sw__knob');
   scoreEl = deck.querySelector('.sw__score');
   scopes = []; boxes = [];
   mounted = true;
+  lastUiSignature = '';
   state = 'title'; players = 1; ships = []; torps = []; sparks = []; score = 0; round = 1; wins = [0, 0]; paused = false; scoresPage = 0; previousLight = undefined;
   stars = Array.from({ length: 150 }, () => ({ x: rand(-1, 1), y: rand(-1, 1), b: rand(.2, 1) ** 2 }));
   held.clear(); tapped.clear();
-  wireKnob();
+  wireKnob(life.signal);
 
   function relabel() {
     const t = say();
@@ -636,12 +654,13 @@ export async function mountSpacewar(hostScreen, player, { signal } = {}) {
     tapeKey.setAttribute('aria-label', document.documentElement.lang === 'pl'
       ? (tapePaused ? 'Wznów całą taśmę' : 'Pauza całej taśmy')
       : (tapePaused ? 'Resume the whole tape' : 'Pause the whole tape'));
-    deck.querySelector('.sw__scale-name').textContent = t.volume.toUpperCase();
+    dial.querySelector('.sw__scale-name').textContent = t.volume.toUpperCase();
     dial.setAttribute('aria-label', t.volume);
     const names = document.documentElement.lang === 'pl' ? ['Obrót w lewo', 'Obrót w prawo', 'Ciąg', 'Strzał', 'Skok w hiperprzestrzeń'] : ['Rotate left', 'Rotate right', 'Thrust', 'Fire', 'Hyperspace'];
     const labels = document.documentElement.lang === 'pl' ? ['LEWO', 'PRAWO', 'CIĄG', 'STRZAŁ', 'SKOK'] : ['LEFT', 'RIGHT', 'THRUST', 'FIRE', 'HYPER'];
     deck.querySelectorAll('[data-pad]').forEach((button, i) => { button.setAttribute('aria-label', names[i]); button.title = names[i]; button.querySelector('small').textContent = labels[i]; });
     deck.querySelector('.sw-controls__pad').setAttribute('aria-label', document.documentElement.lang === 'pl' ? 'Sterowanie grą' : 'Game controls');
+    lastUiSignature = '';
     showLevel(); showReadouts(); refreshUi();
     if (!panel.hidden && panel.dataset.kind === 'help') panel.innerHTML = compactHelp();
     else if (!panel.hidden && panel.dataset.kind === 'scores') showScores();
@@ -694,9 +713,12 @@ export async function mountSpacewar(hostScreen, player, { signal } = {}) {
   function syncActivity() {
     if (!mounted) return;
     deck.inert = hostScreen.inert;
+    // The volume control lives on the cabinet, outside the game deck.
+    dial.inert = hostScreen.inert;
     const tapePaused = document.documentElement.classList.contains('is-tape-paused');
     const tapeKey = deck.querySelector('[data-sw="tape"]');
-    tapeKey.setAttribute('aria-pressed', String(tapePaused));
+    const tapePressed = String(tapePaused);
+    if (tapeKey.getAttribute('aria-pressed') !== tapePressed) tapeKey.setAttribute('aria-pressed', tapePressed);
     tapeKey.textContent = `${document.documentElement.lang === 'pl' ? 'TAŚMA' : 'TAPE'} ${tapePaused ? '▶' : 'Ⅱ'}`;
     tapeKey.setAttribute('aria-label', document.documentElement.lang === 'pl'
       ? (tapePaused ? 'Wznów całą taśmę' : 'Pauza całej taśmy')
@@ -771,6 +793,10 @@ export async function mountSpacewar(hostScreen, player, { signal } = {}) {
     acceptsInput = () => false;
     sound.setVisible(false); sound.rest();
     element.remove();
+    if (volumeSlot) {
+      gameDial.remove();
+      volumeSlot.setAttribute('aria-hidden', 'true');
+    }
     destroyActive = null;
   };
   destroyActive = destroy;
@@ -779,7 +805,7 @@ export async function mountSpacewar(hostScreen, player, { signal } = {}) {
   syncActivity();
   if (!inactive()) { sound.wake(); sound.staticHiss(.15); }
   const bounds = hostScreen.getBoundingClientRect();
-  if (bounds.bottom > 0 && bounds.top < innerHeight && bounds.right > 0 && bounds.left < innerWidth)
+  if (focusGame && bounds.bottom > 0 && bounds.top < innerHeight && bounds.right > 0 && bounds.left < innerWidth)
     canvas.focus({ preventScroll: true });
   return { element, destroy };
 }

@@ -156,15 +156,10 @@
   addEventListener('pointermove', event => {
     if (motion.matches || !fine.matches || event.pointerType === 'touch') return;
     pointer = { x: event.clientX, y: event.clientY };
-    for (const item of seams) {
-      if (!item.visible) continue;
-      const rect = item.el.getBoundingClientRect();
-      const inside = pointer.x >= rect.left && pointer.x <= rect.right && pointer.y >= rect.top && pointer.y <= rect.bottom;
-      if (inside) item.pointer = { x: (pointer.x - rect.left) / rect.width, y: (pointer.y - rect.top) / rect.height };
-      else if (item.pointer) item.pointer = null;
-      else continue;
-      schedule();
-    }
+    // draw() already measures visible seams and resolves the pointer position.
+    // Coalesce fast pointer events into that next frame instead of forcing a
+    // layout read for every event on high-polling-rate mice.
+    if (seams.some(item => item.visible)) schedule();
   }, { passive: true });
   addEventListener('blur', () => { pointer = null; seams.forEach(item => { item.pointer = null; }); schedule(); });
   motion.addEventListener('change', () => { pointer = null; lastTime = 0; lastPaint = 0; seams.forEach(item => { item.pointer = null; }); schedule(); });

@@ -49,6 +49,7 @@
   <link rel="stylesheet" href="css/tape-image-view.css" />
   <link rel="stylesheet" href="css/tape-logistic.css" />
   <link rel="stylesheet" href="css/tape-crt-glass.css" />
+  <link rel="stylesheet" href="css/tape-cover-archive.css" />
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -284,7 +285,18 @@
               <div class="tape-player__case" id="tape-player-cover"></div>
               <div class="tape-player__tv">
                 <div class="tape-player__tube"><div class="tape-player__screen" id="tape-player-screen" role="region" aria-labelledby="tape-player-title"></div></div>
-                <div class="tape-player__controls"><button type="button" class="tape-player__secret" aria-label="Play hidden VHS ident" title="Play hidden VHS ident" data-i18n-attr="aria-label:tapes.ident;title:tapes.ident">TM<span aria-hidden="true">✦</span></button><span class="tape-player__status"><span data-i18n="tapes.nowPlaying">NOW PLAYING / PROJECT ARCHIVE</span><span data-i18n="tapes.nowGame" hidden>NOW PLAYING / SPACEWAR!</span><span data-i18n="tapes.noSignal" hidden>NO SIGNAL / SELECT A TAPE</span></span><button type="button" class="tape-player__close" data-i18n="tapes.eject">EJECT ×</button><button type="button" class="tape-player__power" aria-label="Turn off TV" title="Turn off TV"><span aria-hidden="true">⏻</span></button></div>
+                <div class="tape-player__controls">
+                  <button type="button" class="tape-player__secret" aria-label="Play hidden VHS ident" title="Play hidden VHS ident" data-i18n-attr="aria-label:tapes.ident;title:tapes.ident">TM<span aria-hidden="true">✦</span></button>
+                  <span class="tape-player__status"><span data-i18n="tapes.nowPlaying">NOW PLAYING / PROJECT ARCHIVE</span><span data-i18n="tapes.nowGame" hidden>NOW PLAYING / SPACEWAR!</span><span data-i18n="tapes.noSignal" hidden>NO SIGNAL / SELECT A TAPE</span></span>
+                  <div class="tape-tuner">
+                    <label for="tape-tuner" data-i18n="tapes.tuner">CHANNEL</label>
+                    <div class="tape-tuner__dial"><span class="tape-tuner__face" aria-hidden="true"></span><input id="tape-tuner" type="range" min="0" max="11" step="1" value="0" aria-label="Select a cassette" title="Drag or use arrow keys to select a cassette" data-i18n-attr="aria-label:tapes.tunerLabel;title:tapes.tunerHint" /></div>
+                    <span class="tape-tuner__value" aria-hidden="true">CH --</span>
+                  </div>
+                  <div class="tape-player__volume-slot" aria-hidden="true"></div>
+                  <button type="button" class="tape-player__close" data-i18n="tapes.eject">EJECT ×</button>
+                  <button type="button" class="tape-player__power" aria-label="Turn off TV" title="Turn off TV"><span aria-hidden="true">⏻</span></button>
+                </div>
               </div>
             </div>
           </div>

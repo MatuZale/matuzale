@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 290" preserveAspectRatio="none">
+ <rect width="200" height="290" fill="#191923"/>
+ <path d="M0 0h8v290H0z" fill="#d57757"/><path d="M8 0h3v290H8z" fill="#e9b36b"/>
+ <path d="M141 0h59v5h-59z" fill="#d57757"/><path d="M151 7h49v2h-49z" fill="#e9b36b"/>
+ <g fill="#f7dbac" opacity=".8"><circle cx="166" cy="44" r="1"/><circle cx="144" cy="96" r=".8"/><circle cx="27" cy="128" r="1"/><circle cx="171" cy="214" r="1"/><circle cx="41" cy="247" r=".8"/><circle cx="184" cy="150" r=".8"/></g>
+ <g fill="none" stroke="#d38f73" opacity=".7"><ellipse cx="107" cy="176" rx="97" ry="37" transform="rotate(-28 107 176)"/><ellipse cx="107" cy="176" rx="98" ry="52" transform="rotate(-28 107 176)"/><ellipse cx="107" cy="176" rx="99" ry="67" transform="rotate(-28 107 176)"/><ellipse cx="107" cy="176" rx="99" ry="82" transform="rotate(-28 107 176)"/></g>
+ <defs><linearGradient id="sphere" x1=".2" y1="0" x2=".8" y2="1"><stop stop-color="#ffd287"/><stop offset=".38" stop-color="#ed9863"/><stop offset=".72" stop-color="#c25358"/><stop offset="1" stop-color="#553251"/></linearGradient></defs>
+ <circle cx="110" cy="176" r="40" fill="#191923" stroke="#191923" stroke-width="6"/><circle cx="110" cy="176" r="40" fill="url(#sphere)"/>
+ <circle cx="49" cy="202" r="3.5" fill="#eebd78"/><circle cx="158" cy="131" r="3" fill="#e77e65"/>
+ <path d="M16 256h53M16 260h33" stroke="#d38f73" stroke-width="1" opacity=".7"/>
+</svg>

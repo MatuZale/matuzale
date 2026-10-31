@@ -78,10 +78,18 @@ test('sunset waits for tape time rather than skipping scenes during pause', asyn
   await page.waitForTimeout(300);
   await page.locator('[data-tape-action="pause"]').evaluate(el => el.click());
   const sun = horizon.locator('.horizon__sun');
-  const time = await sun.evaluate(el => el.getAnimations().find(a => a.playState === 'paused')?.currentTime);
-  expect(time).toBeDefined();
+  // pause() can report a paused playState while its pending task is still
+  // resolving. Read the held time only after the browser has settled it.
+  const held = await sun.evaluate(async el => {
+    const animation = el.getAnimations().find(a => a.playState === 'paused');
+    if (!animation) return null;
+    await animation.ready;
+    return { state: animation.playState, time: animation.currentTime };
+  });
+  expect(held?.state).toBe('paused');
+  expect(typeof held?.time).toBe('number');
   await page.waitForTimeout(3700);
-  expect(await sun.evaluate(el => el.getAnimations().find(a => a.playState === 'paused')?.currentTime)).toBe(time);
+  expect(await sun.evaluate(el => el.getAnimations().find(a => a.playState === 'paused')?.currentTime)).toBe(held.time);
   await expect(horizon).not.toHaveClass(/is-night/);
   await page.locator('[data-tape-action="pause"]').click();
   await expect.poll(() => sun.evaluate(el => el.getAnimations().some(a => a.playState === 'running'))).toBe(true);
@@ -114,12 +122,32 @@ test('crash animation holds its fragments and resumes their cleanup', async ({ p
   const piece = page.locator('.circuit-burst svg').first();
   await expect(piece).toBeAttached();
   await page.locator('[data-tape-action="pause"]').evaluate(el => el.click());
-  const time = await piece.evaluate(el => el.getAnimations()[0].currentTime);
+  const held = await piece.evaluate(async el => {
+    const animation = el.getAnimations()[0];
+    if (!animation) return null;
+    await animation.ready;
+    return { state: animation.playState, time: animation.currentTime };
+  });
+  expect(held?.state).toBe('paused');
+  expect(typeof held?.time).toBe('number');
   await page.waitForTimeout(1100);
   await expect(piece).toBeAttached();
-  expect(await piece.evaluate(el => el.getAnimations()[0].currentTime)).toBe(time);
+  expect(await piece.evaluate(el => {
+    const animation = el.getAnimations()[0];
+    return { state: animation.playState, time: animation.currentTime };
+  })).toEqual(held);
   await expect(page.locator('#game-pixels')).not.toContainText('Segmentation fault');
+  // Capture the animation state in the resume event, before a short-lived
+  // fragment can finish and be removed on a busy renderer.
+  await piece.evaluate(el => {
+    const animation = el.getAnimations()[0];
+    window.__burstResumeState = null;
+    document.addEventListener('tape-pause-change', () => {
+      window.__burstResumeState = animation.playState;
+    }, { once: true });
+  });
   await page.locator('[data-tape-action="pause"]').click();
+  await expect.poll(() => page.evaluate(() => window.__burstResumeState)).toBe('running');
   await expect(page.locator('#game-pixels')).toContainText('Segmentation fault', { timeout: 5000 });
   await expect(page.locator('.circuit-burst')).toHaveCount(0, { timeout: 6000 });
 });

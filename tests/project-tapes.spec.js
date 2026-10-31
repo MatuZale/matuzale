@@ -55,6 +55,96 @@ test('cabinet keeps its controls outside the tube on desktop and phone', async (
   }
 });
 
+test('phone transport yields to the TV panel without hiding keyboard focus', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 844 });
+  await page.goto('/?lang=en');
+  const root = page.locator('html');
+  const transport = page.locator('.footer-tape__transport');
+  const key = transport.locator('[data-tape-action="pause"]');
+  await key.focus();
+  await page.locator('.tape-player__controls').evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'instant' }));
+  await expect(key).toBeFocused();
+  await expect(root).not.toHaveClass(/tv-controls-on-screen/);
+  await expect(transport).toHaveCSS('visibility', 'visible');
+  await page.locator('.tape-player__power').evaluate(el => el.focus({ preventScroll: true }));
+  await expect(root).toHaveClass(/tv-controls-on-screen/);
+  await expect(transport).toHaveCSS('visibility', 'hidden');
+  await expect(page.locator('.tape-player__power')).toBeFocused();
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await expect(root).not.toHaveClass(/tv-controls-on-screen/);
+  await expect(transport).toHaveCSS('visibility', 'visible');
+});
+
+test('channel dial selects tapes with the keyboard and stays in sync with the shelf and transport', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/?lang=en');
+  const tuner = page.locator('#tape-tuner');
+  const screen = page.locator('#tape-player-screen');
+  const player = page.locator('#project-player');
+  await expect(tuner).toHaveValue('0');
+  await expect(tuner).toHaveAttribute('aria-valuetext', 'No cassette');
+  await expect(tuner).toHaveAttribute('max', '11');
+  await tuner.focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(tuner).toBeFocused();
+  await expect(tuner).toHaveValue('1');
+  await expect(tuner).toHaveAttribute('aria-valuetext', 'Channel 01: BENTOS');
+  await expect(screen).toHaveAttribute('data-project', 'bentos');
+  await page.keyboard.press('ArrowRight');
+  await expect(tuner).toBeFocused();
+  await expect(tuner).toHaveValue('2');
+  await expect(tuner).toHaveAttribute('aria-valuetext', 'Channel 02: KODLAB');
+  await expect(screen).toHaveAttribute('data-project', 'kodlab');
+
+  await page.locator('.project-tape--art').evaluate(el => el.click());
+  await expect(tuner).toHaveValue('4');
+  await expect(tuner).toHaveAttribute('aria-valuetext', 'Channel 05: ATTRACTORS');
+  await player.locator('.tape-player__close').evaluate(el => el.click());
+  await expect(tuner).toHaveValue('0');
+  await expect(tuner).toHaveAttribute('aria-valuetext', 'No cassette');
+  await expect(screen.locator('.tape-static')).toBeVisible();
+
+  await tuner.focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(screen).toHaveAttribute('data-project', 'bentos');
+  await page.keyboard.press('Home');
+  await expect(tuner).toBeFocused();
+  await expect(tuner).toHaveValue('0');
+  await expect(screen.locator('.tape-static')).toBeVisible();
+  await page.keyboard.press('ArrowRight');
+  await player.locator('.tape-player__power').evaluate(el => el.click());
+  await expect(player).toHaveClass(/is-off/);
+  await expect(tuner).toHaveValue('0');
+  await expect(tuner).toHaveAttribute('aria-valuetext', 'No cassette');
+});
+
+test('channel dial tracks the AV game tape and keeps focus after the game loads', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/?lang=en');
+  const tuner = page.locator('#tape-tuner');
+  const screen = page.locator('#tape-player-screen');
+  await page.locator('.project-tape--art').evaluate(el => el.click());
+  await expect(tuner).toHaveValue('4');
+  await page.locator('[data-av]').evaluate(el => el.click());
+  await expect(page.locator('html')).toHaveClass(/is-crt/);
+  await expect(tuner).toHaveAttribute('max', '12');
+  await expect(tuner).toHaveValue('5');
+  await expect(tuner).toHaveAttribute('aria-valuetext', 'Channel 05: ATTRACTORS');
+  await tuner.focus();
+  await page.keyboard.press('ArrowLeft');
+  await expect(tuner).toHaveValue('4');
+  await expect(tuner).toHaveAttribute('aria-valuetext', 'Channel 04: SPACEWAR!');
+  await expect(screen).toHaveAttribute('data-project', 'spacewar');
+  await expect(screen.locator('.sw-embed canvas')).toBeVisible();
+  await expect(tuner).toBeFocused();
+  await page.locator('[data-av]').evaluate(el => el.click());
+  await expect(page.locator('html')).not.toHaveClass(/is-crt/);
+  await expect(tuner).toHaveAttribute('max', '11');
+  await expect(tuner).toHaveValue('0');
+  await expect(tuner).toHaveAttribute('aria-valuetext', 'No cassette');
+  await expect(screen.locator('.tape-static')).toBeVisible();
+});
+
 test('selecting and changing tapes plays projects on the TV', async ({ page }) => {
   await page.goto('/?lang=pl');
   const shelf = page.locator('#project-shelf');
@@ -72,10 +162,16 @@ test('selecting and changing tapes plays projects on the TV', async ({ page }) =
   await expectProject(page, 'art');
   await expect(player.locator('.tape-art-preview--art img')).toBeVisible();
   const galleryLink = player.locator('[data-deck-open]');
+  const background = page.locator('main#main');
+  await expect(background).toBeVisible();
   await galleryLink.click();
   const gallery = page.locator('dialog.deck');
   await expect(gallery).toBeVisible();
+  await expect(background).toBeHidden();
+  await expect(gallery.locator('.deck__close')).toBeFocused();
   await gallery.locator('.deck__close').click();
+  await expect(gallery).toBeHidden();
+  await expect(background).toBeVisible();
   await expect(player).toBeVisible();
   await expect(galleryLink).toBeFocused();
   await player.locator('.tape-player__close').click();
@@ -182,6 +278,10 @@ test('attractor artwork tilts and returns when the pointer leaves', async ({ pag
   await picture.hover({ position: { x: 30, y: 30 } });
   await expect(picture).toHaveClass(/is-print-holo-active/);
   await expect.poll(() => picture.evaluate(el => el.style.getPropertyValue('--print-tilt-y'))).not.toBe('');
+  // A trailing scroll event must not extinguish the foil while the pointer is
+  // still on the artwork (for example after a smooth scroll settles).
+  await page.evaluate(() => window.dispatchEvent(new Event('scroll')));
+  await expect(picture).toHaveClass(/is-print-holo-active/);
   await page.mouse.move(1, 1);
   await expect(picture).not.toHaveClass(/is-print-holo-active/);
 });
@@ -255,10 +355,24 @@ test('five-colour glow follows hover, not selection, and respects reduced motion
   const tape = page.getByRole('button', { name: /^Kodlab:/ });
   await tape.hover();
   await expect.poll(() => tape.evaluate(el => getComputedStyle(el).animationName)).toBe('tape-halo-turn');
-  const first = await tape.evaluate(el => getComputedStyle(el).getPropertyValue('--tape-halo-angle'));
-  await page.waitForTimeout(300);
-  const second = await tape.evaluate(el => getComputedStyle(el).getPropertyValue('--tape-halo-angle'));
-  expect(second).not.toBe(first);
+  // Sample the actual CSS animation at two points. A wall-clock sleep can
+  // observe the same rendered frame twice on a software-rendered browser.
+  const halo = await tape.evaluate(el => {
+    const animation = el.getAnimations().find(item => item.animationName === 'tape-halo-turn');
+    if (!animation) return null;
+    const running = animation.playState === 'running';
+    const original = animation.currentTime;
+    animation.pause();
+    animation.currentTime = 1000;
+    const first = getComputedStyle(el).getPropertyValue('--tape-halo-angle');
+    animation.currentTime = 3000;
+    const second = getComputedStyle(el).getPropertyValue('--tape-halo-angle');
+    animation.currentTime = original;
+    if (running) animation.play();
+    return { running, first, second };
+  });
+  expect(halo?.running).toBe(true);
+  expect(halo.first).not.toBe(halo.second);
   await tape.click();
   await page.mouse.move(1, 1);
   await expect(tape).toHaveAttribute('aria-expanded', 'true');
@@ -313,10 +427,9 @@ test('VHS ident moves its T-120 title and BENTOS controls remain clickable', asy
   await expect(ident).toBeVisible();
   const title = ident.locator('.tape-ident__title');
   await expect(title).toContainText('120');
-  const first = await title.evaluate(el => getComputedStyle(el).transform);
-  await page.waitForTimeout(1600);
-  const second = await title.evaluate(el => getComputedStyle(el).transform);
-  expect(second).not.toBe(first);
+  // This animation intentionally holds its title still through much of its
+  // timeline. Its entry, hold and exit are checked at explicit times below.
+  await expect.poll(() => title.evaluate(el => getComputedStyle(el).animationName)).toContain('ident-title');
   await page.locator('.tape-player__close').click();
   await expect(ident).toBeHidden();
   await expect(screen).not.toHaveAttribute('inert', '');

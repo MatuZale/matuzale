@@ -9,6 +9,9 @@
   const eject = player.querySelector('.tape-player__close');
   const power = player.querySelector('.tape-player__power');
   const ident = player.querySelector('.tape-player__secret');
+  const tuner = player.querySelector('#tape-tuner');
+  const tunerFace = player.querySelector('.tape-tuner');
+  const tunerValue = player.querySelector('.tape-tuner__value');
   const playingStatus = player.querySelector('[data-i18n="tapes.nowPlaying"]');
   const gameStatus = player.querySelector('[data-i18n="tapes.nowGame"]');
   const idleStatus = player.querySelector('[data-i18n="tapes.noSignal"]');
@@ -49,6 +52,7 @@
   let tuningTimer = 0;
   let completeEject = null;
   let lastButton = null;
+  let tuningByDial = false;
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const systemDark = matchMedia('(prefers-color-scheme: dark)');
   const desktopShelf = matchMedia('(min-width: 1024px)');
@@ -186,6 +190,7 @@
     spine.append(replica);
     const front = document.createElement('div');
     front.className = 'tape-showcase__front';
+    front.dataset.spine = button.querySelector('.project-tape__name').textContent;
     front.append(cover.cloneNode(true));
     box.append(spine, front);
     item.append(box);
@@ -233,6 +238,9 @@
   systemDark.addEventListener('change', updateTheme);
   function stopGame() {
     if (!active?.game) return;
+    // Removing the game's cabinet volume control must not drop keyboard focus.
+    const volumeSlot = player.querySelector('.tape-player__volume-slot');
+    if (volumeSlot?.contains(document.activeElement)) tuner.focus({ preventScroll: true });
     active.abort.abort();
     active.gameController?.destroy();
     active.gameController = null;
@@ -261,6 +269,7 @@
     gameStatus.hidden = idle || !active?.game;
     idleStatus.hidden = !idle;
     player.classList.toggle('is-idle', idle);
+    syncTuner();
     for (const region of [player, screen]) {
       if (idle) {
         region.removeAttribute('aria-labelledby');
@@ -274,6 +283,34 @@
       }
     }
   }
+  function channelTapes() {
+    // The leaning art tape is last on the shelf, but the dial follows channel
+    // numbers, with the hidden game occupying channel 04 only in AV mode.
+    return [...stacks.querySelectorAll('.project-tape')]
+      .sort((a, b) => Number(a.dataset.tapeChannel) - Number(b.dataset.tapeChannel));
+  }
+  function syncTuner(value) {
+    const tapes = channelTapes();
+    const position = value ?? (active ? tapes.indexOf(active.button) + 1 : 0);
+    const selected = tapes[position - 1];
+    tuner.max = String(tapes.length);
+    tuner.value = String(position);
+    const channel = selected?.dataset.tapeChannel || '--';
+    tunerValue.textContent = `CH ${channel}`;
+    tuner.setAttribute('aria-valuetext', selected
+      ? `${document.documentElement.lang === 'pl' ? 'Kanał' : 'Channel'} ${channel}: ${selected.querySelector('.project-tape__name').textContent}`
+      : (document.documentElement.lang === 'pl' ? 'Brak kasety' : 'No cassette'));
+    tunerFace.style.setProperty('--tune-angle', `${-135 + 270 * position / Math.max(1, tapes.length)}deg`);
+  }
+  tuner.addEventListener('input', () => {
+    const position = Number(tuner.value);
+    const button = channelTapes()[position - 1];
+    syncTuner(position);
+    if (!button) { if (active) ejectTape(false, false); return; }
+    if (active?.button === button && !ejectTimer) return;
+    tuningByDial = true;
+    try { button.click(); } finally { tuningByDial = false; }
+  });
   function setPowerState(off) {
     player.classList.toggle('is-off', off);
     power.setAttribute('aria-pressed', String(!off));
@@ -398,6 +435,7 @@
     button.type = 'button';
     if (style === 'art') { article.removeAttribute('id'); button.id = 'art'; }
     button.className = `project-tape project-tape--${style}`;
+    button.dataset.tapeChannel = String(i < 3 ? i + 1 : i + 2).padStart(2, '0');
     button.setAttribute('aria-controls', 'project-player');
     button.setAttribute('aria-expanded', 'false');
     button.innerHTML = `<span class="project-tape__brand">TM<span> /</span></span><span class="project-tape__label"><span class="project-tape__name"></span><span class="project-tape__category"></span></span><span class="project-tape__bands" aria-hidden="true"></span><span class="project-tape__format">${format}<small>VHS</small></span>`;
@@ -466,7 +504,7 @@
       document.dispatchEvent(new CustomEvent('tape-channel-change', {
         detail: { channel: String(i < 3 ? i + 1 : i + 2).padStart(2, '0'), title: name }
       }));
-      title.focus({ preventScroll: true });
+      if (!tuningByDial) title.focus({ preventScroll: true });
     });
     stacks.append(button);
   });
@@ -479,6 +517,7 @@
   gameTape.type = 'button';
   gameTape.className = 'project-tape project-tape--spacewar';
   gameTape.dataset.tapeSpacewar = '';
+  gameTape.dataset.tapeChannel = '04';
   gameTape.setAttribute('aria-controls', 'project-player');
   gameTape.setAttribute('aria-expanded', 'false');
   gameTape.innerHTML = `<span class="project-tape__brand">TM<span> /</span></span><span class="project-tape__label"><span class="project-tape__name">SPACEWAR!</span><span class="project-tape__category"></span></span><span class="project-tape__bands" aria-hidden="true"></span><span class="project-tape__format">T-120<small>VHS</small></span>`;
@@ -533,10 +572,11 @@
     document.dispatchEvent(new CustomEvent('tape-channel-change', {
       detail: { channel: '04', title: 'SPACEWAR!' }
     }));
-    title.focus({ preventScroll: true });
+    if (!tuningByDial) title.focus({ preventScroll: true });
+    const focusGame = !tuningByDial;
     import('./spacewar.js').then(async module => {
       if (active !== session || session.abort.signal.aborted) return;
-      const controller = await module.mountSpacewar(screen, player, { signal: session.abort.signal });
+      const controller = await module.mountSpacewar(screen, player, { signal: session.abort.signal, focusGame });
       if (active !== session || session.abort.signal.aborted) { controller?.destroy(); return; }
       session.gameController = controller;
       loading.remove();
@@ -564,6 +604,7 @@
       updateShowcase();
     }
     if (desktopShelf.matches && !desktopAvShelf.matches) syncShelfMode();
+    syncTuner();
   }
   document.addEventListener('crtchange', syncGameTape);
   syncGameTape();
@@ -571,6 +612,7 @@
     updateKodlabPreview();
     setPowerState(player.classList.contains('is-off'));
     if (player.classList.contains('is-idle')) setIdle(true);
+    else syncTuner();
     labelGameTape();
     const image = active?.body?.querySelector('.tape-art-preview img');
     const source = active?.article?.querySelector('.card__print img');
@@ -609,6 +651,40 @@
       else powerOff();
     }
   });
+  // On phones, the fixed transport otherwise covers the TV's own controls.
+  // Keep it available if it already owns keyboard focus until focus leaves it.
+  const tvControls = player.querySelector('.tape-player__controls');
+  const floatingControls = [document.querySelector('.footer-tape__transport'), document.querySelector('.back-top')].filter(Boolean);
+  const narrowControls = matchMedia('(max-width: 680px)');
+  function syncFloatingControls() {
+    if (!narrowControls.matches) {
+      document.documentElement.classList.remove('tv-controls-on-screen');
+      return;
+    }
+    const rect = tvControls.getBoundingClientRect();
+    const tvControlsVisible = rect.bottom > 0 && rect.top < innerHeight && rect.right > 0 && rect.left < innerWidth;
+    const focused = floatingControls.some(control => control.contains(document.activeElement));
+    document.documentElement.classList.toggle('tv-controls-on-screen', tvControlsVisible && !focused);
+  }
+  if (tvControls && floatingControls.length) {
+    let visibilityFrame = 0;
+    const measureControls = () => {
+      cancelAnimationFrame(visibilityFrame);
+      if (!narrowControls.matches) { syncFloatingControls(); return; }
+      visibilityFrame = requestAnimationFrame(syncFloatingControls);
+    };
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(measureControls).observe(tvControls);
+    }
+    // WebKit can delay observer delivery while scrolling. Keep the controls
+    // clear on the next frame, and measure synchronously when focus changes.
+    window.addEventListener('scroll', measureControls, { passive: true });
+    window.addEventListener('resize', measureControls, { passive: true });
+    measureControls();
+    narrowControls.addEventListener('change', syncFloatingControls);
+    document.addEventListener('focusin', syncFloatingControls);
+    document.addEventListener('focusout', () => queueMicrotask(syncFloatingControls));
+  }
   cards.hidden = true;
   shelf.hidden = false;
   player.hidden = false;

@@ -1,5 +1,44 @@
 import { test, expect } from '@playwright/test';
 
+for (const width of [1024, 1280]) {
+  test(`sleeves keep their proportions and align above the spines at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/?lang=en');
+    const shelf = page.locator('#project-shelf');
+    for (const key of ['bentos', 'kodlab', 'agent', 'art', 'cold', 'finance', 'cloud', 'sound', 'nbody', 'physics', 'quantum']) {
+      await shelf.locator(`.project-tape--${key}`).evaluate(el => el.click());
+      const geometry = await shelf.locator('.tape-showcase.is-open').evaluate(scene => {
+        const frontElement = scene.querySelector('.tape-showcase__front');
+        const front = frontElement.getBoundingClientRect();
+        const cover = scene.querySelector('.tape-cover').getBoundingClientRect();
+        const frame = scene.getBoundingClientRect();
+        const title = scene.querySelector('.tape-cover__title').getBoundingClientRect();
+        const foot = scene.querySelector('.tape-cover__foot').getBoundingClientRect();
+        const art = scene.querySelector('.tape-cover__art').getBoundingClientRect();
+        const subtitle = scene.querySelector('.tape-cover__subtitle').getBoundingClientRect();
+        const matrix = new DOMMatrixReadOnly(getComputedStyle(frontElement).transform);
+        return { width: frontElement.offsetWidth, height: frontElement.offsetHeight,
+          lift: frame.top - front.top, titleBottom: title.bottom, subtitleBottom: subtitle.bottom,
+          footTop: foot.top, artTop: art.top, artBottom: art.bottom, artLeft: art.left,
+          artRight: art.right, coverTop: cover.top, coverBottom: cover.bottom,
+          coverLeft: cover.left, coverRight: cover.right, turn: matrix.m13,
+          spine: frontElement.dataset.spine };
+      });
+      expect(geometry.width / geometry.height).toBeCloseTo(3 / 4.35, 2);
+      expect(geometry.lift).toBeGreaterThan(10);
+      expect(geometry.titleBottom).toBeLessThan(geometry.footTop);
+      expect(geometry.subtitleBottom).toBeLessThan(geometry.footTop);
+      expect(Math.abs(geometry.artTop - geometry.coverTop)).toBeLessThan(2);
+      expect(Math.abs(geometry.artBottom - geometry.coverBottom)).toBeLessThan(2);
+      expect(Math.abs(geometry.artLeft - geometry.coverLeft)).toBeLessThan(2);
+      expect(Math.abs(geometry.artRight - geometry.coverRight)).toBeLessThan(2);
+      expect(Math.abs(geometry.turn)).toBeGreaterThan(.05);
+      expect(geometry.spine).toBeTruthy();
+    }
+  });
+}
+
 for (const mode of ['light', 'dark']) {
   test(`moving spines retain their printed accents in ${mode} mode`, async ({ page }) => {
     await page.emulateMedia({ colorScheme: mode });
@@ -50,8 +89,8 @@ test('replicas stay attached to moving spines during rapid changes', async ({ pa
     for (const key of keys) {
       document.querySelector(`.project-tape--${key}`).click();
       await new Promise(resolve => {
-        const start = performance.now();
-        const frame = now => {
+        let frames = 0;
+        const frame = () => {
           for (const replica of document.querySelectorAll('.tape-showcase')) {
             const box = replica.getBoundingClientRect();
             const spine = replica.source.getBoundingClientRect();
@@ -59,7 +98,9 @@ test('replicas stay attached to moving spines during rapid changes', async ({ pa
               Math.abs(box.top + box.height / 2 - spine.top - spine.height / 2)));
             angles.push(Math.abs(rotation(replica.source) - rotation(replica.querySelector('.tape-showcase__replica'))));
           }
-          if (now - start < 110) requestAnimationFrame(frame);
+          // Observe two actual rendered frames per change, even on a slow
+          // software renderer where 110 ms may contain only a single frame.
+          if (++frames < 2) requestAnimationFrame(frame);
           else resolve();
         };
         requestAnimationFrame(frame);
@@ -69,7 +110,7 @@ test('replicas stay attached to moving spines during rapid changes', async ({ pa
     return { samples, angles, replicas: document.querySelectorAll('.tape-showcase').length,
       hidden: document.querySelectorAll('.project-tape.is-presented').length };
   });
-  expect(result.samples.length).toBeGreaterThan(10);
+  expect(result.samples.length).toBeGreaterThanOrEqual(12);
   // Allow one rendered frame of motion and small rounding differences in WebKit.
   expect(Math.max(...result.samples)).toBeLessThan(8);
   expect(Math.max(...result.angles)).toBeLessThan(1);

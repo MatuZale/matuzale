@@ -36,7 +36,12 @@
 
   // Don't keep a timer alive while the user is away from the television.
   if ('IntersectionObserver' in window) {
-    new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; schedule(); }, { threshold: .2 }).observe(screen);
+    new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      // The CRT's continuous tracking line shares this visibility lifecycle.
+      player.classList.toggle('is-tv-offscreen', !visible);
+      schedule();
+    }, { threshold: .2 }).observe(screen);
   } else {
     visible = true;
   }

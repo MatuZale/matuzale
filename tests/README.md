@@ -1,6 +1,6 @@
 # Deck browser checks
 
-Run `npm run test` for the JavaScript syntax check. `npm run test:mobile` runs all four
+Run `npm run test` for the JavaScript checks. `npm run test:mobile` selects all four
 Playwright projects through the prepared Agent Control offline VM, including the two
 desktop projects. Do not install dependencies or launch Playwright on the host Mac.
 The manifests are exact copies of the supplied cache inputs.
@@ -18,10 +18,23 @@ This preserves the original full-step response at 60 Hz and deliberately avoids
 replaying an unbounded backlog after a stalled frame. CSS, textures and raster sizing
 are unchanged. First-paint/layout/decode costs still need separate device profiling.
 
-The gate has a **600-second total budget**, on 2 CPUs with software rendering. Playwright's
-global timeout is 570 seconds, reserving 30 seconds for the surrounding gate; individual
+Each VM run has a **600-second budget**, on 2 CPUs with software rendering. Playwright's
+global timeout is 570 seconds, reserving 30 seconds for startup and reporting; individual
 test timeouts do not extend this budget. One worker avoids competing software renderers.
-Actual completion within that budget must still be confirmed by the VM run.
+The browser suite now exceeds one VM run's budget, so run all twelve shards sequentially
+against the same unchanged source snapshot:
+
+```sh
+npx playwright test --fully-parallel --workers=1 --shard=1/12 --reporter=dot
+# Repeat with 2/12 through 12/12, each in a separate offline VM run.
+```
+
+`--fully-parallel` makes Playwright partition individual tests instead of entire files;
+`--workers=1` still executes only one at a time. Do not use test filters for this gate.
+Record the exit code, pass count and skips for every shard. All twelve must complete
+successfully; a failure, timeout, missing shard or source change makes the aggregate red.
+Rerun the complete matrix after making a fix. This preserves all projects and assertions;
+an explicit WebKit native-input skip remains visible and is documented below.
 
 - Chromium touch uses CDP engine touch sequences for inspection, scrolling, cancellation
   and multiple fingers. These are browser engine inputs, not measurements on a physical phone.
@@ -44,7 +57,7 @@ Actual completion within that budget must still be confirmed by the VM run.
   and passed it at DPR 1. Effects, actionability and assertions remain enabled. This
   functional profiles do not cover Retina rasterisation, GPU performance or physical iOS;
   those require separate checks. Lowering Chromium raster resolution also gives the
-  complete matrix time to finish in the same 600-second VM gate. Production CSS, assets
+  individual functional runs more practical. Production CSS, assets
   and effects are unchanged.
 
 Every collection opening checks all 20 unique card IDs and all 20 loaded images. The
@@ -114,7 +127,7 @@ creating or opening private files.
 Only two neutral/held-light Chromium screenshots of Halvorsen are requested in `test-results`.
 No automatic failure screenshots, video or trace collection is enabled. Run-specific results
 belong in ignored technical output or the task report, rather than this coverage document.
-A successful run must complete all 20 executable cases within the 600-second gate; the
+A successful run must complete all deck cases as part of the complete sharded matrix; the
 explicit WebKit native multi-touch skip remains visible. A partial or timed-out run fails.
 
 The independent WebKit diagnostic found trusted touch down/up followed by a mouse-labelled

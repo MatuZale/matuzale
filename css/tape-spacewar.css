@@ -50,14 +50,15 @@
 .tape-cover--spacewar .tape-cover__brand { border-bottom: 3px solid #e77751; }
 .tape-cover--spacewar .tape-cover__title { letter-spacing: -.055em; }
 .tape-cover--spacewar .tape-cover__art {
-  inset: 38% 0 12%;
+  inset: 43% 0 12%;
   background:
     radial-gradient(circle at 53% 50%, #fbd37d 0 2px, #e97857 3px 6px, #e9785733 7px 11px, transparent 12px),
-    repeating-radial-gradient(ellipse at 53% 50%, transparent 0 20px, #d99e714d 21px 22px, transparent 23px 33px),
+    repeating-radial-gradient(ellipse at 53% 50%, transparent 0 18px, #d99e7166 19px 20px, transparent 21px 30px),
     radial-gradient(circle at 15% 22%, #f9dfb7 0 1px, transparent 1.5px),
     radial-gradient(circle at 75% 14%, #f9dfb7 0 1px, transparent 1.5px),
     radial-gradient(circle at 87% 70%, #f9dfb7 0 1px, transparent 1.5px),
     radial-gradient(circle at 21% 79%, #f9dfb7 0 1px, transparent 1.5px),
+    linear-gradient(0deg, #e86759 0 3%, #f1a348 3% 6%, #dfcd78 6% 9%, transparent 9%),
     linear-gradient(155deg, #30243e, var(--sw-tape-sky) 65%);
 }
 /* Two ships orbit the central star, drawn as crisp printed vector silhouettes. */

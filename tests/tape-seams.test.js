@@ -40,7 +40,8 @@ const ctx = {
   fillText(char, x, y) { drawn.push([char, x, y, this.fillStyle, this.globalAlpha]); },
 };
 const canvas = { width: 300, height: 150, getContext: () => ctx };
-const element = { classList: { contains: () => false }, querySelector: () => canvas, getBoundingClientRect: () => rect };
+let layoutReads = 0;
+const element = { classList: { contains: () => false }, querySelector: () => canvas, getBoundingClientRect: () => { layoutReads++; return rect; } };
 let deckOpen = false;
 const doc = { ...documentEvents, hidden: false, documentElement: { classList: { contains: name => name === 'deck-open' && deckOpen } }, querySelectorAll: () => [element] };
 let observer;
@@ -89,7 +90,10 @@ windowEvents.emit('scroll');
 flush();
 assert.notEqual(snapshot(), initial, 'the wave continues as the page moves');
 const beforePointer = snapshot();
-windowEvents.emit('pointermove', { pointerType: 'mouse', clientX: 400, clientY: 148 });
+const readsBeforePointer = layoutReads;
+for (let i = 0; i < 12; i++) windowEvents.emit('pointermove', { pointerType: 'mouse', clientX: 400, clientY: 148 });
+assert.equal(layoutReads, readsBeforePointer, 'pointer events do not force layout before the next frame');
+assert.equal(queue.length, 1, 'rapid pointer events coalesce into one frame');
 flush();
 assert.notEqual(snapshot(), beforePointer, 'the pointer bends the wave');
 motion.matches = true;

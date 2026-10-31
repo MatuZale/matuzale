@@ -31,6 +31,27 @@ function expectStableFlow(samples, baseline) {
   }
 }
 
+// Observe the actual MediaQueryLists used by the page. WebKit can update an
+// existing list later than a newly-created matchMedia() result after emulation.
+async function observeMotionLists(page) {
+  await page.addInitScript(() => {
+    const matchMedia = window.matchMedia;
+    window.__testMotionLists = [];
+    window.matchMedia = function (query) {
+      const list = matchMedia.call(this, query);
+      if (query === '(prefers-reduced-motion: reduce)') window.__testMotionLists.push(list);
+      return list;
+    };
+  });
+}
+
+async function waitForMotionLists(page, reduced) {
+  await expect.poll(() => page.evaluate(reduced => {
+    const lists = window.__testMotionLists;
+    return lists.length > 0 && lists.every(list => list.matches === reduced);
+  }, reduced)).toBe(true);
+}
+
 // Sample the actual CSS animation at two instants in one browser task. Pausing
 // it avoids depending on how many frames a busy renderer can present.
 async function samplePower(page, selector, animationName) {
@@ -80,6 +101,7 @@ test('power transitions collapse and restore the picture inside the stationary T
 
 test('new selections and eject cancel power animations without a stale transition', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await observeMotionLists(page);
   await page.goto('/?lang=en');
   const player = page.locator('#project-player');
   const screen = page.locator('#tape-player-screen');
@@ -103,22 +125,30 @@ test('new selections and eject cancel power animations without a stale transitio
   await expect(screen).toHaveAttribute('data-project', 'art');
 
   await page.emulateMedia({ reducedMotion: 'reduce' });
+  await waitForMotionLists(page, true);
   await player.locator('.tape-player__power').evaluate(el => el.click());
+  // Preference changes and power transitions can settle asynchronously in WebKit.
+  await expect(player).toHaveClass(/is-off/);
   await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await waitForMotionLists(page, false);
   const eject = await page.evaluate(() => {
     const player = document.querySelector('#project-player');
+    const off = player.classList.contains('is-off');
+    const paused = document.documentElement.classList.contains('is-tape-paused');
     document.querySelector('.project-tape--kodlab').click();
     const started = player.classList.contains('is-powering-on');
     document.querySelector('.tape-player__close').click();
-    return { started, cancelled: !player.classList.contains('is-powering-on') };
+    return { off, paused, started, cancelled: !player.classList.contains('is-powering-on') };
   });
-  expect(eject).toEqual({ started: true, cancelled: true });
+  expect(eject).toEqual({ off: true, paused: false, started: true, cancelled: true });
   await expect(player.locator('.tape-static')).toBeVisible();
   await expect(player).not.toHaveClass(/is-off|is-powering-on/);
 });
 
 test('reduced motion and tape pause finish power transitions immediately', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
+  await observeMotionLists(page);
+  await page.clock.install();
   await page.goto('/?lang=en');
   const player = page.locator('#project-player');
   const screen = page.locator('#tape-player-screen');
@@ -129,10 +159,22 @@ test('reduced motion and tape pause finish power transitions immediately', async
   await expect(player).toHaveClass(/is-off/);
   await expect(player).not.toHaveClass(/is-powering-off/);
 
+  // Keep the JS transition timeout pending while preference events cross the
+  // automation boundary; the actual page handler and CSS remain in use.
+  await page.clock.pauseAt(Date.now() + 250);
   await page.emulateMedia({ reducedMotion: 'no-preference' });
-  await page.locator('.project-tape--kodlab').evaluate(el => el.click());
-  await expect(player).toHaveClass(/is-powering-on/);
-  await page.locator('[data-tape-action="pause"]').evaluate(el => el.click());
+  // Chromium dispatches the real media-query change on the next frame. Advance
+  // well below either transition's timeout, so a missing handler cannot pass.
+  await page.clock.runFor(32);
+  await waitForMotionLists(page, false);
+  const pauseTransition = await page.evaluate(() => {
+    const player = document.querySelector('#project-player');
+    document.querySelector('.project-tape--kodlab').click();
+    const started = player.classList.contains('is-powering-on');
+    document.querySelector('[data-tape-action="pause"]').click();
+    return { started, stopped: !player.classList.contains('is-powering-on') };
+  });
+  expect(pauseTransition).toEqual({ started: true, stopped: true });
   await expect(player).not.toHaveClass(/is-powering-on/);
   await player.locator('.tape-player__power').evaluate(el => el.click());
   await expect(player).toHaveClass(/is-off/);
@@ -143,14 +185,23 @@ test('reduced motion and tape pause finish power transitions immediately', async
   await player.locator('.tape-player__power').evaluate(el => el.click());
   await expect(player).toHaveClass(/is-powering-on/);
   await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.clock.runFor(32);
+  await waitForMotionLists(page, true);
   await expect(player).not.toHaveClass(/is-powering-on/);
   await player.locator('.tape-player__power').evaluate(el => el.click());
   await expect(player).toHaveClass(/is-off/);
   await page.emulateMedia({ reducedMotion: 'no-preference' });
-  await page.locator('.project-tape--kodlab').evaluate(el => el.click());
-  await player.locator('.tape-player__power').evaluate(el => el.click());
-  await expect(player).toHaveClass(/is-powering-off/);
+  await page.clock.runFor(32);
+  await waitForMotionLists(page, false);
+  const started = await page.evaluate(() => {
+    document.querySelector('.project-tape--kodlab').click();
+    document.querySelector('.tape-player__power').click();
+    return document.querySelector('#project-player').classList.contains('is-powering-off');
+  });
+  expect(started).toBe(true);
   await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.clock.runFor(32);
+  await waitForMotionLists(page, true);
   await expect(player).toHaveClass(/is-off/);
   await expect(player).not.toHaveClass(/is-powering-off/);
 });
@@ -279,21 +330,44 @@ test('off-air snow moves continuously on both layers', async ({ page }) => {
   await page.locator('.tape-player__close').evaluate(el => el.click());
   const grain = page.locator('.tape-static__grain');
   await expect(grain).toBeVisible();
-  const before = await grain.evaluate(el => ({
-    timing: getComputedStyle(el, '::after').animationTimingFunction,
-    secondTiming: getComputedStyle(el, '::before').animationTimingFunction,
-    first: getComputedStyle(el, '::after').transform,
-    second: getComputedStyle(el, '::before').transform,
-  }));
-  expect(before.timing).toBe('linear');
-  expect(before.secondTiming).toBe('linear');
-  await page.waitForTimeout(100);
-  const after = await grain.evaluate(el => ({
-    first: getComputedStyle(el, '::after').transform,
-    second: getComputedStyle(el, '::before').transform,
-  }));
-  expect(after.first).not.toBe(before.first);
-  expect(after.second).not.toBe(before.second);
+  await expect(grain.locator('..')).not.toHaveClass(/is-suspended/);
+  const layers = [
+    { pseudo: '::after', name: 'tape-static-signal' },
+    { pseudo: '::before', name: 'tape-static-drift' },
+  ];
+  for (const layer of layers) {
+    // Compare real CSS geometry at two points without sampling an alternating
+    // animation at an accidentally identical phase on a slow renderer.
+    const sample = await grain.evaluate((el, { pseudo, name }) => {
+      const animation = el.getAnimations({ subtree: true }).find(item => item.animationName === name);
+      if (!animation) return null;
+      const timing = getComputedStyle(el, pseudo).animationTimingFunction;
+      animation.pause();
+      animation.currentTime = 0;
+      const first = getComputedStyle(el, pseudo).transform;
+      animation.currentTime = 75;
+      const second = getComputedStyle(el, pseudo).transform;
+      animation.play();
+      return { timing, first, second };
+    }, layer);
+    expect(sample).not.toBeNull();
+    expect(sample.timing).toBe('linear');
+    expect(sample.first).not.toBe(sample.second);
+
+    // In addition to the controlled geometry samples, require the browser's
+    // real animation clock to advance naturally while this layer is running.
+    const start = await grain.evaluate(async (el, name) => {
+      const animation = el.getAnimations({ subtree: true }).find(item => item.animationName === name);
+      await animation.ready;
+      return { time: animation.currentTime, state: animation.playState };
+    }, layer.name);
+    expect(start.state).toBe('running');
+    expect(start.time).not.toBeNull();
+    await expect.poll(() => grain.evaluate((el, name) => {
+      const animation = el.getAnimations({ subtree: true }).find(item => item.animationName === name);
+      return animation && animation.playState === 'running' ? animation.currentTime : null;
+    }, layer.name)).toBeGreaterThan(start.time);
+  }
 });
 
 test('selecting another cassette interrupts power-off without a stale close', async ({ page }) => {

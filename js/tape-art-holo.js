@@ -67,7 +67,12 @@
   document.addEventListener('visibilitychange', () => { if (document.hidden) reset(); });
   window.addEventListener('blur', reset);
   window.addEventListener('resize', reset, { passive: true });
-  window.addEventListener('scroll', reset, { passive: true, capture: true });
+  // Scrolling can finish after pointerover (including a smooth scroll started
+  // by keyboard or the browser). Recheck the stationary pointer against the
+  // new layout instead of dropping an effect that is still under it.
+  window.addEventListener('scroll', () => {
+    if (active && !raf) raf = requestAnimationFrame(paint);
+  }, { passive: true, capture: true });
   motion.addEventListener('change', reset);
   precise.addEventListener('change', reset);
 })();

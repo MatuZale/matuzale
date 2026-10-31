@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
-// Force one initial map pass per frame so interactions can interrupt the real
-// warmup deterministically, without relying on the speed of the test machine.
+// Interrupt the first frame after one map pass. Subsequent frames keep the real
+// time budget, so the renderer can complete warmup even on a slow machine.
 async function instrument(page, action) {
   await page.addInitScript(action => {
     window.__heroWarmup = { calls: 0, paints: 0 };
@@ -16,9 +16,10 @@ async function instrument(page, action) {
     window.requestAnimationFrame = function (callback) {
       if (!String(callback).includes('steady = !dirty')) return raf.call(window, callback);
       return raf.call(window, time => {
+        const first = window.__heroWarmup.calls === 0;
         let clockCalls = 0;
-        performance.now = () => now() + (clockCalls++ ? 100 : 0);
-        try { callback(time); } finally { performance.now = now; }
+        if (first) performance.now = () => now() + (clockCalls++ ? 100 : 0);
+        try { callback(time); } finally { if (first) performance.now = now; }
         window.__heroWarmup.calls++;
         if (window.__heroWarmup.calls === 1) {
           if (action === 'pause') { document.documentElement.classList.add('is-tape-paused'); document.dispatchEvent(new CustomEvent('tape-pause-change', { detail: { paused: true } })); }
@@ -46,7 +47,8 @@ for (const action of ['pause', 'scroll']) {
     expect(await counts(page)).toEqual(stopped);
     if (action === 'pause') await page.evaluate(() => { document.documentElement.classList.remove('is-tape-paused'); document.dispatchEvent(new CustomEvent('tape-pause-change', { detail: { paused: false } })); });
     else await page.evaluate(() => window.scrollTo(0, 0));
-    await expect.poll(async () => (await counts(page)).paints, { timeout: 6000 }).toBeGreaterThan(stopped.paints);
+    await expect.poll(async () => (await counts(page)).calls).toBeGreaterThan(stopped.calls);
+    await expect.poll(async () => (await counts(page)).paints).toBeGreaterThan(stopped.paints);
     const canvas = page.locator('#attractor');
     const picture = await canvas.evaluate(el => el.toDataURL());
     await page.waitForTimeout(250);
@@ -64,7 +66,8 @@ test('theme and resize during paused warmup produce the new static picture', asy
   await page.waitForTimeout(250);
   const before = await counts(page);
   await page.evaluate(() => { document.documentElement.classList.remove('is-tape-paused'); document.dispatchEvent(new CustomEvent('tape-pause-change', { detail: { paused: false } })); });
-  await expect.poll(async () => (await counts(page)).paints, { timeout: 6000 }).toBeGreaterThan(before.paints);
+  await expect.poll(async () => (await counts(page)).calls).toBeGreaterThan(before.calls);
+  await expect.poll(async () => (await counts(page)).paints).toBeGreaterThan(before.paints);
   const canvas = page.locator('#attractor');
   const data = await canvas.evaluate(el => ({ width: el.width, height: el.height, pixel: [...el.getContext('2d').getImageData(0, 0, 1, 1).data] }));
   expect(data.width).toBe(900);

@@ -17,6 +17,9 @@
 @font-face { font-family: "Deck Mono"; src: url("../assets/fonts/plex/ibm-plex-mono-600-ext.woff2") format("woff2"); font-weight: 600; font-style: normal; font-display: swap; unicode-range: U+0100-02FF, U+1D00-1EFF, U+20A0-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
 
 html.deck-open { overflow: hidden; }
+/* The modal covers the entire viewport. Keep the page in layout for focus
+   restoration, but avoid painting its effects underneath the collection. */
+html.deck-open body > :not(.deck) { visibility: hidden; }
 
 /* ───────── Themes ─────────
    The collection follows the site theme. Dark is the default here; light swaps the room and the card

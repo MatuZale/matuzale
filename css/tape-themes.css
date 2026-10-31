@@ -271,13 +271,3 @@
 .project-tape--finance .project-tape__label, .project-tape--sound .project-tape__label { background: var(--label); color: var(--ink); }
 .tape-cover--kodlab .tape-cover__brand { color: inherit; }
 .tape-cover--agent .tape-cover__brand { color: var(--tape-agent-mark); border-bottom-color: var(--tape-agent-mark); }
-.tape-cover--agent .tape-cover__art { background: linear-gradient(transparent, var(--sleeve-paper) 96%), repeating-linear-gradient(90deg, var(--tape-agent-grid) 0 1px, transparent 1px 15px), repeating-linear-gradient(0deg, var(--tape-agent-grid) 0 1px, transparent 1px 15px); }
-.tape-cover--agent .tape-cover__art::before { border-color: var(--tape-agent-mark); }
-.tape-cover--agent .tape-cover__art::after { color: var(--tape-agent-mark); }
-.tape-cover--finance .tape-cover__art { background: repeating-radial-gradient(ellipse at center, transparent 0 5px, var(--tape-finance-foil) 6px 7px, transparent 8px 12px); }
-.tape-cover--finance .tape-cover__art::after { border-color: var(--tape-finance-foil); }
-.tape-cover--sound .tape-cover__art { background: repeating-radial-gradient(ellipse at center, transparent 0 9px, var(--tape-sound-foil) 10px 12px, transparent 13px 19px); }
-.tape-cover--cloud .tape-cover__art { background: linear-gradient(125deg, transparent 0 30%, #e77743 30% 45%, #f3b641 45% 59%, transparent 59%), repeating-linear-gradient(90deg, var(--tape-cloud-bars) 0 3px, transparent 3px 7px); }
-.tape-cover--cold .tape-cover__art { background: repeating-radial-gradient(ellipse at 10% 100%, transparent 0 10px, var(--tape-cold-foil) 11px 13px, transparent 14px 19px); }
-.tape-cover--quantum .tape-cover__art { background: repeating-linear-gradient(45deg, transparent 0 11px, var(--tape-quantum-grid) 12px 13px, transparent 14px 23px), repeating-linear-gradient(-45deg, transparent 0 11px, var(--tape-quantum-grid) 12px 13px, transparent 14px 23px); }
-.tape-cover--quantum .tape-cover__art::after { border-color: var(--sleeve-paper); }

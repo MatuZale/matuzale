@@ -1,41 +1,48 @@
-/* Curved glass is a separate, non-interactive layer above the whole picture.
-   It also covers the ident and enlarged images, while leaving the controls untouched. */
+/* A self-contained television cabinet. The glass is an inert layer above the
+   tube and ident; all of the controls remain real, independently focusable UI. */
 .tape-player__tv {
+  --crt-rim: clamp(1.05rem, 2vw, 1.4rem);
   position: relative;
-  --crt-rim: clamp(.8rem, 1.6vw, 1.1rem);
+  isolation: isolate;
   padding: var(--crt-rim);
-  border: 1px solid #8d8073;
-  border-radius: 23px;
+  border: 1px solid #77716b;
+  border-radius: 25px;
   background:
-    repeating-linear-gradient(115deg, #ffffff05 0 1px, transparent 1px 4px),
-    linear-gradient(145deg, #766c62 0%, #504943 17%, #343135 62%, #514942 100%);
-  box-shadow: inset 0 2px #e8ddd075, inset 2px 0 #d3c8bc36,
-    inset -4px -5px 0 #19171ba6, 0 18px 30px -12px #000b, 0 4px 5px #0007;
+    linear-gradient(135deg, #ffffff1a, transparent 25% 72%, #0004),
+    repeating-linear-gradient(90deg, #fff1 0 1px, transparent 1px 9px, #0001 10px 12px, transparent 13px 21px),
+    linear-gradient(145deg, #817a75, #565155 24%, #343139 72%, #514a48);
+  box-shadow: inset 0 2px #e2d9c366, inset 2px 0 #d2c7b830,
+    inset -5px -6px #1a1415aa, 0 20px 38px -16px #000b, 0 4px 8px #0008;
 }
-/* A fine moulding line makes the cabinet feel separate from the tube. */
+/* A fine seam in the moulded cabinet, clear of the controls and screen. */
 .tape-player__tv::before {
-  content: "";
+  content: '';
   position: absolute;
   z-index: 1;
-  inset: 3px;
-  border: 1px solid #e4d5c018;
+  inset: 5px;
+  border: 1px solid #ece4d023;
   border-radius: inherit;
+  box-shadow: inset 0 1px #fff1, inset 0 -1px 2px #0007;
   pointer-events: none;
-  box-shadow: inset 0 1px 1px #fff1, inset 0 -1px 2px #0005;
+}
+.tape-player__tube {
+  /* Nested rings make the glass sit in a substantial cream-coloured bezel. */
+  border-radius: 9% / 8%;
+  background: #08090c;
+  box-shadow: 0 0 0 3px #16191a, 0 0 0 8px #c5bb9f,
+    0 0 0 10px #827765, 0 0 0 12px #292425,
+    0 7px 12px 10px #09090c70;
 }
 .tape-player__screen {
   border-radius: 9% / 8%;
-  border-color: #17191d;
+  border-color: #15191c;
   box-shadow: inset 0 0 0 1px #b9c9da30, inset 0 0 35px #000a,
-    0 0 0 1px #e3d6c336, 0 3px 4px #000b, 0 0 0 3px #17161980;
+    0 0 0 1px #ddd5c528, 0 3px 4px #000a;
 }
-.tape-player__tube {
-  /* The pale moulded surround catches light separately from the dark cabinet. */
-  box-shadow: 0 0 0 3px #171719, 0 0 0 7px #b4ae99,
-    0 0 0 9px #5c554e, 0 4px 10px 9px #09090c66;
-}
+/* Reflections describe the curved edges of glass, not a painted stripe across
+   the picture. Their centre is almost transparent, so body text stays clear. */
 .tape-player__tv::after {
-  content: "";
+  content: '';
   position: absolute;
   z-index: 8;
   top: var(--crt-rim);
@@ -45,114 +52,209 @@
   border-radius: 9% / 8%;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 97% 88% at 50% 47%, transparent 50%, #080b1212 72%, #05060d78 100%),
-    radial-gradient(ellipse 100% 47% at 40% -12%, #f5ffff30 0, #dbeaff0d 44%, transparent 72%),
-    linear-gradient(105deg, #e6f6ff0b, transparent 26% 77%, #e3f2ff08),
-    linear-gradient(90deg, #f3767612, transparent 3% 97%, #71c7ff12);
-  box-shadow: inset 0 1px 2px #e5f5ff66, inset 0 -3px 9px #000b,
-    inset 3px 0 4px -3px #ff789b70, inset -3px 0 4px -3px #69c6ff70,
-    inset 11px 0 16px -13px #a9c7df55, inset -11px 0 16px -13px #a9c7df55;
+    radial-gradient(ellipse 110% 100% at 50% 48%, transparent 54%, #070a1110 75%, #03040770 100%),
+    radial-gradient(ellipse 70% 27% at 35% -10%, #f7ffff36 0%, #d7e8eb14 47%, transparent 76%),
+    radial-gradient(ellipse 18% 80% at -5% 40%, #e4f4f51b, transparent 72%),
+    radial-gradient(ellipse 18% 80% at 105% 40%, #d3e8ed12, transparent 72%);
+  box-shadow: inset 0 2px 3px #efffff55, inset 0 -4px 12px #000a,
+    inset 3px 0 5px -3px #ff789b45, inset -3px 0 5px -3px #69c6ff45,
+    inset 14px 0 20px -15px #c3dce845, inset -14px 0 20px -15px #c3dce845;
 }
-/* Colour convergence is deliberately confined to bright type and the glass edge. */
 .tape-player__screen .card__body h3,
 .tape-player__screen .card__body p,
-.tape-player__screen .card__body a {
-  text-shadow: -.55px 0 #ff72912c, .55px 0 #71cfff30;
-}
-.tape-player__controls {
-  position: relative;
-  margin-top: .9rem;
-  padding: .65rem .6rem .4rem;
-  border: 1px solid #81736788;
-  border-radius: 5px;
-  background: linear-gradient(180deg, #29272a, #1c1b1f);
-  box-shadow: inset 0 1px #ffffff18, 0 1px #ffffff12;
-}
-.tape-player__status::before {
-  content: "";
-  display: inline-block;
-  width: 4px;
-  height: 4px;
-  margin-right: .55em;
-  border-radius: 50%;
-  vertical-align: .15em;
-  background: #9bc9a2;
-  box-shadow: 0 0 5px #9bc9a288;
-}
-.tape-player.is-off .tape-player__status::before { background: #d4a276; box-shadow: none; }
+.tape-player__screen .card__body a { text-shadow: -.45px 0 #ff729122, .45px 0 #71cfff25; }
 .tape-player__tv .tape-ident { border-radius: 9% / 8%; }
 
-@media (max-width: 1000px) {
-  .tape-player__controls { padding-bottom: 1.1rem; }
-  .tape-player__controls::after {
-    content: ''; position: absolute; left: .7rem; right: .7rem; bottom: .3rem; height: 5px;
-    border-radius: 2px;
-    background: repeating-linear-gradient(90deg, #101114 0 3px, #77706a 4px, #252428 6px);
-    box-shadow: inset 0 1px 3px #000b;
-    pointer-events: none;
-  }
+/* The console reads as one inset assembly, with a speaker grille and the
+   existing operating controls, not a row of decorative imitation switches. */
+.tape-player__controls {
+  position: relative;
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) 58px;
+  grid-template-areas: 'brand status status' 'tune speaker volume' 'tune eject power';
+  align-items: center;
+  gap: .35rem .6rem;
+  min-width: 0;
+  margin-top: 1.15rem;
+  padding: .7rem .75rem;
+  border: 1px solid #a79b86;
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, #ffffff0a, transparent 15% 85%, #0003),
+    linear-gradient(180deg, #474340, #262629 24%, #252429 80%, #383230);
+  box-shadow: inset 0 1px #fff4, inset 0 -2px #08080bb3, 0 2px 5px #0008;
 }
-/* Wider screens get a side console like a compact domestic set. The tube
-   keeps roughly the same size as before, so project copy and games still fit. */
+.tape-player__secret {
+  grid-area: brand;
+  justify-self: start;
+  align-self: center;
+  padding: .34rem .45rem;
+  border-color: #c9b99c55;
+  background: #1d1c1e;
+  color: #f1dfc3;
+  letter-spacing: -.04em;
+}
+.tape-player__status {
+  grid-area: status;
+  flex: none;
+  min-width: 0;
+  height: 2.4rem;
+  overflow: hidden;
+  color: #d6cfbe;
+  font: 600 .56rem/1.35 var(--font-mono);
+  letter-spacing: .035em;
+}
+.tape-player__status::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-right: .55em;
+  border-radius: 50%;
+  vertical-align: .1em;
+  background: #9ccaa2;
+  box-shadow: 0 0 5px #9ccaa288;
+}
+.tape-player.is-off .tape-player__status::before { background: #bb8b63; box-shadow: none; }
+.tape-player__controls::after {
+  content: '';
+  grid-area: speaker;
+  position: static;
+  width: 100%;
+  height: 38px;
+  border: 3px solid #292625;
+  border-radius: 4px;
+  background:
+    repeating-linear-gradient(0deg, #19181c 0 3px, #34313a 3px 5px, #706b6e 5px 6px, #27252c 7px 10px);
+  box-shadow: inset 0 2px 5px #000b, 0 1px #ffffff22;
+  pointer-events: none;
+}
+.tape-tuner {
+  grid-area: tune;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .23rem;
+  color: #e1d6c4;
+  font: 600 .53rem/1 var(--font-mono);
+  letter-spacing: .07em;
+  text-align: center;
+}
+.tape-tuner__dial { position: relative; width: 64px; height: 64px; border-radius: 50%; }
+.tape-tuner__face {
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  transform: rotate(var(--tune-angle, -135deg));
+  background:
+    radial-gradient(circle at 40% 33%, #d1c7b5, #8c8072 24%, #4c4743 51%, #252224 62%, #c5b9a3 66%, #554b44 72%, #242123 75%);
+  box-shadow: 0 3px 5px #000b, 0 0 0 3px #181719, 0 0 0 4px #8d8170,
+    inset 1px 2px 2px #fff6, inset -2px -3px 4px #000a;
+  transition: transform .18s ease-out;
+  pointer-events: none;
+}
+.tape-tuner__face::before {
+  content: '';
+  position: absolute;
+  top: 7px; left: calc(50% - 1px);
+  width: 2px; height: 10px;
+  border-radius: 2px;
+  background: #fff2d6;
+  box-shadow: 0 0 3px #fff8;
+}
+.tape-tuner__dial input {
+  position: absolute; inset: 0; z-index: 2;
+  width: 100%; height: 100%; margin: 0;
+  opacity: .001; cursor: ew-resize;
+}
+.tape-tuner__dial:focus-within { outline: 2px solid #ffe391; outline-offset: 3px; }
+.tape-tuner__value { color: #f1d4a1; }
+.tape-player__volume-slot {
+  grid-area: volume;
+  align-self: stretch;
+  min-height: 64px; min-width: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .15rem;
+}
+.tape-player__volume-slot::before { content: 'VOL'; color: #e1d6c4; font: 600 .53rem/1 var(--font-mono); letter-spacing: .08em; }
+.tape-player__volume-slot[aria-hidden='true']::before { visibility: hidden; }
+.tape-player__volume-slot[aria-hidden='true']::after {
+  content: 'HI-FI';
+  padding: .3rem .38rem;
+  border-block: 1px solid #b3a58b55;
+  color: #bfb29d;
+  font: 600 .52rem/1 var(--font-mono);
+  letter-spacing: .12em;
+}
+.tape-player__volume-slot .sw__volume { flex: 0 0 50px; }
+.tape-player__close {
+  grid-area: eject;
+  justify-self: stretch;
+  min-height: 40px;
+  padding: .5rem .55rem;
+  border: 1px solid #a79a85;
+  border-radius: 3px;
+  background: linear-gradient(#b0a28e, #877866 45%, #5e5045 49%, #51443e);
+  box-shadow: inset 0 1px #fff9, 0 3px 0 #171517, 0 4px 5px #0008;
+  color: #fff8e8;
+  text-shadow: 0 1px #332a24;
+}
+.tape-player__close:disabled { opacity: .55; }
+.tape-player__power {
+  grid-area: power;
+  justify-self: center;
+  width: 42px; height: 42px;
+  border-color: #b4a796;
+  background: radial-gradient(circle at 35% 25%, #c2b5a4, #817669 25%, #48423e 60%, #211f20 70%);
+  box-shadow: inset 0 1px #fff8, 0 0 0 3px #171517, 0 2px 4px #000b;
+}
+@media (hover: hover) and (pointer: fine) {
+  .tape-player__close:not(:disabled):hover { background: linear-gradient(#c0b29c, #9a8975 45%, #6a5a4a 49%, #5c4d44); }
+}
 @media (min-width: 1001px) {
   .tape-player__tv {
-    --crt-panel: 136px;
-    --crt-gap: 1.25rem;
+    --crt-panel: 142px;
+    --crt-gap: 1.5rem;
     display: grid;
     grid-template-columns: minmax(0, 1fr) var(--crt-panel);
     gap: var(--crt-gap);
     max-width: 850px;
-    padding: var(--crt-rim);
   }
   .tape-player__tv::after { right: calc(var(--crt-rim) + var(--crt-panel) + var(--crt-gap)); }
-  .tape-player__controls {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    justify-content: flex-start;
-    gap: .8rem;
-    min-width: 0;
-    margin: 0;
-    padding: .75rem .65rem;
-  }
-  .tape-player__secret { order: 0; align-self: flex-start; padding: .38rem .5rem; }
-  .tape-player__status { order: 1; flex: 0 0 auto; min-height: 2.5rem; font-size: .58rem; line-height: 1.5; }
-  .tape-player__controls::after {
-    content: '';
-    order: 2;
-    flex: 1 1 auto;
-    min-height: 70px;
-    max-height: 190px;
-    margin-block: .2rem auto;
-    border: 1px solid #09090bc9;
-    border-radius: 3px;
-    background: repeating-linear-gradient(0deg, #111216 0 2px, #77706a 3px, #28272a 5px, #1b1b1e 7px);
-    box-shadow: inset 0 1px 5px #000b, 0 1px #ffffff20;
-    pointer-events: none;
-  }
-  .tape-player__close { order: 3; width: 100%; }
-  .tape-player__power {
-    order: 4;
-    align-self: center;
-    flex: 0 0 38px;
-    width: 38px;
-    height: 38px;
-    border-color: #9f9487;
-    background: radial-gradient(circle at 35% 25%, #b6aa9b, #6b625b 26%, #3b3738 64%, #171719 70%);
-    box-shadow: inset 0 1px #fff8, 0 0 0 3px #161518, 0 2px 4px #000b;
-  }
+  .tape-player__controls { display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; gap: .5rem; margin: 0; padding: .75rem .7rem; }
+  .tape-player__secret { order: 0; align-self: flex-start; }
+  .tape-player__status { order: 1; flex: 0 0 2.4rem; }
+  .tape-player__controls::after { order: 2; flex: 1 1 auto; min-height: 50px; max-height: 150px; margin: .1rem 0 auto; }
+  .tape-tuner { order: 3; }
+  .tape-player__volume-slot { order: 4; align-self: center; height: 68px; flex: 0 0 68px; }
+  .tape-player__close { order: 5; width: 100%; }
+  .tape-player__power { order: 6; align-self: center; flex: 0 0 42px; }
 }
+@media (max-width: 680px) { .tape-player__tv::after { aspect-ratio: 3 / 5; } }
+@media (max-width: 480px) {
+  .tape-player__tv { --crt-rim: 1rem; border-radius: 20px; }
+  .tape-player__controls { grid-template-columns: 64px minmax(0, 1fr) 50px; gap: .3rem; padding: .55rem; }
+  .tape-tuner__dial { width: 58px; height: 58px; }
+  .tape-player__volume-slot { min-height: 62px; }
+  .tape-player__volume-slot .sw__volume { flex-basis: 44px; }
+  .tape-player__close { font-size: .57rem; }
+  .tape-player__power { width: 40px; height: 40px; }
+}
+@media (max-width: 380px) { .tape-player__tv::after { aspect-ratio: 1 / 1.86; } }
 @media (max-width: 680px) {
-  .tape-player__tv::after { aspect-ratio: 3 / 5; }
+  html.tv-controls-on-screen .footer-tape__transport,
+  html.tv-controls-on-screen .back-top { visibility: hidden; pointer-events: none; }
 }
-@media (max-width: 380px) {
-  .tape-player__tv::after { aspect-ratio: 1 / 1.86; }
-}
+@media (prefers-reduced-motion: reduce) { .tape-tuner__face { transition: none; } }
+html.is-tape-paused .tape-tuner__face { transition: none; }
 @media (forced-colors: active) {
   .tape-player__tv::before, .tape-player__tv::after { display: none; }
   .tape-player__screen .card__body h3,
   .tape-player__screen .card__body p,
   .tape-player__screen .card__body a { text-shadow: none; }
+  .tape-tuner__face { border: 2px solid CanvasText; }
+  .tape-tuner__face::before { background: CanvasText; }
+  .tape-tuner__dial:focus-within { outline-color: Highlight; }
 }
-/* A tiny perspective change gives photographs depth without warping body text. */
+/* Give photographs a little depth without transforming the body copy. */
 .tape-image-full > img { transform: perspective(1100px) rotateX(-1.3deg) scale(1.015); }

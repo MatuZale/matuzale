@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 290" preserveAspectRatio="none">
+ <rect width="200" height="290" fill="#171b2c"/>
+ <path d="M0 0h200v6H0z" fill="#efac60"/><path d="M0 6h200v4H0z" fill="#d96962"/>
+ <!-- Corner stripes tie the sleeve to vintage video packaging. -->
+ <path d="M200 28v11l-30 19-9-5z" fill="#e5a05c"/><path d="M200 39v9l-23 15-7-5z" fill="#de705b"/><path d="M200 48v9l-16 11-7-5z" fill="#a75479"/>
+ <g fill="#f7dbad"><circle cx="159" cy="44" r="1"/><circle cx="184" cy="86" r="1"/><circle cx="31" cy="118" r="1"/><circle cx="168" cy="137" r="1"/><circle cx="177" cy="230" r="1"/><circle cx="22" cy="225" r="1"/><circle cx="63" cy="246" r=".8"/><circle cx="184" cy="188" r=".8"/></g>
+ <g fill="none" stroke="#8d7894" stroke-width=".8"><ellipse cx="98" cy="174" rx="91" ry="53" transform="rotate(-35 98 174)"/><ellipse cx="98" cy="174" rx="72" ry="40" transform="rotate(-35 98 174)"/></g>
+ <!-- Ships, crossing the whole face of the sleeve towards the central star. -->
+ <g fill="none" stroke="#e5a05c" stroke-width="2"><path d="M0 246 61 207"/><path d="M0 237 53 203"/><path d="M0 255 58 218"/></g>
+ <path d="m47 200 42-24-21 29-3 19-8-12-17 3z" fill="#f2c581"/>
+ <path d="m51 199 26-15-16 18z" fill="#e7765d"/>
+ <g fill="none" stroke="#d86c64" stroke-width="2"><path d="M200 100 150 133"/><path d="M200 108 155 137"/><path d="M200 92 153 123"/></g>
+ <path d="m155 142-39 23 19-27 4-17 7 10 15-2z" fill="#eb886f"/>
+ <path d="m151 143-24 14 15-17z" fill="#f4c68e"/>
+ <path d="m100 151 4 16 16 5-16 5-4 16-5-16-16-5 16-5z" fill="#f5b862"/>
+ <circle cx="100" cy="172" r="4" fill="#fff0d1"/>
+ <path d="M0 274h200v16H0z" fill="#171b2c"/>
+</svg>
