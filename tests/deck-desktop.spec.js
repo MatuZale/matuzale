@@ -122,46 +122,36 @@ test('the abstract deck background follows the theme and respects reduced motion
   expect(light.image).not.toBe(dark.image);
 });
 
-// Check the actual printed foil, not the generic card glare or only its rotation.
-// Sample each edition's artwork foil, separately from the full-card shine.
-// Split the pointer sweep into two independent tests to stay within the VM budget.
+const symmetryCards = [
+  ['swirling-streamers', 'common'], ['sand-dollar', 'radiant'], ['pentagon', 'v'],
+  ['halloween', 'v-alt'], ['golden-flintstone', 'amazing'], ['chaotic-flower', 'radiant'],
+  ['french-glass', 'v'], ['pentacle', 'v-alt'], ['mayan-bracelet', 'vstar'], ['clam-triple', 'common'],
+];
+const portraitCards = ['halloween', 'french-glass', 'mayan-bracelet'];
+const groundName = id => id === 'golden-flintstone' ? 'art-golden-flintstone.webp' : `ground-${id}.webp`;
+
+// Sample both painted surfaces. The engraving stays fixed while spectral and
+// specular layers move; a moving glare or card rotation alone cannot pass.
 for (const [group, finishes] of [
-  ['21–25', [
-    ['swirling-streamers', 'common', 'foil', 'streamers-prism.svg'],
-    ['sand-dollar', 'radiant', 'foil', 'sand-dollar-prism.svg'],
-    ['pentagon', 'v', 'foil', 'pentagon-prism.svg'],
-    ['halloween', 'v-alt', 'foil', 'halloween-lantern.svg'],
-    ['golden-flintstone', 'amazing', 'foil', 'paint-golden-flintstone.svg'],
-  ]],
-  ['26–30', [
-    ['chaotic-flower', 'radiant', 'foil', 'chaotic-petals.svg'],
-    ['french-glass', 'v', 'foil', 'french-arches.svg'],
-    ['pentacle', 'v-alt', 'foil', 'pentacle-prism.svg'],
-    ['mayan-bracelet', 'vstar', 'foil', 'mayan-orbit.svg'],
-    ['clam-triple', 'common', 'foil', 'clam-tides.svg'],
-  ]],
-]) test(`cards ${group}: printed foil responds to the pointer`, async ({ page }) => {
+  ['21–25', symmetryCards.slice(0, 5)], ['26–30', symmetryCards.slice(5)],
+]) test(`cards ${group}: material foil responds to the pointer`, async ({ page }) => {
   test.setTimeout(180_000);
   await openDeck(page, 'cards');
-  for (const [id, finish, layer, mask] of finishes) {
+  await expect(page.locator('link[href$="/css/deck-symmetry.css"]')).toHaveCount(1);
+  for (const [id, finish] of finishes) {
     const card = page.locator(`.tcard[data-foil="${id}"]`);
+    await expect(card).toHaveClass(/tcard--symmetry/);
     await expect(card).toHaveAttribute('data-holo', finish);
     await page.mouse.move(1, 1);
     await card.evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'instant' }));
     await idle(page);
     const box = await card.boundingBox();
-    const paint = () => card.evaluate((el, layer) => {
-      const target = el.querySelector(`.tcard__${layer}`);
-      const style = getComputedStyle(target);
-      const standardMask = style.maskImage;
-      const detail = el.dataset.foil === 'golden-flintstone' ? getComputedStyle(target, '::after') : null;
-      return { image: style.backgroundImage, position: style.backgroundPosition,
-        mask: standardMask && standardMask !== 'none' ? standardMask : style.webkitMaskImage,
-        display: style.display, opacity: Number(style.opacity),
-        detail: detail && { image: detail.backgroundImage, position: detail.backgroundPosition,
-          mask: detail.maskImage && detail.maskImage !== 'none' ? detail.maskImage : detail.webkitMaskImage,
-          display: detail.display, opacity: Number(detail.opacity) } };
-    }, layer);
+    const paint = () => card.evaluate(el => Object.fromEntries(['foil', 'shine'].map(layer => {
+      const style = getComputedStyle(el.querySelector(`.tcard__${layer}`));
+      return [layer, { image: style.backgroundImage, position: style.backgroundPosition,
+        mask: style.maskImage && style.maskImage !== 'none' ? style.maskImage : style.webkitMaskImage,
+        display: style.display, opacity: Number(style.opacity) }];
+    })));
     const resting = await paint();
     await page.mouse.move(box.x + box.width * .25, box.y + box.height * .3);
     await idle(page);
@@ -169,19 +159,19 @@ for (const [group, finishes] of [
     await page.mouse.move(box.x + box.width * .75, box.y + box.height * .7);
     await idle(page);
     const second = await paint();
-    expect(first.display, id).not.toBe('none');
-    expect(first.image, id).not.toBe('none');
-    expect(first.mask, id).toContain(mask);
-    expect(first.opacity, id).toBeGreaterThan(resting.opacity + .2);
-    // This samples the background actually painted through the selected foil mask.
-    // It catches a static foil even if the generic glare and 3D tilt still move.
-    expect([second.image, second.position], id).not.toEqual([first.image, first.position]);
-    if (first.detail) {
-      expect(first.detail.display, id).not.toBe('none');
-      expect(first.detail.opacity, id).toBeGreaterThan(0);
-      expect(first.detail.mask, id).toContain('golden-veins.svg');
-      expect([second.detail.image, second.detail.position], id).not.toEqual([first.detail.image, first.detail.position]);
+    for (const layer of ['foil', 'shine']) {
+      expect(first[layer].display, `${id} ${layer}`).not.toBe('none');
+      expect(first[layer].image, `${id} ${layer}`).toContain(`material-${id}.webp`);
+      expect(first[layer].opacity, `${id} ${layer}`).toBeGreaterThan(resting[layer].opacity + .05);
+      expect(second[layer].position, `${id} ${layer}`).not.toBe(first[layer].position);
+      // The first background is the relief texture, which must not slide.
+      expect(second[layer].position.split(',')[0], `${id} fixed material`).toBe(first[layer].position.split(',')[0]);
     }
+    // Mayan's full-size gradients cannot translate within their box. Its light
+    // changes through the conic angle and radial phase inside the painted image.
+    if (id === 'mayan-bracelet') expect(second.foil.image).not.toBe(first.foil.image);
+    expect(first.foil.mask, id).toContain(groundName(id));
+    expect(first.shine.mask, id).toContain(portraitCards.includes(id) ? 'frame-full.webp' : 'frame-window.webp');
     const state = await values(card);
     expect(state.mx).toBeGreaterThan(55);
     expect(Math.abs(state.rx)).toBeGreaterThan(1);
@@ -189,120 +179,118 @@ for (const [group, finishes] of [
   }
 });
 
-test('new finishes retain their distinct printed patterns', async ({ page }) => {
+for (const reducedMotion of ['no-preference', 'reduce']) {
+  test(`symmetry foil follows a wheel turn at a fixed pointer (${reducedMotion})`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion });
+    await openDeck(page, 'cards');
+    const card = page.locator('.tcard[data-foil="pentacle"]');
+    await lift(page, card, false);
+    await faceOn(page, card);
+    const before = await card.evaluate(el => {
+      const read = () => ({
+        ry: parseFloat(el.style.getPropertyValue('--ry')),
+        tilt: parseFloat(el.style.getPropertyValue('--foil-tilt-x')),
+        mx: el.style.getPropertyValue('--mx'), my: el.style.getPropertyValue('--my'),
+        position: getComputedStyle(el.querySelector('.tcard__foil')).backgroundPosition,
+      });
+      const audit = window.symmetryWheelAudit = { samples: [] };
+      audit.observer = new MutationObserver(() => audit.samples.push(read()));
+      audit.observer.observe(el, { attributes: true, attributeFilter: ['style'] });
+      return read();
+    });
+    const wheelCount = await page.evaluate(() => window.deckAudit.events.filter(e => e.type === 'wheel').length);
+    // The pointer remains over the toolbar: only the card's surface normal changes.
+    await page.mouse.wheel(0, 60);
+    await expect.poll(() => page.evaluate(() => window.deckAudit.events.filter(e => e.type === 'wheel').length)).toBeGreaterThan(wheelCount);
+    await idle(page);
+    // Reduced motion jumps immediately, but the deliberate wheel gesture still
+    // waits for its normal snap timer. Observe that completion rather than sleeping.
+    await expect.poll(async () => angleDistance((await values(card)).ry, before.ry)).toBeLessThan(.1);
+    const samples = await page.evaluate(() => {
+      window.symmetryWheelAudit.observer.disconnect();
+      return window.symmetryWheelAudit.samples;
+    });
+    expect(samples.some(sample => Math.abs(sample.tilt - before.tilt) > .05)).toBe(true);
+    expect(samples.some(sample => sample.position !== before.position)).toBe(true);
+    expect(samples.every(sample => sample.mx === before.mx && sample.my === before.my),
+      'The reflection must change without a moving pointer/light coordinate').toBe(true);
+    if (reducedMotion === 'reduce') {
+      expect((await values(card)).rx).toBe(0);
+      expect(await page.evaluate(() => window.deckAudit.pending.size)).toBe(0);
+    }
+  });
+}
+
+test('all symmetry materials and protection masks decode and preserve the printed layout', async ({ page }) => {
   test.setTimeout(180_000);
   await openDeck(page, 'cards');
-  for (const id of ['halloween', 'french-glass', 'mayan-bracelet']) {
+  await expect(page.locator('.tcard--symmetry')).toHaveCount(10);
+  for (const id of portraitCards) {
     const card = page.locator(`.tcard[data-foil="${id}"]`);
-    const image = card.locator('.tcard__art img');
-    await expect(image).toHaveAttribute('src', new RegExp(`full-${id}\\.webp$`));
-    const geometry = await card.evaluate(el => {
-      const panel = el.querySelector('.tcard__panel').getBoundingClientRect();
-      const art = el.querySelector('.tcard__art').getBoundingClientRect();
-      return { panel: panel.height, art: art.height };
-    });
+    await expect(card.locator('.tcard__art img')).toHaveAttribute('src', new RegExp(`full-${id}\\.webp$`));
+    const geometry = await card.evaluate(el => ({
+      panel: el.querySelector('.tcard__panel').getBoundingClientRect().height,
+      art: el.querySelector('.tcard__art').getBoundingClientRect().height,
+    }));
     expect(geometry.art / geometry.panel).toBeGreaterThan(.9);
   }
-  const ridgeLoaded = await page.evaluate(async () => {
-    const image = new Image();
-    image.src = 'assets/deck/foil/symmetric-ridges.webp';
-    try { await image.decode(); return image.naturalWidth > 0; } catch { return false; }
-  });
-  expect(ridgeLoaded).toBe(true);
-  const prismMasks = await page.evaluate(async () => Promise.all([
-    'streamers-prism.svg', 'sand-dollar-prism.svg', 'pentagon-prism.svg',
-    'halloween-lantern.svg', 'golden-veins.svg', 'chaotic-petals.svg', 'french-arches.svg',
-    'pentacle-prism.svg', 'mayan-orbit.svg', 'clam-tides.svg',
-  ].map(async name => {
+  const files = symmetryCards.flatMap(([id]) => [`material-${id}.webp`, groundName(id)])
+    .concat(['frame-window.webp', 'frame-full.webp']);
+  const assets = await page.evaluate(async files => Promise.all(files.map(async name => {
     const image = new Image();
     image.src = `assets/deck/foil/${name}`;
-    try { await image.decode(); return { name, loaded: image.naturalWidth > 0 && image.naturalHeight > 0 }; }
-    catch { return { name, loaded: false }; }
-  })));
-  expect(prismMasks.filter(mask => !mask.loaded)).toEqual([]);
-  const iconMasks = await page.evaluate(async () => Promise.all([
-    'swirling-streamers', 'sand-dollar', 'pentagon', 'chaotic-flower', 'pentacle', 'clam-triple',
-    'french-glass', 'mayan-bracelet', 'halloween', 'golden-flintstone',
-  ].map(async id => {
-    const image = new Image();
-    image.src = `assets/deck/foil/icon-${id}.webp`;
     try {
       await image.decode();
       const canvas = document.createElement('canvas');
       canvas.width = image.naturalWidth; canvas.height = image.naturalHeight;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(image, 0, 0);
-      const maxAlpha = (x, y, width, height) => {
-        const data = ctx.getImageData(x, y, width, height).data;
+      const { width: w, height: h } = canvas;
+      const pixels = ctx.getImageData(0, 0, w, h).data;
+      let minAlpha = 255, maxAlpha = 0, minTone = 255, maxTone = 0;
+      for (let i = 0; i < pixels.length; i += 4) {
+        minAlpha = Math.min(minAlpha, pixels[i + 3]); maxAlpha = Math.max(maxAlpha, pixels[i + 3]);
+        minTone = Math.min(minTone, pixels[i]); maxTone = Math.max(maxTone, pixels[i]);
+      }
+      const maxIn = (left, top, right, bottom) => {
         let max = 0;
-        for (let i = 3; i < data.length; i += 4) max = Math.max(max, data[i]);
+        for (let y = Math.floor(top * h); y < Math.floor(bottom * h); y++) {
+          for (let x = Math.floor(left * w); x < Math.floor(right * w); x++) max = Math.max(max, pixels[(y * w + x) * 4 + 3]);
+        }
         return max;
       };
-      const w = canvas.width, h = canvas.height;
-      // Compare broad patches of the frame, excluding the artwork and the quiet text area.
-      // Averaging suppresses tiny pixel and compression differences between near-copies.
-      const pixels = ctx.getImageData(0, 0, w, h).data;
-      const frame = [];
-      for (let row = 0; row < 28; row++) {
-        for (let col = 0; col < 20; col++) {
-          const x = (col + .5) / 20, y = (row + .5) / 28;
-          if (y > .105 && y < .479 && x > .065 && x < .935) continue;
-          if (y > .58 && y < .90 && x > .19 && x < .81) continue;
-          let sum = 0, count = 0;
-          for (let py = Math.floor(row * h / 28); py < Math.floor((row + 1) * h / 28); py++) {
-            for (let px = Math.floor(col * w / 20); px < Math.floor((col + 1) * w / 20); px++) {
-              sum += pixels[(py * w + px) * 4 + 3];
-              count++;
-            }
-          }
-          frame.push(sum / count);
-        }
+      // A small signature detects accidental duplicate material files; it is
+      // not a metric of artistic quality or how the composited foil looks.
+      const signature = [];
+      for (let row = 0; row < 20; row++) for (let col = 0; col < 20; col++) {
+        signature.push(pixels[(Math.floor((row + .5) * h / 20) * w + Math.floor((col + .5) * w / 20)) * 4]);
       }
-      return { id, text: maxAlpha(Math.floor(w * .19), Math.floor(h * .58), Math.floor(w * .62), Math.floor(h * .32)),
-        edge: maxAlpha(0, 0, Math.floor(w * .055), h),
-        window: maxAlpha(Math.floor(w * .5), Math.floor(h * .3), 1, 1), frame };
-    } catch { return { id, failed: true }; }
-  })));
-  for (const mask of iconMasks) {
-    expect(mask.failed, mask.id).toBeUndefined();
-    expect(mask.text, mask.id).toBeLessThanOrEqual(70);
-    expect(mask.edge, mask.id).toBeGreaterThan(100);
-    if (!['french-glass', 'mayan-bracelet', 'halloween', 'golden-flintstone'].includes(mask.id)) expect(mask.window, mask.id).toBe(0);
-    expect(mask.frame.reduce((sum, value) => sum + value, 0) / mask.frame.length, mask.id).toBeGreaterThan(1);
-    const applied = await page.locator(`.tcard[data-foil="${mask.id}"] .tcard__shine`).evaluate(el => {
-      const style = getComputedStyle(el);
-      return { image: style.maskImage || style.webkitMaskImage, display: style.display };
-    });
-    expect(applied.image, mask.id).toContain(`icon-${mask.id}.webp`);
-    expect(applied.display, mask.id).not.toBe('none');
+      return { name, w, h, minAlpha, maxAlpha, minTone, maxTone, signature: signature.join(','),
+        textAlpha: maxIn(.19, .58, .81, .90), windowAlpha: maxIn(.1, .15, .9, .45), lowerAlpha: maxIn(0, .57, 1, 1) };
+    } catch { return { name, failed: true }; }
+  })), files);
+  expect(assets.filter(asset => asset.failed)).toEqual([]);
+  const materials = assets.filter(asset => asset.name.startsWith('material-'));
+  for (const material of materials) {
+    expect(material.w, material.name).toBeGreaterThan(0);
+    expect(material.h, material.name).toBeGreaterThan(0);
+    expect(material.maxTone - material.minTone, material.name).toBeGreaterThan(40);
   }
-  for (const [a, b] of [
-    ['swirling-streamers', 'sand-dollar'], ['swirling-streamers', 'pentagon'], ['sand-dollar', 'pentagon'],
-    ['chaotic-flower', 'french-glass'], ['pentacle', 'clam-triple'],
-  ]) {
-    const first = iconMasks.find(mask => mask.id === a).frame;
-    const second = iconMasks.find(mask => mask.id === b).frame;
-    const difference = first.reduce((sum, value, index) => sum + Math.abs(value - second[index]), 0) / first.length;
-    // A small tolerance catches missing/duplicated motifs, not aesthetic similarity.
-    expect(difference, `${a} / ${b}`).toBeGreaterThan(1.5);
+  expect(new Set(materials.map(material => material.signature)).size).toBe(10);
+  for (const [id] of symmetryCards) {
+    const ground = assets.find(asset => asset.name === groundName(id));
+    expect(ground.minAlpha, id).toBe(0);
+    expect(ground.maxAlpha, id).toBeGreaterThan(150);
+    if (portraitCards.includes(id)) expect(ground.lowerAlpha, `${id} text protection`).toBeLessThanOrEqual(35);
   }
-  const amazing = page.locator('.tcard[data-foil="golden-flintstone"]');
-  await expect(amazing).toHaveAttribute('data-holo', 'amazing');
-  await expect(amazing.locator('.tcard__art img')).toHaveAttribute('src', /cut-golden-flintstone\.webp$/);
-  await expect(amazing.locator('.tcard__glitter')).toHaveCount(1);
-  const masks = await amazing.evaluate(async el => {
-    const style = getComputedStyle(el);
-    const paths = ['cut', 'art', 'splash'].map(kind => `assets/deck/foil/${kind}-golden-flintstone.webp`);
-    const loaded = await Promise.all(paths.map(async path => {
-      const image = new Image();
-      image.src = path;
-      try { await image.decode(); return image.naturalWidth > 0 && image.naturalHeight > 0; }
-      catch { return false; }
-    }));
-    return { loaded, css: ['--cut', '--art-mask', '--splash'].map(name => style.getPropertyValue(name)) };
-  });
-  expect(masks.loaded).toEqual([true, true, true]);
-  for (const [index, kind] of ['cut', 'art', 'splash'].entries()) expect(masks.css[index]).toContain(`${kind}-golden-flintstone.webp`);
+  for (const name of ['frame-window.webp', 'frame-full.webp']) {
+    const mask = assets.find(asset => asset.name === name);
+    expect(mask.maxAlpha, name).toBeGreaterThan(200);
+    expect(mask.textAlpha, `${name} text protection`).toBeLessThanOrEqual(25);
+    if (name === 'frame-window.webp') expect(mask.windowAlpha).toBe(0);
+  }
+  await expect(page.locator('.tcard[data-foil="golden-flintstone"] .tcard__art img'))
+    .toHaveAttribute('src', /cut-golden-flintstone\.webp$/);
 });
 
 for (const entry of ['cards', 'home']) {

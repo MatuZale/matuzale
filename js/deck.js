@@ -212,7 +212,7 @@ const ICONS = [
 ];
 for (const [id, name, m, lambda, alpha, beta, gamma, omega, symbol, ability, description, alt, accent, panel] of ICONS) {
   CARDS.push({
-    id, name, stage: "Symmetric map", dim: 2, symbol, rarity: id === "golden-flintstone" ? "★★★" : "◆",
+    id, name, symmetry: true, stage: "Symmetric map", dim: 2, symbol, rarity: id === "golden-flintstone" ? "★★★" : "◆",
     credit: "after Field &amp; Golubitsky", ability,
     style: `--eq: .83; --name-size: 4.4cqw; --accent: ${accent}; --panel: ${panel}; --frame: linear-gradient(140deg, color-mix(in srgb, ${accent}, white 45%), ${accent} 32%, #fff 52%, ${accent} 78%, color-mix(in srgb, ${accent}, white 35%))`,
     eq: [[X("z"), "(<i>λ</i> + <i>α</i>|<i>z</i><sub>n</sub>|² + <i>iω</i> + <i>β</i> Re(<i>z</i><sub>n</sub><sup>m</sup>)) <i>z</i><sub>n</sub>"], ["", "+ <i>γ</i> <i class=\"ol\">z</i><sub>n</sub><sup>m−1</sup>"]],
@@ -285,7 +285,7 @@ function cardMarkup(card, index) {
     : HOLO[card.id] === "amazing" ? [`foil/cut-${card.id}`, 1200, 900] : [card.id, 1200, 900];
   return `
     <li class="deck__slot" style="--i: ${index}">
-      <div class="tcard tcard--${card.id}" data-foil="${card.id}" data-kind="${KIND[card.id] ?? ""}" data-art="${ART[card.id] ?? ""}" data-holo="${HOLO[card.id] ?? ""}" ${card.style ? `style="${card.style}"` : ""} role="button" tabindex="0" aria-pressed="false" aria-label="${card.name}${card.id === "smoke" ? " (alternate art)" : ""}: lift the card${card.id === "clam-triple" ? "; flip to switch the site theme" : ""}">
+      <div class="tcard tcard--${card.id}${card.symmetry ? " tcard--symmetry" : ""}" data-foil="${card.id}" data-kind="${KIND[card.id] ?? ""}" data-art="${ART[card.id] ?? ""}" data-holo="${HOLO[card.id] ?? ""}" ${card.style ? `style="${card.style}"` : ""} role="button" tabindex="0" aria-pressed="false" aria-label="${card.name}${card.id === "smoke" ? " (alternate art)" : ""}: lift the card${card.id === "clam-triple" ? "; flip to switch the site theme" : ""}">
         <div class="tcard__rotator">
           <div class="tcard__face tcard__front">
             <div class="tcard__panel">
@@ -321,7 +321,7 @@ function cardMarkup(card, index) {
 }
 
 function loadStyles() {
-  return Promise.all(["../css/deck.css", "../css/deck-room.css"].map(path => {
+  return Promise.all(["../css/deck.css", "../css/deck-room.css", "../css/deck-symmetry.css"].map(path => {
     const href = new URL(path, import.meta.url).href;
     if (document.querySelector(`link[href="${href}"]`)) return Promise.resolve();
     return new Promise(resolve => {
@@ -398,6 +398,7 @@ export async function createDeck() {
   function controller(el) {
     const label = el.getAttribute("aria-label");
     const rotator = el.querySelector(".tcard__rotator");
+    const symmetry = el.classList.contains("tcard--symmetry");
     const s = {
       rx: new Spring(0), ry: new Spring(0), spin: new Spring(0, .05, .2),
       mx: new Spring(50), my: new Spring(50), o: new Spring(0, .05, .3),
@@ -419,6 +420,15 @@ export async function createDeck() {
       st.setProperty("--px", ((mx - 50) / 50).toFixed(3));
       st.setProperty("--py", ((my - 50) / 50).toFixed(3));
       st.setProperty("--ang", (mx * 3.6 + my * .9).toFixed(1) + "deg");
+      if (symmetry) {
+        // These foils also respond to the surface normal: turning with the
+        // wheel or Flip must change the reflection even at a fixed pointer.
+        const yaw = (s.ry.value + s.spin.value) * Math.PI / 180;
+        const pitch = s.rx.value * Math.PI / 180;
+        st.setProperty("--foil-tilt-x", Math.sin(yaw).toFixed(4));
+        st.setProperty("--foil-tilt-y", Math.sin(pitch).toFixed(4));
+        st.setProperty("--foil-facing", Math.abs(Math.cos(yaw) * Math.cos(pitch)).toFixed(4));
+      }
       st.setProperty("--o", s.o.value.toFixed(3));
       st.setProperty("--tx", s.tx.value.toFixed(1) + "px");
       st.setProperty("--ty", s.ty.value.toFixed(1) + "px");
@@ -534,10 +544,19 @@ export async function createDeck() {
       s.spin.set(Math.round(s.spin.target / 360) * 360, .04, .2);
       rest();
     }
-    function flip(direction) { s.spin.set((Math.round(s.spin.target / 180) + direction) * 180, .04, .18); wake(); }
+    function flip(direction) {
+      s.o.set(1, .07, .26);
+      s.spin.set((Math.round(s.spin.target / 180) + direction) * 180, .04, .18);
+      wake();
+    }
     function spinTo(value, snap) {
       if (snap) s.spin.set(Math.round(value / 180) * 180, .04, .18);
-      else s.spin.set(value, .2, .45);
+      else {
+        // A preceding drag can have rested the light; every new mouse/wheel
+        // turn must illuminate the foil again, without needing a hover first.
+        s.o.set(1, .07, .26);
+        s.spin.set(value, .2, .45);
+      }
       wake();
     }
     function reset() {

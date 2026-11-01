@@ -15,8 +15,9 @@ The controller passes RAF elapsed time to the spring, resets its clock on stop/i
 and keeps the running clock across pointer moves. A step uses at most four reference
 frames, divided into steps no larger than 1/60 s; fractional steps support 120 Hz.
 This preserves the original full-step response at 60 Hz and deliberately avoids
-replaying an unbounded backlog after a stalled frame. CSS, textures and raster sizing
-are unchanged. First-paint/layout/decode costs still need separate device profiling.
+replaying an unbounded backlog after a stalled frame. This numerical check does not
+exercise CSS, textures or raster sizing. First-paint/layout/decode costs still need
+separate device profiling.
 
 Each VM run has a **600-second budget**, on 2 CPUs with software rendering. Playwright's
 global timeout is 570 seconds, reserving 30 seconds for startup and reporting; individual
@@ -64,8 +65,14 @@ Every collection opening checks all 30 unique card IDs and all 30 loaded images.
 gesture sweep uses four representatives in every entry/engine combination: Clifford
 (classic foil), Chirikov (reverse holo), Logistic (beam) and Halvorsen (amazing). This covers
 the shared controller and the original foil families without repeating every texture in the
-regular gate. A desktop check also moves the pointer over common, radiant, V, V alternate and
-VStar finishes, checking the light and pattern respond to position. For a longer, separate
+regular gate. Two desktop checks move the pointer over all ten symmetry editions (21–30),
+sampling the actual artwork foil and the card surface independently. They check material
+and protection-mask references, a visible light response, moving spectral backgrounds,
+and a fixed first background layer for the engraved material. Mayan also checks that its
+full-size conic/radial gradient image changes; position alone cannot move a full-size gradient.
+Separate wheel checks keep
+the pointer fixed and observe surface-normal and painted-background changes during the turn,
+with both normal and reduced motion. For a longer, separate
 Chromium/cards sweep, set `DECK_FULL_COLLECTION=1`
 and select that project/inspection test; it inspects all 30 cards. Run this separately
 from the whole regular matrix within the existing per-command VM budget.
@@ -76,8 +83,9 @@ Halvorsen additionally covers explicit Flip and inspection of the back in each c
 | Check | Entry and engine coverage |
 |---|---|
 | Regular inspection | 4 original foil families per entry and touch engine; all 30 identities/images checked each time |
-| New finishes | Desktop pointer response, foil mask decoding, quieter texture over text, and checks for vanished or near-duplicate frame motifs on the reported pairs |
-| Full art and theme card | Desktop portrait artwork bounds and mask decoding; Clam Triple theme flip via button, keyboard, drag and wheel; touch Flip and theme persistence |
+| Symmetry materials | All ten editions: artwork foil and card-surface pointer response, stationary material layer, ten material textures and ten background-protection masks decoded, material contrast and duplicate-file checks |
+| Symmetry protection and rotation | Both frame masks quiet text; the window-frame mask excludes the rectangular artwork; portrait ground masks protect lower text; fixed-pointer wheel reflection in normal and reduced motion |
+| Full art and theme card | Desktop portrait artwork bounds; Clam Triple theme flip via button, keyboard, drag and wheel; touch Flip and theme persistence |
 | Extended inspection | Optional `DECK_FULL_COLLECTION=1`, Chromium/cards: all 30 gestures; run separately |
 | Synthetic cancel and capture loss; partial second-finger release | cards.html, both touch projects |
 | Landscape viewport, controls, close/reopen during gesture | See examples, both touch projects |
@@ -90,9 +98,11 @@ Halvorsen additionally covers explicit Flip and inspection of the back in each c
 
 The suite preserves distinct behaviors without repeating every lifecycle
 case for every card, viewport and entry. It is not an exhaustive Cartesian matrix.
-The frame comparison averages mask alpha over broad patches outside the art and text;
-it can catch a missing or near-duplicated motif but cannot judge visual character,
-colour or readability of the composited card. Those need visual inspection.
+The material check samples a small grayscale signature to catch accidentally duplicated
+files and rejects flat textures. Background and frame masks are checked for transparent
+subject regions, visible foil regions and subdued alpha behind text. These checks cannot
+judge the visual character, colour or readability of the composited card, nor prove that
+every fine orbit filament is protected. Those need visual inspection.
 
 Assertions observe computed CSS values, transforms, active state, slot geometry, capture,
 image loading and control hit testing. A forwarding RAF observer counts calls originating

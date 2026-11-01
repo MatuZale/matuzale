@@ -19,9 +19,19 @@ if (!Number.isInteger(samples) || samples < 1 || samples > 20) throw new Error('
 if (!['desktop', 'mobile', 'both'].includes(profile)) throw new Error('profile must be desktop, mobile or both');
 if (args.cards && !selectedCards.length) throw new Error('cards must contain at least one card ID');
 
-// Compare only the deck assets: the portfolio may have unrelated working changes.
-const baseline = args.baseline && Object.fromEntries(['js/deck.js', 'css/deck.css'].map(path => [path,
-  execFileSync('git', ['show', `${args.baseline}:${path}`], { encoding: 'utf8' })]));
+// Snapshot the whole deck, including styles and binary artwork/materials. The
+// surrounding portfolio stays current so unrelated local changes are shared.
+const isDeckPath = path => path === 'js/deck.js' || /^css\/deck(?:-[^/]+)?\.css$/.test(path) || path.startsWith('assets/deck/');
+const baselineRevision = args.baseline && execFileSync('git',
+  ['rev-parse', '--verify', '--end-of-options', `${args.baseline}^{commit}`], { encoding: 'utf8' }).trim();
+// Read Buffers before launching the browser: Git I/O must not skew timed phases.
+const baseline = baselineRevision && new Map(execFileSync('git',
+  ['ls-tree', '-r', '--name-only', '-z', baselineRevision, '--', 'js/deck.js', 'css', 'assets/deck'],
+  { encoding: 'utf8' }).split('\0').filter(isDeckPath).map(path => [path,
+    execFileSync('git', ['show', `${baselineRevision}:${path}`], { maxBuffer: 64 * 1024 * 1024 })]));
+const contentTypes = { css: 'text/css', js: 'application/javascript', png: 'image/png',
+  webp: 'image/webp', jpg: 'image/jpeg', jpeg: 'image/jpeg', svg: 'image/svg+xml',
+  avif: 'image/avif', gif: 'image/gif', json: 'application/json' };
 const profiles = {
   desktop: { viewport: { width: 1280, height: 900 }, deviceScaleFactor: 2 },
   mobile: { viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, hasTouch: true, isMobile: true },
@@ -49,9 +59,12 @@ async function run(variant, name, iteration) {
     const request = new URL(route.request().url());
     if (request.origin !== new URL(url).origin) return route.abort('blockedbyclient');
     const key = request.pathname.slice(1);
-    if (variant === 'baseline' && baseline[key] !== undefined) return route.fulfill({
-      status: 200, contentType: key.endsWith('.css') ? 'text/css' : 'application/javascript', body: baseline[key]
-    });
+    if (variant === 'baseline' && isDeckPath(key)) {
+      // A file introduced after the baseline must not leak from the checkout.
+      if (!baseline.has(key)) return route.fulfill({ status: 404, body: '' });
+      return route.fulfill({ status: 200,
+        contentType: contentTypes[key.split('.').at(-1)] || 'application/octet-stream', body: baseline.get(key) });
+    }
     return route.continue();
   });
   await page.addInitScript(() => {
