@@ -54,13 +54,13 @@ def backdrop(name, palette, width=1200, height=900, legacy_clam=False):
         def cloud(cx, cy, sx, sy):
             return np.exp(-((x-cx)**2/sx + (y-cy)**2/sy))
 
-        light = (cloud(-.34, -.10, .065, .16)[..., None] * np.array([5, 43, 46]) +
-                 cloud(.36, .24, .09, .12)[..., None] * np.array([21, 23, 55]) +
-                 cloud(.02, .03, .22, .18)[..., None] * np.array([2, 13, 19]))
+        light = (cloud(-.34, -.10, .065, .16)[..., None] * np.array([3, 25, 27]) +
+                 cloud(.36, .24, .09, .12)[..., None] * np.array([12, 13, 30]) +
+                 cloud(.02, .03, .22, .18)[..., None] * np.array([1, 7, 10]))
         # Two asymmetrical currents recede into the corners, with no line grid
         # or hard rim around the subject. Their edges dissolve into the water.
-        for offset, amplitude, colour in [(-.32, .045, (8, 38, 40)),
-                                           (.30, .065, (15, 21, 42))]:
+        for offset, amplitude, colour in [(-.32, .045, (4, 21, 23)),
+                                           (.30, .065, (8, 11, 23))]:
             path = offset + .17*np.sin(3.5*x + offset*2) - .18*x
             ribbon = np.exp(-((y-path)/amplitude)**2) * np.clip((np.abs(x)-.15)*2.6, 0, 1)
             light += ribbon[..., None] * np.array(colour)

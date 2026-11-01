@@ -5,6 +5,7 @@ second picture of the attractor. Alpha is cut out at the illustration window
 and attenuated behind the rules. Requires NumPy and Pillow.
 Run: python3 assets/deck/generate_icon_foils.py
 """
+import argparse
 from math import cos, sin, pi
 from pathlib import Path
 
@@ -16,7 +17,8 @@ W, H = 560, 782
 
 
 def path(draw, points, fill=220, width=3, closed=False):
-    points = [(round(x), round(y)) for x, y in points]
+    if not getattr(draw, 'supersampled', False):
+        points = [(round(x), round(y)) for x, y in points]
     if closed:
         points.append(points[0])
     draw.line(points, fill=fill, width=width, joint='curve')
@@ -252,23 +254,58 @@ def smoothstep(a, b, value):
     return t*t*(3-2*t)
 
 
-y, x = np.mgrid[0:H, 0:W].astype(np.float64)
-u, v = x / W, y / H
-# Preserve the artwork region, including the transparent cut-out of Amazing
-# Rare. Full-art ornaments are also kept outside the subject's central area.
-art = (u >= .0659) & (u <= .9341) & (v >= .1054) & (v <= .4783)
-text = (smoothstep(.07, .17, u) * (1-smoothstep(.83, .93, u)) *
-        smoothstep(.49, .56, v) * (1-smoothstep(.94, .98, v)))
-readability = 1 - .74*text
+class SupersampledDraw:
+    """Scale the original coordinates before drawing, keeping curves smooth."""
+    supersampled = True
+
+    def __init__(self, image, scale):
+        self.draw, self.scale = ImageDraw.Draw(image), scale
+
+    def points(self, points):
+        return [(round(x*self.scale), round(y*self.scale)) for x, y in points]
+
+    def line(self, points, fill, width, joint):
+        self.draw.line(self.points(points), fill=fill, width=width*self.scale, joint=joint)
+
+    def ellipse(self, box, **kwargs):
+        if 'width' in kwargs:
+            kwargs['width'] *= self.scale
+        self.draw.ellipse(tuple(round(n*self.scale) for n in box), **kwargs)
+
+    def polygon(self, points, **kwargs):
+        self.draw.polygon(self.points(points), **kwargs)
+
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--only', choices=DESIGNS, help='rebuild one plate')
+args = parser.parse_args()
 
 for name, design in DESIGNS.items():
-    image = Image.new('L', (W, H), 0)
-    design(ImageDraw.Draw(image))
+    if args.only and name != args.only:
+        continue
+    # The chain's fine, curved links are noticeable at inspection size. Draw
+    # at 4x and retain a 2x plate with antialiased edges for high-DPI displays.
+    output_scale = 2 if name == 'mayan-bracelet' else 1
+    image = Image.new('L', (W*output_scale, H*output_scale), 0)
+    if output_scale == 2:
+        image = Image.new('L', (W*4, H*4), 0)
+        design(SupersampledDraw(image, 4))
+        image = image.resize((W*2, H*2), Image.Resampling.LANCZOS)
+    else:
+        design(ImageDraw.Draw(image))
+    out_w, out_h = image.size
+    y, x = np.mgrid[0:out_h, 0:out_w].astype(np.float64)
+    u, v = x / out_w, y / out_h
+    # Preserve the artwork and attenuate the ornament behind the rules.
+    art = (u >= .0659) & (u <= .9341) & (v >= .1054) & (v <= .4783)
+    text = (smoothstep(.07, .17, u) * (1-smoothstep(.83, .93, u)) *
+            smoothstep(.49, .56, v) * (1-smoothstep(.94, .98, v)))
+    readability = 1 - .74*text
     pixels = np.asarray(image, dtype=np.float64) * readability
     pixels = np.where(art, 0, pixels)
     alpha = Image.fromarray(np.uint8(np.clip(pixels, 0, 255)), 'L')
-    mask = Image.new('RGBA', (W, H), 'white')
+    mask = Image.new('RGBA', image.size, 'white')
     mask.putalpha(alpha)
     mask.save(ROOT / f'icon-{name}.webp', 'WEBP', lossless=True, method=6)
-    central_text = np.asarray(alpha)[int(H*.58):int(H*.90), int(W*.19):int(W*.81)]
+    central_text = np.asarray(alpha)[int(out_h*.58):int(out_h*.90), int(out_w*.19):int(out_w*.81)]
     print(name, 'text max', int(central_text.max()), 'visible pixels', int(np.count_nonzero(alpha)))

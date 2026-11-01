@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" preserveAspectRatio="none">
+  <!-- Fivefold shell fragments frame the figure without covering it. -->
+  <g fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M82 295C162 152 267 92 408 70M92 318C171 174 275 114 416 91M102 340C180 196 284 136 424 112M792 70C933 92 1038 152 1118 295M784 91C925 114 1029 174 1108 318M776 112C916 136 1020 196 1098 340" stroke-width="7" opacity=".85"/>
+    <path d="M100 566C159 707 259 785 396 830M110 546C170 688 270 764 405 808M1100 566C1041 707 941 785 804 830M1090 546C1030 688 930 764 795 808" stroke-width="7" opacity=".85"/>
+    <path d="M494 76 600 25 706 76 669 133 600 105 531 133Z M491 826 600 874 709 826 674 778 600 804 526 778Z" stroke-width="6" opacity=".8"/>
+    <path d="M47 440 112 402 177 440 112 478ZM1153 440 1088 402 1023 440 1088 478Z" stroke-width="5" opacity=".7"/>
+  </g>
+</svg>

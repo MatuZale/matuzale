@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1257" preserveAspectRatio="none">
+  <!-- Sixfold lantern spokes, confined to the margins of the portrait. -->
+  <g fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M40 98 Q78 201 43 328 T42 555 M860 98 Q822 201 857 328 T858 555" stroke-width="5" opacity=".9"/>
+    <path d="M57 110 Q99 206 65 330 T62 552 M843 110 Q801 206 835 330 T838 552" stroke-width="2" opacity=".65"/>
+    <path d="M40 187 Q100 222 124 273 M860 187 Q800 222 776 273 M43 440 Q98 418 120 374 M857 440 Q802 418 780 374" stroke-width="3" opacity=".85"/>
+    <path d="M125 68 Q220 83 260 149 M775 68 Q680 83 640 149 M260 149 L220 126 M640 149 L680 126" stroke-width="3" opacity=".8"/>
+    <path d="M62 552 Q151 595 230 600 M838 552 Q749 595 670 600" stroke-width="3" opacity=".75"/>
+    <path d="M35 688 l28 -16 28 16 v32 l-28 16 -28 -16z M809 688 l28 -16 28 16 v32 l-28 16 -28 -16z" stroke-width="3" opacity=".55"/>
+    <path d="M49 688 l14 -8 14 8 v16 l-14 8 -14 -8z M823 688 l14 -8 14 8 v16 l-14 8 -14 -8z" stroke-width="2" opacity=".55"/>
+  </g>
+</svg>

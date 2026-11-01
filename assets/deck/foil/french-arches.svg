@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1257">
+  <!-- Leaded-glass tracery flanks the central rosette and leaves the text clear. -->
+  <g fill="none" stroke="white" stroke-linejoin="round">
+    <g stroke-width="4" opacity=".85">
+      <path d="M0 120 L94 160 L149 275 L94 390 L0 430 M0 165 L68 189 L109 275 L68 360 L0 386"/>
+      <path d="M900 120 L806 160 L751 275 L806 390 L900 430 M900 165 L832 189 L791 275 L832 360 L900 386"/>
+      <path d="M0 460 L72 477 L126 560 L72 643 L0 660 M900 460 L828 477 L774 560 L828 643 L900 660"/>
+      <path d="M0 690 L48 730 L82 795 L48 860 L0 900 M900 690 L852 730 L818 795 L852 860 L900 900"/>
+    </g>
+    <g stroke-width="2.5" opacity=".65">
+      <path d="M94 160 L94 390 M0 275 H149 M806 160 L806 390 M751 275 H900"/>
+      <path d="M72 477 L72 643 M0 560 H126 M828 477 L828 643 M774 560 H900"/>
+      <path d="M0 1000 Q76 968 125 1034 M900 1000 Q824 968 775 1034"/>
+    </g>
+    <g stroke-width="3" opacity=".8">
+      <path d="M45 75 v20 m-10 -10 h20 M855 75 v20 m-10 -10 h20 M37 1110 v20 m-10 -10 h20 M863 1110 v20 m-10 -10 h20"/>
+    </g>
+  </g>
+</svg>

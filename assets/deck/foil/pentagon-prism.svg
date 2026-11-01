@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" preserveAspectRatio="none">
+  <!-- Cut-glass facets sit around the pale five-sided orbit. -->
+  <g fill="none" stroke="white" stroke-linejoin="round">
+    <path d="M55 55 365 55 260 132 110 225ZM83 73 307 73 244 116 123 190ZM1145 55 835 55 940 132 1090 225ZM1117 73 893 73 956 116 1077 190Z" stroke-width="7" opacity=".85"/>
+    <path d="M46 815 292 815 195 738 68 670ZM64 793 239 793 185 754 77 700ZM1154 815 908 815 1005 738 1132 670ZM1136 793 961 793 1015 754 1123 700Z" stroke-width="7" opacity=".85"/>
+    <path d="M55 55 110 225 260 132 365 55M1145 55 1090 225 940 132 835 55M46 815 68 670 195 738 292 815M1154 815 1132 670 1005 738 908 815" stroke-width="4" opacity=".55"/>
+    <path d="M48 405 104 369 160 405 138 471 70 471ZM1152 405 1096 369 1040 405 1062 471 1130 471Z" stroke-width="6" opacity=".7"/>
+  </g>
+</svg>

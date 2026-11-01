@@ -122,24 +122,46 @@ test('the abstract deck background follows the theme and respects reduced motion
   expect(light.image).not.toBe(dark.image);
 });
 
-test('new finishes follow the pointer while retaining their distinct printed patterns', async ({ page }) => {
+// Check the actual printed foil, not the generic card glare or only its rotation.
+// Sample each edition's artwork foil, separately from the full-card shine.
+// Split the pointer sweep into two independent tests to stay within the VM budget.
+for (const [group, finishes] of [
+  ['21–25', [
+    ['swirling-streamers', 'common', 'foil', 'streamers-prism.svg'],
+    ['sand-dollar', 'radiant', 'foil', 'sand-dollar-prism.svg'],
+    ['pentagon', 'v', 'foil', 'pentagon-prism.svg'],
+    ['halloween', 'v-alt', 'foil', 'halloween-lantern.svg'],
+    ['golden-flintstone', 'amazing', 'foil', 'paint-golden-flintstone.svg'],
+  ]],
+  ['26–30', [
+    ['chaotic-flower', 'radiant', 'foil', 'chaotic-petals.svg'],
+    ['french-glass', 'v', 'foil', 'french-arches.svg'],
+    ['pentacle', 'v-alt', 'foil', 'pentacle-prism.svg'],
+    ['mayan-bracelet', 'vstar', 'foil', 'mayan-orbit.svg'],
+    ['clam-triple', 'common', 'foil', 'clam-tides.svg'],
+  ]],
+]) test(`cards ${group}: printed foil responds to the pointer`, async ({ page }) => {
   test.setTimeout(180_000);
   await openDeck(page, 'cards');
-  const finishes = [
-    ['swirling-streamers', 'common'], ['sand-dollar', 'radiant'], ['pentagon', 'v'],
-    ['halloween', 'v-alt'], ['mayan-bracelet', 'vstar'],
-  ];
-  for (const [id, finish] of finishes) {
+  for (const [id, finish, layer, mask] of finishes) {
     const card = page.locator(`.tcard[data-foil="${id}"]`);
     await expect(card).toHaveAttribute('data-holo', finish);
     await page.mouse.move(1, 1);
     await card.evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'instant' }));
     await idle(page);
     const box = await card.boundingBox();
-    const paint = () => card.evaluate(el => {
-      const style = getComputedStyle(el.querySelector(el.dataset.holo === 'common' ? '.tcard__front > .tcard__glare' : '.tcard__shine'));
-      return { image: style.backgroundImage, position: style.backgroundPosition, display: style.display, opacity: Number(style.opacity) };
-    });
+    const paint = () => card.evaluate((el, layer) => {
+      const target = el.querySelector(`.tcard__${layer}`);
+      const style = getComputedStyle(target);
+      const standardMask = style.maskImage;
+      const detail = el.dataset.foil === 'golden-flintstone' ? getComputedStyle(target, '::after') : null;
+      return { image: style.backgroundImage, position: style.backgroundPosition,
+        mask: standardMask && standardMask !== 'none' ? standardMask : style.webkitMaskImage,
+        display: style.display, opacity: Number(style.opacity),
+        detail: detail && { image: detail.backgroundImage, position: detail.backgroundPosition,
+          mask: detail.maskImage && detail.maskImage !== 'none' ? detail.maskImage : detail.webkitMaskImage,
+          display: detail.display, opacity: Number(detail.opacity) } };
+    }, layer);
     const resting = await paint();
     await page.mouse.move(box.x + box.width * .25, box.y + box.height * .3);
     await idle(page);
@@ -147,18 +169,29 @@ test('new finishes follow the pointer while retaining their distinct printed pat
     await page.mouse.move(box.x + box.width * .75, box.y + box.height * .7);
     await idle(page);
     const second = await paint();
-    expect(first.display).not.toBe('none');
-    expect(first.image).not.toBe('none');
-    if (finish !== 'common') {
-      expect(resting.opacity).toBeGreaterThanOrEqual(.1);
-      expect(first.opacity).toBeGreaterThan(resting.opacity + .2);
+    expect(first.display, id).not.toBe('none');
+    expect(first.image, id).not.toBe('none');
+    expect(first.mask, id).toContain(mask);
+    expect(first.opacity, id).toBeGreaterThan(resting.opacity + .2);
+    // This samples the background actually painted through the selected foil mask.
+    // It catches a static foil even if the generic glare and 3D tilt still move.
+    expect([second.image, second.position], id).not.toEqual([first.image, first.position]);
+    if (first.detail) {
+      expect(first.detail.display, id).not.toBe('none');
+      expect(first.detail.opacity, id).toBeGreaterThan(0);
+      expect(first.detail.mask, id).toContain('golden-veins.svg');
+      expect([second.detail.image, second.detail.position], id).not.toEqual([first.detail.image, first.detail.position]);
     }
-    expect([second.image, second.position]).not.toEqual([first.image, first.position]);
     const state = await values(card);
     expect(state.mx).toBeGreaterThan(55);
     expect(Math.abs(state.rx)).toBeGreaterThan(1);
     expect(Math.abs(state.ry)).toBeGreaterThan(1);
   }
+});
+
+test('new finishes retain their distinct printed patterns', async ({ page }) => {
+  test.setTimeout(180_000);
+  await openDeck(page, 'cards');
   for (const id of ['halloween', 'french-glass', 'mayan-bracelet']) {
     const card = page.locator(`.tcard[data-foil="${id}"]`);
     const image = card.locator('.tcard__art img');
@@ -176,6 +209,17 @@ test('new finishes follow the pointer while retaining their distinct printed pat
     try { await image.decode(); return image.naturalWidth > 0; } catch { return false; }
   });
   expect(ridgeLoaded).toBe(true);
+  const prismMasks = await page.evaluate(async () => Promise.all([
+    'streamers-prism.svg', 'sand-dollar-prism.svg', 'pentagon-prism.svg',
+    'halloween-lantern.svg', 'golden-veins.svg', 'chaotic-petals.svg', 'french-arches.svg',
+    'pentacle-prism.svg', 'mayan-orbit.svg', 'clam-tides.svg',
+  ].map(async name => {
+    const image = new Image();
+    image.src = `assets/deck/foil/${name}`;
+    try { await image.decode(); return { name, loaded: image.naturalWidth > 0 && image.naturalHeight > 0 }; }
+    catch { return { name, loaded: false }; }
+  })));
+  expect(prismMasks.filter(mask => !mask.loaded)).toEqual([]);
   const iconMasks = await page.evaluate(async () => Promise.all([
     'swirling-streamers', 'sand-dollar', 'pentagon', 'chaotic-flower', 'pentacle', 'clam-triple',
     'french-glass', 'mayan-bracelet', 'halloween', 'golden-flintstone',

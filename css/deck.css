@@ -1134,21 +1134,23 @@ html.deck-open body > :not(.deck) { visibility: hidden; }
     radial-gradient(ellipse at 50% 52%, #573455, #121b37 84%);
 }
 .tcard.tcard--golden-flintstone .tcard__art::after {
-  opacity: calc(.10 + var(--o, 0) * .35);
-  filter: saturate(1.2);
+  opacity: calc(.08 + var(--o, 0) * .28);
+  background:
+    radial-gradient(circle at var(--mx, 50%) var(--my, 50%), #ffe7a577, transparent 44%),
+    linear-gradient(125deg, #ffb57a, #f783a3 24%, #a0e6d4 49%, #9aaef3 70%, #f4bb80) calc(50% + var(--px, 0) * 32%) calc(50% + var(--py, 0) * 22%) / 230% 230%;
+  background-blend-mode: screen;
+  filter: saturate(1.3);
 }
 /* This edition uses broad pools of coloured foil in place of the common
    glitter tile. The second mask removes the attractor itself from the paint. */
 .tcard.tcard--golden-flintstone .tcard__glitter { display: none; }
 .tcard.tcard--golden-flintstone .tcard__foil {
-  opacity: calc(.38 + var(--o, 0) * .42);
+  opacity: calc(.36 + var(--o, 0) * .46);
   background:
-    radial-gradient(circle at var(--mx, 50%) var(--my, 50%), #ffefba88, transparent 48%),
-    radial-gradient(ellipse at calc(19% + var(--px, 0) * 6%) 25%, #ffba78, transparent 40%),
-    radial-gradient(ellipse at calc(82% - var(--px, 0) * 6%) 30%, #73e4d0, transparent 38%),
-    radial-gradient(ellipse at 24% 84%, #ed7cc3, transparent 42%),
-    radial-gradient(ellipse at 78% 82%, #939df3, transparent 42%),
-    linear-gradient(115deg, #e9a88b, #f4c46f, #a8e9cb, #b6a3ed) var(--posx, 50%) var(--posy, 50%) / 220% 220%;
+    radial-gradient(circle at var(--mx, 50%) var(--my, 50%), #ffe7a888, transparent 38%),
+    linear-gradient(120deg, #f377a9 0%, #ffce69 20%, #91e7d1 40%, #88a2ef 61%, #ed8acb 81%, #ffd889 100%) calc(50% + var(--px, 0) * 38%) calc(50% + var(--py, 0) * 28%) / 240% 240%,
+    linear-gradient(35deg, #a75d9f, #dc915f 48%, #469b9d);
+  background-blend-mode: screen, soft-light, normal;
   -webkit-mask:
     url('../assets/deck/foil/paint-golden-flintstone.svg') center / 100% 100% no-repeat,
     var(--art-mask) calc(50% + var(--px, 0) * .9cqw) calc(50% + var(--py, 0) * .7cqw) / calc(100% * var(--zoom)) auto no-repeat;
@@ -1157,6 +1159,16 @@ html.deck-open body > :not(.deck) { visibility: hidden; }
     url('../assets/deck/foil/paint-golden-flintstone.svg') center / 100% 100% no-repeat,
     var(--art-mask) calc(50% + var(--px, 0) * .9cqw) calc(50% + var(--py, 0) * .7cqw) / calc(100% * var(--zoom)) auto no-repeat;
   mask-composite: intersect;
+}
+/* Fine, branching fractures are etched into the pools. The parent foil's
+   masks still clip them to the paint and protect the bright attractor. */
+.tcard.tcard--golden-flintstone .tcard__foil::after {
+  display: block;
+  opacity: calc(.72 + var(--o, 0) * .22);
+  background: linear-gradient(115deg, #ffe4a2, #ff82ac 20%, #91f3da 40%, #9bb7ff 60%, #f996da 80%, #ffe4a2) calc(50% - var(--px, 0) * 36%) calc(50% + var(--py, 0) * 24%) / 240% 240%;
+  -webkit-mask: url('../assets/deck/foil/golden-veins.svg') center / 100% 100% no-repeat;
+  mask: url('../assets/deck/foil/golden-veins.svg') center / 100% 100% no-repeat;
+  mix-blend-mode: screen;
 }
 .tcard.tcard--golden-flintstone .tcard__front > .tcard__glare {
   background: radial-gradient(farthest-corner circle at var(--mx, 50%) var(--my, 50%), #ffddb966 0%, #c7dfff33 24%, #daafe81a 48%, #10122655 95%);
@@ -1526,18 +1538,23 @@ html.deck-open body > :not(.deck) { visibility: hidden; }
   mask: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), #000, transparent 70%);
 }
 
-/* Clam Triple's coloured cosmos lies in the artwork only, distinct from the
-   reverse mosaic above, and moves independently from the frame and text. */
+/* Nacre lines frame the three shells. The engraving is fixed to the print;
+   only the coloured reflection travels over it as the card is tilted. */
 .tcard.tcard--clam-triple .tcard__foil {
   display: block;
-  opacity: calc(.12 + var(--o, 0) * .62);
+  opacity: calc(.30 + var(--o, 0) * .45);
   background:
-    radial-gradient(circle at var(--mx, 50%) var(--my, 50%), #fff9 0%, #9ef7ed44 20%, transparent 60%),
-    url('../assets/deck/foil/glitter.webp') calc(50% + var(--px, 0) * 2cqw) calc(50% + var(--py, 0) * 2cqw) / 20cqw 20cqw repeat,
-    linear-gradient(120deg, #92fce0, #8da8ff, #f8a6d9, #fff4b9) var(--posx, 50%) var(--posy, 50%) / 300% 300%;
-  background-blend-mode: screen, screen, normal;
+    radial-gradient(circle at var(--mx, 50%) var(--my, 50%), #dbfff9a8, transparent 45%),
+    linear-gradient(118deg, #56c5bf, #a79bef 23%, #f3a6bd 43%, #f6d698 59%, #70dace 78%, #56c5bf) var(--posx, 50%) var(--posy, 50%) / 260% 260%;
+  -webkit-mask: url('../assets/deck/foil/clam-tides.svg') center / cover no-repeat;
+  mask: url('../assets/deck/foil/clam-tides.svg') center / cover no-repeat;
   mix-blend-mode: screen;
   filter: none;
+  transform: none;
+}
+.tcard.tcard--clam-triple .tcard__front > .tcard__glare {
+  opacity: calc(var(--o, 0) * .25);
+  background: radial-gradient(farthest-corner circle at var(--mx, 50%) var(--my, 50%), #c8fff866 0%, #8cc5fa30 22%, #c59dd41a 46%, #0a132355 95%);
 }
 
 /* Keep the colours and darks of the original print: the bright reflection is
@@ -1585,19 +1602,65 @@ html.deck-open body > :not(.deck) { visibility: hidden; }
 }
 /* Pools of Amazing Rare foil catch separate hues rather than one gold veil. */
 :root .deck .tcard.tcard--golden-flintstone .tcard__shine {
-  background: conic-gradient(from calc(18deg + var(--px, 0) * 25deg) at var(--mx, 50%) var(--my, 50%), #ef8ea5, #f5bf67, #b7ead3, #8bc8ef, #cda2ef, #ef8ea5);
+  background:
+    radial-gradient(circle at var(--mx, 50%) var(--my, 50%), #ffe8ae66, transparent 43%),
+    linear-gradient(135deg, #e46c9d, #ffd679 19%, #8cddc3 39%, #88a7f0 60%, #e59ed6 80%, #ffd679) calc(50% - var(--px, 0) * 35%) calc(50% + var(--py, 0) * 28%) / 230% 230%,
+    conic-gradient(from 30deg at 50% 50%, #c06b91, #e0ad64, #7fb6b3, #9d7cba, #c06b91);
+  background-blend-mode: screen, soft-light, normal;
 }
 /* The full-art stock is dark in both themes. */
 :root .deck .tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__shine { mix-blend-mode: screen; filter: none; }
+
+/* Flower foil: the five-petal print is stationary, while the prismatic colour
+   travels around its petals with the light. The matching window engraving
+   stays at the edges, leaving the actual calculated flower unobscured. */
+:root .deck .tcard.tcard--chaotic-flower .tcard__shine {
+  opacity: calc(.48 + var(--o, 0) * .48);
+  background: conic-gradient(from calc(32deg + var(--px, 0) * 70deg - var(--py, 0) * 32deg) at 50% 48%, #f186b8, #ffd695, #a6f4dc, #8fcaf8, #c4a1fa, #f186b8);
+}
+:root .deck .tcard.tcard--chaotic-flower .tcard__foil {
+  opacity: calc(.30 + var(--o, 0) * .52);
+  background: conic-gradient(from calc(18deg + var(--px, 0) * 60deg + var(--py, 0) * 28deg) at 50% 50%, #f58ac5, #f8cf84, #98eadb, #9fc1ff, #d5a0f5, #f58ac5);
+  -webkit-mask: url('../assets/deck/foil/chaotic-petals.svg') center / cover no-repeat;
+  mask: url('../assets/deck/foil/chaotic-petals.svg') center / cover no-repeat;
+  mix-blend-mode: screen;
+  transform: none;
+}
+
+/* French Glass carries a different finish: colour bands cross the fixed
+   leaded panes, and the narrow arches flank the full-art rosette. */
+:root .deck .tcard.tcard--french-glass .tcard__shine {
+  opacity: calc(.44 + var(--o, 0) * .5);
+  background: repeating-linear-gradient(125deg, #92e4d6 0%, #91c9fa 10%, #c5adfa 20%, #f1b9ca 30%, #ffe2a4 40%, #92e4d6 50%) var(--posx, 50%) var(--posy, 50%) / 240% 240%;
+}
+:root .deck .tcard.tcard--french-glass .tcard__foil {
+  opacity: calc(.35 + var(--o, 0) * .48);
+  background: repeating-linear-gradient(120deg, #7ad7c8 0%, #8ebff1 10%, #c6aaf4 20%, #f3b8c4 30%, #f4d291 40%, #7ad7c8 50%) calc(100% - var(--posx, 50%)) var(--posy, 50%) / 220% 220%;
+  -webkit-mask: url('../assets/deck/foil/french-arches.svg') center / 100% 100% no-repeat;
+  mask: url('../assets/deck/foil/french-arches.svg') center / 100% 100% no-repeat;
+  mix-blend-mode: screen;
+  transform: none;
+}
+.tcard:is(.tcard--chaotic-flower, .tcard--french-glass) .tcard__foil::after,
+:root .deck .tcard.tcard--chaotic-flower .tcard__shine::before { display: none; }
 /* A colour wheel, rather than parallel stripes, refracts through the chain as
    the light moves. The mask keeps the central figure untouched. */
 :root .deck .tcard.tcard--mayan-bracelet .tcard__shine {
   background: conic-gradient(from calc(25deg + var(--px, 0) * 35deg) at var(--mx, 50%) var(--my, 50%), var(--icon-spectrum));
   opacity: calc(.48 + var(--o, 0) * .48);
 }
-/* Mayan's previous VStar pass put parallel stripes over the full image; its
-   refracting chain now carries the effect, leaving the illustration clear. */
-.tcard.tcard--mayan-bracelet .tcard__foil { background: none; }
+/* A second prismatic finish follows the outer orbit independently of the
+   frame's bracelet. Its vector engraving leaves the seven links untouched. */
+:root .deck .tcard.tcard--mayan-bracelet .tcard__foil {
+  display: block;
+  opacity: calc(.20 + var(--o, 0) * .68);
+  background: conic-gradient(from calc(25deg - var(--px, 0) * 55deg + var(--py, 0) * 35deg) at 50% 32%, #ff9e9b, #ffe07e, #93ecc2, #8ecdfb, #bea7ff, #fba6d5, #ff9e9b);
+  -webkit-mask: url('../assets/deck/foil/mayan-orbit.svg') center / 100% 100% no-repeat;
+  mask: url('../assets/deck/foil/mayan-orbit.svg') center / 100% 100% no-repeat;
+  mix-blend-mode: screen;
+  transform: none;
+}
+:root .deck .tcard.tcard--mayan-bracelet .tcard__foil::after { display: none; }
 /* These older hotspot overlays would otherwise superimpose a second, generic
    pattern on top of the individually drawn plates. */
 :root .deck .tcard:is(.tcard--swirling-streamers, .tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__shine::before,
@@ -1621,6 +1684,75 @@ html.deck-open body > :not(.deck) { visibility: hidden; }
 :root .deck .tcard:is(.tcard--sand-dollar, .tcard--pentagon, .tcard--chaotic-flower, .tcard--pentacle) .tcard__panel::before {
   opacity: calc(.06 + var(--o, 0) * .12);
 }
+
+/* The three reverse-foil editions each have a stationary engraving in the
+   dark artwork window. Turning the card sweeps colour through the engraving,
+   independently of the mosaic on the frame and without whitening the print. */
+.tcard--swirling-streamers { --prism-art: url('../assets/deck/foil/streamers-prism.svg'); }
+.tcard--sand-dollar { --prism-art: url('../assets/deck/foil/sand-dollar-prism.svg'); }
+.tcard--pentagon { --prism-art: url('../assets/deck/foil/pentagon-prism.svg'); }
+:root .deck .tcard:is(.tcard--swirling-streamers, .tcard--sand-dollar, .tcard--pentagon) .tcard__foil {
+  display: block;
+  opacity: calc(.12 + var(--o, 0) * .76);
+  -webkit-mask: var(--prism-art) center / 100% 100% no-repeat;
+  mask: var(--prism-art) center / 100% 100% no-repeat;
+  mix-blend-mode: screen;
+  filter: none;
+  transform: none;
+}
+:root .deck .tcard:is(.tcard--swirling-streamers, .tcard--sand-dollar, .tcard--pentagon) .tcard__foil::after,
+:root .deck .tcard:is(.tcard--swirling-streamers, .tcard--sand-dollar, .tcard--pentagon) .tcard__shine::before,
+:root .deck .tcard:is(.tcard--swirling-streamers, .tcard--sand-dollar, .tcard--pentagon) .tcard__shine::after { display: none; }
+:root .deck .tcard.tcard--swirling-streamers .tcard__foil {
+  background: conic-gradient(from calc(30deg + var(--px, 0) * 50deg - var(--py, 0) * 20deg) at 50% 50%, #fc8a91, #ffc478, #a3efd2, #86cfff, #caa5ff, #fc8a91);
+}
+:root .deck .tcard.tcard--sand-dollar .tcard__foil {
+  background: conic-gradient(from calc(15deg + var(--px, 0) * 42deg + var(--py, 0) * 20deg) at 50% 50%, #8fe8cf, #a9d7ff, #d3abff, #ed9fbc, #ffd99c, #8fe8cf);
+}
+:root .deck .tcard.tcard--pentagon .tcard__foil {
+  background: linear-gradient(125deg, #70c8ff, #bd99ff 18%, #ffabc9 34%, #ffe7a3 50%, #93ecd6 66%, #83caff 82%, #bd99ff) var(--posx, 50%) var(--posy, 50%) / 240% 240%;
+}
+:root .deck .tcard:is(.tcard--swirling-streamers, .tcard--sand-dollar, .tcard--pentagon) .tcard__shine {
+  opacity: calc(.34 + var(--o, 0) * .58);
+  background: conic-gradient(from calc(25deg + var(--px, 0) * 42deg - var(--py, 0) * 18deg) at 50% 50%, var(--icon-spectrum));
+}
+
+/* Pentacle: the engraving stays printed in place. Only the spectral light
+   travels across its five-sided facets as the card is turned. */
+:root .deck .tcard.tcard--pentacle .tcard__shine {
+  background:
+    linear-gradient(110deg, #bca0ff, #f883c4 20%, #ffe49a 36%, #8beacf 53%, #83bfff 70%, #d1a4ff 86%, #bca0ff) var(--posx, 50%) var(--posy, 50%) / 250% 250%;
+  opacity: calc(.38 + var(--o, 0) * .52);
+}
+:root .deck .tcard.tcard--pentacle .tcard__shine::before,
+:root .deck .tcard.tcard--pentacle .tcard__shine::after { display: none; }
+:root .deck .tcard.tcard--pentacle .tcard__foil {
+  opacity: calc(.12 + var(--o, 0) * .74);
+  background:
+    conic-gradient(from calc(20deg + var(--px, 0) * 38deg - var(--py, 0) * 18deg) at 50% 50%, #efa4e6, #ffca91, #f7ebac, #9ae8d6, #7dc7fa, #bd9eff, #efa4e6);
+  -webkit-mask: url('../assets/deck/foil/pentacle-prism.svg') center / 100% 100% no-repeat;
+  mask: url('../assets/deck/foil/pentacle-prism.svg') center / 100% 100% no-repeat;
+  mix-blend-mode: screen;
+  transform: none;
+}
+:root .deck .tcard.tcard--pentacle .tcard__foil::after { display: none; }
+
+/* Halloween: spectral light moves across a sixfold lantern engraving. Its
+   fixed geometry stays at the edges of the artwork, away from the orbit. */
+:root .deck .tcard.tcard--halloween .tcard__shine {
+  background: conic-gradient(from calc(20deg + var(--px, 0) * 40deg - var(--py, 0) * 20deg) at var(--mx, 50%) var(--my, 50%), #ffd783, #e681a9, #ae91ef, #8fd9ec, #ffbd6c, #ffd783);
+  opacity: calc(.30 + var(--o, 0) * .58);
+}
+:root .deck .tcard.tcard--halloween .tcard__foil {
+  display: block;
+  background: conic-gradient(from calc(45deg - var(--px, 0) * 48deg + var(--py, 0) * 28deg) at 50% 30%, #ffe5a2, #fb95a0, #c19af9, #8de6e6, #ffc978, #ffe5a2);
+  opacity: calc(.16 + var(--o, 0) * .68);
+  -webkit-mask: url('../assets/deck/foil/halloween-lantern.svg') center / 100% 100% no-repeat;
+  mask: url('../assets/deck/foil/halloween-lantern.svg') center / 100% 100% no-repeat;
+  mix-blend-mode: screen;
+  transform: none;
+}
+:root .deck .tcard.tcard--halloween .tcard__foil::after { display: none; }
 
 /* ───────── Back ───────── */
 .tcard__back {

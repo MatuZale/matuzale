@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" preserveAspectRatio="none">
+  <!-- Foil ribbons flow around the orbit; the drawing itself remains still. -->
+  <g fill="none" stroke="white" stroke-linecap="round">
+    <path d="M40 282C145 78 324 60 512 102S906 196 1155 54M30 304C140 96 322 78 508 120S911 214 1165 72M24 326C135 114 319 96 504 138S915 232 1174 90" stroke-width="7" opacity=".83"/>
+    <path d="M35 846C281 702 428 808 599 816S1009 855 1168 622M29 827C270 686 430 788 602 798S1007 835 1160 604M25 808C259 670 432 768 604 780S1006 815 1152 586" stroke-width="6" opacity=".8"/>
+    <path d="M52 448c30-58 66-68 109-38M1148 484c-30 58-66 68-109 38" stroke-width="5" opacity=".75"/>
+  </g>
+</svg>

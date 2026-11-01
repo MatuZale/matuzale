@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900">
+  <!-- A floral border around the printed orbit, kept separate from the figure. -->
+  <defs>
+    <g id="flower" fill="none" stroke="white" stroke-width="5">
+      <path d="M0 0 C-31 -36 -25 -76 0 -88 C25 -76 31 -36 0 0Z"/>
+      <path d="M0 0 C-31 -36 -25 -76 0 -88 C25 -76 31 -36 0 0Z" transform="rotate(72)"/>
+      <path d="M0 0 C-31 -36 -25 -76 0 -88 C25 -76 31 -36 0 0Z" transform="rotate(144)"/>
+      <path d="M0 0 C-31 -36 -25 -76 0 -88 C25 -76 31 -36 0 0Z" transform="rotate(216)"/>
+      <path d="M0 0 C-31 -36 -25 -76 0 -88 C25 -76 31 -36 0 0Z" transform="rotate(288)"/>
+      <circle r="8" fill="white"/>
+    </g>
+  </defs>
+  <g fill="none" stroke="white" stroke-width="4" opacity=".8">
+    <path d="M-30 770 C65 660 111 532 93 400 C81 308 28 234 -25 182"/>
+    <path d="M1230 130 C1135 240 1089 368 1107 500 C1119 592 1172 666 1225 718"/>
+    <path d="M91 487 Q20 461 24 394 Q91 415 91 487Z M1109 413 Q1180 439 1176 506 Q1109 485 1109 413Z"/>
+  </g>
+  <g opacity=".78">
+    <use href="#flower" transform="translate(100 248) scale(.8)"/>
+    <use href="#flower" transform="translate(1110 652) scale(.8)"/>
+    <use href="#flower" transform="translate(92 643) scale(.54)"/>
+    <use href="#flower" transform="translate(1108 257) scale(.54)"/>
+  </g>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" preserveAspectRatio="none">
+  <!-- Stationary pentagonal facets surround, rather than pass through, the orbit. -->
+  <g fill="none" stroke="white" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M600 48 1092 278 932 816 268 816 108 278Z" stroke-width="8" opacity=".9"/>
+    <path d="M600 68 1070 290 915 794 285 794 130 290Z" stroke-width="3" opacity=".65"/>
+    <path d="M600 87 1048 302 899 772 301 772 152 302Z" stroke-width="2" opacity=".45"/>
+    <path d="M600 48 654 94 M1092 278 1026 298 M932 816 885 757 M268 816 315 757 M108 278 174 298" stroke-width="5" opacity=".8"/>
+    <path d="M50 575 105 476 68 361 M1150 575 1095 476 1132 361 M397 862 600 835 803 862" stroke-width="3" opacity=".6"/>
+    <path d="M72 575 124 476 91 364 M1128 575 1076 476 1109 364 M398 877 600 850 802 877" stroke-width="2" opacity=".4"/>
+  </g>
+</svg>

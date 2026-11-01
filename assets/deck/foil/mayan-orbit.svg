@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1257">
+  <!-- Linked arcs frame the seven-sided orbit without touching its threads. -->
+  <g fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round">
+    <g stroke-width="4" opacity=".8">
+      <path d="M30 405 C20 228 153 93 316 55 M40 405 C31 235 161 107 319 70"/>
+      <path d="M870 405 C880 228 747 93 584 55 M860 405 C869 235 739 107 581 70"/>
+      <path d="M30 427 C32 518 78 602 153 659 M40 427 C42 514 87 594 158 647"/>
+      <path d="M870 427 C868 518 822 602 747 659 M860 427 C858 514 813 594 742 647"/>
+    </g>
+    <g stroke-width="3" opacity=".72">
+      <path d="M102 200 l20 -25 20 25 -20 25Z M798 200 l-20 -25 -20 25 20 25Z"/>
+      <path d="M39 390 l19 -19 19 19 -19 19Z M861 390 l-19 -19 -19 19 19 19Z"/>
+      <path d="M126 602 l20 -21 20 21 -20 21Z M774 602 l-20 -21 -20 21 20 21Z"/>
+      <path d="M427 44 l23 -18 23 18 -23 18Z"/>
+    </g>
+  </g>
+</svg>

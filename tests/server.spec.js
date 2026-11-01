@@ -27,6 +27,10 @@ test('Static server serves public assets and rejects private paths and traversal
     '/assets/deck/full-french-glass.webp', '/assets/deck/full-mayan-bracelet.webp',
     '/assets/deck/foil/symmetric-ridges.webp', '/assets/deck/foil/icon-swirling-streamers.webp',
     '/assets/deck/foil/paint-golden-flintstone.svg',
+    '/assets/deck/foil/streamers-prism.svg', '/assets/deck/foil/sand-dollar-prism.svg',
+    '/assets/deck/foil/pentagon-prism.svg', '/assets/deck/foil/halloween-lantern.svg', '/assets/deck/foil/golden-veins.svg',
+    '/assets/deck/foil/chaotic-petals.svg', '/assets/deck/foil/french-arches.svg',
+    '/assets/deck/foil/pentacle-prism.svg', '/assets/deck/foil/mayan-orbit.svg', '/assets/deck/foil/clam-tides.svg',
   ]) {
     const result = await response(path);
     expect(result.status, path).toBe(200);
