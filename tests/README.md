@@ -65,12 +65,16 @@ Every collection opening checks all 30 unique card IDs and all 30 loaded images.
 gesture sweep uses four representatives in every entry/engine combination: Clifford
 (classic foil), Chirikov (reverse holo), Logistic (beam) and Halvorsen (amazing). This covers
 the shared controller and the original foil families without repeating every texture in the
-regular gate. Two desktop checks move the pointer over all ten symmetry editions (21–30),
-sampling the actual artwork foil and the card surface independently. They check material
-and protection-mask references, a visible light response, moving spectral backgrounds,
-and a fixed first background layer for the engraved material. Mayan also checks that its
-full-size conic/radial gradient image changes; position alone cannot move a full-size gradient.
-Separate wheel checks keep
+regular gate. Four desktop checks lift all ten symmetry editions (21–30) in two groups,
+then move the native pointer to all four corners in normal and reduced motion. Artwork
+foil and card surface are sampled independently, along with Golden's subject sheen.
+They check material/mask references, a visible light response, changing spectral and
+specular gradient images, and a stationary material. Every gradient must cover its
+surface without tiling; repeated colour cycles must close without a colour jump. The
+declared phase dimensions are compared with actual layout, and the phase is checked
+against the former translation projected onto the gradient axis. This catches the
+large-angle image-tile seams without enlarging or freezing the light field. Mayan's
+conic spectrum and radial front are sampled separately. Separate wheel checks keep
 the pointer fixed and observe surface-normal and painted-background changes during the turn,
 with both normal and reduced motion. For a longer, separate
 Chromium/cards sweep, set `DECK_FULL_COLLECTION=1`
@@ -84,6 +88,7 @@ Halvorsen additionally covers explicit Flip and inspection of the back in each c
 |---|---|
 | Regular inspection | 4 original foil families per entry and touch engine; all 30 identities/images checked each time |
 | Symmetry materials | All ten editions: artwork foil and card-surface pointer response, stationary material layer, ten material textures and ten background-protection masks decoded, material contrast and duplicate-file checks |
+| Symmetry corner continuity | All ten editions, four corners, normal/reduced motion: gradient coverage without image tiling, closed colour cycles, changing spectrum/front images, and phase geometry against actual layer bounds; Golden subject sheen included |
 | Symmetry protection and rotation | Both frame masks quiet text; the window-frame mask excludes the rectangular artwork; portrait ground masks protect lower text; fixed-pointer wheel reflection in normal and reduced motion |
 | Full art and theme card | Desktop portrait artwork bounds; Clam Triple theme flip via button, keyboard, drag and wheel; touch Flip and theme persistence |
 | Extended inspection | Optional `DECK_FULL_COLLECTION=1`, Chromium/cards: all 30 gestures; run separately |
@@ -102,7 +107,9 @@ The material check samples a small grayscale signature to catch accidentally dup
 files and rejects flat textures. Background and frame masks are checked for transparent
 subject regions, visible foil regions and subdued alpha behind text. These checks cannot
 judge the visual character, colour or readability of the composited card, nor prove that
-every fine orbit filament is protected. Those need visual inspection.
+every fine orbit filament is protected. The corner checks inspect computed gradients
+and their geometry, not screenshot pixels or presented-frame continuity. Those need
+visual inspection.
 
 Assertions observe computed CSS values, transforms, active state, slot geometry, capture,
 image loading and control hit testing. A forwarding RAF observer counts calls originating

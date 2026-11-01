@@ -130,54 +130,166 @@ const symmetryCards = [
 const portraitCards = ['halloween', 'french-glass', 'mayan-bracelet'];
 const groundName = id => id === 'golden-flintstone' ? 'art-golden-flintstone.webp' : `ground-${id}.webp`;
 
-// Sample both painted surfaces. The engraving stays fixed while spectral and
-// specular layers move; a moving glare or card rotation alone cannot pass.
-for (const [group, finishes] of [
-  ['21–25', symmetryCards.slice(0, 5)], ['26–30', symmetryCards.slice(5)],
-]) test(`cards ${group}: material foil responds to the pointer`, async ({ page }) => {
-  test.setTimeout(180_000);
-  await openDeck(page, 'cards');
-  await expect(page.locator('link[href$="/css/deck-symmetry.css"]')).toHaveCount(1);
-  for (const [id, finish] of finishes) {
-    const card = page.locator(`.tcard[data-foil="${id}"]`);
-    await expect(card).toHaveClass(/tcard--symmetry/);
-    await expect(card).toHaveAttribute('data-holo', finish);
-    await page.mouse.move(1, 1);
-    await card.evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'instant' }));
-    await idle(page);
-    const box = await card.boundingBox();
-    const paint = () => card.evaluate(el => Object.fromEntries(['foil', 'shine'].map(layer => {
-      const style = getComputedStyle(el.querySelector(`.tcard__${layer}`));
-      return [layer, { image: style.backgroundImage, position: style.backgroundPosition,
+// Read the painted gradients separately: a moving radial glare alone must not
+// pass for a moving spectrum. The hidden probe resolves CSS lengths without
+// changing the card, its transforms, or any illumination variable.
+async function symmetryPaint(card) {
+  return card.evaluate(el => {
+    const split = value => {
+      const parts = []; let depth = 0, start = 0;
+      for (let i = 0; i < value.length; i++) {
+        if (value[i] === '(') depth++;
+        if (value[i] === ')') depth--;
+        if (value[i] === ',' && depth === 0) { parts.push(value.slice(start, i).trim()); start = i + 1; }
+      }
+      parts.push(value.slice(start).trim());
+      return parts;
+    };
+    const probe = document.createElement('i');
+    probe.style.cssText = 'all:initial;position:absolute;visibility:hidden;pointer-events:none;contain:strict';
+    el.append(probe);
+    const read = (element, pseudo) => {
+      const style = getComputedStyle(element, pseudo);
+      const number = key => parseFloat(style.getPropertyValue(key));
+      probe.style.width = style.getPropertyValue('--paint-width');
+      probe.style.height = style.getPropertyValue('--paint-height');
+      probe.style.left = style.getPropertyValue('--spectrum-phase');
+      probe.style.top = style.getPropertyValue('--beam-phase');
+      const resolved = getComputedStyle(probe);
+      return {
+        images: split(style.backgroundImage), positions: split(style.backgroundPosition),
+        repeats: split(style.backgroundRepeat), sizes: split(style.backgroundSize),
         mask: style.maskImage && style.maskImage !== 'none' ? style.maskImage : style.webkitMaskImage,
-        display: style.display, opacity: Number(style.opacity) }];
-    })));
-    const resting = await paint();
-    await page.mouse.move(box.x + box.width * .25, box.y + box.height * .3);
-    await idle(page);
-    const first = await paint();
-    await page.mouse.move(box.x + box.width * .75, box.y + box.height * .7);
-    await idle(page);
-    const second = await paint();
-    for (const layer of ['foil', 'shine']) {
-      expect(first[layer].display, `${id} ${layer}`).not.toBe('none');
-      expect(first[layer].image, `${id} ${layer}`).toContain(`material-${id}.webp`);
-      expect(first[layer].opacity, `${id} ${layer}`).toBeGreaterThan(resting[layer].opacity + .05);
-      expect(second[layer].position, `${id} ${layer}`).not.toBe(first[layer].position);
-      // The first background is the relief texture, which must not slide.
-      expect(second[layer].position.split(',')[0], `${id} fixed material`).toBe(first[layer].position.split(',')[0]);
+        display: style.display, opacity: Number(style.opacity),
+        width: parseFloat(style.width), height: parseFloat(style.height),
+        paintWidth: parseFloat(resolved.width), paintHeight: parseFloat(resolved.height),
+        spectrumPhase: parseFloat(resolved.left), beamPhase: parseFloat(resolved.top),
+        spectrumAngle: number('--spectral-angle'), beamAngle: number('--beam-angle'),
+        spectrumScale: [number('--spectrum-scale-x'), number('--spectrum-scale-y')],
+        beamScale: [number('--beam-scale-x'), number('--beam-scale-y')],
+      };
+    };
+    try {
+      const result = Object.fromEntries(['foil', 'shine'].map(layer => [layer, read(el.querySelector(`.tcard__${layer}`))]));
+      if (el.dataset.foil === 'golden-flintstone') result.subject = read(el.querySelector('.tcard__art'), '::after');
+      const value = key => parseFloat(el.style.getPropertyValue(key));
+      return { surfaces: result, fx: value('--px') * .65 + value('--foil-tilt-x') * .8,
+        fy: value('--py') * .65 - value('--foil-tilt-y') * .8 };
+    } finally { probe.remove(); }
+  });
+}
+
+function unbrokenGradientCanvas(surface, label, fx, fy) {
+  // These dimensions also guard against layout changes silently invalidating
+  // the phase calculation's cqw geometry (window, full-art and Golden cut-out).
+  expect(Math.abs(surface.paintWidth - surface.width), `${label} phase width`).toBeLessThan(.35);
+  expect(Math.abs(surface.paintHeight - surface.height), `${label} phase height`).toBeLessThan(.35);
+  const item = (list, i) => list[i % list.length];
+  const length = (token, span) => token.endsWith('%') ? parseFloat(token) * span / 100 : parseFloat(token);
+  for (const [i, image] of surface.images.entries()) {
+    if (!image.includes('gradient(')) continue;
+    expect(item(surface.repeats, i), `${label} gradient ${i} cannot tile`).toBe('no-repeat');
+    const size = item(surface.sizes, i).split(/\s+/);
+    const position = item(surface.positions, i).split(/\s+/);
+    for (const [axis, span] of [surface.width, surface.height].entries()) {
+      const extent = length(size[axis] || size[0], span);
+      const offset = length(position[axis] || position[0], span - extent);
+      expect(offset, `${label} gradient ${i} starts before surface`).toBeLessThanOrEqual(.1);
+      expect(offset + extent, `${label} gradient ${i} covers surface`).toBeGreaterThanOrEqual(span - .1);
     }
-    // Mayan's full-size gradients cannot translate within their box. Its light
-    // changes through the conic angle and radial phase inside the painted image.
-    if (id === 'mayan-bracelet') expect(second.foil.image).not.toBe(first.foil.image);
-    expect(first.foil.mask, id).toContain(groundName(id));
-    expect(first.shine.mask, id).toContain(portraitCards.includes(id) ? 'frame-full.webp' : 'frame-window.webp');
-    const state = await values(card);
-    expect(state.mx).toBeGreaterThan(55);
-    expect(Math.abs(state.rx)).toBeGreaterThan(1);
-    expect(Math.abs(state.ry)).toBeGreaterThan(1);
+    if (image.startsWith('repeating-') || image.startsWith('conic-gradient')) {
+      const colours = image.match(/(?:rgba?|color)\([^)]*\)/g) || [];
+      expect(colours.length, `${label} cyclic colours`).toBeGreaterThan(1);
+      expect(colours.at(-1), `${label} cycle has no colour jump`).toBe(colours[0]);
+    }
   }
-});
+  // Compare with the former translation projected onto the gradient's axis,
+  // using the measured box, not the shader's declared dimensions. This preserves
+  // the small-angle field while allowing it to continue beyond the old tile.
+  const projection = (angle, scale, x, y) => {
+    const radians = angle * Math.PI / 180;
+    return Math.sin(radians) * (1 - scale[0]) * surface.width * x
+      - Math.cos(radians) * (1 - scale[1]) * surface.height * y;
+  };
+  const spectralIndex = surface.images[0].startsWith('url(') ? 1 : 0;
+  if (surface.images[spectralIndex].startsWith('repeating-linear-gradient')) {
+    const expected = projection(surface.spectrumAngle, surface.spectrumScale, fx * .65, fy * .8);
+    expect(Math.abs(surface.spectrumPhase - expected), `${label} continuous spectral phase`).toBeLessThan(.5);
+  }
+  if (surface.images[2]?.startsWith('repeating-linear-gradient')) {
+    const expected = projection(surface.beamAngle, surface.beamScale, -fx * .48 - fy * .14, -fy * .5);
+    expect(Math.abs(surface.beamPhase - expected), `${label} continuous beam phase`).toBeLessThan(.5);
+  }
+}
+
+// A lifted card has a stable hit box. Native mouse moves just beyond each corner
+// reach the controller's full 0/100% light range, including the old bottom-right
+// seam. Repeat with reduced motion: the light still moves while tilt stays zero.
+for (const reducedMotion of ['no-preference', 'reduce']) {
+  for (const [group, finishes] of [
+    ['21–25', symmetryCards.slice(0, 5)], ['26–30', symmetryCards.slice(5)],
+  ]) test(`cards ${group}: unbroken material foil at all corners (${reducedMotion})`, async ({ page }) => {
+    test.setTimeout(180_000);
+    await page.emulateMedia({ reducedMotion });
+    await openDeck(page, 'cards');
+    await expect(page.locator('link[href$="/css/deck-symmetry.css"]')).toHaveCount(1);
+    for (const [id, finish] of finishes) {
+      const card = page.locator(`.tcard[data-foil="${id}"]`);
+      await expect(card).toHaveClass(/tcard--symmetry/);
+      await expect(card).toHaveAttribute('data-holo', finish);
+      await page.mouse.move(1, 1);
+      await card.evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'instant' }));
+      await idle(page);
+      const resting = await symmetryPaint(card);
+      await lift(page, card, false);
+      await faceOn(page, card);
+      const box = await card.boundingBox();
+      let previous = await symmetryPaint(card);
+      const spectra = Object.fromEntries(Object.keys(previous.surfaces).map(layer => [layer, new Set()]));
+      const fronts = Object.fromEntries(Object.keys(previous.surfaces).map(layer => [layer, new Set()]));
+      for (const [x, y] of [[0, 0], [1, 0], [1, 1], [0, 1]]) {
+        await page.mouse.move(box.x + (x ? box.width + 2 : -2), box.y + (y ? box.height + 2 : -2));
+        await idle(page);
+        const current = await symmetryPaint(card);
+        for (const [layer, surface] of Object.entries(current.surfaces)) {
+          const label = `${id} ${layer} corner ${x},${y}`;
+          expect(surface.display, label).not.toBe('none');
+          unbrokenGradientCanvas(surface, label, current.fx, current.fy);
+          const spectralIndex = layer === 'subject' ? 0 : 1;
+          spectra[layer].add(surface.images[spectralIndex]);
+          if (layer !== 'subject') {
+            expect(surface.images[0], label).toContain(`material-${id}.webp`);
+            expect(surface.images[0], `${label} fixed material`).toBe(previous.surfaces[layer].images[0]);
+            expect(surface.positions, `${label} fixed canvas`).toEqual(previous.surfaces[layer].positions);
+            expect(surface.opacity, label).toBeGreaterThan(resting.surfaces[layer].opacity + .05);
+            if (surface.images[2]?.startsWith('repeating-')) fronts[layer].add(surface.images[2]);
+          }
+        }
+        expect(current.surfaces.foil.mask, id).toContain(groundName(id));
+        expect(current.surfaces.shine.mask, id).toContain(portraitCards.includes(id) ? 'frame-full.webp' : 'frame-window.webp');
+        const state = await values(card);
+        expect(state.mx, id).toBeCloseTo(x * 100, 1);
+        expect(state.my, id).toBeCloseTo(y * 100, 1);
+        if (reducedMotion === 'reduce') {
+          expect(state.rx).toBe(0);
+          expect(angleDistance(state.ry, 0)).toBeLessThan(.1);
+        } else {
+          expect(Math.abs(state.rx)).toBeCloseTo(17, 1);
+          expect(angleDistance(state.ry, x ? 17 : -17)).toBeLessThan(.1);
+        }
+        previous = current;
+      }
+      for (const [layer, samples] of Object.entries(spectra)) {
+        // Mayan's conic spectrum depends on horizontal light while its radial
+        // front also responds vertically; four corners need not yield four hues.
+        expect(samples.size, `${id} ${layer} moving spectrum`).toBeGreaterThan(1);
+        if (fronts[layer].size) expect(fronts[layer].size, `${id} ${layer} moving specular front`).toBeGreaterThan(1);
+      }
+      await card.press('Escape');
+      await backInSlot(page, card);
+    }
+  });
+}
 
 for (const reducedMotion of ['no-preference', 'reduce']) {
   test(`symmetry foil follows a wheel turn at a fixed pointer (${reducedMotion})`, async ({ page }) => {
@@ -191,7 +303,7 @@ for (const reducedMotion of ['no-preference', 'reduce']) {
         ry: parseFloat(el.style.getPropertyValue('--ry')),
         tilt: parseFloat(el.style.getPropertyValue('--foil-tilt-x')),
         mx: el.style.getPropertyValue('--mx'), my: el.style.getPropertyValue('--my'),
-        position: getComputedStyle(el.querySelector('.tcard__foil')).backgroundPosition,
+        image: getComputedStyle(el.querySelector('.tcard__foil')).backgroundImage,
       });
       const audit = window.symmetryWheelAudit = { samples: [] };
       audit.observer = new MutationObserver(() => audit.samples.push(read()));
@@ -211,7 +323,7 @@ for (const reducedMotion of ['no-preference', 'reduce']) {
       return window.symmetryWheelAudit.samples;
     });
     expect(samples.some(sample => Math.abs(sample.tilt - before.tilt) > .05)).toBe(true);
-    expect(samples.some(sample => sample.position !== before.position)).toBe(true);
+    expect(samples.some(sample => sample.image !== before.image)).toBe(true);
     expect(samples.every(sample => sample.mx === before.mx && sample.my === before.my),
       'The reflection must change without a moving pointer/light coordinate').toBe(true);
     if (reducedMotion === 'reduce') {

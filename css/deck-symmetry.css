@@ -56,24 +56,34 @@
 :root .deck .tcard.tcard--symmetry {
   --fx: calc(var(--px, 0) * .65 + var(--foil-tilt-x, 0) * .8);
   --fy: calc(var(--py, 0) * .65 - var(--foil-tilt-y, 0) * .8);
-  --spectrum-x: calc(50% + var(--fx) * 65%);
-  --spectrum-y: calc(50% + var(--fy) * 80%);
-  --beam-x: calc(50% - var(--fx) * 48% - var(--fy) * 14%);
-  --beam-y: calc(50% - var(--fy) * 50%);
   --light-x: calc(50% + var(--fx) * 32%);
   --light-y: calc(50% + var(--fy) * 32%);
   --incidence: calc(.2 + var(--foil-facing, 1) * .8);
   --spectral-angle: 112deg;
   --beam-angle: 128deg;
-  --band-size: 260% 280%;
-  --beam-size: 230% 240%;
+  --spectrum-scale-x: 2.6;
+  --spectrum-scale-y: 2.8;
+  --beam-scale-x: 2.3;
+  --beam-scale-y: 2.4;
   --material-size: 100% 100%;
   --surface-mask: url('../assets/deck/foil/frame-window.webp');
   --surface-blend: color-dodge;
   --surface-brightness: .72;
   --surface-strength: .76;
   --art-strength: .85;
-  --spectral-colours: #ee456a 0%, #f6b94f 6%, #acec75 12%, #4dd9d1 18%, #7396f5 24%, #c66aee 30%, #ee456a 36%;
+  --spectrum-colour-1: #ee456a;
+  --spectrum-colour-2: #f6b94f;
+  --spectrum-colour-3: #acec75;
+  --spectrum-colour-4: #4dd9d1;
+  --spectrum-colour-5: #7396f5;
+  --spectrum-colour-6: #c66aee;
+  --spectrum-colour-7: #ee456a;
+  --spectrum-stop-2: 6%;
+  --spectrum-stop-3: 12%;
+  --spectrum-stop-4: 18%;
+  --spectrum-stop-5: 24%;
+  --spectrum-stop-6: 30%;
+  --spectrum-stop-7: 36%;
 }
 .tcard--swirling-streamers { --material: url('../assets/deck/foil/material-swirling-streamers.webp'); --ground: url('../assets/deck/foil/ground-swirling-streamers.webp'); }
 .tcard--sand-dollar { --material: url('../assets/deck/foil/material-sand-dollar.webp'); --ground: url('../assets/deck/foil/ground-sand-dollar.webp'); }
@@ -97,16 +107,44 @@
 /* Microrelief modulates luminance; the spectral layer colours it. Opposing
    bright/dark bands reveal different parts of the fixed engraving as it turns. */
 :root .deck .tcard.tcard--symmetry .tcard__shine,
+:root .deck .tcard.tcard--symmetry .tcard__foil,
+:root .deck .tcard.tcard--golden-flintstone .tcard__art::after {
+  /* Dimensions follow the border-box card geometry in deck.css. The frame is
+     100cqw × 88/63; the window and portrait overrides below subtract their rims.
+     Project the original background translation onto the gradient direction,
+     then move its stops instead of the rectangular image. This preserves the
+     original pitch/phase while removing tile seams at every light angle. */
+  --paint-width: 100cqw;
+  --paint-height: calc(100cqw * 88 / 63);
+  --band-size: calc(var(--spectrum-scale-x) * 100%) calc(var(--spectrum-scale-y) * 100%);
+  --beam-size: calc(var(--beam-scale-x) * 100%) calc(var(--beam-scale-y) * 100%);
+  --spectrum-phase: calc(
+    sin(var(--spectral-angle)) * (1 - var(--spectrum-scale-x)) * var(--paint-width) * var(--fx) * .65
+    - cos(var(--spectral-angle)) * (1 - var(--spectrum-scale-y)) * var(--paint-height) * var(--fy) * .8);
+  --beam-phase: calc(
+    sin(var(--beam-angle)) * (1 - var(--beam-scale-x)) * var(--paint-width) * (var(--fx) * -.48 - var(--fy) * .14)
+    + cos(var(--beam-angle)) * (1 - var(--beam-scale-y)) * var(--paint-height) * var(--fy) * .5);
+  /* Compose here, not on the card: each surface has its own geometry and phase. */
+  --spectral-colours:
+    var(--spectrum-colour-1) calc(0% + var(--spectrum-phase)),
+    var(--spectrum-colour-2) calc(var(--spectrum-stop-2) + var(--spectrum-phase)),
+    var(--spectrum-colour-3) calc(var(--spectrum-stop-3) + var(--spectrum-phase)),
+    var(--spectrum-colour-4) calc(var(--spectrum-stop-4) + var(--spectrum-phase)),
+    var(--spectrum-colour-5) calc(var(--spectrum-stop-5) + var(--spectrum-phase)),
+    var(--spectrum-colour-6) calc(var(--spectrum-stop-6) + var(--spectrum-phase)),
+    var(--spectrum-colour-7) calc(var(--spectrum-stop-7) + var(--spectrum-phase));
+}
+:root .deck .tcard.tcard--symmetry .tcard__shine,
 :root .deck .tcard.tcard--symmetry .tcard__foil {
   display: block;
   background-image:
     var(--material),
     repeating-linear-gradient(var(--spectral-angle), var(--spectral-colours)),
-    repeating-linear-gradient(var(--beam-angle), #080b16 0%, #101b2c 5%, #b5bfc8 8%, #edf2ed 9.2%, #485063 11%, #080b16 16%, #080b16 24%),
+    repeating-linear-gradient(var(--beam-angle), #080b16 calc(0% + var(--beam-phase)), #101b2c calc(5% + var(--beam-phase)), #b5bfc8 calc(8% + var(--beam-phase)), #edf2ed calc(9.2% + var(--beam-phase)), #485063 calc(11% + var(--beam-phase)), #080b16 calc(16% + var(--beam-phase)), #080b16 calc(24% + var(--beam-phase))),
     radial-gradient(ellipse at var(--light-x) var(--light-y), #c6cbd3 0%, #4b5065 28%, #10131d 58%, #03040b 85%);
   background-size: var(--material-size), var(--band-size), var(--beam-size), 100% 100%;
-  background-position: center, var(--spectrum-x) var(--spectrum-y), var(--beam-x) var(--beam-y), center;
-  background-repeat: no-repeat, repeat, repeat, no-repeat;
+  background-position: center;
+  background-repeat: no-repeat;
   background-blend-mode: soft-light, color, screen, normal;
   filter: brightness(var(--surface-brightness)) contrast(1.65) saturate(1.45);
   mix-blend-mode: var(--surface-blend);
@@ -127,6 +165,9 @@
   mix-blend-mode: color-dodge;
   --material-size: 100% auto;
   --surface-brightness: .8;
+  /* Window: 86.8cqw wide at 16/9.6, minus its 0.8cqw rim on each side. */
+  --paint-width: 85.2cqw;
+  --paint-height: 50.48cqw;
 }
 /* Gloss is narrow and translucent. It never paints a grey veil over the art. */
 :root .deck .tcard.tcard--symmetry .tcard__front > .tcard__glare {
@@ -141,16 +182,36 @@
 }
 
 /* Each plate has a different grain direction, spectral cadence and reflection. */
-:root .deck .tcard.tcard--swirling-streamers { --beam-angle: 66deg; --spectral-angle: 158deg; --beam-size: 300% 210%; --band-size: 230% 330%; }
-:root .deck .tcard.tcard--sand-dollar { --beam-angle: 28deg; --spectral-angle: 98deg; --beam-size: 240% 340%; --spectral-colours: #d9517d 0%, #eca874 7%, #4ad7a7 14%, #5abbd8 21%, #a46de1 28%, #d9517d 35%; }
-:root .deck .tcard.tcard--pentagon { --beam-angle: 144deg; --spectral-angle: 36deg; --beam-size: 180% 210%; --band-size: 230% 230%; }
-:root .deck .tcard.tcard--halloween { --beam-angle: 72deg; --spectral-angle: 18deg; --surface-strength: .68; --spectral-colours: #ed9844 0%, #f0ce70 5%, #df6279 11%, #a55acd 17%, #59bdc8 24%, #ed9844 32%; }
-:root .deck .tcard.tcard--golden-flintstone { --beam-angle: 24deg; --spectral-angle: 132deg; --beam-size: 190% 280%; --band-size: 330% 240%; --spectral-colours: #c95a69 0%, #f4ae46 5%, #f6d78c 11%, #88c9b3 17%, #7b80c8 23%, #db72a8 29%, #c95a69 35%; }
-:root .deck .tcard.tcard--chaotic-flower { --beam-angle: 160deg; --spectral-angle: 72deg; --beam-size: 320% 230%; --band-size: 250% 190%; }
-:root .deck .tcard.tcard--french-glass { --beam-angle: 90deg; --spectral-angle: 28deg; --band-size: 210% 400%; --spectral-colours: #47c8b0 0%, #5fa6dc 6%, #aa6bda 12%, #df689b 18%, #e8c164 24%, #47c8b0 31%; }
-:root .deck .tcard.tcard--pentacle { --beam-angle: 18deg; --spectral-angle: 126deg; --beam-size: 280% 190%; --band-size: 260% 300%; }
-:root .deck .tcard.tcard--mayan-bracelet { --beam-angle: 157deg; --spectral-angle: 67deg; --surface-strength: .7; --band-size: 320% 240%; }
-:root .deck .tcard.tcard--clam-triple { --beam-angle: 44deg; --spectral-angle: 125deg; --beam-size: 360% 240%; --band-size: 250% 340%; --art-strength: .7; --spectral-colours: #59b9ac 0%, #6ba4dc 7%, #ab82cd 14%, #e6a3b5 21%, #e6cf83 28%, #59b9ac 35%; }
+:root .deck .tcard.tcard--swirling-streamers { --beam-angle: 66deg; --spectral-angle: 158deg; --beam-scale-x: 3; --beam-scale-y: 2.1; --spectrum-scale-x: 2.3; --spectrum-scale-y: 3.3; }
+:root .deck .tcard.tcard--sand-dollar {
+  --beam-angle: 28deg; --spectral-angle: 98deg; --beam-scale-x: 2.4; --beam-scale-y: 3.4;
+  --spectrum-colour-1: #d9517d; --spectrum-colour-2: #eca874; --spectrum-colour-3: #4ad7a7; --spectrum-colour-4: #5abbd8; --spectrum-colour-5: #a46de1; --spectrum-colour-6: #d9517d; --spectrum-colour-7: #d9517d;
+  --spectrum-stop-2: 7%; --spectrum-stop-3: 14%; --spectrum-stop-4: 21%; --spectrum-stop-5: 28%; --spectrum-stop-6: 35%; --spectrum-stop-7: 35%;
+}
+:root .deck .tcard.tcard--pentagon { --beam-angle: 144deg; --spectral-angle: 36deg; --beam-scale-x: 1.8; --beam-scale-y: 2.1; --spectrum-scale-x: 2.3; --spectrum-scale-y: 2.3; }
+:root .deck .tcard.tcard--halloween {
+  --beam-angle: 72deg; --spectral-angle: 18deg; --surface-strength: .68;
+  --spectrum-colour-1: #ed9844; --spectrum-colour-2: #f0ce70; --spectrum-colour-3: #df6279; --spectrum-colour-4: #a55acd; --spectrum-colour-5: #59bdc8; --spectrum-colour-6: #ed9844; --spectrum-colour-7: #ed9844;
+  --spectrum-stop-2: 5%; --spectrum-stop-3: 11%; --spectrum-stop-4: 17%; --spectrum-stop-5: 24%; --spectrum-stop-6: 32%; --spectrum-stop-7: 32%;
+}
+:root .deck .tcard.tcard--golden-flintstone {
+  --beam-angle: 24deg; --spectral-angle: 132deg; --beam-scale-x: 1.9; --beam-scale-y: 2.8; --spectrum-scale-x: 3.3; --spectrum-scale-y: 2.4;
+  --spectrum-colour-1: #c95a69; --spectrum-colour-2: #f4ae46; --spectrum-colour-3: #f6d78c; --spectrum-colour-4: #88c9b3; --spectrum-colour-5: #7b80c8; --spectrum-colour-6: #db72a8; --spectrum-colour-7: #c95a69;
+  --spectrum-stop-2: 5%; --spectrum-stop-3: 11%; --spectrum-stop-4: 17%; --spectrum-stop-5: 23%; --spectrum-stop-6: 29%; --spectrum-stop-7: 35%;
+}
+:root .deck .tcard.tcard--chaotic-flower { --beam-angle: 160deg; --spectral-angle: 72deg; --beam-scale-x: 3.2; --beam-scale-y: 2.3; --spectrum-scale-x: 2.5; --spectrum-scale-y: 1.9; }
+:root .deck .tcard.tcard--french-glass {
+  --beam-angle: 90deg; --spectral-angle: 28deg; --spectrum-scale-x: 2.1; --spectrum-scale-y: 4;
+  --spectrum-colour-1: #47c8b0; --spectrum-colour-2: #5fa6dc; --spectrum-colour-3: #aa6bda; --spectrum-colour-4: #df689b; --spectrum-colour-5: #e8c164; --spectrum-colour-6: #47c8b0; --spectrum-colour-7: #47c8b0;
+  --spectrum-stop-2: 6%; --spectrum-stop-3: 12%; --spectrum-stop-4: 18%; --spectrum-stop-5: 24%; --spectrum-stop-6: 31%; --spectrum-stop-7: 31%;
+}
+:root .deck .tcard.tcard--pentacle { --beam-angle: 18deg; --spectral-angle: 126deg; --beam-scale-x: 2.8; --beam-scale-y: 1.9; --spectrum-scale-x: 2.6; --spectrum-scale-y: 3; }
+:root .deck .tcard.tcard--mayan-bracelet { --beam-angle: 157deg; --spectral-angle: 67deg; --surface-strength: .7; --spectrum-scale-x: 3.2; --spectrum-scale-y: 2.4; }
+:root .deck .tcard.tcard--clam-triple {
+  --beam-angle: 44deg; --spectral-angle: 125deg; --beam-scale-x: 3.6; --beam-scale-y: 2.4; --spectrum-scale-x: 2.5; --spectrum-scale-y: 3.4; --art-strength: .7;
+  --spectrum-colour-1: #59b9ac; --spectrum-colour-2: #6ba4dc; --spectrum-colour-3: #ab82cd; --spectrum-colour-4: #e6a3b5; --spectrum-colour-5: #e6cf83; --spectrum-colour-6: #59b9ac; --spectrum-colour-7: #59b9ac;
+  --spectrum-stop-2: 7%; --spectrum-stop-3: 14%; --spectrum-stop-4: 21%; --spectrum-stop-5: 28%; --spectrum-stop-6: 35%; --spectrum-stop-7: 35%;
+}
 
 /* The three portrait prints stay dark in both room themes. Their ground masks
    follow their own scaled orbit, rather than a rectangular artwork cut-out. */
@@ -160,14 +221,24 @@
 :root .deck .tcard.tcard--symmetry:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__shine {
   opacity: calc(var(--o, 0) * .18);
 }
-:root .deck .tcard.tcard--symmetry:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__foil { --material-size: 100% 100%; }
+:root .deck .tcard.tcard--symmetry:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__foil {
+  --material-size: 100% 100%;
+  /* Full-art panel fills the card inside its 1.55cqw rim. */
+  --paint-width: 96.9cqw;
+  --paint-height: calc(100cqw * 88 / 63 - 3.1cqw);
+}
 
 /* Golden's orbit remains the floating cut-out. The surrounding foil is now
    continuous crumpled metal, not a set of opaque pastel paint blobs. */
 :root .deck .tcard.tcard--golden-flintstone .tcard__art::before { background: radial-gradient(ellipse at 30% 30%, #34203b, #080e20 75%); }
 :root .deck .tcard.tcard--golden-flintstone .tcard__art::after {
+  --paint-width: 97.98cqw;
+  --paint-height: 73.485cqw;
+  --spectral-angle: 118deg;
+  --spectrum-scale-x: 3;
+  --spectrum-scale-y: 3;
   opacity: calc(var(--o, 0) * .24);
-  background: repeating-linear-gradient(118deg, var(--spectral-colours)) var(--spectrum-x) var(--spectrum-y) / 300% 300%;
+  background: repeating-linear-gradient(var(--spectral-angle), var(--spectral-colours)) center / var(--band-size) no-repeat;
   filter: saturate(1.25);
   mix-blend-mode: soft-light;
 }
@@ -179,11 +250,13 @@
 /* Crumpled gold reflects in irregular islands rather than laser-straight bars. */
 :root .deck .tcard.tcard--golden-flintstone .tcard__shine,
 :root .deck .tcard.tcard--golden-flintstone .tcard__foil {
+  --spectral-angle: 32deg;
+  --spectrum-scale-x: 2.8;
+  --spectrum-scale-y: 3;
   background-image: var(--material),
-    repeating-linear-gradient(32deg, var(--spectral-colours)),
+    repeating-linear-gradient(var(--spectral-angle), var(--spectral-colours)),
     radial-gradient(ellipse at var(--light-x) var(--light-y), #e4d9bc 0%, #94949f 19%, #343848 42%, #0a0b16 78%);
-  background-size: var(--material-size), 280% 300%, 100% 100%;
-  background-position: center, var(--spectrum-x) var(--spectrum-y), center;
+  background-size: var(--material-size), var(--band-size), 100% 100%;
   background-blend-mode: hard-light, color, normal;
   filter: brightness(.83) contrast(1.45) saturate(1.3);
 }
@@ -199,7 +272,7 @@
     repeating-radial-gradient(ellipse at 50% 32%, #0a0b18 calc(-8% + var(--ring-phase)), #697481 calc(1% + var(--ring-phase)), #d1d7d5 calc(3% + var(--ring-phase)), #0a0b18 calc(8% + var(--ring-phase)), #0a0b18 calc(14% + var(--ring-phase))),
     radial-gradient(ellipse at var(--light-x) var(--light-y), #a2a9b1, #10131d 68%);
   background-size: 100% 100%;
-  background-position: center, var(--spectrum-x) var(--spectrum-y), center, center;
+  background-position: center;
   filter: brightness(.7) contrast(1.55) saturate(1.35);
 }
 
