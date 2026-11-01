@@ -60,12 +60,14 @@ an explicit WebKit native-input skip remains visible and is documented below.
   individual functional runs more practical. Production CSS, assets
   and effects are unchanged.
 
-Every collection opening checks all 20 unique card IDs and all 20 loaded images. The
+Every collection opening checks all 30 unique card IDs and all 30 loaded images. The
 gesture sweep uses four representatives in every entry/engine combination: Clifford
 (classic foil), Chirikov (reverse holo), Logistic (beam) and Halvorsen (amazing). This covers
-the shared controller and every foil family without repeating it for all textures in the
-regular gate. For a longer, separate Chromium/cards sweep, set `DECK_FULL_COLLECTION=1`
-and select that project/inspection test; it inspects all 20 cards. Run this separately
+the shared controller and the original foil families without repeating every texture in the
+regular gate. A desktop check also moves the pointer over common, radiant, V, V alternate and
+VStar finishes, checking the light and pattern respond to position. For a longer, separate
+Chromium/cards sweep, set `DECK_FULL_COLLECTION=1`
+and select that project/inspection test; it inspects all 30 cards. Run this separately
 from the whole regular matrix within the existing per-command VM budget.
 Each inspected card is lifted, tilted/lit, released
 without changing face, probed for trailing clicks, put back and checked against its slot.
@@ -73,8 +75,10 @@ Halvorsen additionally covers explicit Flip and inspection of the back in each c
 
 | Check | Entry and engine coverage |
 |---|---|
-| Regular inspection | 4 foil families per entry and touch engine; all 20 identities/images checked each time |
-| Extended inspection | Optional `DECK_FULL_COLLECTION=1`, Chromium/cards: all 20 gestures; run separately |
+| Regular inspection | 4 original foil families per entry and touch engine; all 30 identities/images checked each time |
+| New finishes | Desktop pointer response, foil mask decoding, quieter texture over text, and checks for vanished or near-duplicate frame motifs on the reported pairs |
+| Full art and theme card | Desktop portrait artwork bounds and mask decoding; Clam Triple theme flip via button, keyboard, drag and wheel; touch Flip and theme persistence |
+| Extended inspection | Optional `DECK_FULL_COLLECTION=1`, Chromium/cards: all 30 gestures; run separately |
 | Synthetic cancel and capture loss; partial second-finger release | cards.html, both touch projects |
 | Landscape viewport, controls, close/reopen during gesture | See examples, both touch projects |
 | Separate veil dismissal and slot tracking during return scroll | Both entries, both touch projects; return scroll is programmatic |
@@ -84,9 +88,11 @@ Halvorsen additionally covers explicit Flip and inspection of the back in each c
 | Desktop reduced motion | cards.html, both desktop engines |
 | Public files and rejected server paths | One shared-server check in Chromium desktop |
 
-This defines 21 test cases across the four projects: 20 executable cases and one explicit
-WebKit native-input skip. It preserves distinct behaviors without repeating every lifecycle
+The suite preserves distinct behaviors without repeating every lifecycle
 case for every card, viewport and entry. It is not an exhaustive Cartesian matrix.
+The frame comparison averages mask alpha over broad patches outside the art and text;
+it can catch a missing or near-duplicated motif but cannot judge visual character,
+colour or readability of the composited card. Those need visual inspection.
 
 Assertions observe computed CSS values, transforms, active state, slot geometry, capture,
 image loading and control hit testing. A forwarding RAF observer counts calls originating
@@ -144,3 +150,13 @@ A blocked click cannot pass this check, and there is no repeat tap or forced inp
 handler, plus the surrounding pointer/click events. Failure diagnostics also include this
 probe, event targets and final `defaultPrevented`, to distinguish late delivery from a
 blocked or misdirected action. These are test observations; product handlers are unchanged.
+
+`tests/deck-benchmark.mjs` is an observational WebKit benchmark for a separately served
+copy in the same prepared VM, not a pass/fail gate or a physical device measurement. It
+reports frame intervals, deck callback time, rotation, asset requests and collection image
+dimensions and an estimated uncompressed RGBA size. It samples three existing cards plus one
+of each new finish, including Amazing Rare; `--baseline REV`
+alternates the old and current source and measures shared cards in both, with new finishes
+measured only in the current variant. Use `--cards id,id` to select cards present in both
+variants. Compare like-for-like phases on the same VM and note that software rendering,
+timings and frame intervals do not establish real-device GPU performance.

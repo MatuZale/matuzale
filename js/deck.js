@@ -1,7 +1,7 @@
 // The attractor collection: trading cards for the renders behind "Strange attractors & fractals".
 // Loaded on first use by script.js. Each card follows the pointer on springs; a lifted card can be
 // tilted by touch, or spun round by dragging with a mouse. The equations and parameters are the ones used for the
-// renders (github.com/MatuZale/color_recursive_maps).
+// renders (github.com/MatuZale/color_recursive_maps and assets/deck/color_symmetry.py).
 
 // Each card reads like a trading card: a stage tag and dimension in the header, a Pokédex-style
 // strip under the art, an ability, the update rules as "attacks", the parameters in the
@@ -195,6 +195,32 @@ const CARDS = [
   },
 ];
 
+// Ten symmetric icons from Field and Golubitsky's standard map (Symmetry in Chaos,
+// table A.1). The images are independent density renders, not reproductions of
+// the reference artwork; the full parameter list is printed on each card.
+const ICONS = [
+  ["swirling-streamers", "Swirling Streamers", 4, "−1.86", "2", "0", "1", ".1", "✳", "Rotating ribbons", "Four streams wind through one another; a small rotation breaks mirror symmetry while leaving fourfold turns.", "Coral ribbons winding into a fourfold symmetric knot on midnight blue", "#e98682", "#29101c"],
+  ["sand-dollar", "Sand Dollar", 5, "−2.34", "2", ".2", ".1", "0", "✿", "Fivefold shell", "A fivefold shell emerges from one orbit. Its teal and burgundy palette takes a cue from Bourke's Tangle.", "A sand dollar in teal and burgundy on a dark background", "#69c9b4", "#152f30"],
+  ["pentagon", "Pentagon", 5, "2.6", "−2", "0", "−.5", "0", "⬠", "Five-sided fold", "Overlapping translucent folds outline a pentagon, while the same map visits every corner.", "Pale blue folds forming a pentagon on midnight blue", "#83cbe0", "#102034"],
+  ["halloween", "Halloween", 6, "−2.7", "5", "1.5", "1", "0", "✶", "Sixfold lantern", "Six bright spokes and a woven centre arise from a single orbit; colour follows the density of visits.", "A sixfold golden lantern of fine threads on black", "#f0a254", "#2b1422"],
+  ["golden-flintstone", "Golden Flintstone", 3, "2.5", "−2.5", "0", ".9", "0", "✦", "Golden facets", "The threefold orbit folds into sharp facets, like a small shard of luminous gold.", "Interlocking golden triangular facets on dark violet", "#ebc976", "#231627"],
+  ["chaotic-flower", "Chaotic Flower", 5, "−2.5", "5", "−1.9", "1", ".188", "✿", "Petals in motion", "Five petals turn around an open centre. The rotation term makes their curls directional.", "Pink and peach petals surrounding a dark centre", "#efa8c3", "#24142f"],
+  ["french-glass", "French Glass", 9, "−2.05", "3", "−16.79", "1", "0", "❋", "Ninefold lace", "Nine repeated forms weave a circular lace from one complex orbit.", "A turquoise ninefold rosette of fine interwoven lines", "#7bd5bf", "#0d252c"],
+  ["pentacle", "Pentacle", 5, "−2.32", "2.32", "0", ".75", "0", "⛤", "Five-point weave", "A star hides inside a five-sided veil, all traced by the same iterative rule.", "A translucent lavender five-point star on dark violet", "#c2a4e4", "#1a1431"],
+  ["mayan-bracelet", "Mayan Bracelet", 7, "−2.08", "1", "−.1", ".167", "0", "❂", "Seven-link loop", "Seven delicate links join into a ring. Each light thread marks where the orbit spends time.", "A ring of seven delicate rose-gold woven links", "#e5a38a", "#291722"],
+  ["clam-triple", "Clam Triple", 3, "1.56", "−1", ".1", "−.82", ".12", "◈", "Triple spiral", "A hint of rotation turns three overlapping shells into a gently twisting shape.", "Three translucent sea-green shells twisting together", "#75cbbf", "#0d252a"],
+];
+for (const [id, name, m, lambda, alpha, beta, gamma, omega, symbol, ability, description, alt, accent, panel] of ICONS) {
+  CARDS.push({
+    id, name, stage: "Symmetric map", dim: 2, symbol, rarity: id === "golden-flintstone" ? "★★★" : "◆",
+    credit: "after Field &amp; Golubitsky", ability,
+    style: `--eq: .83; --name-size: 4.4cqw; --accent: ${accent}; --panel: ${panel}; --frame: linear-gradient(140deg, color-mix(in srgb, ${accent}, white 45%), ${accent} 32%, #fff 52%, ${accent} 78%, color-mix(in srgb, ${accent}, white 35%))`,
+    eq: [[X("z"), "(<i>λ</i> + <i>α</i>|<i>z</i><sub>n</sub>|² + <i>iω</i> + <i>β</i> Re(<i>z</i><sub>n</sub><sup>m</sup>)) <i>z</i><sub>n</sub>"], ["", "+ <i>γ</i> <i class=\"ol\">z</i><sub>n</sub><sup>m−1</sup>"]],
+    stats: [["<i>m</i>", m], ["<i>λ</i>", lambda], ["<i>α</i>", alpha], ["<i>β</i>", beta], ["<i>γ</i>", gamma], ["<i>ω</i>", omega]],
+    text: description, illustration: "Computed density", size: "1200 × 900 · 45 M points", alt,
+  });
+}
+
 // The kind of foil on the frame, as on printed holo cards: reverse holo (texture everywhere but the artwork),
 // regular holo (matte frame, foil in the artwork only) or full art (gold). See deck.css.
 const KIND = { clifford: "reverse", dejong: "reverse", simon: "reverse", ikeda: "reverse", thomas: "reverse", bedhead: "reverse", layered: "regular", symmetric: "regular", gumowski: "regular", harmonic: "regular", julia: "full", mcmullen: "full" };
@@ -213,7 +239,9 @@ const ART = {
 //   beam     holo rare: rainbow foil with vertical beams, in the artwork window only
 //   amazing  amazing rare: the attractor breaks out of its window in a splash of glitter (Halvorsen's window
 //            also an etched swirl, after the Jirachi amazing rare)
-const HOLO = { chirikov: "reverse", hopalong: "reverse", popcorn: "reverse", logistic: "beam", halvorsen: "amazing", lorenz: "amazing", aizawa: "amazing" };
+const HOLO = { chirikov: "reverse", hopalong: "reverse", popcorn: "reverse", logistic: "beam", halvorsen: "amazing", lorenz: "amazing", aizawa: "amazing",
+  "swirling-streamers": "common", "sand-dollar": "radiant", pentagon: "v", halloween: "v-alt", "golden-flintstone": "amazing",
+  "chaotic-flower": "radiant", "french-glass": "v", pentacle: "v-alt", "mayan-bracelet": "vstar", "clam-triple": "common" };
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 // Whether a spring has all but arrived: within eps of its target and hardly moving.
@@ -253,10 +281,11 @@ function cardMarkup(card, index) {
   // The alternate art is a portrait full-bleed render; the others sit in a landscape window. An amazing rare
   // shows its render cut out of the dark background, so it can spill over the card (generate_holo.py).
   const [file, width, height] = card.id === "smoke" ? ["simon-smoke", 900, 1257]
+    : ["halloween", "french-glass", "mayan-bracelet"].includes(card.id) ? [`full-${card.id}`, 900, 1257]
     : HOLO[card.id] === "amazing" ? [`foil/cut-${card.id}`, 1200, 900] : [card.id, 1200, 900];
   return `
     <li class="deck__slot" style="--i: ${index}">
-      <div class="tcard tcard--${card.id}" data-foil="${card.id}" data-kind="${KIND[card.id] ?? ""}" data-art="${ART[card.id] ?? ""}" data-holo="${HOLO[card.id] ?? ""}" ${card.style ? `style="${card.style}"` : ""} role="button" tabindex="0" aria-pressed="false" aria-label="${card.name}${card.id === "smoke" ? " (alternate art)" : ""}: lift the card">
+      <div class="tcard tcard--${card.id}" data-foil="${card.id}" data-kind="${KIND[card.id] ?? ""}" data-art="${ART[card.id] ?? ""}" data-holo="${HOLO[card.id] ?? ""}" ${card.style ? `style="${card.style}"` : ""} role="button" tabindex="0" aria-pressed="false" aria-label="${card.name}${card.id === "smoke" ? " (alternate art)" : ""}: lift the card${card.id === "clam-triple" ? "; flip to switch the site theme" : ""}">
         <div class="tcard__rotator">
           <div class="tcard__face tcard__front">
             <div class="tcard__panel">
@@ -270,21 +299,20 @@ function cardMarkup(card, index) {
                 <img src="assets/deck/${file}.webp" alt="${card.alt}" width="${width}" height="${height}" decoding="async" draggable="false" />
                 <span class="tcard__foil" aria-hidden="true"></span>
                 ${HOLO[card.id] === "amazing" ? `<span class="tcard__glitter" aria-hidden="true"></span>` : ""}
+                ${card.id === "clam-triple" ? `<span class="tcard__theme-badge" aria-hidden="true">↻ LIGHT / DARK</span>` : ""}
               </div>
               <p class="tcard__strip"><span>NO. ${number}</span>${card.credit}</p>
               <p class="tcard__ability"><span class="tcard__ability-tag">Ability</span>${card.ability}</p>
               <div class="tcard__moves">${card.eq.map(([lhs, rhs]) => `<p class="tcard__move">${energy}<span class="tcard__eq">${lhs ? `<b>${lhs}</b> = ` : ""}${rhs}</span></p>`).join("")}</div>
               <dl class="tcard__stats">${card.stats.map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join("")}</dl>
               <p class="tcard__flavor">${card.text}</p>
-              <div class="tcard__foot"><span>Illus. Tomasz Młynik</span><span>${card.size}</span><span>${set} <span class="tcard__rarity" aria-hidden="true">${card.rarity}</span></span></div>
+              <div class="tcard__foot"><span>${card.illustration ?? "Illus. Tomasz Młynik"}</span><span>${card.size}</span><span>${set} <span class="tcard__rarity" aria-hidden="true">${card.rarity}</span></span></div>
             </div>
             <span class="tcard__shine" aria-hidden="true"></span>
             <span class="tcard__glare" aria-hidden="true"></span>
           </div>
           <div class="tcard__face tcard__back" aria-hidden="true">
-            <span class="tcard__back-motif"></span>
-            <span class="tcard__back-mark">TM</span>
-            <span class="tcard__back-title">Strange attractors</span>
+            ${card.id === "clam-triple" ? `<span class="tcard__theme-orbit"></span><span class="tcard__theme-symbol">◐</span><span class="tcard__theme-title">LIGHT / DARK</span><span class="tcard__theme-subtitle">Flip to switch theme</span>` : `<span class="tcard__back-motif"></span><span class="tcard__back-mark">TM</span><span class="tcard__back-title">Strange attractors</span>`}
             <span class="tcard__glare"></span>
           </div>
         </div>
@@ -293,13 +321,15 @@ function cardMarkup(card, index) {
 }
 
 function loadStyles() {
-  const href = new URL("../css/deck.css", import.meta.url).href;
-  if (document.querySelector(`link[href="${href}"]`)) return Promise.resolve();
-  return new Promise(resolve => {
-    const link = Object.assign(document.createElement("link"), { rel: "stylesheet", href });
-    link.onload = link.onerror = () => resolve();
-    document.head.append(link);
-  });
+  return Promise.all(["../css/deck.css", "../css/deck-room.css"].map(path => {
+    const href = new URL(path, import.meta.url).href;
+    if (document.querySelector(`link[href="${href}"]`)) return Promise.resolve();
+    return new Promise(resolve => {
+      const link = Object.assign(document.createElement("link"), { rel: "stylesheet", href });
+      link.onload = link.onerror = () => resolve();
+      document.head.append(link);
+    });
+  }));
 }
 
 export async function createDeck() {
@@ -317,6 +347,7 @@ export async function createDeck() {
       <p class="deck__hint">
         <span class="deck__hint--pointer">Tilt a card with the pointer and click to lift it out. Flip it with the button, the mouse wheel, F or a sideways drag. Esc puts it back.</span>
         <span class="deck__hint--touch">Tap to lift a card. Slide one finger to tilt it and explore the light; release to relax. Use Flip card to turn it over, or Put back to return it.</span>
+        <span class="deck__theme-hint">Flip Clam Triple to switch the site theme.</span>
       </p>
       <button type="button" class="deck__close">Close <span aria-hidden="true">✕</span></button>
     </div>
@@ -325,6 +356,7 @@ export async function createDeck() {
     <div class="deck__tools">
       <button type="button" class="deck__tool" data-deck-flip>Flip card <span aria-hidden="true">↻</span></button>
       <button type="button" class="deck__tool" data-deck-back>Put back</button>
+      <span class="deck__theme-status" data-theme-status aria-live="polite"></span>
     </div>`;
   document.body.append(dialog);
 
@@ -333,6 +365,35 @@ export async function createDeck() {
   const closeButton = dialog.querySelector(".deck__close");
   const cards = [...dialog.querySelectorAll(".tcard")].map(el => controller(el));
   let active = null, opener = null;
+  const siteRoot = document.documentElement;
+  const systemDark = matchMedia("(prefers-color-scheme: dark)");
+  const themeStatus = dialog.querySelector("[data-theme-status]");
+  const flipButton = dialog.querySelector("[data-deck-flip]");
+  const siteTheme = () => siteRoot.getAttribute("data-theme") || (systemDark.matches ? "dark" : "light");
+  function syncThemeStatus() {
+    const theme = siteTheme();
+    themeStatus.textContent = `Site theme: ${theme}.`;
+    if (active?.el.dataset.foil === "clam-triple") flipButton.setAttribute("aria-label", `Flip card and switch to ${theme === "dark" ? "light" : "dark"} theme`);
+    else flipButton.removeAttribute("aria-label");
+  }
+  function switchTheme() {
+    // On the portfolio use its existing handler, including pending transitions,
+    // storage and accessible button labels. The standalone deck has no toggle.
+    const toggle = document.getElementById("theme-toggle");
+    if (toggle) toggle.click();
+    else {
+      const next = siteTheme() === "dark" ? "light" : "dark";
+      siteRoot.setAttribute("data-theme", next);
+      try { localStorage.setItem("theme", next); } catch (e) { /* storage unavailable */ }
+    }
+  }
+  const side = degrees => Math.abs(Math.round(degrees / 180) % 2);
+  function switchThemeIfTurned(card, previous) {
+    if (card?.el.dataset.foil === "clam-triple" && side(previous) !== side(card.s.spin.target)) switchTheme();
+  }
+  new MutationObserver(syncThemeStatus).observe(siteRoot, { attributes: true, attributeFilter: ["data-theme"] });
+  systemDark.addEventListener("change", syncThemeStatus);
+  syncThemeStatus();
 
   function controller(el) {
     const label = el.getAttribute("aria-label");
@@ -501,6 +562,7 @@ export async function createDeck() {
     interrupt();
     if (active) active.drop();
     active = card;
+    syncThemeStatus();
     dialog.classList.add("has-active");
     card.lift(input);
   }
@@ -509,6 +571,7 @@ export async function createDeck() {
     if (!active) return;
     active.drop();
     active = null;
+    syncThemeStatus();
     dialog.classList.remove("has-active");
   }
 
@@ -531,7 +594,7 @@ export async function createDeck() {
   // Each physical press owns its click eligibility. Keep the completed sequence until the
   // next press, since a compatibility click can follow pointerup/lostpointercapture.
   const pointers = new Map();
-  let gesture = null, lastPress = null, wheelEnd = 0, dealFrame = 0;
+  let gesture = null, lastPress = null, wheelEnd = 0, wheelStart = 0, dealFrame = 0;
   const cardAt = target => cards.find(card => card.el.contains(target));
   const touchCount = () => [...pointers.values()].filter(press => press.type === "touch").length;
 
@@ -542,6 +605,7 @@ export async function createDeck() {
     if (g.type === "touch") g.card.rest();
     else if (g.press.moved || cancelled) {
       g.card.spinTo(cancelled ? g.spin : g.card.s.spin.target, true);
+      if (!cancelled) switchThemeIfTurned(g.card, g.spin);
       g.card.rest();
     }
     if (g.card.el.hasPointerCapture(g.id)) g.card.el.releasePointerCapture(g.id);
@@ -552,13 +616,17 @@ export async function createDeck() {
     finishWheel();
   }
   function finishWheel() {
+    if (!wheelEnd) return;
     clearTimeout(wheelEnd);
-    if (wheelEnd && active) active.spinTo(active.s.spin.target, true);
     wheelEnd = 0;
+    if (active) { active.spinTo(active.s.spin.target, true); switchThemeIfTurned(active, wheelStart); }
   }
   function flip(direction) {
     interrupt();
-    active?.flip(direction);
+    if (!active) return;
+    const before = active.s.spin.target;
+    active.flip(direction);
+    switchThemeIfTurned(active, before);
   }
 
   // Guard button/veil handlers too: a finger starting on a card cannot become a Flip,
@@ -687,10 +755,10 @@ export async function createDeck() {
     if (!active) return;
     event.preventDefault();
     if (gesture || touchCount()) return;
+    if (!wheelEnd) wheelStart = active.s.spin.target;
     active.spinTo(active.s.spin.target + clamp(event.deltaY + event.deltaX, -80, 80) * .9, false);
     clearTimeout(wheelEnd);
-    const card = active;
-    wheelEnd = setTimeout(() => { wheelEnd = 0; if (active === card) card.spinTo(card.s.spin.target, true); }, 160);
+    wheelEnd = setTimeout(finishWheel, 160);
   }, { passive: false });
 
   dialog.querySelector(".deck__close").addEventListener("click", () => dialog.close());
@@ -706,6 +774,7 @@ export async function createDeck() {
     cancelAnimationFrame(dealFrame);
     dealFrame = 0;
     active = null;
+    syncThemeStatus();
     dialog.classList.remove("has-active");
     cards.forEach(card => card.reset());
     document.documentElement.classList.remove("deck-open");

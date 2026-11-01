@@ -206,3 +206,48 @@ test('page and TV controls use a warm hover while disabled eject stays quiet', a
   await expect.poll(async () => warm(await colour(cta))).toBe(true);
   await expect(cta).toHaveCSS('transform', 'none');
 });
+
+test('REW returns gradually to the top and preserves fragment history', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => window.scrollTo({ top: 6000, behavior: 'instant' }));
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(5900);
+  await page.locator('#back-top').click();
+  await expect(page).toHaveURL(/#top$/);
+  await page.waitForTimeout(350);
+  const during = await page.evaluate(() => window.scrollY);
+  expect(during).toBeGreaterThan(100);
+  expect(during).toBeLessThan(6000);
+  await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 8000 }).toBeLessThan(4);
+  await page.goBack();
+  await expect(page).toHaveURL(/\/$/);
+});
+
+test('Backspace rewinds gradually and user scrolling interrupts it', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => window.scrollTo({ top: 6000, behavior: 'instant' }));
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(5900);
+  await page.keyboard.press('Backspace');
+  await page.waitForTimeout(350);
+  const during = await page.evaluate(() => window.scrollY);
+  expect(during).toBeGreaterThan(100);
+  expect(during).toBeLessThan(6000);
+  await expect(page).toHaveURL(/\/$/);
+  await page.mouse.wheel(0, 150);
+  // Wait for the wheel's own scroll to settle before checking that rewind stays cancelled.
+  await page.waitForTimeout(350);
+  const stopped = await page.evaluate(() => window.scrollY);
+  expect(stopped).toBeGreaterThan(100);
+  await page.waitForTimeout(500);
+  expect(Math.abs(await page.evaluate(() => window.scrollY) - stopped)).toBeLessThanOrEqual(2);
+});
+
+test('REW jumps to the top with reduced motion', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await page.evaluate(() => window.scrollTo({ top: 6000, behavior: 'instant' }));
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(5900);
+  await page.locator('#back-top').click();
+  expect(await page.evaluate(() => window.scrollY)).toBeLessThan(4);
+  await expect(page).toHaveURL(/#top$/);
+  await expect(page.locator('.tape-transport.is-on')).toHaveCount(0);
+});

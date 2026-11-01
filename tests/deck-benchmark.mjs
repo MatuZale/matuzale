@@ -2,6 +2,7 @@
 //   node tests/deck-benchmark.mjs --url http://127.0.0.1:4182 --samples 2
 //   node tests/deck-benchmark.mjs --url http://127.0.0.1:4182 --baseline HEAD --samples 2
 // Add --profile desktop or --profile mobile to run one viewport only.
+// Add --cards id,id to select cards present in every requested variant.
 import { execFileSync } from 'node:child_process';
 import os from 'node:os';
 import { webkit } from '@playwright/test';
@@ -11,8 +12,12 @@ const args = Object.fromEntries(pairs.flatMap((arg, index) => arg.startsWith('--
 const url = args.url || 'http://127.0.0.1:4182';
 const samples = Number(args.samples || 2);
 const profile = args.profile || 'both';
+const sharedCards = ['clifford', 'lorenz', 'chirikov'];
+const newCards = ['swirling-streamers', 'sand-dollar', 'pentagon', 'halloween', 'mayan-bracelet', 'golden-flintstone'];
+const selectedCards = args.cards?.split(',').filter(Boolean);
 if (!Number.isInteger(samples) || samples < 1 || samples > 20) throw new Error('samples must be from 1 to 20');
 if (!['desktop', 'mobile', 'both'].includes(profile)) throw new Error('profile must be desktop, mobile or both');
+if (args.cards && !selectedCards.length) throw new Error('cards must contain at least one card ID');
 
 // Compare only the deck assets: the portfolio may have unrelated working changes.
 const baseline = args.baseline && Object.fromEntries(['js/deck.js', 'css/deck.css'].map(path => [path,
@@ -23,7 +28,7 @@ const profiles = {
 };
 const browser = await webkit.launch({ headless: true });
 console.log(JSON.stringify({ browser: `Playwright WebKit ${browser.version()}`, os: `${os.platform()} ${os.release()} ${os.arch()}`,
-  cpu: os.cpus()[0]?.model, profiles: profile, samples, baseline: args.baseline || null }));
+  cpu: os.cpus()[0]?.model, profiles: profile, samples, baseline: args.baseline || null, cards: selectedCards || 'representative cards per variant' }));
 
 function summary(values) {
   const sorted = values.slice().sort((a, b) => a - b);
@@ -92,9 +97,21 @@ async function run(variant, name, iteration) {
     await page.waitForTimeout(3000);
     let result = await page.evaluate(() => ({ to: performance.now(), data: window.__deckBenchmark }));
     record('opening', 0, result.to, result.data);
+    console.log(JSON.stringify({ variant, profile: name, iteration, phase: 'collection', ...await page.evaluate(() => {
+      const images = [...document.querySelectorAll('.tcard__art img')].map(img => ({
+        src: img.getAttribute('src'), width: img.naturalWidth, height: img.naturalHeight, loaded: img.complete && img.naturalWidth > 0,
+      }));
+      // RGBA estimate only, not actual browser/GPU allocation or deduplication.
+      return { cards: document.querySelectorAll('.tcard').length, images,
+        decodedRgbaBytesEstimate: images.reduce((sum, img) => sum + img.width * img.height * 4, 0) };
+    }) }));
     await phase('idle', async () => {}, 1700);
-    for (const foil of ['clifford', 'lorenz', 'chirikov']) {
+    // New cards do not exist in an old git baseline. Shared IDs give a direct
+    // comparison; the current variant also measures every new foil family.
+    const cards = selectedCards || [...sharedCards, ...(variant === 'current' ? newCards : [])];
+    for (const foil of cards) {
       const card = page.locator(`.tcard[data-foil="${foil}"]`);
+      if (await card.count() !== 1) throw new Error(`Card ${foil} is absent or duplicated in ${variant}`);
       // Playwright may regard a partly visible card as in view even when its
       // centre is hidden beneath the sticky bar. Centre it for a real tap.
       await card.evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'instant' }));

@@ -242,7 +242,7 @@ document.addEventListener("keydown", event => {
   const key = keys[["1", "2", "3"].indexOf(event.key)];
   if (key) { event.preventDefault(); key.click(); }
   else if (event.key === "0" && av) { event.preventDefault(); switchAV(); }
-  else if (event.key === "Backspace" && window.scrollY > 4) { event.preventDefault(); rewind(true); }
+  else if (event.key === "Backspace" && window.scrollY > 4) { event.preventDefault(); rewind(); }
 });
 
 // Open on the channel from the link, or the one chosen last time.

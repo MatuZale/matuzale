@@ -204,13 +204,57 @@ function tape(direction, atEnd = () => false) {
   };
   window.addEventListener("scroll", follow, { passive: true });
   quiet = setTimeout(stop, 1500);
+  return stop;
 }
-// The back-to-top link scrolls by itself; the remote's Backspace asks for the scroll too.
-export function rewind(scroll = false) {
-  tape("back", () => window.scrollY < 4);
-  if (scroll) window.scrollTo({ top: 0, behavior: motion.matches ? "auto" : "smooth" });
+// Give the tape time to wind, even on long pages. Any new user input takes control back.
+let cancelRewind;
+export function rewind() {
+  cancelRewind?.();
+  const stopTape = tape("back", () => window.scrollY < 4);
+  const from = window.scrollY;
+  if (motion.matches || from < 4) {
+    window.scrollTo({ top: 0, behavior: "instant" });
+    stopTape();
+    return;
+  }
+  const duration = Math.min(6000, 1200 + from * .28);
+  const start = performance.now();
+  const inputs = ["wheel", "touchstart", "pointerdown", "keydown"];
+  let frame;
+  const stop = () => {
+    cancelAnimationFrame(frame);
+    inputs.forEach(type => window.removeEventListener(type, stop, true));
+    motion.removeEventListener("change", onMotionChange);
+    document.removeEventListener("visibilitychange", onVisibilityChange);
+    cancelRewind = null;
+    stopTape();
+  };
+  const onMotionChange = () => {
+    if (motion.matches) { stop(); window.scrollTo({ top: 0, behavior: "instant" }); }
+  };
+  const onVisibilityChange = () => { if (document.hidden) stop(); };
+  cancelRewind = stop;
+  inputs.forEach(type => window.addEventListener(type, stop, { capture: true, passive: true }));
+  motion.addEventListener("change", onMotionChange);
+  document.addEventListener("visibilitychange", onVisibilityChange);
+  frame = requestAnimationFrame(function tick(now) {
+    const p = Math.min(1, (now - start) / duration);
+    const eased = p * p * (3 - 2 * p);
+    window.scrollTo({ top: from * (1 - eased), behavior: "instant" });
+    if (p < 1) frame = requestAnimationFrame(tick);
+    else stop();
+  });
 }
-document.getElementById("back-top")?.addEventListener("click", () => rewind());
+document.getElementById("back-top")?.addEventListener("click", event => {
+  if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  event.preventDefault();
+  if (location.hash !== "#top") history.pushState(null, "", "#top");
+  const top = document.getElementById("top");
+  top.setAttribute("tabindex", "-1");
+  top.focus({ preventScroll: true });
+  top.removeAttribute("tabindex");
+  rewind();
+});
 
 document.getElementById("nav-links")?.addEventListener("click", event => {
   if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;

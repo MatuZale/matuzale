@@ -392,7 +392,7 @@ html.deck-open body > :not(.deck) { visibility: hidden; }
   margin: 0;
   overflow: hidden;
   font-family: var(--font-head);
-  font-size: 6.6cqw;
+  font-size: var(--name-size, 6.6cqw);
   font-weight: 700;
   line-height: 1.05;
   letter-spacing: -.015em;
@@ -1119,6 +1119,508 @@ html.deck-open body > :not(.deck) { visibility: hidden; }
   --cut: url("../assets/deck/foil/cut-aizawa.webp");
   --splash: url("../assets/deck/foil/splash-aizawa.webp");
 }
+.tcard--golden-flintstone { /* amazing rare */
+  --zoom: 1.15;
+  --art-mask: url("../assets/deck/foil/art-golden-flintstone.webp");
+  --cut: url("../assets/deck/foil/cut-golden-flintstone.webp");
+  --splash: url("../assets/deck/foil/splash-golden-flintstone.webp");
+}
+.tcard.tcard--golden-flintstone .tcard__art::before {
+  background:
+    radial-gradient(ellipse at 24% 66%, #ffcd6170, transparent 29%),
+    radial-gradient(ellipse at 76% 35%, #79e4cf8c, transparent 30%),
+    radial-gradient(ellipse at 55% 75%, #f47cb17a, transparent 34%),
+    radial-gradient(ellipse at 40% 25%, #7996e8aa, transparent 40%),
+    radial-gradient(ellipse at 50% 52%, #573455, #121b37 84%);
+}
+.tcard.tcard--golden-flintstone .tcard__art::after {
+  opacity: calc(.10 + var(--o, 0) * .35);
+  filter: saturate(1.2);
+}
+/* This edition uses broad pools of coloured foil in place of the common
+   glitter tile. The second mask removes the attractor itself from the paint. */
+.tcard.tcard--golden-flintstone .tcard__glitter { display: none; }
+.tcard.tcard--golden-flintstone .tcard__foil {
+  opacity: calc(.38 + var(--o, 0) * .42);
+  background:
+    radial-gradient(circle at var(--mx, 50%) var(--my, 50%), #ffefba88, transparent 48%),
+    radial-gradient(ellipse at calc(19% + var(--px, 0) * 6%) 25%, #ffba78, transparent 40%),
+    radial-gradient(ellipse at calc(82% - var(--px, 0) * 6%) 30%, #73e4d0, transparent 38%),
+    radial-gradient(ellipse at 24% 84%, #ed7cc3, transparent 42%),
+    radial-gradient(ellipse at 78% 82%, #939df3, transparent 42%),
+    linear-gradient(115deg, #e9a88b, #f4c46f, #a8e9cb, #b6a3ed) var(--posx, 50%) var(--posy, 50%) / 220% 220%;
+  -webkit-mask:
+    url('../assets/deck/foil/paint-golden-flintstone.svg') center / 100% 100% no-repeat,
+    var(--art-mask) calc(50% + var(--px, 0) * .9cqw) calc(50% + var(--py, 0) * .7cqw) / calc(100% * var(--zoom)) auto no-repeat;
+  -webkit-mask-composite: source-in;
+  mask:
+    url('../assets/deck/foil/paint-golden-flintstone.svg') center / 100% 100% no-repeat,
+    var(--art-mask) calc(50% + var(--px, 0) * .9cqw) calc(50% + var(--py, 0) * .7cqw) / calc(100% * var(--zoom)) auto no-repeat;
+  mask-composite: intersect;
+}
+.tcard.tcard--golden-flintstone .tcard__front > .tcard__glare {
+  background: radial-gradient(farthest-corner circle at var(--mx, 50%) var(--my, 50%), #ffddb966 0%, #c7dfff33 24%, #daafe81a 48%, #10122655 95%);
+}
+
+/* Symmetric-icon editions: printed texture under the type, a separate foil in the
+   picture window and a moving highlight over the card. Each responds to the existing
+   light position; none runs an animation while the card is idle. */
+.tcard[data-holo="common"] .tcard__shine,
+.tcard[data-holo="common"] .tcard__foil { display: none; }
+.tcard[data-holo="common"] .tcard__front > .tcard__glare {
+  background: radial-gradient(farthest-corner circle at var(--mx, 50%) var(--my, 50%), #fff4dfdf 0%, #adeeff85 20%, #dca6e44d 42%, #10112973 90%);
+}
+.tcard[data-holo="common"] .tcard__front::before {
+  opacity: .7;
+  background: repeating-linear-gradient(115deg, #fff8 0 .12cqw, transparent .16cqw .9cqw), linear-gradient(135deg, #ffe2a9, #91e9f3, #eba4de, #fff1c7);
+  mix-blend-mode: soft-light;
+}
+
+/* Foil is printed beneath the typography; keep the artwork and text above it. */
+.tcard:is([data-holo="radiant"], [data-holo="v"], [data-holo="v-alt"], [data-holo="vstar"]) .tcard__panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: calc(.18 + var(--o, 0) * .32);
+  mix-blend-mode: screen;
+}
+.tcard:is([data-holo="radiant"], [data-holo="v"], [data-holo="v-alt"], [data-holo="vstar"]) .tcard__panel > * {
+  position: relative;
+  z-index: 1;
+}
+/* The main glint crosses the window and frame, but is subdued over the text. */
+.tcard:is([data-holo="radiant"], [data-holo="v"], [data-holo="v-alt"], [data-holo="vstar"]) .tcard__shine {
+  display: block;
+  opacity: calc(.18 + var(--o, 0) * .58);
+  -webkit-mask: linear-gradient(to bottom, #000b 0%, #000 12%, #000 46%, #0007 55%, #0004 72%, #0009 100%);
+  mask: linear-gradient(to bottom, #000b 0%, #000 12%, #000 46%, #0007 55%, #0004 72%, #0009 100%);
+  mix-blend-mode: screen;
+  filter: none;
+}
+.tcard:is([data-holo="radiant"], [data-holo="v"], [data-holo="v-alt"], [data-holo="vstar"]) .tcard__front > .tcard__glare {
+  background: radial-gradient(farthest-corner circle at var(--mx, 50%) var(--my, 50%), #ffecdf70 0%, #d7d1ff38 24%, #b4dff21a 48%, #10122655 95%);
+}
+.tcard:is([data-holo="radiant"], [data-holo="v"], [data-holo="v-alt"], [data-holo="vstar"]) .tcard__shine::before,
+.tcard:is([data-holo="radiant"], [data-holo="v"], [data-holo="v-alt"], [data-holo="vstar"]) .tcard__shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+}
+/* Foil in the picture is separate from the frame, so its light can move the other way. */
+.tcard:is([data-holo="radiant"], [data-holo="v"], [data-holo="v-alt"], [data-holo="vstar"]) .tcard__foil {
+  display: block;
+  opacity: calc(.20 + var(--o, 0) * .46);
+  -webkit-mask: none;
+  mask: none;
+  filter: none;
+  mix-blend-mode: screen;
+  transform: none;
+}
+.tcard:is([data-holo="radiant"], [data-holo="v"], [data-holo="v-alt"], [data-holo="vstar"]) .tcard__foil::after {
+  display: block;
+  opacity: .35;
+  -webkit-mask: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), #000 0%, #0009 35%, transparent 80%);
+  mask: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), #000 0%, #0009 35%, transparent 80%);
+}
+
+/* Radiant: microscopic diagonal cuts and two spectral veils, with sparks near the light.
+   The marks are fine enough to read as a foil surface rather than a lattice over the print. */
+.tcard[data-holo="radiant"] .tcard__panel::before {
+  background:
+    repeating-linear-gradient(45deg, transparent 0 .48cqw, #9afff933 .5cqw .59cqw, transparent .62cqw 1.12cqw),
+    repeating-linear-gradient(-45deg, transparent 0 .48cqw, #ffd0ef33 .5cqw .59cqw, transparent .62cqw 1.12cqw),
+    linear-gradient(125deg, #331e56, #156a78, #792f62, #42316c);
+  background-blend-mode: screen, screen, normal;
+}
+.tcard[data-holo="radiant"] .tcard__shine {
+  background:
+    radial-gradient(ellipse at var(--mx, 50%) var(--my, 50%), #ffe4ed66, #ffe1f433 18%, transparent 50%),
+    repeating-linear-gradient(115deg, #ff94ce44 0%, #ffe6a977 11%, #b3ffe966 23%, #a9d8ff66 35%, #ff94ce44 46%) var(--posx, 50%) var(--posy, 50%) / 260% 260%;
+  background-blend-mode: screen;
+}
+.tcard[data-holo="radiant"] .tcard__shine::before {
+  opacity: .6;
+  background: url("../assets/deck/foil/glitter.webp") calc(50% + var(--px, 0) * 3cqw) calc(50% + var(--py, 0) * 3cqw) / 18cqw 18cqw repeat;
+  mix-blend-mode: screen;
+  -webkit-mask: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), #000, #0008 30%, transparent 68%);
+  mask: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), #000, #0008 30%, transparent 68%);
+}
+.tcard[data-holo="radiant"] .tcard__foil {
+  background:
+    repeating-linear-gradient(42deg, transparent 0 .35cqw, #b5fff975 .4cqw .48cqw, transparent .52cqw .95cqw),
+    repeating-linear-gradient(-42deg, transparent 0 .35cqw, #ffd6ed75 .4cqw .48cqw, transparent .52cqw .95cqw),
+    linear-gradient(125deg, #ff79c722, #9affef55, #b1a3ff33, #ffc68344) var(--posx, 50%) var(--posy, 50%) / 220% 220%;
+  background-blend-mode: screen;
+}
+
+/* V: a wide diagonal spectrum and narrow metallic rays travel in opposite directions. */
+.tcard[data-holo="v"] .tcard__panel::before {
+  background:
+    repeating-linear-gradient(114deg, transparent 0 2.4cqw, #b2e8ff33 2.5cqw 2.7cqw, transparent 2.8cqw 5.4cqw),
+    linear-gradient(140deg, #523363, #234c65, #662e56, #305c5c);
+}
+.tcard[data-holo="v"] .tcard__shine {
+  background:
+    radial-gradient(ellipse at var(--mx, 50%) var(--my, 50%), #d4eaff66, #f7e8ff20 26%, transparent 57%),
+    repeating-linear-gradient(112deg, #fc749700 0%, #ff83ad99 8%, #ffdc85a0 16%, #aaffd399 24%, #86d6ff99 32%, #ba9cff99 40%, #fc749700 48%) var(--posx, 50%) var(--posy, 50%) / 280% 280%;
+  background-blend-mode: screen;
+}
+.tcard[data-holo="v"] .tcard__shine::before {
+  opacity: .65;
+  background: repeating-linear-gradient(112deg, transparent 0 7%, #fff9 8%, transparent 9%, transparent 18%, #cdeeff88 19%, transparent 20%, transparent 37%) calc(100% - var(--posx, 50%)) calc(100% - var(--posy, 50%)) / 210% 210%;
+  mix-blend-mode: screen;
+}
+.tcard[data-holo="v"] .tcard__foil {
+  background:
+    repeating-linear-gradient(112deg, transparent 0%, #83c8ff44 8%, transparent 12%, #ffd18c55 20%, transparent 26%, #fa91e255 34%, transparent 42%) calc(100% - var(--posx, 50%)) var(--posy, 50%) / 240% 240%,
+    repeating-linear-gradient(112deg, #ffffff00 0 .5cqw, #ffffff55 .52cqw .58cqw, #ffffff00 .63cqw 1.1cqw);
+  background-blend-mode: screen;
+}
+
+/* Alternate art: iridescent contour engraving bends around the illustration instead
+   of repeating V's straight rays. The second pass changes contrast with the light. */
+.tcard[data-holo="v-alt"] .tcard__panel::before {
+  background:
+    repeating-radial-gradient(ellipse at 78% 22%, transparent 0 1.3cqw, #eebcff52 1.4cqw 1.55cqw, transparent 1.7cqw 2.8cqw),
+    linear-gradient(145deg, #452653, #254b63, #6a344d);
+}
+.tcard[data-holo="v-alt"] .tcard__shine {
+  background:
+    radial-gradient(ellipse at var(--mx, 50%) var(--my, 50%), #f4d7ff66, #f7dbff22 30%, transparent 58%),
+    repeating-linear-gradient(126deg, #f18bda00 0%, #e9a0ff88 12%, #8ed7ff99 24%, #a4ffdb88 36%, #ffdf9c99 48%, #f29cc588 60%, #f18bda00 72%) var(--posx, 50%) var(--posy, 50%) / 250% 250%;
+  background-blend-mode: screen;
+}
+.tcard[data-holo="v-alt"] .tcard__shine::before {
+  opacity: .65;
+  background: repeating-radial-gradient(ellipse at calc(70% + var(--px, 0) * 8%) calc(25% + var(--py, 0) * 8%), transparent 0 1.2cqw, #fff9 1.35cqw 1.48cqw, transparent 1.6cqw 2.6cqw);
+  -webkit-mask: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), #000, #0008 36%, transparent 75%);
+  mask: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), #000, #0008 36%, transparent 75%);
+}
+.tcard[data-holo="v-alt"] .tcard__foil {
+  background:
+    repeating-radial-gradient(ellipse at calc(72% + var(--px, 0) * 7%) calc(30% + var(--py, 0) * 7%), transparent 0 .9cqw, #ffdfed77 1cqw 1.12cqw, transparent 1.2cqw 2cqw),
+    linear-gradient(125deg, #d386ef44, #90d8ff44, #ffd59e55) var(--posx, 50%) var(--posy, 50%) / 200% 200%;
+  background-blend-mode: screen;
+}
+
+/* VStar: pastel metal, a sparse field of flecks and softly engraved angled ribbons. */
+.tcard[data-holo="vstar"] .tcard__panel::before {
+  background:
+    url("../assets/deck/foil/glitter.webp") 0 0 / 24cqw 24cqw repeat,
+    repeating-linear-gradient(132deg, transparent 0 3cqw, #f7e6ff55 3.2cqw 3.5cqw, transparent 3.7cqw 6.5cqw),
+    linear-gradient(145deg, #4c4164, #28535c, #65475b);
+  background-blend-mode: screen, screen, normal;
+}
+.tcard[data-holo="vstar"] .tcard__shine {
+  opacity: calc(.18 + var(--o, 0) * .48);
+  background:
+    radial-gradient(ellipse at var(--mx, 50%) var(--my, 50%), #f7eaff66, #e1f7ff22 25%, transparent 58%),
+    repeating-linear-gradient(125deg, #fce2f700 0%, #fce2f799 12%, #e3d8ff99 24%, #c7f1ff99 36%, #dcffdf99 48%, #fff0bd99 60%, #fce2f700 72%) var(--posx, 50%) var(--posy, 50%) / 240% 240%;
+  background-blend-mode: screen;
+}
+.tcard[data-holo="vstar"] .tcard__shine::before {
+  opacity: .55;
+  background: url("../assets/deck/foil/glitter.webp") calc(50% - var(--px, 0) * 2cqw) calc(50% - var(--py, 0) * 2cqw) / 22cqw 22cqw repeat;
+  mix-blend-mode: screen;
+  -webkit-mask: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), #000, #0008 32%, transparent 72%);
+  mask: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), #000, #0008 32%, transparent 72%);
+}
+.tcard[data-holo="vstar"] .tcard__foil {
+  background:
+    repeating-linear-gradient(135deg, transparent 0 3.5cqw, #e4ffff70 3.7cqw 3.9cqw, transparent 4.1cqw 7.2cqw) calc(100% - var(--posx, 50%)) var(--posy, 50%) / 160% 160%,
+    linear-gradient(135deg, #ffddf344, #c4d5ff55, #d8ffed55, #fff2c544) var(--posx, 50%) var(--posy, 50%) / 220% 220%;
+  background-blend-mode: screen;
+}
+
+/* The additional sparkle and hotspot passes are needed only during inspection.
+   Idle cards keep their static printed texture and spectral colour. */
+.tcard:is([data-holo="radiant"], [data-holo="v"], [data-holo="v-alt"], [data-holo="vstar"]):not(.is-active):not(:hover) .tcard__shine::before,
+.tcard:is([data-holo="radiant"], [data-holo="v"], [data-holo="v-alt"], [data-holo="vstar"]):not(.is-active):not(:hover) .tcard__foil::after { display: none; }
+/* Sand Dollar's dark background lets the foil glow around its fine teal and
+   burgundy filaments; keep the reflection gentle enough to preserve them. */
+.tcard.tcard--sand-dollar .tcard__shine { opacity: calc(.14 + var(--o, 0) * .30); }
+.tcard.tcard--sand-dollar .tcard__foil { mix-blend-mode: screen; opacity: calc(.05 + var(--o, 0) * .18); }
+.tcard.tcard--sand-dollar .tcard__foil::after { display: none; }
+
+/* Each icon gets an engraving derived from its own rotational geometry. The
+   ornament sits behind the rules and also catches the light in the metal edge. */
+.tcard--swirling-streamers {
+  --icon-engraving: repeating-conic-gradient(from 12deg at 50% 50%, #ffe3b978 0deg 2deg, transparent 3deg 45deg, #efa0c775 46deg 48deg, transparent 49deg 90deg);
+  --icon-lines: repeating-radial-gradient(ellipse at 48% 52%, transparent 0 2.4cqw, #ffc8b4a0 2.5cqw 2.7cqw, transparent 2.9cqw 5.2cqw);
+}
+.tcard--sand-dollar {
+  --icon-engraving: repeating-conic-gradient(from 18deg at 50% 50%, #c7fff48c 0deg 2deg, transparent 3deg 70deg, #fa9cae7a 71deg 72deg);
+  --icon-lines: repeating-radial-gradient(circle at 50% 50%, transparent 0 2.2cqw, #8de4d3a0 2.35cqw 2.55cqw, transparent 2.7cqw 4.8cqw);
+}
+.tcard--pentagon {
+  --icon-engraving: repeating-conic-gradient(from 18deg at 50% 50%, #b5eaff99 0deg 2deg, transparent 3deg 70deg, #fff3b280 71deg 72deg);
+  --icon-lines: repeating-linear-gradient(54deg, transparent 0 3.1cqw, #b9eaff99 3.2cqw 3.4cqw, transparent 3.55cqw 6.5cqw);
+  --icon-clip: polygon(50% 0%, 98% 35%, 79% 91%, 21% 91%, 2% 35%);
+}
+.tcard--halloween {
+  --icon-engraving: repeating-conic-gradient(from 15deg at 50% 50%, #ffc873aa 0deg 2deg, transparent 3deg 57deg, #fb7f8e88 58deg 60deg);
+  --icon-lines: repeating-radial-gradient(circle at 50% 50%, transparent 0 2.2cqw, #ffd18199 2.35cqw 2.55cqw, transparent 2.7cqw 4.7cqw);
+}
+.tcard--golden-flintstone {
+  --icon-engraving: repeating-conic-gradient(from 30deg at 50% 50%, #fff4c4aa 0deg 2deg, transparent 3deg 117deg, #f5b66a9c 118deg 120deg);
+  --icon-lines: repeating-linear-gradient(60deg, transparent 0 2.8cqw, #ffe9b499 2.95cqw 3.1cqw, transparent 3.25cqw 6cqw);
+  --icon-clip: polygon(50% 0, 100% 87%, 0 87%);
+}
+.tcard--chaotic-flower {
+  --icon-engraving: repeating-conic-gradient(from 18deg at 50% 50%, #ffd9e7a0 0deg 3deg, transparent 4deg 69deg, #ffba9978 70deg 72deg);
+  --icon-lines: repeating-radial-gradient(ellipse at 50% 35%, transparent 0 2.1cqw, #ffd2dca0 2.25cqw 2.4cqw, transparent 2.6cqw 4.6cqw);
+}
+.tcard--french-glass {
+  --icon-engraving: repeating-conic-gradient(from 0deg at 50% 50%, #c8fff3a0 0deg 1deg, transparent 2deg 39deg, #94d9ff88 39.5deg 40deg);
+  --icon-lines: repeating-radial-gradient(circle at 50% 50%, transparent 0 1.5cqw, #a6f6df99 1.65cqw 1.8cqw, transparent 1.95cqw 3.4cqw);
+}
+.tcard--pentacle {
+  --icon-engraving: repeating-conic-gradient(from 18deg at 50% 50%, #e2c9ff9c 0deg 2deg, transparent 3deg 70deg, #ffc9ef88 71deg 72deg);
+  --icon-lines: repeating-linear-gradient(36deg, transparent 0 2.5cqw, #e9d1ff99 2.65cqw 2.8cqw, transparent 2.95cqw 5.4cqw);
+  --icon-clip: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 93%, 50% 71%, 21% 93%, 32% 57%, 2% 35%, 39% 35%);
+}
+.tcard--mayan-bracelet {
+  --icon-engraving: repeating-conic-gradient(from 0deg at 50% 50%, #fff0c69c 0deg 2deg, transparent 3deg 49.4deg, #f7b9a38c 50.4deg 51.4286deg);
+  --icon-lines: repeating-radial-gradient(circle at 50% 50%, transparent 0 2.1cqw, #ffe0c299 2.25cqw 2.45cqw, transparent 2.6cqw 4.7cqw);
+}
+.tcard--clam-triple {
+  --icon-engraving: repeating-conic-gradient(from 30deg at 50% 50%, #cffff19c 0deg 2deg, transparent 3deg 117deg, #a4e8e69c 118deg 120deg);
+  --icon-lines: repeating-radial-gradient(ellipse at 35% 65%, transparent 0 2cqw, #b1f4e49c 2.15cqw 2.3cqw, transparent 2.45cqw 4.5cqw);
+}
+.tcard:is(.tcard--swirling-streamers, .tcard--sand-dollar, .tcard--pentagon, .tcard--halloween, .tcard--golden-flintstone, .tcard--chaotic-flower, .tcard--french-glass, .tcard--pentacle, .tcard--mayan-bracelet, .tcard--clam-triple) .tcard__front::before {
+  opacity: .8;
+  background: var(--icon-engraving), repeating-linear-gradient(115deg, #ffffff40 0 .12cqw, transparent .18cqw 1cqw);
+  background-blend-mode: screen;
+  mix-blend-mode: soft-light;
+}
+.tcard:is(.tcard--swirling-streamers, .tcard--sand-dollar, .tcard--pentagon, .tcard--halloween, .tcard--golden-flintstone, .tcard--chaotic-flower, .tcard--french-glass, .tcard--pentacle, .tcard--mayan-bracelet, .tcard--clam-triple) .tcard__panel::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  right: -9cqw;
+  bottom: 4cqw;
+  width: 45cqw;
+  aspect-ratio: 1;
+  pointer-events: none;
+  opacity: calc(.25 + var(--o, 0) * .18);
+  background: var(--icon-lines), var(--icon-engraving);
+  background-blend-mode: screen;
+  clip-path: var(--icon-clip, circle(50%));
+  -webkit-mask: radial-gradient(circle, transparent 5%, #0009 24%, #000 58%, transparent 72%);
+  mask: radial-gradient(circle, transparent 5%, #0009 24%, #000 58%, transparent 72%);
+  mix-blend-mode: screen;
+}
+.tcard:is(.tcard--swirling-streamers, .tcard--sand-dollar, .tcard--pentagon, .tcard--halloween, .tcard--golden-flintstone, .tcard--chaotic-flower, .tcard--french-glass, .tcard--pentacle, .tcard--mayan-bracelet, .tcard--clam-triple) .tcard__panel > :not(.tcard__art) { position: relative; z-index: 1; }
+:root[data-theme="light"] .tcard:is(.tcard--swirling-streamers, .tcard--sand-dollar, .tcard--pentagon, .tcard--halloween, .tcard--golden-flintstone, .tcard--chaotic-flower, .tcard--french-glass, .tcard--pentacle, .tcard--mayan-bracelet, .tcard--clam-triple) .tcard__panel::after { mix-blend-mode: multiply; opacity: .22; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .tcard:is(.tcard--swirling-streamers, .tcard--sand-dollar, .tcard--pentagon, .tcard--halloween, .tcard--golden-flintstone, .tcard--chaotic-flower, .tcard--french-glass, .tcard--pentacle, .tcard--mayan-bracelet, .tcard--clam-triple) .tcard__panel::after { mix-blend-mode: multiply; opacity: .22; }
+}
+
+/* Pale stock needs the foil to tint like ink; screen alone disappears on white. */
+:root[data-theme="light"] .tcard:is([data-holo="radiant"], [data-holo="v"], [data-holo="v-alt"], [data-holo="vstar"]) .tcard__panel::before {
+  mix-blend-mode: multiply;
+  opacity: calc(.10 + var(--o, 0) * .18);
+}
+:root[data-theme="light"] .tcard:is([data-holo="radiant"], [data-holo="v"], [data-holo="v-alt"], [data-holo="vstar"]) .tcard__shine { mix-blend-mode: multiply; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .tcard:is([data-holo="radiant"], [data-holo="v"], [data-holo="v-alt"], [data-holo="vstar"]) .tcard__panel::before {
+    mix-blend-mode: multiply;
+    opacity: calc(.10 + var(--o, 0) * .18);
+  }
+  :root:not([data-theme="dark"]) .tcard:is([data-holo="radiant"], [data-holo="v"], [data-holo="v-alt"], [data-holo="vstar"]) .tcard__shine { mix-blend-mode: multiply; }
+}
+
+/* Full-art icon editions use separately composed portraits, never stretched
+   landscape images. Art runs under the text to a slim metallic edge. */
+:root .deck .tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) {
+  --ink: #fffaf4;
+  --ink-soft: #f7f3fa;
+  --ink-muted: #d3d5e8;
+  --ink-accent: #fff6d1;
+  --ink-value: #ffecd0;
+  --ink-ability: #ffcfb0;
+  --ink-filter: drop-shadow(0 .24cqw .42cqw #000);
+  --ink-shadow: 0 .2cqw .4cqw #000;
+  --holo-a: #fff0b4;
+  --holo-b: #a5faff;
+  --holo-c: #ffdc85;
+  --holo-d: #f4beff;
+  --rule: #ffffff52;
+  --flavor-bg: #0a0b1ba8;
+}
+.tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__front { padding: 1.55cqw; }
+.tcard--halloween .tcard__front { background: linear-gradient(130deg, #fff2bd, #8b662c 20%, #1a1722 43%, #ffe6a2 57%, #54394d 80%, #e9c873); }
+.tcard--french-glass .tcard__front { background: linear-gradient(130deg, #e9ffff, #789ba5 23%, #202b40 44%, #cdf8ec 60%, #526b91 82%, #f8ffff); }
+.tcard--mayan-bracelet .tcard__front { background: linear-gradient(130deg, #fff5db, #d5a477 24%, #6c4160 45%, #fce1c1 60%, #866b9a 82%, #fff2d7); }
+.tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__panel { padding-top: 3.4cqw; background: #111325; box-shadow: inset 0 0 0 .25cqw #ffffff4d; }
+.tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__panel > .tcard__art { position: absolute; inset: 0; z-index: 0; aspect-ratio: auto; padding: 0; border-radius: inherit; background: #111325; box-shadow: none; }
+.tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__art img { border-radius: 0; object-fit: cover; transform: translate(calc(var(--px, 0) * -.35cqw), calc(var(--py, 0) * -.3cqw)) scale(1.015); }
+.tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__art .tcard__foil { inset: 0; border-radius: 0; }
+.tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__art::after { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; background: linear-gradient(#07071699 0%, transparent 13%, transparent 35%, #08091b94 55%, #08091baf 100%); }
+.tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__panel::before { z-index: 1; opacity: calc(.08 + var(--o, 0) * .24); }
+:root .deck .tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__panel::before { mix-blend-mode: soft-light; opacity: calc(.04 + var(--o, 0) * .13); }
+:root .deck .tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__shine,
+.tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__foil { mix-blend-mode: color-dodge; }
+.tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__panel > :not(.tcard__art) { position: relative; z-index: 2; }
+.tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__head { text-shadow: 0 .25cqw .7cqw #000; }
+/* Keep the title legible over dark full-art portraits, including in Safari. */
+.tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__name {
+  background: none;
+  color: #fffaf4;
+  -webkit-text-fill-color: #fffaf4;
+}
+.tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__strip { margin-top: auto; }
+.tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__moves,
+.tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__stats,
+.tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__flavor { border-radius: 1cqw; background: linear-gradient(90deg, #07091bc9, #07091b60); text-shadow: 0 .18cqw .35cqw #000; }
+.tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__moves { flex: none; padding: 0 1.5cqw; }
+.tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__stats { padding: .8cqw 0; }
+.tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__foot { margin-top: 1.2cqw; }
+@media (prefers-reduced-motion: reduce) { .tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__art img { transform: scale(1.015); } }
+
+/* Halloween's original fingerprint-like etched relief is revealed near the
+   light, separately from the colour bands and the black-and-gold print. */
+.tcard.tcard--halloween .tcard__shine { opacity: calc(.12 + var(--o, 0) * .34); }
+.tcard.tcard--halloween .tcard__foil { opacity: calc(.10 + var(--o, 0) * .26); }
+.tcard.tcard--halloween .tcard__shine::after {
+  opacity: calc(var(--o, 0) * .65);
+  background: linear-gradient(115deg, #ffd999, #d389ff 25%, #fff5ce 50%, #79d7ed 75%, #ffc979) var(--posx, 50%) var(--posy, 50%) / 250% 250%;
+  -webkit-mask: url('../assets/deck/foil/symmetric-ridges.webp') center / 100% 100% no-repeat, radial-gradient(circle at var(--mx, 50%) var(--my, 50%), #000 0%, #0009 28%, transparent 70%);
+  mask: url('../assets/deck/foil/symmetric-ridges.webp') center / 100% 100% no-repeat, radial-gradient(circle at var(--mx, 50%) var(--my, 50%), #000 0%, #0009 28%, transparent 70%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  mix-blend-mode: screen;
+}
+
+/* A reverse-print mosaic leaves Swirling Streamers' picture matte while the
+   frame and panel reveal symbols and colour as the card turns. */
+.tcard.tcard--swirling-streamers .tcard__shine {
+  display: block;
+  opacity: calc(.14 + var(--o, 0) * .72);
+  background:
+    radial-gradient(circle at var(--mx, 50%) var(--my, 50%), #fff9, transparent 54%),
+    repeating-conic-gradient(from 45deg, #ffbd7d88 0deg 45deg, #9b4f8b55 45deg 90deg, #ffe5b988 90deg 135deg, #d275a455 135deg 180deg) 0 0 / 13cqw 13cqw,
+    linear-gradient(115deg, #ffb2a8, #ffde99, #c3ffeb, #b0caff, #f8b8e6) var(--posx, 50%) var(--posy, 50%) / 250% 250%;
+  background-blend-mode: screen, soft-light, normal;
+  -webkit-mask: linear-gradient(to bottom, #000d 0% 10%, transparent 13% 43%, #0007 47%, #0009 100%);
+  mask: linear-gradient(to bottom, #000d 0% 10%, transparent 13% 43%, #0007 47%, #0009 100%);
+  mix-blend-mode: screen;
+  filter: none;
+}
+.tcard.tcard--swirling-streamers .tcard__shine::before {
+  content: "✳　✳　✳　✳　✳　✳";
+  position: absolute;
+  inset: 0;
+  padding: 52cqw 1cqw 0;
+  color: #fff3d8;
+  font: 700 8cqw/1.5 var(--font-head);
+  letter-spacing: 1cqw;
+  overflow: hidden;
+  opacity: calc(var(--o, 0) * .6);
+  -webkit-mask: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), #000, transparent 70%);
+  mask: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), #000, transparent 70%);
+}
+
+/* Clam Triple's coloured cosmos lies in the artwork only, distinct from the
+   reverse mosaic above, and moves independently from the frame and text. */
+.tcard.tcard--clam-triple .tcard__foil {
+  display: block;
+  opacity: calc(.12 + var(--o, 0) * .62);
+  background:
+    radial-gradient(circle at var(--mx, 50%) var(--my, 50%), #fff9 0%, #9ef7ed44 20%, transparent 60%),
+    url('../assets/deck/foil/glitter.webp') calc(50% + var(--px, 0) * 2cqw) calc(50% + var(--py, 0) * 2cqw) / 20cqw 20cqw repeat,
+    linear-gradient(120deg, #92fce0, #8da8ff, #f8a6d9, #fff4b9) var(--posx, 50%) var(--posy, 50%) / 300% 300%;
+  background-blend-mode: screen, screen, normal;
+  mix-blend-mode: screen;
+  filter: none;
+}
+
+/* Keep the colours and darks of the original print: the bright reflection is
+   local, not an opaque grey veil over the card. The foil and the glare each
+   contribute separately, so both remain restrained when they overlap. */
+.tcard:is([data-holo="radiant"], [data-holo="v"], [data-holo="v-alt"], [data-holo="vstar"]) .tcard__front > .tcard__glare {
+  opacity: calc(var(--o, 0) * .28);
+}
+.tcard:is([data-holo="radiant"], [data-holo="v"], [data-holo="v-alt"], [data-holo="vstar"]):not(.tcard--sand-dollar) .tcard__shine {
+  opacity: calc(.07 + var(--o, 0) * .37);
+}
+.tcard:is([data-holo="radiant"], [data-holo="v"], [data-holo="v-alt"], [data-holo="vstar"]):not(.tcard--sand-dollar) .tcard__foil {
+  opacity: calc(.07 + var(--o, 0) * .26);
+}
+.tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__foil {
+  opacity: calc(.05 + var(--o, 0) * .20);
+}
+/* Do not rasterise the detailed relief until it can actually catch light. */
+.tcard.tcard--halloween:not(.is-active):not(:hover) .tcard__shine::after { display: none; }
+
+/* Each card has an original foil plate. Serpentines, shells and pentagonal
+   glass make three different reverse-print mosaics; the other editions use
+   a different ornament. The plates cut out the artwork and soften under type. */
+.tcard--swirling-streamers { --icon-foil: url('../assets/deck/foil/icon-swirling-streamers.webp'); --icon-spectrum: #f294a6, #ffcb80, #ff8ac8, #91d7e7, #f294a6; }
+.tcard--sand-dollar { --icon-foil: url('../assets/deck/foil/icon-sand-dollar.webp'); --icon-spectrum: #8ae8d2, #c895b4, #b2d8fa, #f0b88c, #8ae8d2; }
+.tcard--pentagon { --icon-foil: url('../assets/deck/foil/icon-pentagon.webp'); --icon-spectrum: #8bd4f0, #d0bdff, #a6f5ed, #fed29a, #8bd4f0; }
+.tcard--halloween { --icon-foil: url('../assets/deck/foil/icon-halloween.webp'); --icon-spectrum: #ffb349, #fbdb86, #e8809d, #ba82de, #ffb349; }
+.tcard--golden-flintstone { --icon-foil: url('../assets/deck/foil/icon-golden-flintstone.webp'); --icon-spectrum: #f8ce62, #fb8e78, #b1e9dd, #dcacfb, #f8ce62; }
+.tcard--chaotic-flower { --icon-foil: url('../assets/deck/foil/icon-chaotic-flower.webp'); --icon-spectrum: #fc9fc8, #f3c282, #d3a7f5, #92d9e8, #fc9fc8; }
+.tcard--french-glass { --icon-foil: url('../assets/deck/foil/icon-french-glass.webp'); --icon-spectrum: #82e4d3, #92c8fa, #cbb0f3, #f3c7b6, #82e4d3; }
+.tcard--pentacle { --icon-foil: url('../assets/deck/foil/icon-pentacle.webp'); --icon-spectrum: #c6a1f0, #f0b4df, #99d2ee, #f3d18c, #c6a1f0; }
+.tcard--mayan-bracelet { --icon-foil: url('../assets/deck/foil/icon-mayan-bracelet.webp'); --icon-spectrum: #ff879e, #ffd977, #8df0bf, #83cfff, #b7a5ff, #fb9ddd, #ff879e; }
+.tcard--clam-triple { --icon-foil: url('../assets/deck/foil/icon-clam-triple.webp'); --icon-spectrum: #87e3ce, #80bce8, #b9a2ee, #f3bf9e, #87e3ce; }
+:root .deck .tcard:is(.tcard--swirling-streamers, .tcard--sand-dollar, .tcard--pentagon, .tcard--halloween, .tcard--golden-flintstone, .tcard--chaotic-flower, .tcard--french-glass, .tcard--pentacle, .tcard--mayan-bracelet, .tcard--clam-triple) .tcard__shine {
+  display: block;
+  opacity: calc(.34 + var(--o, 0) * .52);
+  background:
+    radial-gradient(farthest-corner circle at var(--mx, 50%) var(--my, 50%), #ffe3d74d 0%, #d9b1e622 24%, transparent 59%),
+    linear-gradient(115deg, var(--icon-spectrum)) var(--posx, 50%) var(--posy, 50%) / 280% 280%;
+  background-blend-mode: screen;
+  -webkit-mask: var(--icon-foil) center / 100% 100% no-repeat;
+  mask: var(--icon-foil) center / 100% 100% no-repeat;
+  mix-blend-mode: var(--holo-blend);
+  filter: var(--holo-filter);
+}
+/* Pools of Amazing Rare foil catch separate hues rather than one gold veil. */
+:root .deck .tcard.tcard--golden-flintstone .tcard__shine {
+  background: conic-gradient(from calc(18deg + var(--px, 0) * 25deg) at var(--mx, 50%) var(--my, 50%), #ef8ea5, #f5bf67, #b7ead3, #8bc8ef, #cda2ef, #ef8ea5);
+}
+/* The full-art stock is dark in both themes. */
+:root .deck .tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__shine { mix-blend-mode: screen; filter: none; }
+/* A colour wheel, rather than parallel stripes, refracts through the chain as
+   the light moves. The mask keeps the central figure untouched. */
+:root .deck .tcard.tcard--mayan-bracelet .tcard__shine {
+  background: conic-gradient(from calc(25deg + var(--px, 0) * 35deg) at var(--mx, 50%) var(--my, 50%), var(--icon-spectrum));
+  opacity: calc(.48 + var(--o, 0) * .48);
+}
+/* Mayan's previous VStar pass put parallel stripes over the full image; its
+   refracting chain now carries the effect, leaving the illustration clear. */
+.tcard.tcard--mayan-bracelet .tcard__foil { background: none; }
+/* These older hotspot overlays would otherwise superimpose a second, generic
+   pattern on top of the individually drawn plates. */
+:root .deck .tcard:is(.tcard--swirling-streamers, .tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__shine::before,
+:root .deck .tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__shine::after { display: none; }
+/* This particular edition has a coral-bronze edge and a restrained, coloured
+   glare; do not wash its pale stock or the illustration toward white. */
+.tcard--swirling-streamers .tcard__front {
+  background: linear-gradient(140deg, #f5aa96, #a74063 30%, #f8c49b 51%, #9a4d8b 78%, #ed9ca8);
+}
+.tcard.tcard--swirling-streamers .tcard__front > .tcard__glare {
+  opacity: calc(var(--o, 0) * .22);
+  background: radial-gradient(farthest-corner circle at var(--mx, 50%) var(--my, 50%), #ffbdbe55 0%, #c9a9ed30 25%, #ffb89315 46%, #15102055 95%);
+}
+
+/* The ornament sits under the rules, but its strongest lines should not compete
+   with equations. The actual foil masks preserve their bright frame edges and
+   fade smoothly across the central text field. */
+:root .deck .tcard:is(.tcard--swirling-streamers, .tcard--sand-dollar, .tcard--pentagon, .tcard--chaotic-flower, .tcard--pentacle, .tcard--clam-triple, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__panel::after {
+  opacity: calc(.08 + var(--o, 0) * .08);
+}
+:root .deck .tcard:is(.tcard--sand-dollar, .tcard--pentagon, .tcard--chaotic-flower, .tcard--pentacle) .tcard__panel::before {
+  opacity: calc(.06 + var(--o, 0) * .12);
+}
 
 /* ───────── Back ───────── */
 .tcard__back {
@@ -1160,3 +1662,36 @@ html.deck-open body > :not(.deck) { visibility: hidden; }
   .deck[open], .deck.is-dealt .deck__slot { animation: none; }
   .deck__veil, .deck__tools { transition: none !important; }
 }
+
+/* Clam Triple is the deck's reversible light/dark key. Its two-sided mark is
+   independent of the site theme, so the instruction remains clear in either. */
+.deck__theme-hint { display: block; margin-top: .3rem; color: var(--deck-text); }
+.deck__theme-status {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+.tcard__theme-badge {
+  position: absolute; z-index: 4; right: 2cqw; bottom: 2cqw;
+  padding: .9cqw 1.5cqw; border: .2cqw solid #ffffff8a; border-radius: 2cqw;
+  background: #101929d9; color: #fff; font: 700 1.95cqw/1 var(--font-mono);
+  letter-spacing: .06em; box-shadow: 0 .5cqw 1.8cqw #0008; pointer-events: none;
+}
+.tcard--clam-triple .tcard__back {
+  gap: 3cqw;
+  background:
+    radial-gradient(circle at 75% 27%, #ffe7ad90, transparent 28%) padding-box,
+    radial-gradient(circle at 25% 72%, #6bb8e45c, transparent 32%) padding-box,
+    linear-gradient(132deg, #172039 0%, #253b5a 49.7%, #9b735e 50%, #f5d1a1 100%) padding-box,
+    linear-gradient(140deg, #6ae4e0, #eec3ed 50%, #ffe28a) border-box;
+}
+.tcard__theme-orbit {
+  position: absolute; width: 72cqw; height: 72cqw; border-radius: 50%;
+  border: .25cqw solid #ffffff80; box-shadow: 0 0 0 2cqw #ffffff16, 0 0 0 5cqw #ffffff12, 0 0 0 9cqw #ffffff0e;
+}
+.tcard__theme-symbol {
+  position: relative; display: grid; place-items: center; width: 31cqw; height: 31cqw;
+  color: #fff7dc; font: 400 26cqw/1 var(--font-head); text-shadow: 0 0 5cqw #fff9;
+}
+.tcard__theme-title, .tcard__theme-subtitle { position: relative; color: #fff; text-shadow: 0 .3cqw 1cqw #101024; }
+.tcard__theme-title { font: 700 5cqw/1 var(--font-head); letter-spacing: .14em; }
+.tcard__theme-subtitle { font: 500 2.9cqw/1.3 var(--font-mono); letter-spacing: .04em; }

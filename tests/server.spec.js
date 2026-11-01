@@ -21,7 +21,13 @@ function response(path, method = 'GET') {
 
 test('Static server serves public assets and rejects private paths and traversal', async ({}, info) => {
   test.skip(info.project.name !== 'chromium-desktop', 'The same Node server is shared by all four projects.');
-  for (const path of ['/cards.html', '/index.html', '/js/deck.js', '/css/deck.css', '/assets/deck/clifford.webp']) {
+  for (const path of [
+    '/cards.html', '/index.html', '/js/deck.js', '/css/deck.css', '/css/deck-room.css', '/assets/deck/clifford.webp',
+    '/assets/deck/clam-triple.webp', '/assets/deck/full-halloween.webp',
+    '/assets/deck/full-french-glass.webp', '/assets/deck/full-mayan-bracelet.webp',
+    '/assets/deck/foil/symmetric-ridges.webp', '/assets/deck/foil/icon-swirling-streamers.webp',
+    '/assets/deck/foil/paint-golden-flintstone.svg',
+  ]) {
     const result = await response(path);
     expect(result.status, path).toBe(200);
     expect(result.bytes).toBeGreaterThan(0);
