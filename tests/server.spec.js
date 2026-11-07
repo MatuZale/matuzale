@@ -22,8 +22,11 @@ function response(path, method = 'GET') {
 test('Static server serves public assets and rejects private paths and traversal', async ({}, info) => {
   test.skip(info.project.name !== 'chromium-desktop', 'The same Node server is shared by all four projects.');
   for (const path of [
-    '/cards.html', '/index.html', '/js/deck.js', '/css/deck.css', '/css/deck-room.css', '/css/deck-symmetry.css', '/assets/deck/clifford.webp',
+    '/cards.html', '/index.html', '/js/deck.js', '/css/deck.css', '/css/deck-room.css', '/css/deck-symmetry.css', '/css/deck-bourke.css', '/assets/deck/clifford.webp',
     '/assets/deck/clam-triple.webp', '/assets/deck/full-halloween.webp',
+    '/assets/deck/thorn-rose.webp', '/assets/deck/full-thorn-crown.webp', '/assets/deck/reuleaux.webp', '/assets/deck/full-reuleaux-nebula.webp',
+    '/assets/deck/foil/bourke-material-thorn-rose.webp', '/assets/deck/foil/bourke-etch-reuleaux-nebula.webp',
+    '/assets/deck/foil/ground-thorn-tide.webp', '/assets/deck/foil/ground-full-reuleaux-nebula.webp',
     '/assets/deck/full-french-glass.webp', '/assets/deck/full-mayan-bracelet.webp',
     '/assets/deck/foil/material-swirling-streamers.webp', '/assets/deck/foil/material-golden-flintstone.webp',
     '/assets/deck/foil/ground-swirling-streamers.webp', '/assets/deck/foil/ground-halloween.webp',

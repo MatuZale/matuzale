@@ -1,0 +1,185 @@
+{
+  "max_iterations": 500,
+  "bailout_radius": 10000,
+  "supersampling": 2,
+  "standard_size": [
+    1200,
+    900
+  ],
+  "portrait_size": [
+    900,
+    1257
+  ],
+  "cases": [
+    {
+      "id": "thorn-rose",
+      "title": "Thorn Rose",
+      "family": 0,
+      "c": [
+        0.102,
+        -0.04
+      ],
+      "centre": [
+        1.5,
+        0
+      ],
+      "span": 5.4,
+      "rotation": 1.5707963267948966,
+      "levels": [
+        5.5,
+        36
+      ],
+      "palette": [
+        "080e1b",
+        "22213d",
+        "682449",
+        "b13e60",
+        "ed7c87",
+        "ffc5aa",
+        "fff2db"
+      ]
+    },
+    {
+      "id": "thorn-crown",
+      "title": "Thorn Crown",
+      "family": 0,
+      "c": [
+        1.098,
+        1.402
+      ],
+      "centre": [
+        1.5,
+        0
+      ],
+      "span": 5.4,
+      "rotation": 1.5707963267948966,
+      "levels": [
+        6.5,
+        20
+      ],
+      "palette": [
+        "071914",
+        "123f39",
+        "4c6150",
+        "987241",
+        "d8a64f",
+        "ffe092",
+        "fff6d6"
+      ],
+      "portrait": true
+    },
+    {
+      "id": "thorn-tide",
+      "title": "Thorn Tide",
+      "family": 0,
+      "c": [
+        -0.354,
+        0.162
+      ],
+      "centre": [
+        1.5,
+        0
+      ],
+      "span": 5.4,
+      "rotation": 1.5707963267948966,
+      "levels": [
+        5.5,
+        26
+      ],
+      "palette": [
+        "08101e",
+        "123752",
+        "1e6b83",
+        "41a8ad",
+        "95d6c7",
+        "e2edcb",
+        "fff6e1"
+      ]
+    },
+    {
+      "id": "reuleaux",
+      "title": "Reuleaux",
+      "family": 1,
+      "c": [
+        -0.5666666666666667,
+        0
+      ],
+      "centre": [
+        0,
+        0
+      ],
+      "span": 4.8,
+      "rotation": 0,
+      "levels": [
+        3.4,
+        17
+      ],
+      "palette": [
+        "090d20",
+        "17234e",
+        "4a3d7c",
+        "a57165",
+        "ecb868",
+        "ffe3a6",
+        "fff7df"
+      ]
+    },
+    {
+      "id": "reuleaux-lace",
+      "title": "Reuleaux Lace",
+      "family": 1,
+      "c": [
+        -0.48,
+        0
+      ],
+      "centre": [
+        -0.3,
+        0.35
+      ],
+      "span": 2.2,
+      "rotation": 0,
+      "levels": [
+        4.2,
+        22
+      ],
+      "palette": [
+        "070f20",
+        "1c385c",
+        "435498",
+        "8a6fbe",
+        "66bad0",
+        "c0e9e7",
+        "f5ffed"
+      ]
+    },
+    {
+      "id": "reuleaux-nebula",
+      "title": "Reuleaux Nebula",
+      "family": 1,
+      "c": [
+        -0.45,
+        0.16
+      ],
+      "centre": [
+        0,
+        0
+      ],
+      "span": 4.8,
+      "rotation": 0,
+      "levels": [
+        3.4,
+        19
+      ],
+      "palette": [
+        "100a22",
+        "282353",
+        "663575",
+        "b24c99",
+        "eb7a9d",
+        "ffc7b0",
+        "fff2da"
+      ],
+      "portrait": true
+    }
+  ]
+}

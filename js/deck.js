@@ -221,6 +221,73 @@ for (const [id, name, m, lambda, alpha, beta, gamma, omega, symbol, ability, des
   });
 }
 
+// Six independently rendered escape-time fields, not attractor density plots.
+// Thorn / Secant Sea: Andrew Wayne Graff, described by Paul Bourke:
+// https://paulbourke.net/fractals/thorn/
+// Reuleaux triangle: Paul Bourke, inspired by Chris Thomasson:
+// https://paulbourke.net/fractals/triangle/
+// Exact viewports, palettes and pole handling live in generate_bourke.py and
+// generate_bourke.c. Two full-art layouts compose the renders into portraits.
+const BOURKE = [
+  {
+    id: "thorn-rose", name: "Thorn Rose", family: "thorn", symbol: "✳", rarity: "★",
+    parameters: [".102", "−.04"], accent: "#de9bb4", panel: "#2c142c",
+    ability: "Thorns of escape",
+    text: "Every starting point follows the same two rules. Colour records when its orbit escapes, revealing fine thorns and channels. The view is turned 90°.",
+    alt: "Thorn escape-time fractal with rose-coloured spines and curved channels",
+  },
+  {
+    id: "thorn-crown", name: "Thorn Crown", family: "thorn", symbol: "♜", rarity: "★★★", portrait: true,
+    parameters: ["1.098", "1.402"], accent: "#e5bd72", panel: "#102b26",
+    ability: "Singular crown",
+    text: "Division by sine and cosine cuts singular curves through the plane. Nearby starting points can escape after very different numbers of steps.",
+    alt: "Full-card Thorn fractal with branching spines and a crown of intricate escape-time contours",
+  },
+  {
+    id: "thorn-tide", name: "Thorn Tide", family: "thorn", symbol: "≋", rarity: "★★",
+    parameters: ["−.354", ".162"], accent: "#79cbbf", panel: "#102a2d",
+    ability: "Secant sea",
+    text: "A change of parameters redraws the channels between the thorns. This is an escape-time field over starting points, not a long-exposure orbit.",
+    alt: "Thorn fractal in sea-green tones, with fine repeating spines and flowing escape-time bands",
+  },
+  {
+    id: "reuleaux", name: "Reuleaux", family: "triangle", symbol: "△", rarity: "★",
+    parameters: ["−1.7/3"], accent: "#e3bf7d", panel: "#161b35",
+    ability: "Rounded triangle",
+    text: "A rational map draws a rounded triangular silhouette with a finely structured boundary. This is Bourke's original parameter; colour records escape time.",
+    alt: "Reuleaux triangle fractal: a rounded triangular region with fine escape-time contours",
+  },
+  {
+    id: "reuleaux-lace", name: "Reuleaux Lace", family: "triangle", symbol: "⋈", rarity: "★★",
+    parameters: ["−.48"], accent: "#90cfda", panel: "#102236",
+    ability: "Boundary lace",
+    text: "A closer view with a changed φ reveals the rational map's finer contours. These repeating forms come from the iteration; the surrounding foil is decorative.",
+    alt: "A closer view of the Reuleaux map boundary, showing layers of delicate fractal lace",
+  },
+  {
+    id: "reuleaux-nebula", name: "Reuleaux Nebula", family: "triangle", symbol: "✧", rarity: "★★★", portrait: true,
+    parameters: ["−.45 + .16<i>i</i>"], accent: "#de97c7", panel: "#291432",
+    ability: "Complex sky",
+    text: "A complex φ breaks the real-parameter map's mirror symmetry. Bands record escape time; points still unescaped after 500 steps stay dark.",
+    alt: "Full-card Reuleaux fractal with a threefold lace of circular voids and magenta escape-time bands",
+  },
+];
+for (const study of BOURKE) {
+  const thorn = study.family === "thorn";
+  CARDS.push({
+    ...study, bourke: true, stage: "Escape fractal", dim: 2,
+    credit: thorn ? "A. W. Graff · via P. Bourke" : "P. Bourke · after C. Thomasson",
+    style: `--eq: .91; --name-size: 4.4cqw; --accent: ${study.accent}; --panel: ${study.panel}; --frame: linear-gradient(140deg, color-mix(in srgb, ${study.accent}, white 45%), ${study.accent} 32%, #fff 52%, ${study.accent} 78%, color-mix(in srgb, ${study.accent}, white 35%))`,
+    eq: thorn
+      ? [[X("x"), "<i>x</i><sub>n</sub> / cos <i>y</i><sub>n</sub> + <i>c</i><sub>x</sub>"], [X("y"), "<i>y</i><sub>n</sub> / sin <i>x</i><sub>n</sub> + <i>c</i><sub>y</sub>"]]
+      : [[X("z"), "(<i>z</i><sub>n</sub>³ + <i>φ</i>) / <i>z</i><sub>n</sub>"], ["", "<i>z</i><sub>0</sub> = <i>x</i> + <i>iy</i> · each starting pixel"]],
+    stats: (thorn ? [["<i>c</i><sub>x</sub>", study.parameters[0]], ["<i>c</i><sub>y</sub>", study.parameters[1]]]
+      : [["<i>φ</i>", study.parameters[0]]]).concat([["max steps", "500"], ["escape radius", "10⁴"]]),
+    artwork: study.portrait ? [`full-${study.id}`, 900, 1257] : [study.id, 1200, 900],
+    illustration: "Computed escape time", size: study.portrait ? "900 × 1257 · portrait" : "1200 × 900",
+  });
+}
+
 // The kind of foil on the frame, as on printed holo cards: reverse holo (texture everywhere but the artwork),
 // regular holo (matte frame, foil in the artwork only) or full art (gold). See deck.css.
 const KIND = { clifford: "reverse", dejong: "reverse", simon: "reverse", ikeda: "reverse", thomas: "reverse", bedhead: "reverse", layered: "regular", symmetric: "regular", gumowski: "regular", harmonic: "regular", julia: "full", mcmullen: "full" };
@@ -280,12 +347,12 @@ function cardMarkup(card, index) {
   const energy = `<span class="tcard__energy" aria-hidden="true">${card.symbol}</span>`;
   // The alternate art is a portrait full-bleed render; the others sit in a landscape window. An amazing rare
   // shows its render cut out of the dark background, so it can spill over the card (generate_holo.py).
-  const [file, width, height] = card.id === "smoke" ? ["simon-smoke", 900, 1257]
+  const [file, width, height] = card.artwork ?? (card.id === "smoke" ? ["simon-smoke", 900, 1257]
     : ["halloween", "french-glass", "mayan-bracelet"].includes(card.id) ? [`full-${card.id}`, 900, 1257]
-    : HOLO[card.id] === "amazing" ? [`foil/cut-${card.id}`, 1200, 900] : [card.id, 1200, 900];
+    : HOLO[card.id] === "amazing" ? [`foil/cut-${card.id}`, 1200, 900] : [card.id, 1200, 900]);
   return `
     <li class="deck__slot" style="--i: ${index}">
-      <div class="tcard tcard--${card.id}${card.symmetry ? " tcard--symmetry" : ""}" data-foil="${card.id}" data-kind="${KIND[card.id] ?? ""}" data-art="${ART[card.id] ?? ""}" data-holo="${HOLO[card.id] ?? ""}" ${card.style ? `style="${card.style}"` : ""} role="button" tabindex="0" aria-pressed="false" aria-label="${card.name}${card.id === "smoke" ? " (alternate art)" : ""}: lift the card${card.id === "clam-triple" ? "; flip to switch the site theme" : ""}">
+      <div class="tcard tcard--${card.id}${card.symmetry ? " tcard--symmetry" : ""}${card.bourke ? " tcard--bourke" : ""}" data-foil="${card.id}" data-kind="${KIND[card.id] ?? ""}" data-art="${ART[card.id] ?? ""}" data-holo="${card.bourke ? "bourke" : HOLO[card.id] ?? ""}" ${card.style ? `style="${card.style}"` : ""} role="button" tabindex="0" aria-pressed="false" aria-label="${card.name}${card.id === "smoke" ? " (alternate art)" : ""}: lift the card${card.id === "clam-triple" ? "; flip to switch the site theme" : ""}">
         <div class="tcard__rotator">
           <div class="tcard__face tcard__front">
             <div class="tcard__panel">
@@ -321,7 +388,7 @@ function cardMarkup(card, index) {
 }
 
 function loadStyles() {
-  return Promise.all(["../css/deck.css", "../css/deck-room.css", "../css/deck-symmetry.css"].map(path => {
+  return Promise.all(["../css/deck.css", "../css/deck-room.css", "../css/deck-symmetry.css", "../css/deck-bourke.css"].map(path => {
     const href = new URL(path, import.meta.url).href;
     if (document.querySelector(`link[href="${href}"]`)) return Promise.resolve();
     return new Promise(resolve => {
@@ -398,7 +465,7 @@ export async function createDeck() {
   function controller(el) {
     const label = el.getAttribute("aria-label");
     const rotator = el.querySelector(".tcard__rotator");
-    const symmetry = el.classList.contains("tcard--symmetry");
+    const normalAware = el.classList.contains("tcard--symmetry") || el.classList.contains("tcard--bourke");
     const s = {
       rx: new Spring(0), ry: new Spring(0), spin: new Spring(0, .05, .2),
       mx: new Spring(50), my: new Spring(50), o: new Spring(0, .05, .3),
@@ -420,7 +487,7 @@ export async function createDeck() {
       st.setProperty("--px", ((mx - 50) / 50).toFixed(3));
       st.setProperty("--py", ((my - 50) / 50).toFixed(3));
       st.setProperty("--ang", (mx * 3.6 + my * .9).toFixed(1) + "deg");
-      if (symmetry) {
+      if (normalAware) {
         // These foils also respond to the surface normal: turning with the
         // wheel or Flip must change the reflection even at a fixed pointer.
         const yaw = (s.ry.value + s.spin.value) * Math.PI / 180;

@@ -35,10 +35,10 @@ for (const entry of ['cards', 'home']) {
     test.setTimeout(fullCollection ? 540_000 : 120_000);
     await openDeck(page, entry, true);
     const ids = await page.locator('.tcard').evaluateAll(cards => cards.map(card => card.dataset.foil));
-    expect(new Set(ids).size).toBe(30);
+    expect(new Set(ids).size).toBe(36);
     const inspected = fullCollection
       ? ids : ['clifford', 'chirikov', 'logistic', 'halvorsen'];
-    info.annotations.push({ type: 'coverage', description: `Inspected cards: ${inspected.join(', ')}. All 30 identities and images checked on entry.` });
+    info.annotations.push({ type: 'coverage', description: `Inspected cards: ${inspected.join(', ')}. All 36 identities and images checked on entry.` });
     const seenHolo = new Set();
     for (const id of inspected) {
       await test.step(id, async () => {
@@ -116,7 +116,7 @@ for (const entry of ['cards', 'home']) {
       });
     }
     for (const foil of ['', 'amazing', 'beam', 'reverse']) expect(seenHolo.has(foil)).toBe(true);
-    if (fullCollection) for (const foil of ['radiant', 'v', 'v-alt', 'vstar']) expect(seenHolo.has(foil)).toBe(true);
+    if (fullCollection) for (const foil of ['radiant', 'v', 'v-alt', 'vstar', 'bourke']) expect(seenHolo.has(foil)).toBe(true);
   });
 
   test(`${entry}: ${entry === 'cards' ? 'synthetic cancellation and capture loss' : 'viewport rotation and close/reopen'}`, async ({ page, browserName }, info) => {

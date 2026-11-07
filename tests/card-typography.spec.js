@@ -9,7 +9,7 @@ for (const entry of ['cards', 'home']) for (const width of [1280, 390]) {
       await page.locator('#project-shelf #art').click();
       await page.locator('[data-deck-open]').click();
     }
-    await expect(page.locator('.deck[open] .tcard')).toHaveCount(20);
+    await expect(page.locator('.deck[open] .tcard')).toHaveCount(36);
     const audit = await page.evaluate(async () => {
       const faces = ['400 16px "STIX Two Math"', 'italic 400 16px "STIX Two Text"', '700 16px "Deck Sans"'];
       const loaded = await Promise.all(faces.map(async face => {

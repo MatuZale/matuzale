@@ -61,7 +61,7 @@ an explicit WebKit native-input skip remains visible and is documented below.
   individual functional runs more practical. Production CSS, assets
   and effects are unchanged.
 
-Every collection opening checks all 30 unique card IDs and all 30 loaded images. The
+Every collection opening checks all 36 unique card IDs and all 36 loaded images. The
 gesture sweep uses four representatives in every entry/engine combination: Clifford
 (classic foil), Chirikov (reverse holo), Logistic (beam) and Halvorsen (amazing). This covers
 the shared controller and the original foil families without repeating every texture in the
@@ -78,20 +78,22 @@ conic spectrum and radial front are sampled separately. Separate wheel checks ke
 the pointer fixed and observe surface-normal and painted-background changes during the turn,
 with both normal and reduced motion. For a longer, separate
 Chromium/cards sweep, set `DECK_FULL_COLLECTION=1`
-and select that project/inspection test; it inspects all 30 cards. Run this separately
+and select that project/inspection test; it inspects all 36 cards. Run this separately
 from the whole regular matrix within the existing per-command VM budget.
+The six Bourke editions (31–36) are also checked in both themes: distinct material, engraving and protection assets must decode, the two portrait layouts must fill the card, printed rarities must match, and both artwork and stock reflections must respond at all four native pointer corners. Both foil pseudo-elements must generate visible, changing gradients, and stationary artwork must share the protection mask's cover/centre geometry. The fixed-pointer wheel checks now cover Thorn Rose and Reuleaux Nebula alongside Pentacle, in normal and reduced motion, including stationary print throughout the turn.
 Each inspected card is lifted, tilted/lit, released
 without changing face, probed for trailing clicks, put back and checked against its slot.
 Halvorsen additionally covers explicit Flip and inspection of the back in each combination.
 
 | Check | Entry and engine coverage |
 |---|---|
-| Regular inspection | 4 original foil families per entry and touch engine; all 30 identities/images checked each time |
+| Regular inspection | 4 original foil families per entry and touch engine; all 36 identities/images checked each time |
 | Symmetry materials | All ten editions: artwork foil and card-surface pointer response, stationary material layer, ten material textures and ten background-protection masks decoded, material contrast and duplicate-file checks |
 | Symmetry corner continuity | All ten editions, four corners, normal/reduced motion: gradient coverage without image tiling, closed colour cycles, changing spectrum/front images, and phase geometry against actual layer bounds; Golden subject sheen included |
+| Bourke editions | Six identities and star ranks, two full-art layouts, all material/mask assets, pointer reflections in both themes and fixed-pointer wheel reflection in normal/reduced motion |
 | Symmetry protection and rotation | Both frame masks quiet text; the window-frame mask excludes the rectangular artwork; portrait ground masks protect lower text; fixed-pointer wheel reflection in normal and reduced motion |
 | Full art and theme card | Desktop portrait artwork bounds; Clam Triple theme flip via button, keyboard, drag and wheel; touch Flip and theme persistence |
-| Extended inspection | Optional `DECK_FULL_COLLECTION=1`, Chromium/cards: all 30 gestures; run separately |
+| Extended inspection | Optional `DECK_FULL_COLLECTION=1`, Chromium/cards: all 36 gestures; run separately |
 | Synthetic cancel and capture loss; partial second-finger release | cards.html, both touch projects |
 | Landscape viewport, controls, close/reopen during gesture | See examples, both touch projects |
 | Separate veil dismissal and slot tracking during return scroll | Both entries, both touch projects; return scroll is programmatic |

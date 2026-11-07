@@ -1,0 +1,303 @@
+/* Six original physical foil finishes for the Bourke escape-time prints.
+   Inspired by the separation of art, foil and glare on printed trading cards
+   (visual reference: https://poke-holo.simey.me/). No reference code or assets.
+   The material and polished-crest maps never move. Only light moves, using
+   the existing card springs and surface normal; no separate animation loop. */
+:root .deck .tcard.tcard--bourke {
+  --bx: calc(var(--px, 0) * .62 + var(--foil-tilt-x, 0) * .8);
+  --by: calc(var(--py, 0) * .62 - var(--foil-tilt-y, 0) * .8);
+  --lx: calc(50% + var(--bx) * 36%);
+  --ly: calc(50% + var(--by) * 36%);
+  --facing: calc(.22 + var(--foil-facing, 1) * .78);
+  --foil-axis: 118deg;
+  --beam-axis: 64deg;
+  --foil-power: .65;
+  --frame-power: .19;
+  --frame-blend: soft-light;
+  --frame-mask: url('../assets/deck/foil/frame-window.webp');
+  --plate-size: 100% auto;
+  --tone-a: #81c4d0;
+  --tone-b: #e4d3aa;
+  --tone-c: #ad92cf;
+  --ring-o: .33;
+  --holo-a: #d9b8bd;
+  --holo-b: #b1d9d4;
+  --holo-c: #e6d3a1;
+  --holo-d: #b7bddc;
+  --rarity-low: #a18b5c;
+  --rarity-high: #ffedb9;
+}
+
+:root .deck .tcard.tcard--thorn-rose {
+  --material: url('../assets/deck/foil/bourke-material-thorn-rose.webp');
+  --polished: url('../assets/deck/foil/bourke-etch-thorn-rose.webp');
+  --ground: url('../assets/deck/foil/ground-thorn-rose.webp');
+  --foil-axis: 145deg; --beam-axis: 74deg;
+  --tone-a: #b78bb8; --tone-b: #eec8be; --tone-c: #9accc8;
+  --ring: #a0c4c2, #d8adb8, #eadac0, #a0c4c2;
+}
+:root .deck .tcard.tcard--thorn-crown {
+  --material: url('../assets/deck/foil/bourke-material-thorn-crown.webp');
+  --polished: url('../assets/deck/foil/bourke-etch-thorn-crown.webp');
+  --ground: url('../assets/deck/foil/ground-full-thorn-crown.webp');
+  --foil-axis: 30deg; --beam-axis: 128deg;
+  --tone-a: #8a7054; --tone-b: #f1d28c; --tone-c: #c79a62;
+  --ring: #a7864d, #fff0bd, #c8a66e, #a7864d;
+  --foil-power: .72;
+}
+:root .deck .tcard.tcard--thorn-tide {
+  --material: url('../assets/deck/foil/bourke-material-thorn-tide.webp');
+  --polished: url('../assets/deck/foil/bourke-etch-thorn-tide.webp');
+  --ground: url('../assets/deck/foil/ground-thorn-tide.webp');
+  --foil-axis: 26deg; --beam-axis: 152deg;
+  --tone-a: #88bcb5; --tone-b: #dac8c1; --tone-c: #829bc7;
+  --ring: #a5cabf, #d7b8c9, #acbedb, #a5cabf;
+}
+:root .deck .tcard.tcard--reuleaux {
+  --material: url('../assets/deck/foil/bourke-material-reuleaux.webp');
+  --polished: url('../assets/deck/foil/bourke-etch-reuleaux.webp');
+  --ground: url('../assets/deck/foil/ground-reuleaux.webp');
+  --foil-axis: 62deg; --beam-axis: 122deg;
+  --tone-a: #8aaccf; --tone-b: #cfc0ea; --tone-c: #debda0;
+  --ring: #abbada, #dac4ed, #e1cbab, #abbada;
+}
+:root .deck .tcard.tcard--reuleaux-lace {
+  --material: url('../assets/deck/foil/bourke-material-reuleaux-lace.webp');
+  --polished: url('../assets/deck/foil/bourke-etch-reuleaux-lace.webp');
+  --ground: url('../assets/deck/foil/ground-reuleaux-lace.webp');
+  --foil-axis: 164deg; --beam-axis: 38deg;
+  --tone-a: #6faeac; --tone-b: #e6d9b7; --tone-c: #a8b8cc;
+  --ring: #87bfb2, #e8d5a4, #b7cadc, #87bfb2;
+}
+:root .deck .tcard.tcard--reuleaux-nebula {
+  --material: url('../assets/deck/foil/bourke-material-reuleaux-nebula.webp');
+  --polished: url('../assets/deck/foil/bourke-etch-reuleaux-nebula.webp');
+  --ground: url('../assets/deck/foil/ground-full-reuleaux-nebula.webp');
+  --foil-axis: 78deg; --beam-axis: 138deg;
+  --tone-a: #b8a0dc; --tone-b: #e7c58f; --tone-c: #8cced1;
+  --ring: #849cd8, #d8b3e5, #f3d8aa, #849cd8;
+  --foil-power: .97;
+}
+
+/* A continuous light field: gradient stops change instead of translating a
+   tiled rectangular image. Even a full corner tilt cannot expose a tile seam. */
+:root .deck .tcard.tcard--bourke .tcard__foil,
+:root .deck .tcard.tcard--bourke .tcard__shine {
+  --band: calc(50% + var(--bx) * 29% + var(--by) * 19%);
+  --beam: calc(50% - var(--bx) * 27% + var(--by) * 24%);
+  display: block;
+  background-position: center;
+  background-repeat: no-repeat;
+  transform: none;
+  clip-path: none;
+  -webkit-mask-composite: source-over;
+  mask-composite: add;
+}
+:root .deck .tcard.tcard--bourke .tcard__foil {
+  background-image: var(--material),
+    linear-gradient(var(--foil-axis), #0b0d19 calc(var(--band) - 35%), var(--tone-a) calc(var(--band) - 15%), var(--tone-b) var(--band), var(--tone-c) calc(var(--band) + 15%), #090b14 calc(var(--band) + 35%)),
+    radial-gradient(ellipse at var(--lx) var(--ly), #89919d, #242839 31%, #080b15 64%);
+  background-size: var(--plate-size), 100% 100%, 100% 100%;
+  background-blend-mode: soft-light, color, normal;
+  -webkit-mask: var(--ground) center / cover no-repeat;
+  mask: var(--ground) center / cover no-repeat;
+  mix-blend-mode: screen;
+  filter: brightness(.82) saturate(.92);
+  opacity: calc(.025 + var(--o, 0) * var(--foil-power) * var(--facing));
+}
+/* A bright, thin front catches just the polished cuts. Its fixed alpha mask
+   leaves real dark gaps between reflections instead of whitening the artwork. */
+:root .deck .tcard.tcard--bourke .tcard__foil::before,
+:root .deck .tcard.tcard--bourke .tcard__foil::after {
+  content: "";
+  display: block;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+  -webkit-mask: var(--polished) center / var(--plate-size) no-repeat;
+  mask: var(--polished) center / var(--plate-size) no-repeat;
+  mix-blend-mode: screen;
+}
+:root .deck .tcard.tcard--bourke .tcard__foil::before {
+  background-image: linear-gradient(var(--beam-axis), transparent calc(var(--beam) - 23%), #d8e3ee70 calc(var(--beam) - 8%), #fff6e9 var(--beam), #b6d5e577 calc(var(--beam) + 8%), transparent calc(var(--beam) + 23%));
+  opacity: .95;
+}
+:root .deck .tcard.tcard--bourke .tcard__foil::after {
+  background-image: radial-gradient(ellipse at calc(50% - var(--bx) * 30%) calc(50% - var(--by) * 22%), var(--tone-c), transparent 48%);
+  opacity: .3;
+}
+
+/* Stock outside the picture is quiet and achromatic. Its own metal engraving
+   can show at the margins and beneath the lower print, with protected text. */
+:root .deck .tcard.tcard--bourke .tcard__shine {
+  background-image: var(--material),
+    linear-gradient(var(--beam-axis), #141414 calc(var(--beam) - 30%), #c1c1c1 var(--beam), #202020 calc(var(--beam) + 30%));
+  background-size: 100% 100%;
+  background-blend-mode: soft-light, normal;
+  -webkit-mask: var(--frame-mask) center / 100% 100% no-repeat;
+  mask: var(--frame-mask) center / 100% 100% no-repeat;
+  mix-blend-mode: var(--frame-blend);
+  filter: grayscale(1);
+  opacity: calc(.018 + var(--o, 0) * var(--frame-power) * var(--facing));
+}
+:root .deck .tcard.tcard--bourke .tcard__shine::before,
+:root .deck .tcard.tcard--bourke .tcard__shine::after { content: none; }
+:root .deck .tcard.tcard--bourke .tcard__front > .tcard__glare {
+  background: radial-gradient(ellipse at var(--lx) var(--ly), #fff4e238, #c6defa0a 18%, transparent 42%);
+  mix-blend-mode: screen;
+  opacity: calc(var(--o, 0) * .29 * var(--facing));
+}
+:root .deck .tcard.tcard--bourke .tcard__front::before {
+  background: var(--material) center / 100% 100% no-repeat;
+  mix-blend-mode: soft-light;
+  opacity: .18;
+}
+/* The escape-time print and its protection mask use the same centred cover
+   geometry. Keep both fixed to the stock so fine filaments stay protected at
+   every tilt; the card itself and its illumination still respond normally. */
+:root .deck .tcard.tcard--bourke .tcard__art img { transform: none; }
+
+/* 1 · Silk. Long curved cuts light up in narrow satin ribbons; the subsidiary
+   front runs against the main front, rather than moving the material itself. */
+:root .deck .tcard.tcard--thorn-rose .tcard__foil::before {
+  background-image: linear-gradient(var(--beam-axis), transparent calc(var(--beam) - 14%), #b3d9d253 calc(var(--beam) - 5%), #fff1ed var(--beam), #dbb7d15c calc(var(--beam) + 5%), transparent calc(var(--beam) + 14%));
+}
+:root .deck .tcard.tcard--thorn-rose .tcard__foil::after {
+  background-image: linear-gradient(147deg, transparent calc(var(--band) - 13%), #c2c4ed99 var(--band), transparent calc(var(--band) + 13%));
+  opacity: .46;
+}
+
+/* 2 · Hammered gold. Rounded cups and isolated embossed stars, lit with a
+   champagne highlight and a slower, warm secondary glint. */
+:root .deck .tcard.tcard--thorn-crown .tcard__foil {
+  background-image: var(--material),
+    radial-gradient(ellipse at var(--lx) var(--ly), #e3bc70, #76604a 25%, #1c1720 54%, #06070e 80%);
+  background-size: var(--plate-size), 100% 100%;
+  background-blend-mode: hard-light, normal;
+  filter: brightness(.82) saturate(.86);
+}
+:root .deck .tcard.tcard--thorn-crown .tcard__foil::before {
+  background-image: linear-gradient(128deg, transparent calc(var(--beam) - 27%), #b8934c70 calc(var(--beam) - 10%), #fff0bb var(--beam), #c9a26d77 calc(var(--beam) + 10%), transparent calc(var(--beam) + 27%));
+}
+:root .deck .tcard.tcard--thorn-crown .tcard__foil::after {
+  background-image: radial-gradient(ellipse at calc(50% - var(--bx) * 35%) calc(50% - var(--by) * 28%), #ffe0a5, transparent 35%);
+  opacity: .52;
+}
+
+/* 3 · Opal mosaic. Quiet panes have independent engraved grain directions;
+   a broad pearlescent diffraction band changes colour without rotating panes. */
+:root .deck .tcard.tcard--thorn-tide .tcard__foil {
+  background-image: var(--material),
+    conic-gradient(from calc(35deg + var(--bx) * 34deg + var(--by) * 22deg) at 50% 45%, #81b8b0, #c1a9c6, #d8cdb4, #8caac9, #81b8b0),
+    radial-gradient(ellipse at var(--lx) var(--ly), #a6a4a1, #242d3b 37%, #080b16 72%);
+  background-size: var(--plate-size), 100% 100%, 100% 100%;
+  background-blend-mode: hard-light, color, normal;
+}
+:root .deck .tcard.tcard--thorn-tide .tcard__foil::before {
+  background-image: radial-gradient(ellipse at var(--lx) var(--ly), #f0f4e8 0%, #d2ddd999 18%, transparent 47%);
+}
+
+/* 4 · Cut crystal. Sharp triangular bevels meet two differently angled narrow
+   reflection fronts; flat interiors are much darker than their polished edges. */
+:root .deck .tcard.tcard--reuleaux .tcard__foil::before {
+  background-image: linear-gradient(122deg, transparent calc(var(--beam) - 10%), #c5c5f5 var(--beam), transparent calc(var(--beam) + 10%)),
+    linear-gradient(62deg, transparent calc(var(--band) - 9%), #f4dfbbcc var(--band), transparent calc(var(--band) + 9%));
+  background-blend-mode: screen;
+}
+:root .deck .tcard.tcard--reuleaux .tcard__foil::after { opacity: .18; }
+
+/* 5 · Intaglio lace. The dense threefold engraving stays fixed while a thin
+   radial wave of light travels across it, like silver guilloché under a lamp. */
+:root .deck .tcard.tcard--reuleaux-lace .tcard__foil::before {
+  --ring-radius: calc(29% + var(--bx) * 11% + var(--by) * 9%);
+  background-image: radial-gradient(ellipse at 50% 48%, transparent calc(var(--ring-radius) - 13%), #a6d7c275 calc(var(--ring-radius) - 4%), #fff2cb var(--ring-radius), #bad6e27a calc(var(--ring-radius) + 4%), transparent calc(var(--ring-radius) + 13%));
+}
+:root .deck .tcard.tcard--reuleaux-lace .tcard__foil::after {
+  background-image: linear-gradient(38deg, transparent calc(var(--beam) - 12%), #bee0d5cc var(--beam), transparent calc(var(--beam) + 12%));
+  opacity: .48;
+}
+
+/* 6 · Cosmos. Sparse sharp stars, crescent-edged metal disks and tiny flecks
+   emerge locally. Empty foil stays black, retaining the nebula's contrast. */
+:root .deck .tcard.tcard--reuleaux-nebula .tcard__foil {
+  background-image: var(--material),
+    radial-gradient(ellipse at var(--lx) var(--ly), #a68bbf, #514364 21%, #05070d 49%);
+  background-size: var(--plate-size), 100% 100%;
+  background-blend-mode: multiply, normal;
+  filter: none;
+}
+:root .deck .tcard.tcard--reuleaux-nebula .tcard__foil::before {
+  background-image: radial-gradient(ellipse at var(--lx) var(--ly), #fff8df 0%, #fff0d6 18%, #d6d9ffef 31%, #84c7d86b 47%, transparent 66%);
+  opacity: 1;
+}
+:root .deck .tcard.tcard--reuleaux-nebula .tcard__foil::after {
+  background-image: radial-gradient(ellipse at calc(50% - var(--bx) * 42%) calc(50% - var(--by) * 31%), #ceeaff, #aec3ffcc 22%, transparent 48%);
+  opacity: .9;
+}
+
+/* A pair of full-art rarities use separately composed portrait renders. The
+   print sits on dark stock in either theme, under bright readable typography. */
+:root .deck .tcard.tcard--bourke:is(.tcard--thorn-crown, .tcard--reuleaux-nebula) {
+  --ink: #fffaf1; --ink-soft: #ece9f4; --ink-muted: #c4c4d7;
+  --ink-accent: #e7dcbb; --ink-value: #fff0c9; --ink-ability: #efc7ae;
+  --ink-filter: drop-shadow(0 .2cqw .35cqw #000);
+  --ink-shadow: 0 .2cqw .4cqw #000;
+  --rule: #ffffff38; --flavor-bg: #080b1ba0;
+  --frame-mask: url('../assets/deck/foil/frame-full.webp');
+  --frame-power: .1;
+  --plate-size: 100% 100%;
+}
+:root .deck .tcard.tcard--bourke:is(.tcard--thorn-crown, .tcard--reuleaux-nebula) .tcard__front { padding: 1.55cqw; }
+:root .deck .tcard.tcard--bourke:is(.tcard--thorn-crown, .tcard--reuleaux-nebula) .tcard__front::after { padding: 1.55cqw; }
+:root .deck .tcard.tcard--thorn-crown .tcard__front { background: linear-gradient(132deg, #fff0c1, #b28b48 21%, #3d2b29 43%, #ffe8a6 59%, #806047 81%, #ead2a3); }
+:root .deck .tcard.tcard--reuleaux-nebula .tcard__front { background: linear-gradient(132deg, #d7e6ff, #81719e 21%, #212a46 43%, #dcd7f3 59%, #686b91 81%, #c5dded); }
+:root .deck .tcard.tcard--bourke:is(.tcard--thorn-crown, .tcard--reuleaux-nebula) .tcard__panel { padding-top: 3.4cqw; background: #080b19; box-shadow: inset 0 0 0 .25cqw #ffffff38; }
+:root .deck .tcard.tcard--bourke:is(.tcard--thorn-crown, .tcard--reuleaux-nebula) .tcard__panel > .tcard__art { position: absolute; inset: 0; z-index: 0; aspect-ratio: auto; padding: 0; border-radius: inherit; background: #080b19; box-shadow: none; }
+:root .deck .tcard.tcard--bourke:is(.tcard--thorn-crown, .tcard--reuleaux-nebula) .tcard__art img { border-radius: 0; object-fit: cover; }
+:root .deck .tcard.tcard--bourke:is(.tcard--thorn-crown, .tcard--reuleaux-nebula) .tcard__art .tcard__foil { inset: 0; border-radius: 0; }
+:root .deck .tcard.tcard--bourke:is(.tcard--thorn-crown, .tcard--reuleaux-nebula) .tcard__art::after { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; background: linear-gradient(#080b1877, transparent 15%, transparent 36%, #080b1880 53%, #080b18c9 100%); }
+:root .deck .tcard.tcard--bourke:is(.tcard--thorn-crown, .tcard--reuleaux-nebula) .tcard__panel > :not(.tcard__art) { z-index: 2; }
+:root .deck .tcard.tcard--bourke:is(.tcard--thorn-crown, .tcard--reuleaux-nebula) .tcard__name { background: none; color: #fffaf1; -webkit-text-fill-color: #fffaf1; }
+:root .deck .tcard.tcard--bourke:is(.tcard--thorn-crown, .tcard--reuleaux-nebula) .tcard__strip { margin-top: auto; }
+:root .deck .tcard.tcard--bourke:is(.tcard--thorn-crown, .tcard--reuleaux-nebula) :is(.tcard__moves, .tcard__stats, .tcard__flavor) { border-radius: 1cqw; background: linear-gradient(90deg, #080a19d9, #080a1960); text-shadow: 0 .18cqw .35cqw #000; }
+:root .deck .tcard.tcard--bourke:is(.tcard--thorn-crown, .tcard--reuleaux-nebula) .tcard__moves { flex: none; padding: .35cqw 1.4cqw; }
+:root .deck .tcard.tcard--bourke:is(.tcard--thorn-crown, .tcard--reuleaux-nebula) .tcard__stats { padding: .6cqw 0; }
+:root .deck .tcard.tcard--bourke:is(.tcard--thorn-crown, .tcard--reuleaux-nebula) .tcard__stats dd {
+  background: none;
+  color: var(--ink-value);
+  -webkit-text-fill-color: var(--ink-value);
+  filter: none;
+}
+:root .deck .tcard.tcard--bourke:is(.tcard--thorn-crown, .tcard--reuleaux-nebula) .tcard__foot { margin-top: 1.1cqw; }
+
+/* Rarity is part of the print: small engraved metal stars, not emoji. */
+:root .deck .tcard.tcard--bourke .tcard__rarity {
+  display: inline-block;
+  font-family: "Deck Sans", sans-serif;
+  font-size: 3.1cqw;
+  line-height: 1;
+  letter-spacing: .28cqw;
+  vertical-align: -.08em;
+  color: transparent;
+  background: linear-gradient(115deg, var(--rarity-low) calc(var(--lx) - 35%), var(--rarity-high) var(--lx), var(--rarity-low) calc(var(--lx) + 35%));
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 .12cqw .1cqw #0006);
+}
+:root[data-theme="light"] .deck .tcard.tcard--bourke:not(:is(.tcard--thorn-crown, .tcard--reuleaux-nebula)) {
+  --frame-power: .13;
+  /* Light paper needs dark metallic ink throughout the reflection sweep. */
+  --holo-a: #673c58; --holo-b: #2f626a; --holo-c: #6d5931; --holo-d: #4f4a6f;
+  --rarity-low: #735426; --rarity-high: #9d7129;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .deck .tcard.tcard--bourke:not(:is(.tcard--thorn-crown, .tcard--reuleaux-nebula)) {
+    --frame-power: .13;
+    --holo-a: #673c58; --holo-b: #2f626a; --holo-c: #6d5931; --holo-d: #4f4a6f;
+    --rarity-low: #735426; --rarity-high: #9d7129;
+  }
+}

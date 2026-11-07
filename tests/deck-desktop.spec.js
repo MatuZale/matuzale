@@ -291,11 +291,11 @@ for (const reducedMotion of ['no-preference', 'reduce']) {
   });
 }
 
-for (const reducedMotion of ['no-preference', 'reduce']) {
-  test(`symmetry foil follows a wheel turn at a fixed pointer (${reducedMotion})`, async ({ page }) => {
+for (const reducedMotion of ['no-preference', 'reduce']) for (const id of ['pentacle', 'thorn-rose', 'reuleaux-nebula']) {
+  test(`${id} foil follows a wheel turn at a fixed pointer (${reducedMotion})`, async ({ page }) => {
     await page.emulateMedia({ reducedMotion });
     await openDeck(page, 'cards');
-    const card = page.locator('.tcard[data-foil="pentacle"]');
+    const card = page.locator(`.tcard[data-foil="${id}"]`);
     await lift(page, card, false);
     await faceOn(page, card);
     const before = await card.evaluate(el => {
@@ -304,6 +304,7 @@ for (const reducedMotion of ['no-preference', 'reduce']) {
         tilt: parseFloat(el.style.getPropertyValue('--foil-tilt-x')),
         mx: el.style.getPropertyValue('--mx'), my: el.style.getPropertyValue('--my'),
         image: getComputedStyle(el.querySelector('.tcard__foil')).backgroundImage,
+        artTransform: getComputedStyle(el.querySelector('.tcard__art img')).transform,
       });
       const audit = window.symmetryWheelAudit = { samples: [] };
       audit.observer = new MutationObserver(() => audit.samples.push(read()));
@@ -326,6 +327,11 @@ for (const reducedMotion of ['no-preference', 'reduce']) {
     expect(samples.some(sample => sample.image !== before.image)).toBe(true);
     expect(samples.every(sample => sample.mx === before.mx && sample.my === before.my),
       'The reflection must change without a moving pointer/light coordinate').toBe(true);
+    if (id !== 'pentacle') {
+      expect(before.artTransform, `${id} print starts registered to the mask`).toBe('none');
+      expect(samples.every(sample => sample.artTransform === 'none'),
+        `${id} printed artwork stays registered throughout the wheel turn`).toBe(true);
+    }
     if (reducedMotion === 'reduce') {
       expect((await values(card)).rx).toBe(0);
       expect(await page.evaluate(() => window.deckAudit.pending.size)).toBe(0);
@@ -404,6 +410,94 @@ test('all symmetry materials and protection masks decode and preserve the printe
   await expect(page.locator('.tcard[data-foil="golden-flintstone"] .tcard__art img'))
     .toHaveAttribute('src', /cut-golden-flintstone\.webp$/);
 });
+
+const bourkeCards = [
+  ['thorn-rose', '★'], ['thorn-crown', '★★★'], ['thorn-tide', '★★'],
+  ['reuleaux', '★'], ['reuleaux-lace', '★★'], ['reuleaux-nebula', '★★★'],
+];
+const bourkePortraits = new Set(['thorn-crown', 'reuleaux-nebula']);
+
+for (const colorScheme of ['dark', 'light']) {
+  test(`six Bourke editions load their own materials and respond to light in ${colorScheme}`, async ({ page }) => {
+    test.setTimeout(180_000);
+    await page.emulateMedia({ colorScheme, reducedMotion: 'reduce' });
+    await openDeck(page, 'cards');
+    await expect(page.locator('.tcard--bourke')).toHaveCount(6);
+    await expect(page.locator('link[href$="/css/deck-bourke.css"]')).toHaveCount(1);
+    const files = bourkeCards.flatMap(([id]) => [
+      `bourke-material-${id}.webp`, `bourke-etch-${id}.webp`, `ground-${bourkePortraits.has(id) ? "full-" : ""}${id}.webp`,
+    ]);
+    const failures = await page.evaluate(async files => {
+      const result = await Promise.all(files.map(async file => {
+        const image = new Image(); image.src = `assets/deck/foil/${file}`;
+        try { await image.decode(); return image.naturalWidth > 0 ? null : file; }
+        catch { return file; }
+      }));
+      return result.filter(Boolean);
+    }, files);
+    expect(failures, 'Every distinct foil material, engraving and subject-protection mask must decode').toEqual([]);
+    for (const [id, rarity] of bourkeCards) {
+      const card = page.locator(`.tcard[data-foil="${id}"]`);
+      await expect(card).toHaveAttribute('data-holo', 'bourke');
+      await expect(card.locator('.tcard__rarity')).toHaveText(rarity);
+      const prefix = bourkePortraits.has(id) ? 'full-' : '';
+      await expect(card.locator('.tcard__art img')).toHaveAttribute('src', `assets/deck/${prefix}${id}.webp`);
+      if (bourkePortraits.has(id)) {
+        expect(await card.evaluate(el => el.querySelector('.tcard__art').getBoundingClientRect().height /
+          el.querySelector('.tcard__panel').getBoundingClientRect().height)).toBeGreaterThan(.9);
+      }
+      await lift(page, card, false);
+      const box = await card.boundingBox();
+      const paint = () => card.evaluate(el => {
+        const foil = el.querySelector('.tcard__foil'), image = el.querySelector('.tcard__art img');
+        const foilStyle = getComputedStyle(foil), imageStyle = getComputedStyle(image);
+        const surfaces = Object.fromEntries([
+          ['foil', foil], ['shine', el.querySelector('.tcard__shine')],
+          ['before', foil, '::before'], ['after', foil, '::after'],
+        ].map(([name, element, pseudo]) => {
+          const style = getComputedStyle(element, pseudo);
+          return [name, { image: style.backgroundImage, opacity: Number(style.opacity), display: style.display, content: style.content }];
+        }));
+        return { surfaces, registration: {
+          artTransform: imageStyle.transform, foilTransform: foilStyle.transform,
+          artFit: imageStyle.objectFit, artPosition: imageStyle.objectPosition,
+          maskSize: foilStyle.maskSize || foilStyle.webkitMaskSize,
+          maskPosition: foilStyle.maskPosition || foilStyle.webkitMaskPosition,
+          imageWidth: image.clientWidth, imageHeight: image.clientHeight,
+          foilWidth: foil.clientWidth, foilHeight: foil.clientHeight,
+        } };
+      });
+      let previous = null;
+      for (const [x, y] of [[0, 0], [1, 0], [1, 1], [0, 1]]) {
+        await page.mouse.move(box.x + (x ? box.width + 2 : -2), box.y + (y ? box.height + 2 : -2));
+        const current = await paint();
+        for (const layer of ['foil', 'shine', 'before', 'after']) {
+          const surface = current.surfaces[layer], label = `${id} ${layer} at ${x},${y}`;
+          expect(surface.display, label).not.toBe('none');
+          expect(surface.opacity, label).toBeGreaterThan(0);
+          expect(surface.image, label).toContain('gradient(');
+          if (layer === 'before' || layer === 'after') {
+            expect(surface.content, `${label} must generate a painted pseudo-element`).not.toBe('none');
+            expect(surface.content, `${label} must generate a painted pseudo-element`).not.toBe('normal');
+          }
+          if (previous) expect(surface.image, `${label} reflects moving light`).not.toBe(previous.surfaces[layer].image);
+        }
+        const registration = current.registration;
+        expect(registration.artTransform, `${id} stationary print`).toBe('none');
+        expect(registration.foilTransform, `${id} stationary protection mask`).toBe('none');
+        expect(registration.artFit).toBe('cover');
+        expect(registration.maskSize).toBe('cover');
+        expect(registration.artPosition).toBe('50% 50%');
+        expect(registration.maskPosition).toBe('50% 50%');
+        expect(Math.abs(registration.imageWidth - registration.foilWidth), `${id} mask/print width`).toBeLessThanOrEqual(1);
+        expect(Math.abs(registration.imageHeight - registration.foilHeight), `${id} mask/print height`).toBeLessThanOrEqual(1);
+        previous = current;
+      }
+      await page.locator('[data-deck-back]').click();
+      await backInSlot(page, card);
+    }
+  });
+}
 
 for (const entry of ['cards', 'home']) {
   test(`${entry}: flipping Clam Triple switches and remembers the site theme`, async ({ page }) => {

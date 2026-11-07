@@ -139,12 +139,12 @@ export async function openDeck(page, entry, touch = false) {
     await expect(page).toHaveURL(/\/index\.html/); // Collection opens here, not via fallback navigation.
   }
   await expect(page.locator('.deck')).toBeVisible();
-  await expect(page.locator('.tcard')).toHaveCount(30);
+  await expect(page.locator('.tcard')).toHaveCount(36);
   expect(await page.locator('.tcard').evaluateAll(cards =>
     new Set(cards.map(card => card.dataset.foil)).size,
-  )).toBe(30);
+  )).toBe(36);
   await dealt(page);
-  await expect(page.locator('.tcard__art img')).toHaveCount(30);
+  await expect(page.locator('.tcard__art img')).toHaveCount(36);
   await expect.poll(() => page.locator('.tcard__art img').evaluateAll(images =>
     images.filter(img => !img.complete || !img.naturalWidth).map(img => img.currentSrc || img.src),
   ), { message: 'Every card image must load; the failing URLs are listed below' }).toEqual([]);
