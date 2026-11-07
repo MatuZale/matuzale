@@ -37,7 +37,7 @@ test('AV reveals a Spacewar cassette and plays inside the existing TV', async ({
   await expect(tape(page)).toHaveCount(0);
   await tuneAV(page);
   await expect(page.locator('[data-game]')).toHaveCount(0);
-  await expect(page.locator('#project-shelf .project-tape')).toHaveCount(13);
+  await expect(page.locator('#project-shelf .project-tape')).toHaveCount(14);
   await playSpacewar(page);
   await expect(page.locator('dialog.sw')).toHaveCount(0);
   const player = page.locator('#project-player');
@@ -128,7 +128,7 @@ test('the cabinet volume knob controls and remembers the game sound', async ({ p
   await expect(page.locator('#tape-tuner')).toBeFocused();
 });
 
-test('AV keeps all twelve tapes reachable at 1024px, then restores the normal 3D shelf', async ({ page }) => {
+test('AV keeps every tape reachable at 1024px, then restores the normal 3D shelf', async ({ page }) => {
   await page.setViewportSize({ width: 1024, height: 900 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/?lang=en');
@@ -136,7 +136,7 @@ test('AV keeps all twelve tapes reachable at 1024px, then restores the normal 3D
   const shelf = page.locator('#project-shelf');
   await shelf.scrollIntoViewIfNeeded();
   const buttons = shelf.locator('.tape-shelf__stacks .project-tape');
-  await expect(buttons).toHaveCount(13);
+  await expect(buttons).toHaveCount(14);
   for (const selected of ['bentos', 'spacewar']) {
     await shelf.locator(`.project-tape--${selected}`).click();
     await expect(screen(page)).toHaveAttribute('data-project', selected);
@@ -156,7 +156,7 @@ test('AV keeps all twelve tapes reachable at 1024px, then restores the normal 3D
   await page.locator('[data-av]').evaluate(el => el.click());
   await expect(page.locator('html')).not.toHaveClass(/is-crt/);
   await expect(tape(page)).toHaveCount(0);
-  await expect(buttons).toHaveCount(12);
+  await expect(buttons).toHaveCount(13);
   await shelf.locator('.project-tape--kodlab').click();
   await expect(shelf.locator('.tape-showcase.is-open .tape-cover--kodlab')).toBeVisible();
 });

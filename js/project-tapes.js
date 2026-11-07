@@ -27,6 +27,7 @@
     ['STUDENT DATA', 'Student data pipeline', 'cloud', 'T-120', 'CLOUD / ML'],
     ['PENDULUM', 'Pendulum wave sounds', 'sound', 'T-120', 'SOUND / CANVAS'],
     ['N-BODY', 'Gravity simulation in 3D', 'nbody', 'T-120', 'GRAVITY SIMULATION'],
+    ['ORBITALS', 'Hydrogen orbital atlas', 'orbitals', 'T-120', 'WAVEFUNCTION ATLAS'],
     ['PHYSICS LAB', 'Interactive physics demos', 'physics', 'T-120', 'INTERACTIVE SCIENCE'],
     ['QUANTUM', 'Quantum research code', 'quantum', 'T-120', 'RESEARCH ARCHIVE'],
     ['WW', 'Document workflow automation', 'ww', 'T-120', 'DOCUMENT FLOW']
@@ -41,6 +42,7 @@
     cloud: 'A student-performance dataset followed through an AWS pipeline, exploratory analysis and a gradient-boosting model. The project also checks feature leakage: whether a prediction is using information it should not have.',
     sound: 'A pendulum wave you can both watch and hear. The moving pendulums drive a bell synthesiser and a chord pad, turning their changing alignment into visible polyrhythms under a starry sky.',
     nbody: 'A 3D gravity simulator built in C++20 and OpenGL. Bodies follow a symplectic leapfrog integrator, while an orbital camera makes it possible to inspect the motion from different viewpoints.',
+    orbitals: 'An interactive atlas of 30 hydrogen orbitals for n = 1–4, written in C++17 with GLFW and OpenGL. Monte Carlo sampling turns probability density into clouds of points that you can rotate and explore.',
     physics: 'Browser demos made for public science events: a small quantum lab and a genetic algorithm tackling the travelling-salesman problem. Visitors can explore abstract ideas through experiments and changing visual results.',
     quantum: 'Two research tools from my PhD: an SDP test for decomposable positive maps and a Young–Yamanouchi basis generator. They turn parts of quantum-information theory into calculations that can be reproduced.',
     ww: 'A private tool that turns incoming messages and PDF documents into organised records. It connects the inbox, document parsing and a shared spreadsheet, reducing the repeated work of copying information between them.'
@@ -482,6 +484,10 @@
       cover.innerHTML = `<span class="tape-cover__brand">TM / VIDEO LIBRARY</span><span class="tape-cover__format">${format} <b>VHS</b></span><strong class="tape-cover__title"></strong><span class="tape-cover__subtitle"></span><span class="tape-cover__art"></span><span class="tape-cover__foot">HIGH QUALITY VIDEO <b>VHS</b></span>`;
       cover.querySelector('.tape-cover__title').textContent = name;
       cover.querySelector('.tape-cover__subtitle').textContent = subtitle;
+      if (style === 'orbitals') {
+        cover.querySelector('.tape-cover__brand').textContent = 'HYDROGEN / VOL. 01';
+        cover.querySelector('.tape-cover__foot').innerHTML = 'C++17 · OPENGL <b>VHS</b>';
+      }
       const sourceImage = ['art', 'quantum'].includes(style) && article.querySelector('.card__print img');
       if (sourceImage) {
         const preview = document.createElement('figure');

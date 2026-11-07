@@ -41,7 +41,7 @@ test('tuning can lock instantly or briefly, and a long interruption is interrupt
     { channel: '02', title: 'KODLAB' },
     { channel: '05', title: 'ATTRACTORS' },
     { channel: '03', title: 'AGENT CONTROL' },
-    { channel: '12', title: 'QUANTUM' },
+    { channel: '13', title: 'QUANTUM' },
   ]);
 });
 

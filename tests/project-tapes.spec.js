@@ -83,7 +83,7 @@ test('channel dial selects tapes with the keyboard and stays in sync with the sh
   const player = page.locator('#project-player');
   await expect(tuner).toHaveValue('0');
   await expect(tuner).toHaveAttribute('aria-valuetext', 'No cassette');
-  await expect(tuner).toHaveAttribute('max', '12');
+  await expect(tuner).toHaveAttribute('max', '13');
   await tuner.focus();
   await page.keyboard.press('ArrowRight');
   await expect(tuner).toBeFocused();
@@ -127,7 +127,7 @@ test('channel dial tracks the AV game tape and keeps focus after the game loads'
   await expect(tuner).toHaveValue('4');
   await page.locator('[data-av]').evaluate(el => el.click());
   await expect(page.locator('html')).toHaveClass(/is-crt/);
-  await expect(tuner).toHaveAttribute('max', '13');
+  await expect(tuner).toHaveAttribute('max', '14');
   await expect(tuner).toHaveValue('5');
   await expect(tuner).toHaveAttribute('aria-valuetext', 'Channel 05: ATTRACTORS');
   await tuner.focus();
@@ -139,7 +139,7 @@ test('channel dial tracks the AV game tape and keeps focus after the game loads'
   await expect(tuner).toBeFocused();
   await page.locator('[data-av]').evaluate(el => el.click());
   await expect(page.locator('html')).not.toHaveClass(/is-crt/);
-  await expect(tuner).toHaveAttribute('max', '12');
+  await expect(tuner).toHaveAttribute('max', '13');
   await expect(tuner).toHaveValue('0');
   await expect(tuner).toHaveAttribute('aria-valuetext', 'No cassette');
   await expect(screen.locator('.tape-static')).toBeVisible();
@@ -149,7 +149,7 @@ test('selecting and changing tapes plays projects on the TV', async ({ page }) =
   await page.goto('/?lang=pl');
   const shelf = page.locator('#project-shelf');
   const player = page.locator('#project-player');
-  await expect(shelf.locator('button')).toHaveCount(12);
+  await expect(shelf.locator('button')).toHaveCount(13);
   await expect(shelf.locator('button').last()).toHaveId('art');
   const kodlab = shelf.getByRole('button', { name: /^Kodlab:/ });
   await kodlab.click();
@@ -257,7 +257,8 @@ test('TV keeps its dimensions and contains each project without scrolling', asyn
   const screen = page.locator('#tape-player-screen');
   const tapes = shelf.locator('button');
   let size;
-  for (let i = 0; i < 11; i++) {
+  const tapeCount = await tapes.count();
+  for (let i = 0; i < tapeCount; i++) {
     await tapes.nth(i).click();
     await expect(player).toHaveClass(i === 0 ? /is-playing/ : /is-changing/);
     const dimensions = await screen.evaluate(el => ({ width: el.clientWidth, height: el.clientHeight, scrollWidth: el.scrollWidth, scrollHeight: el.scrollHeight }));
@@ -344,7 +345,7 @@ test('all projects fit the TV at phone sizes in both languages', async ({ page }
           return { clipped, overflow: screen.scrollHeight > screen.clientHeight || screen.scrollWidth > screen.clientWidth };
         });
       });
-      expect(results).toHaveLength(12);
+      expect(results).toHaveLength(13);
       expect(results.filter(result => result.clipped || result.overflow)).toEqual([]);
     }
   }
@@ -583,7 +584,7 @@ test('all tape sleeves share one size and T-120 format', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/?lang=en');
   const shelf = page.locator('#project-shelf');
-  await expect(shelf.locator('button')).toHaveCount(12);
+  await expect(shelf.locator('button')).toHaveCount(13);
   for (const width of [375, 800, 1280]) {
     await page.setViewportSize({ width, height: 900 });
     const result = await shelf.locator('button').evaluateAll(buttons => {

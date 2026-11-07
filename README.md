@@ -52,6 +52,7 @@ predictive modelling. I build the software side: data pipelines, APIs and dashbo
 | [**Strange attractors & fractals**](https://github.com/MatuZale/color_recursive_maps) | Chaotic maps rendered as neon density plots and 1080p60 videos ([Instagram](https://www.instagram.com/mathuzaleh/)) | Python · Numba |
 | [**Personal Finance Analyzer**](https://github.com/MatuZale/personal-finance-analyzer) | Cleans Polish bank CSV exports, categorises spending, charts it in a CLI and an app | Python · Streamlit |
 | [**N-body simulator**](https://github.com/MatuZale/Projekt-n-bodies) | 3D gravity with a symplectic integrator and energy tracking | C++20 · OpenGL |
+| [**Hydrogen Orbital Explorer**](https://github.com/MatuZale/hydrogen-orbital-explorer) | An atlas of 30 hydrogen orbitals, with real and complex states, Monte Carlo point clouds and probability-current tracers | C++17 · GLFW · OpenGL |
 | [**Pendulum Wave Chimes**](https://github.com/MatuZale/pendulum-wave-chimes) | A single-file browser toy: pendulum waves as polyrhythmic bells | Web Audio · Canvas |
 | **WW** (private) | Automates a document workflow, from incoming messages and PDFs to organised records and a small web control panel | Python |
 | [**Tools from my PhD**](https://github.com/MatuZale/Test-decomposability-of-positive-maps) | SDP test for decomposable positive maps, plus a [Young–Yamanouchi basis](https://github.com/MatuZale/Young-Yamanouchi-basis) generator | MATLAB · Sage |

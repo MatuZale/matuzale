@@ -31,6 +31,7 @@ test('Static server serves public assets and rejects private paths and traversal
     '/assets/deck/foil/material-swirling-streamers.webp', '/assets/deck/foil/material-golden-flintstone.webp',
     '/assets/deck/foil/ground-swirling-streamers.webp', '/assets/deck/foil/ground-halloween.webp',
     '/assets/deck/foil/art-golden-flintstone.webp', '/assets/deck/foil/frame-window.webp', '/assets/deck/foil/frame-full.webp',
+    '/assets/tape-orbitals-cover.webp', '/assets/orbitals-preview.webp', '/assets/orbitals-rotation.mp4',
   ]) {
     const result = await response(path);
     expect(result.status, path).toBe(200);

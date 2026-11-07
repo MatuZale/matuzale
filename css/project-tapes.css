@@ -34,6 +34,10 @@
 .project-tape--sound .project-tape__bands { background: repeating-linear-gradient(0deg,#6fd4c7 0 3px,#244454 3px 6px); }
 .project-tape--nbody { --case:#1a1920; --label:#ede3cf; --stripe:#ef8a61; }
 .project-tape--nbody .project-tape__bands { background: linear-gradient(#bc4e62 0 25%,#df7557 25% 50%,#efb56c 50% 75%,#3d2747 75%); }
+.project-tape--orbitals { --case:#173744; --label:#e0ece6; --ink:#17333e; --case-ink:#d3f2ee; --stripe:#efab6f; }
+.project-tape--orbitals .project-tape__bands { background: linear-gradient(#73d8df 0 38%, #e8e5c7 38% 56%, #ed9b60 56% 83%, #244b5b 83%); }
+.project-tape--orbitals .project-tape__label { border-top: 4px solid #ed9b60; }
+:root[data-theme="dark"] .project-tape--orbitals { --case:#102d39; --label:#245061; --ink:#f3ead8; --case-ink:#d8f1ec; }
 .project-tape--physics { --case:#d8b948; --label:#fbeb96; --stripe:#e56975; }
 .project-tape--physics .project-tape__brand, .project-tape--physics .project-tape__format { color:#292537; }
 .project-tape--quantum { --case:#403750; --label:#e8e2ed; --stripe:#ac8ad5; }
@@ -66,3 +70,7 @@
 .project-tape--nbody .project-tape__format, .project-tape--cloud .project-tape__format { font-size: 16px; }
 .tape-art-preview { margin: 1rem 0 0; }
 .tape-art-preview img { display: block; max-width: 100%; max-height: 230px; width: auto; object-fit: contain; border: 4px solid #292632; border-radius: 3px; }
+/* The sampled-orbital plate uses the existing CRT thumbnail/enlarge control. */
+.tape-preview--orbitals { width: 100%; }
+.tape-preview--orbitals img { background: #080c18; }
+.tape-player__screen .tape-preview--orbitals figcaption { color: #bdd6df; }

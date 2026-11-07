@@ -119,7 +119,9 @@
   }
 }
 @media (max-width: 380px) {
-  .tape-player__screen { aspect-ratio: 1 / 1.86; min-height: 600px; }
+  /* Keep the extra reading height inside the tube instead of letting the
+     preferred ratio transfer its 600px minimum into a wider screen. */
+  .tape-player__screen { width: 100%; max-width: 100%; aspect-ratio: 1 / 1.86; min-height: 600px; }
   .tape-player__tv::after { min-height: 600px; }
 }
 /* Programme notes give each project a short introduction and a useful second
