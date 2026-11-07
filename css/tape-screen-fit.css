@@ -122,7 +122,13 @@
   /* Keep the extra reading height inside the tube instead of letting the
      preferred ratio transfer its 600px minimum into a wider screen. */
   .tape-player__screen { width: 100%; max-width: 100%; aspect-ratio: 1 / 1.86; min-height: 600px; }
-  .tape-player__tv::after { min-height: 600px; }
+  .tape-player__tv::after {
+    /* Constrain the glass to the same inset width as the tube; its tall
+       minimum must not transfer through aspect-ratio into horizontal overflow. */
+    width: calc(100% - 2 * var(--crt-rim));
+    max-width: calc(100% - 2 * var(--crt-rim));
+    min-height: 600px;
+  }
 }
 /* Programme notes give each project a short introduction and a useful second
    paragraph. The longer original introduction remains available in the fallback. */

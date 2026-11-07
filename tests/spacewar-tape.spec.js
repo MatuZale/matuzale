@@ -10,6 +10,30 @@ async function tuneAV(page) {
   await expect(tape(page)).toBeVisible();
 }
 
+async function expectShelfFit(shelf) {
+  const result = await shelf.evaluate(async shelf => {
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    const bounds = shelf.getBoundingClientRect();
+    const buttons = [...shelf.querySelectorAll('.tape-shelf__stacks .project-tape:not(.is-presented)')];
+    const clipped = [], unreachable = [];
+    for (const button of buttons) {
+      const box = button.getBoundingClientRect();
+      if (box.left < bounds.left - 1 || box.right > bounds.right + 1) clipped.push(button.getAttribute('aria-label'));
+      const reachable = [.15, .35, .5, .65, .85].some(x => [.25, .5, .75].some(y => {
+        const px = box.left + box.width * x, py = box.top + box.height * y;
+        if (px < 0 || px >= innerWidth || py < 0 || py >= innerHeight) return false;
+        const hit = document.elementFromPoint(px, py);
+        return hit === button || button.contains(hit);
+      }));
+      if (!reachable) unreachable.push(button.getAttribute('aria-label'));
+    }
+    const cover = shelf.querySelector('.tape-showcase.is-open .tape-showcase__front')?.getBoundingClientRect();
+    return { clipped, unreachable, overflow: document.documentElement.scrollWidth - innerWidth,
+      coverFits: !cover || (cover.left >= bounds.left && cover.right <= bounds.right) };
+  });
+  expect(result).toEqual({ clipped: [], unreachable: [], overflow: 0, coverFits: true });
+}
+
 async function playSpacewar(page) {
   await tape(page).evaluate(el => el.click());
   await expect(screen(page)).toHaveAttribute('data-project', 'spacewar');
@@ -128,7 +152,7 @@ test('the cabinet volume knob controls and remembers the game sound', async ({ p
   await expect(page.locator('#tape-tuner')).toBeFocused();
 });
 
-test('AV keeps every tape reachable at 1024px, then restores the normal 3D shelf', async ({ page }) => {
+test('AV fits fourteen spines and an open cover at 1024px, then refits thirteen spines', async ({ page }) => {
   await page.setViewportSize({ width: 1024, height: 900 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/?lang=en');
@@ -137,44 +161,41 @@ test('AV keeps every tape reachable at 1024px, then restores the normal 3D shelf
   await shelf.scrollIntoViewIfNeeded();
   const buttons = shelf.locator('.tape-shelf__stacks .project-tape');
   await expect(buttons).toHaveCount(14);
-  for (const selected of ['bentos', 'spacewar']) {
+  await expectShelfFit(shelf);
+  for (const selected of ['bentos', 'finance', 'spacewar', 'art']) {
     await shelf.locator(`.project-tape--${selected}`).click();
     await expect(screen(page)).toHaveAttribute('data-project', selected);
-    await expect(shelf.locator('.tape-shelf__showcase')).toBeHidden();
-    const unreachable = await buttons.evaluateAll(items => items.filter(el => {
-      const box = el.getBoundingClientRect();
-      if (!box.width || !box.height) return true;
-      return ![.15, .35, .5, .65, .85].some(x => [.25, .5, .75].some(y => {
-        const px = box.left + box.width * x, py = box.top + box.height * y;
-        if (px < 0 || px >= innerWidth || py < 0 || py >= innerHeight) return false;
-        const hit = document.elementFromPoint(px, py);
-        return hit === el || el.contains(hit);
-      }));
-    }).map(el => el.getAttribute('aria-label')));
-    expect(unreachable).toEqual([]);
+    await expect(shelf.locator(`.tape-showcase.is-open .tape-cover--${selected}`)).toBeVisible();
+    await expectShelfFit(shelf);
   }
   await page.locator('[data-av]').evaluate(el => el.click());
   await expect(page.locator('html')).not.toHaveClass(/is-crt/);
   await expect(tape(page)).toHaveCount(0);
   await expect(buttons).toHaveCount(13);
+  await expect(shelf.locator('.tape-showcase.is-open .tape-cover--art')).toBeVisible();
+  await expectShelfFit(shelf);
   await shelf.locator('.project-tape--kodlab').click();
   await expect(shelf.locator('.tape-showcase.is-open .tape-cover--kodlab')).toBeVisible();
 });
 
-test('AV enables 3D at 1100px while neighbouring cassettes stay clickable', async ({ page }) => {
-  await page.setViewportSize({ width: 1100, height: 900 });
+for (const width of [1100, 1280]) test(`AV refits an open cover at ${width}px while neighbouring cassettes stay clickable`, async ({ page }) => {
+  await page.setViewportSize({ width, height: 900 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/?lang=en');
-  await tuneAV(page);
   const shelf = page.locator('#project-shelf');
   await shelf.scrollIntoViewIfNeeded();
   await shelf.locator('.project-tape--bentos').click();
   await expect(shelf.locator('.tape-showcase.is-open .tape-cover--bentos')).toBeVisible();
+  await tuneAV(page);
+  await expect(shelf.locator('.tape-showcase.is-open .tape-cover--bentos')).toBeVisible();
+  await expectShelfFit(shelf);
   await tape(page).click();
   await expect(screen(page)).toHaveAttribute('data-project', 'spacewar');
   await expect(shelf.locator('.tape-showcase.is-open .tape-cover--spacewar')).toBeVisible();
+  await expectShelfFit(shelf);
   await shelf.locator('.project-tape--art').click();
   await expect(screen(page)).toHaveAttribute('data-project', 'art');
+  await expectShelfFit(shelf);
 });
 
 for (const action of ['close', 'power']) {

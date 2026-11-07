@@ -36,7 +36,7 @@ test('standby and power keep the TV available without a cassette', async ({ page
 
 test('cabinet keeps its controls outside the tube on desktop and phone', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  for (const width of [1280, 375]) {
+  for (const width of [1280, 375, 320]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto('/?lang=en');
     const geometry = await page.locator('.tape-player__tv').evaluate(tv => {
@@ -44,9 +44,11 @@ test('cabinet keeps its controls outside the tube on desktop and phone', async (
       const controls = tv.querySelector('.tape-player__controls').getBoundingClientRect();
       const glass = getComputedStyle(tv, '::after');
       return { screen: { right: screen.right, bottom: screen.bottom, width: screen.width },
-        controls: { left: controls.left, top: controls.top }, glassWidth: parseFloat(glass.width) };
+        controls: { left: controls.left, top: controls.top }, glassWidth: parseFloat(glass.width),
+        overflow: document.documentElement.scrollWidth - innerWidth };
     });
     expect(Math.abs(geometry.glassWidth - geometry.screen.width)).toBeLessThan(2);
+    expect(geometry.overflow).toBe(0);
     if (width > 1000) expect(geometry.controls.left).toBeGreaterThan(geometry.screen.right);
     else expect(geometry.controls.top).toBeGreaterThan(geometry.screen.bottom);
     await page.locator('.project-tape--kodlab').evaluate(el => el.click());

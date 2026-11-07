@@ -60,9 +60,36 @@
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const systemDark = matchMedia('(prefers-color-scheme: dark)');
   const desktopShelf = matchMedia('(min-width: 1024px)');
-  const desktopAvShelf = matchMedia('(min-width: 1100px)');
-  const shelfHasRoom = () => desktopShelf.matches &&
-    (!document.documentElement.classList.contains('is-crt') || desktopAvShelf.matches);
+  const shelfHasRoom = () => desktopShelf.matches && !shelf.classList.contains('is-flat');
+  const coverScale = () => Math.max(.8, Math.min(1, .8 + (window.innerWidth - 800) / 1500));
+  function fitShelf() {
+    const buttons = [...stacks.children];
+    shelf.style.setProperty('--shelf-count', buttons.length);
+    if (!desktopShelf.matches) {
+      shelf.classList.remove('is-flat', 'is-compact');
+      return;
+    }
+    if (!stacks.clientWidth || !buttons.length) return;
+    const style = getComputedStyle(stacks);
+    const innerWidth = stacks.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+    const gaps = (parseFloat(style.columnGap) || 0) * (buttons.length - 1);
+    const margins = buttons.reduce((sum, button) => {
+      const css = getComputedStyle(button);
+      return sum + parseFloat(css.marginLeft) + parseFloat(css.marginRight);
+    }, 0);
+    const coverWidth = buttons[0].offsetHeight * coverScale() * 3 / 4.35;
+    // N spines plus the opened cover replacing one spine, with 20px clear
+    // on either side. The reserve is present before a selection, so no
+    // layout width jumps or hidden neighbours accompany an opened sleeve.
+    const fitted = buttons.length > 1
+      ? (innerWidth - gaps - margins - coverWidth - 40) / (buttons.length - 1) : 65;
+    const canPresent = fitted >= 42;
+    const width = canPresent ? Math.min(65, Math.floor(fitted * 10) / 10) : 55;
+    stacks.style.setProperty('--shelf-spine-width', `${width}px`);
+    shelf.classList.toggle('is-flat', !canPresent);
+    shelf.classList.toggle('is-compact', canPresent && width < 46);
+    if (canPresent && stacks.scrollLeft) stacks.scrollLeft = 0;
+  }
   const showcase = document.createElement('div');
   showcase.className = 'tape-shelf__showcase';
   showcase.setAttribute('aria-hidden', 'true');
@@ -75,8 +102,7 @@
     const width = button.offsetWidth, height = button.offsetHeight;
     // A narrower desktop has fewer spare pixels around the row. Keep the
     // physical spines equal, while sizing the presented face to that space.
-    const scale = Math.max(.8, Math.min(1, .8 + (window.innerWidth - 800) / 1500));
-    const coverHeight = height * scale;
+    const coverHeight = height * coverScale();
     const coverWidth = coverHeight * 3 / 4.35;
     // The target is based on the stable slot, but the replica must start at
     // the visible spine, which may still be moving from the previous selection.
@@ -86,8 +112,8 @@
     const transform = getComputedStyle(button).transform;
     const matrix = transform === 'none' ? null : new DOMMatrixReadOnly(transform);
     const angle = matrix ? Math.atan2(matrix.b, matrix.a) * 180 / Math.PI : 0;
-    const leftLimit = shelfBox.left + coverWidth / 2 + 18;
-    const rightLimit = shelfBox.right - coverWidth / 2 - 18;
+    const leftLimit = shelfBox.left + coverWidth / 2 + 32;
+    const rightLimit = shelfBox.right - coverWidth / 2 - 24;
     const target = Math.max(leftLimit, Math.min(rightLimit, centre));
     item.style.left = `${visibleCentre - shelfBox.left - width / 2}px`;
     item.style.top = `${visible.top + visible.height / 2 - shelfBox.top - height / 2}px`;
@@ -101,8 +127,8 @@
       const first = stacks.firstElementChild, last = stacks.lastElementChild;
       const leftSpace = Math.max(0, first.offsetLeft - 14);
       const rightSpace = Math.max(0, shelf.clientWidth - last.offsetLeft - last.offsetWidth - 30);
-      const leftWanted = Math.max(0, centre - width / 2 - (target - coverWidth / 2) + 12);
-      const rightWanted = Math.max(0, target + coverWidth / 2 - (centre + width / 2) + 12);
+      const leftWanted = Math.max(0, centre - width / 2 - (target - coverWidth / 2) + 20);
+      const rightWanted = Math.max(0, target + coverWidth / 2 - (centre + width / 2) + 20);
       stacks.style.setProperty('--part-left', `${-Math.min(leftSpace, leftWanted)}px`);
       stacks.style.setProperty('--part-right', `${Math.min(rightSpace, rightWanted)}px`);
     }
@@ -211,19 +237,20 @@
   const updateShowcase = () => {
     cancelAnimationFrame(shelfResizeFrame);
     shelfResizeFrame = requestAnimationFrame(() => {
+      const hadRoom = shelfHasRoom();
+      fitShelf();
+      if (hadRoom !== shelfHasRoom()) { syncShelfMode(); return; }
       [...showcase.children].forEach(item => { positionShowcase(item); paintShowcase(item); });
     });
   };
   window.addEventListener('resize', updateShowcase, { passive: true });
   stacks.addEventListener('scroll', updateShowcase, { passive: true });
   function syncShelfMode() {
+    fitShelf();
     closeShowcase(true);
     if (shelfHasRoom() && active) showCase(active.button, caseSlot.querySelector('.tape-cover'));
   }
   desktopShelf.addEventListener('change', syncShelfMode);
-  desktopAvShelf.addEventListener('change', () => {
-    if (document.documentElement.classList.contains('is-crt')) syncShelfMode();
-  });
   const kodlabPreview = document.querySelector('[data-kodlab-preview]');
   function updateKodlabPreview() {
     if (!kodlabPreview) return;
@@ -595,6 +622,7 @@
     });
   });
   function syncGameTape() {
+    const hadRoom = shelfHasRoom();
     const on = document.documentElement.classList.contains('is-crt');
     if (on && !gameTape.isConnected) {
       stacks.insertBefore(gameTape, stacks.querySelector('.project-tape--art'));
@@ -611,7 +639,8 @@
       if (open) partShelf(open.source);
       updateShowcase();
     }
-    if (desktopShelf.matches && !desktopAvShelf.matches) syncShelfMode();
+    fitShelf();
+    if (hadRoom !== shelfHasRoom()) syncShelfMode();
     syncTuner();
   }
   document.addEventListener('crtchange', syncGameTape);
@@ -695,6 +724,7 @@
   }
   cards.hidden = true;
   shelf.hidden = false;
+  fitShelf();
   player.hidden = false;
   player.classList.add('is-expanded');
   setPowerState(true);

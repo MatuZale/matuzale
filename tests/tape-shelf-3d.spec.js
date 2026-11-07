@@ -1,13 +1,42 @@
 import { test, expect } from '@playwright/test';
 
-for (const width of [1024, 1280]) {
+// Observe the actual layout after resize/selection observers have run. Geometry
+// alone can miss a neighbour covered by the selected sleeve, so also hit-test it.
+async function shelfFit(shelf) {
+  return shelf.evaluate(async shelf => {
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    const bounds = shelf.getBoundingClientRect();
+    const buttons = [...shelf.querySelectorAll('.tape-shelf__stacks .project-tape:not(.is-presented)')];
+    const clipped = [], blocked = [];
+    for (const button of buttons) {
+      const box = button.getBoundingClientRect();
+      if (box.left < bounds.left - 1 || box.right > bounds.right + 1) clipped.push(button.id || button.className);
+      const reachable = [.15, .35, .5, .65, .85].some(x => [.25, .5, .75].some(y => {
+        const px = box.left + box.width * x, py = box.top + box.height * y;
+        if (px < 0 || px >= innerWidth || py < 0 || py >= innerHeight) return false;
+        const hit = document.elementFromPoint(px, py);
+        return hit === button || button.contains(hit);
+      }));
+      if (!reachable) blocked.push(button.id || button.className);
+    }
+    const cover = shelf.querySelector('.tape-showcase.is-open .tape-showcase__front')?.getBoundingClientRect();
+    return { clipped, blocked, overflow: document.documentElement.scrollWidth - innerWidth,
+      coverFits: !cover || (cover.left >= bounds.left && cover.right <= bounds.right) };
+  });
+}
+
+for (const width of [1024, 1100, 1280]) {
   test(`sleeves keep their proportions and align above the spines at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/?lang=en');
     const shelf = page.locator('#project-shelf');
+    await shelf.scrollIntoViewIfNeeded();
+    expect(await shelfFit(shelf)).toEqual({ clipped: [], blocked: [], overflow: 0, coverFits: true });
     for (const key of ['bentos', 'kodlab', 'agent', 'art', 'cold', 'finance', 'cloud', 'sound', 'nbody', 'orbitals', 'physics', 'quantum', 'ww']) {
       await shelf.locator(`.project-tape--${key}`).evaluate(el => el.click());
+      await expect(shelf.locator('.tape-showcase.is-open')).toHaveCount(1);
+      expect(await shelfFit(shelf), `Open ${key} must leave every other spine reachable`).toEqual({ clipped: [], blocked: [], overflow: 0, coverFits: true });
       const geometry = await shelf.locator('.tape-showcase.is-open').evaluate(scene => {
         const frontElement = scene.querySelector('.tape-showcase__front');
         const front = frontElement.getBoundingClientRect();
@@ -208,6 +237,25 @@ for (const width of [375, 760, 800, 1023]) {
     await expect(shelf.locator('.project-tape')).toHaveCount(13);
     expect(Math.abs(await page.evaluate(() => scrollY) - scrollBefore)).toBeLessThanOrEqual(1);
     expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBe(0);
+    // The start of a centred overflowing row can be unreachable at scrollLeft=0.
+    // At tablet widths, inspect both ends just as on the phone's scrolling row.
+    for (const end of ['first', 'last']) {
+      const tape = shelf.locator('.tape-shelf__stacks .project-tape')[end]();
+      await shelf.locator('.tape-shelf__stacks').evaluate((row, end) => {
+        row.scrollLeft = end === 'first' ? 0 : row.scrollWidth;
+      }, end);
+      const reachable = await tape.evaluate(async button => {
+        await new Promise(resolve => requestAnimationFrame(resolve));
+        const row = button.parentElement.getBoundingClientRect(), box = button.getBoundingClientRect();
+        return [.2, .5, .8].some(x => [.3, .5, .7].some(y => {
+          const px = box.left + box.width * x, py = box.top + box.height * y;
+          if (px < row.left || px > row.right || px < 0 || px >= innerWidth || py < 0 || py >= innerHeight) return false;
+          const hit = document.elementFromPoint(px, py);
+          return hit === button || button.contains(hit);
+        }));
+      });
+      expect(reachable, `${end} tape is reachable at the corresponding scroll limit`).toBe(true);
+    }
   });
 }
 
@@ -234,7 +282,7 @@ for (const mode of ['light', 'dark']) {
     const shelf = page.locator('#project-shelf');
     const screen = page.locator('#tape-player-screen');
     await shelf.scrollIntoViewIfNeeded();
-    for (const [selected, neighbour] of [['bentos', 'kodlab'], ['art', 'quantum']]) {
+    for (const [selected, neighbour] of [['bentos', 'kodlab'], ['art', 'ww']]) {
       // Select the edge item without scrolling the page; the actual interactions
       // under test below use native mouse clicks on visible pixels.
       await shelf.locator(`.project-tape--${selected}`).evaluate(el => el.click());

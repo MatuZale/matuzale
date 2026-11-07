@@ -59,8 +59,8 @@
   width: 100%; height: 100%; max-width: none; aspect-ratio: auto;
 }
 @media (min-width: 1024px) {
-  /* Desktop has enough room for the spines; letting them use the shelf's
-     padding keeps the moving row and its soft shadows out of a clipping box. */
+  /* The measured row reserves room for a cover. Let the shifting spines and
+     their shadows use that room without a clipping box. */
   .tape-shelf__stacks { overflow: visible; }
   /* Hand over between the real spine and its replica in one frame. Fading the
      original after the replica disappears leaves a visible gap in the row. */
@@ -70,21 +70,21 @@
   .tape-shelf__stacks .project-tape.is-parting-right { transform: translateX(var(--part-right)); }
   .tape-shelf__stacks .project-tape.is-adjacent.is-parting-left { transform: translateX(var(--part-left)) rotate(-2deg); }
   .tape-shelf__stacks .project-tape.is-adjacent.is-parting-right { transform: translateX(var(--part-right)) rotate(2deg); }
-  .tape-shelf__stacks .project-tape--art.is-parting-left { transform: translateX(var(--part-left)) rotate(-6deg); }
-  .tape-shelf__stacks .project-tape--art.is-parting-right { transform: translateX(var(--part-right)) rotate(-6deg); }
-  .tape-shelf__stacks .project-tape--art.is-adjacent.is-parting-right { transform: translateX(var(--part-right)) rotate(-4deg); }
+  .tape-shelf__stacks .project-tape--art.is-parting-left { transform: translateX(var(--part-left)) rotate(-4deg); }
+  .tape-shelf__stacks .project-tape--art.is-parting-right { transform: translateX(var(--part-right)) rotate(-4deg); }
+  .tape-shelf__stacks .project-tape--art.is-adjacent.is-parting-right { transform: translateX(var(--part-right)) rotate(-3deg); }
   .tape-shelf:has(.project-tape.is-presented:focus-visible) .tape-showcase.is-open .tape-showcase__front { outline: 2px solid #fff5ce; outline-offset: 4px; }
   .tape-shelf:has(.project-tape--bentos.is-presented:focus-visible) .tape-showcase.is-open .tape-showcase__front { outline-color: #caff65; }
 }
 /* On narrower layouts the spines need the full row to remain individually
    visible and clickable; keep the original flat shelf, as on phones. */
 @media (max-width: 1023px) { .tape-shelf__showcase { display: none; } }
-/* AV adds a twelfth sleeve; use the flat shelf until there is room for every
-   spine beside the presented cover. */
-@media (min-width: 1024px) and (max-width: 1099px) {
-  html.is-crt .tape-shelf__showcase { display: none; }
-  html.is-crt .tape-shelf__stacks { overflow-x: auto; overflow-y: hidden; }
-}
+/* If a future collection cannot retain readable spines beside a cover,
+   keep every cassette reachable through the same scrolling flat shelf. */
+.tape-shelf.is-flat .tape-shelf__showcase { display: none; }
+.tape-shelf.is-flat .tape-shelf__stacks { justify-content: flex-start; overflow-x: auto; overflow-y: hidden; }
+.tape-shelf.is-flat .tape-shelf__scroll-hint { display: inline; }
+.tape-shelf.is-flat .tape-shelf__format { display: none; }
 @media (prefers-reduced-motion: reduce) {
   .tape-showcase__spine, .tape-showcase__front, .tape-shelf__stacks .project-tape { transition: none; }
 }

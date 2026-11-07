@@ -106,7 +106,32 @@
 }
 .project-tape--art { margin-left: 33px; margin-right: 8px; transform: rotate(-6deg); }
 .project-tape--art:hover, .project-tape--art:focus-visible { transform: translateY(-8px) rotate(-6deg); }
+.tape-shelf__stacks .project-tape__format { font-size: 12px; white-space: nowrap; }
 @media (max-width: 760px) {
   .project-tape { flex-basis: 55px; height: 310px; }
   .project-tape__name { font-size: .82rem; }
+}
+
+/* Reserve room for one opened sleeve instead of packing closed spines edge
+   to edge. JS measures the row and its actual cassette count, including AV. */
+@media (min-width: 1024px) {
+  .tape-shelf__stacks .project-tape {
+    flex: 0 0 var(--shelf-spine-width, 49px);
+    min-width: 42px;
+    max-width: 65px;
+    height: clamp(292px, 24vw, 320px);
+  }
+  .project-tape__label { gap: 4px; padding-inline: 2px; }
+  .project-tape__name { font-size: clamp(.8rem, 1.05vw, .9rem); }
+  .project-tape--art { margin-left: 22px; margin-right: 6px; transform: rotate(-4deg); }
+  .project-tape--art:hover, .project-tape--art:focus-visible { transform: translateY(-8px) rotate(-4deg); }
+  .tape-shelf.is-compact .project-tape__category { display: none; }
+  .tape-shelf.is-compact .project-tape__label { justify-content: center; }
+}
+/* A scrollable row must start at its first cassette; centring an overflowing
+   flex row can strand the first few spines beyond the scroll origin. */
+@media (max-width: 1023px) {
+  .tape-shelf__stacks { justify-content: flex-start; }
+  .tape-shelf__scroll-hint { display: inline; }
+  .tape-shelf__format { display: none; }
 }
