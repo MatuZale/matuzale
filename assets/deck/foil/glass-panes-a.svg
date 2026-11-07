@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1120" preserveAspectRatio="none">
+  <!-- Original leaded-glass plate A; fixed panes share one direction of reflection. -->
+  <g fill="white" stroke="white" stroke-width="1.5" stroke-linejoin="round">
+    <path d="M1 1H257L218 204 1 278Z" opacity=".85"/>
+    <path d="M533 1H799V231L655 284 473 168Z" opacity=".58"/>
+    <path d="M218 208 471 171 652 287 570 481 292 447Z" opacity=".92"/>
+    <path d="M1 282 214 211 288 448 158 614 1 552Z" opacity=".5"/>
+    <path d="M574 485 799 433V700L672 754 492 632Z" opacity=".78"/>
+    <path d="M162 618 289 452 488 635 414 854 186 823Z" opacity=".68"/>
+    <path d="M1 906 182 827 288 1119H1Z" opacity=".92"/>
+    <path d="M418 858 671 758 799 907V1119H579Z" opacity=".56"/>
+  </g>
+</svg>

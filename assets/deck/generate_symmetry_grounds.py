@@ -38,8 +38,7 @@ def cases():
     assignment = next(node for node in tree.body if isinstance(node, ast.Assign)
                       and any(isinstance(target, ast.Name) and target.id == 'CASES'
                               for target in node.targets))
-    return [case for case in ast.literal_eval(assignment.value)
-            if case[0] != 'golden-flintstone']
+    return ast.literal_eval(assignment.value)
 
 
 def smoothstep(start, end, value):
@@ -131,14 +130,17 @@ def main():
                 continue
             started = time.monotonic()
             print(f'{name}: calculating {STEPS:,} orbit visits', flush=True)
+            # Golden's floating portrait uses the larger source crop from color_symmetry.py.
+            extent = .46 if name == 'golden-flintstone' else .33
             subprocess.run([str(binary), *map(str, (m, lam, a, b, g, omega, STEPS)),
-                            str(raw), '.33'], check=True)
+                            str(raw), str(extent)], check=True)
             hist = np.fromfile(raw, dtype=np.uint32).reshape(SOURCE_SIZE[1], SOURCE_SIZE[0])
             if np.count_nonzero(hist) < 1000:
                 raise RuntimeError(f'{name}: incomplete orbit')
             ground(hist, name)
             print(f'  completed in {time.monotonic() - started:.1f}s', flush=True)
-    frame_masks()
+    if args.only is None:
+        frame_masks()
 
 
 if __name__ == '__main__':

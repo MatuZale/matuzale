@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1257" preserveAspectRatio="none">
+  <!-- Original fine diffraction grooves centred on the portrait's actual orbit. -->
+  <defs>
+    <radialGradient id="grooves" gradientUnits="userSpaceOnUse" cx="450" cy="385" r="4" spreadMethod="repeat">
+      <stop offset="0" stop-color="white" stop-opacity="0"/>
+      <stop offset=".42" stop-color="white" stop-opacity="0"/>
+      <stop offset=".53" stop-color="white" stop-opacity=".84"/>
+      <stop offset=".73" stop-color="white" stop-opacity=".22"/>
+      <stop offset="1" stop-color="white" stop-opacity="0"/>
+    </radialGradient>
+    <mask id="annulus" maskUnits="userSpaceOnUse" x="0" y="0" width="900" height="1257">
+      <circle cx="450" cy="385" r="365" fill="white"/>
+      <circle cx="450" cy="385" r="120" fill="black"/>
+    </mask>
+  </defs>
+  <rect width="900" height="1257" fill="url(#grooves)" mask="url(#annulus)"/>
+</svg>

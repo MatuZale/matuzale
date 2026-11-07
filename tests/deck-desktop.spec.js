@@ -191,11 +191,35 @@ const symmetryCards = [
   ['french-glass', 'v'], ['pentacle', 'v-alt'], ['mayan-bracelet', 'vstar'], ['clam-triple', 'common'],
 ];
 const portraitCards = ['halloween', 'french-glass', 'mayan-bracelet'];
-const groundName = id => id === 'golden-flintstone' ? 'art-golden-flintstone.webp' : `ground-${id}.webp`;
+const groundName = id => `ground-${id}.webp`;
 
-// Read the painted gradients separately: a moving radial glare alone must not
-// pass for a moving spectrum. The hidden probe resolves CSS lengths without
-// changing the card, its transforms, or any illumination variable.
+// Optical roles are explicit: fixed engraving/print may stay still, while each
+// declared illumination field must respond. These shapes distinguish a comb,
+// facets, lattice, reverse stock, rings and a selective brushburst without
+// snapshotting their exact colours or requiring one shared shader stack.
+const symmetryOptics = {
+  'swirling-streamers': ['url', 'repeating-linear', 'repeating-linear', 'radial'],
+  'sand-dollar': ['radial'],
+  pentagon: ['url', 'conic', 'url', 'radial'],
+  halloween: ['url', 'repeating-linear', 'radial'],
+  'golden-flintstone': ['url', 'conic', 'radial'],
+  'chaotic-flower': ['url', 'repeating-linear', 'repeating-linear', 'repeating-linear', 'radial'],
+  'french-glass': ['url', 'conic', 'radial'],
+  pentacle: ['url', 'conic', 'radial'],
+  'mayan-bracelet': ['url', 'conic', 'repeating-radial', 'radial'],
+  'clam-triple': ['radial', 'repeating-conic'],
+};
+const reverseSymmetry = new Set(['pentacle']);
+const paintEditions = {
+  'sand-dollar': { print: 'print-sand-ink.svg', mask: 'mask-sand-ink.svg', relief: 'relief-sand-ink.svg', inverse: true },
+  'golden-flintstone': { print: 'print-golden-brush.svg', mask: 'mask-golden-brush.svg', relief: 'relief-golden-brush.svg', inverse: true },
+  'clam-triple': { print: 'print-clam-burst.svg', mask: 'mask-clam-burst.svg', inverse: true },
+};
+const gradientKinds = images => images.map(image => image.startsWith('url(') ? 'url' : image.match(/^([a-z-]+)-gradient\(/)?.[1] || image);
+const paintState = surface => JSON.stringify([surface.images, surface.positions, surface.opacity, surface.filter]);
+const maskState = (surface, includeTransform = true) => JSON.stringify([surface.mask, surface.maskSize, surface.maskPosition, surface.maskRepeat, surface.maskComposite, includeTransform ? surface.transform : null]);
+const intersection = value => /intersect|source-in/.test(value);
+
 async function symmetryPaint(card) {
   return card.evaluate(el => {
     const split = value => {
@@ -205,15 +229,13 @@ async function symmetryPaint(card) {
         if (value[i] === ')') depth--;
         if (value[i] === ',' && depth === 0) { parts.push(value.slice(start, i).trim()); start = i + 1; }
       }
-      parts.push(value.slice(start).trim());
-      return parts;
+      parts.push(value.slice(start).trim()); return parts;
     };
     const probe = document.createElement('i');
     probe.style.cssText = 'all:initial;position:absolute;visibility:hidden;pointer-events:none;contain:strict';
     el.append(probe);
     const read = (element, pseudo) => {
-      const style = getComputedStyle(element, pseudo);
-      const number = key => parseFloat(style.getPropertyValue(key));
+      const style = getComputedStyle(element, pseudo), number = key => parseFloat(style.getPropertyValue(key));
       probe.style.width = style.getPropertyValue('--paint-width');
       probe.style.height = style.getPropertyValue('--paint-height');
       probe.style.left = style.getPropertyValue('--spectrum-phase');
@@ -223,7 +245,10 @@ async function symmetryPaint(card) {
         images: split(style.backgroundImage), positions: split(style.backgroundPosition),
         repeats: split(style.backgroundRepeat), sizes: split(style.backgroundSize),
         mask: style.maskImage && style.maskImage !== 'none' ? style.maskImage : style.webkitMaskImage,
-        display: style.display, opacity: Number(style.opacity),
+        maskSize: style.maskSize || style.webkitMaskSize, maskPosition: style.maskPosition || style.webkitMaskPosition,
+        maskRepeat: style.maskRepeat || style.webkitMaskRepeat, maskComposite: style.maskComposite || style.webkitMaskComposite,
+        display: style.display, content: style.content, opacity: Number(style.opacity),
+        transform: style.transform, filter: style.filter,
         width: parseFloat(style.width), height: parseFloat(style.height),
         paintWidth: parseFloat(resolved.width), paintHeight: parseFloat(resolved.height),
         spectrumPhase: parseFloat(resolved.left), beamPhase: parseFloat(resolved.top),
@@ -233,30 +258,40 @@ async function symmetryPaint(card) {
       };
     };
     try {
-      const result = Object.fromEntries(['foil', 'shine'].map(layer => [layer, read(el.querySelector(`.tcard__${layer}`))]));
-      if (el.dataset.foil === 'golden-flintstone') result.subject = read(el.querySelector('.tcard__art'), '::after');
-      const value = key => parseFloat(el.style.getPropertyValue(key));
+      const foil = el.querySelector('.tcard__foil'), art = el.querySelector('.tcard__art'), image = art.querySelector('img');
+      const result = { foil: read(foil), shine: read(el.querySelector('.tcard__shine')) };
+      for (const [name, pseudo] of [['foilBefore', '::before'], ['foilAfter', '::after']]) {
+        const surface = read(foil, pseudo);
+        if (surface.display !== 'none' && !['none', 'normal'].includes(surface.content)) result[name] = surface;
+      }
+      if (el.dataset.foil === 'golden-flintstone') result.subject = read(art, '::after');
+      if (['sand-dollar', 'golden-flintstone', 'clam-triple'].includes(el.dataset.foil)) result.print = read(art, '::before');
+      if (el.dataset.foil === 'pentacle') result.stock = read(el.querySelector('.tcard__panel'), '::before');
+      const value = key => parseFloat(el.style.getPropertyValue(key)), imageStyle = getComputedStyle(image);
       return { surfaces: result, fx: value('--px') * .65 + value('--foil-tilt-x') * .8,
-        fy: value('--py') * .65 - value('--foil-tilt-y') * .8 };
+        fy: value('--py') * .65 - value('--foil-tilt-y') * .8,
+        registration: { image: read(image), artFit: imageStyle.objectFit, artPosition: imageStyle.objectPosition,
+          imageWidth: image.clientWidth, imageHeight: image.clientHeight, foilWidth: foil.clientWidth, foilHeight: foil.clientHeight,
+          artZ: Number(getComputedStyle(art).zIndex),
+          textZ: [...el.querySelector('.tcard__panel').children].filter(child => child !== art).map(child => Number(getComputedStyle(child).zIndex)),
+          stockDisplay: getComputedStyle(el.querySelector('.tcard__panel'), '::before').display },
+      };
     } finally { probe.remove(); }
   });
 }
 
-function unbrokenGradientCanvas(surface, label, fx, fy) {
-  // These dimensions also guard against layout changes silently invalidating
-  // the phase calculation's cqw geometry (window, full-art and Golden cut-out).
-  expect(Math.abs(surface.paintWidth - surface.width), `${label} phase width`).toBeLessThan(.35);
-  expect(Math.abs(surface.paintHeight - surface.height), `${label} phase height`).toBeLessThan(.35);
+function unbrokenGradientCanvas(surface, label) {
   const item = (list, i) => list[i % list.length];
-  const length = (token, span) => token.endsWith('%') ? parseFloat(token) * span / 100 : parseFloat(token);
+  // CSS gradients have no intrinsic aspect ratio: an auto dimension fills the positioning area.
+  const length = (token, span) => token === 'auto' ? span : token.endsWith('%') ? parseFloat(token) * span / 100 : parseFloat(token);
+  expect(surface.width, `${label} resolved width`).toBeGreaterThan(0);
+  expect(surface.height, `${label} resolved height`).toBeGreaterThan(0);
   for (const [i, image] of surface.images.entries()) {
     if (!image.includes('gradient(')) continue;
     expect(item(surface.repeats, i), `${label} gradient ${i} cannot tile`).toBe('no-repeat');
-    const size = item(surface.sizes, i).split(/\s+/);
-    const position = item(surface.positions, i).split(/\s+/);
+    const size = item(surface.sizes, i).split(/\s+/), position = item(surface.positions, i).split(/\s+/);
     for (const [axis, span] of [surface.width, surface.height].entries()) {
-      const extent = length(size[axis] || size[0], span);
-      const offset = length(position[axis] || position[0], span - extent);
+      const extent = length(size[axis] || size[0], span), offset = length(position[axis] || position[0], span - extent);
       expect(offset, `${label} gradient ${i} starts before surface`).toBeLessThanOrEqual(.1);
       expect(offset + extent, `${label} gradient ${i} covers surface`).toBeGreaterThanOrEqual(span - .1);
     }
@@ -266,23 +301,96 @@ function unbrokenGradientCanvas(surface, label, fx, fy) {
       expect(colours.at(-1), `${label} cycle has no colour jump`).toBe(colours[0]);
     }
   }
-  // Compare with the former translation projected onto the gradient's axis,
-  // using the measured box, not the shader's declared dimensions. This preserves
-  // the small-angle field while allowing it to continue beyond the old tile.
+}
+
+function projectedPhases(id, layer, surface, fx, fy) {
+  // Only these fields still use the original translated-plane projection.
+  // Conic/radial fields and the fixed crosshatch have independent geometry.
+  const legacyShine = ['swirling-streamers', 'sand-dollar', 'pentacle', 'mayan-bracelet', 'clam-triple'].includes(id) && layer === 'shine';
+  const spectrum = legacyShine || ['halloween', 'chaotic-flower'].includes(id) && ['foil', 'shine'].includes(layer)
+    || id === 'swirling-streamers' && layer === 'foil' || layer === 'subject';
+  const beam = legacyShine || id === 'swirling-streamers' && layer === 'foil';
+  if (!spectrum && !beam) return;
+  expect(Math.abs(surface.paintWidth - surface.width), `${id} ${layer} phase width`).toBeLessThan(.35);
+  expect(Math.abs(surface.paintHeight - surface.height), `${id} ${layer} phase height`).toBeLessThan(.35);
   const projection = (angle, scale, x, y) => {
     const radians = angle * Math.PI / 180;
     return Math.sin(radians) * (1 - scale[0]) * surface.width * x
       - Math.cos(radians) * (1 - scale[1]) * surface.height * y;
   };
-  const spectralIndex = surface.images[0].startsWith('url(') ? 1 : 0;
-  if (surface.images[spectralIndex].startsWith('repeating-linear-gradient')) {
-    const expected = projection(surface.spectrumAngle, surface.spectrumScale, fx * .65, fy * .8);
-    expect(Math.abs(surface.spectrumPhase - expected), `${label} continuous spectral phase`).toBeLessThan(.5);
+  if (spectrum) expect(Math.abs(surface.spectrumPhase - projection(surface.spectrumAngle, surface.spectrumScale, fx * .65, fy * .8)),
+    `${id} ${layer} continuous spectral phase`).toBeLessThan(.5);
+  if (beam) expect(Math.abs(surface.beamPhase - projection(surface.beamAngle, surface.beamScale, -fx * .48 - fy * .14, -fy * .5)),
+    `${id} ${layer} continuous beam phase`).toBeLessThan(.5);
+}
+
+function fixedImage(id, layer, image, index) {
+  return layer === 'print' || image.startsWith('url(')
+    || id === 'chaotic-flower' && ['foil', 'shine'].includes(layer) && [2, 3].includes(index);
+}
+
+function symmetryConstruction(id, paint) {
+  const { surfaces, registration } = paint;
+  expect(gradientKinds(surfaces.foil.images), `${id} optical construction`).toEqual(symmetryOptics[id]);
+  expect(surfaces.shine.mask, `${id} protects printed stock`).toContain(portraitCards.includes(id) ? 'frame-full.webp' : 'frame-window.webp');
+  expect(surfaces.foil.transform, `${id} protection plate does not move`).toBe('none');
+  if (!paintEditions[id]) expect(surfaces.foil.mask, `${id} protects orbit lines`).toContain(groundName(id));
+  if (!paintEditions[id]) {
+    expect(registration.image.transform, `${id} registered artwork`).toBe('none');
+    expect(registration.artFit).toBe('cover'); expect(registration.artPosition).toBe('50% 50%');
+    expect(surfaces.foil.maskSize.split(',')[0].trim()).toBe('cover');
+    expect(surfaces.foil.maskPosition.split(',')[0].trim()).toBe('50% 50%');
+    expect(Math.abs(registration.imageWidth - registration.foilWidth), `${id} mask/print width`).toBeLessThanOrEqual(1);
+    expect(Math.abs(registration.imageHeight - registration.foilHeight), `${id} mask/print height`).toBeLessThanOrEqual(1);
   }
-  if (surface.images[2]?.startsWith('repeating-linear-gradient')) {
-    const expected = projection(surface.beamAngle, surface.beamScale, -fx * .48 - fy * .14, -fy * .5);
-    expect(Math.abs(surface.beamPhase - expected), `${label} continuous beam phase`).toBeLessThan(.5);
+  if (id === 'swirling-streamers') {
+    expect(surfaces.foilAfter, 'independent counter-comb').toBeTruthy();
+    expect(surfaces.foilAfter.mask).toContain('radial-gradient(');
+    expect(surfaces.foilAfter.maskRepeat).toBe('no-repeat');
   }
+  if (id === 'sand-dollar') {
+    expect(surfaces.foilBefore.mask).toContain('glitter.webp');
+    expect(surfaces.foilBefore.maskRepeat).toBe('repeat');
+    expect(surfaces.foilAfter.mask).toContain('relief-sand-ink.svg');
+  }
+  if (id === 'golden-flintstone') expect(surfaces.foilBefore.mask).toContain('relief-golden-brush.svg');
+  if (reverseSymmetry.has(id)) {
+    expect(surfaces.stock.mask).toContain('frame-window.webp');
+    expect(intersection(surfaces.stock.maskComposite)).toBe(true);
+  }
+  if (id === 'pentagon') expect(surfaces.foil.images.join(',')).toContain('crystal-shards.svg');
+  if (id === 'chaotic-flower') {
+    expect(surfaces.foil.images[2]).toMatch(/^repeating-linear-gradient\(45deg,/);
+    expect(surfaces.foil.images[3]).toMatch(/^repeating-linear-gradient\(135deg,/);
+  }
+  if (id === 'french-glass') {
+    expect(surfaces.foilBefore.mask).toContain('glass-panes-a.svg');
+    expect(surfaces.foilAfter.mask).toContain('glass-panes-b.svg');
+  }
+  const print = paintEditions[id];
+  if (print) {
+    expect(surfaces.print.images).toHaveLength(1);
+    expect(surfaces.print.images[0]).toContain(print.print);
+    expect(surfaces.print.transform).toBe('none');
+    expect(surfaces.foil.mask).toContain(print.mask);
+    expect(registration.stockDisplay, `${id} keeps the stock quiet`).toBe('none');
+    expect(registration.textZ.every(z => z > registration.artZ), `${id} printed rules stay above paint`).toBe(true);
+    if (id === 'clam-triple') {
+      expect(surfaces.foil.mask).toContain('glitter.webp');
+      expect(intersection(surfaces.foil.maskComposite)).toBe(true);
+    }
+    if (print.inverse) {
+      expect(registration.image.mask).toContain(`ground-${id}.webp`);
+      expect(registration.image.mask).toContain('linear-gradient(');
+      expect(registration.image.maskComposite).toMatch(/exclude|xor/);
+      expect(registration.artFit).toBe(id === 'golden-flintstone' ? 'fill' : 'cover');
+      expect(registration.image.maskSize.split(',').at(-1).trim()).toBe(id === 'golden-flintstone' ? '100% 100%' : 'cover');
+      expect(registration.image.maskPosition.split(',').at(-1).trim()).toBe('50% 50%');
+    }
+    expect(surfaces.print.width).toBeCloseTo(surfaces.foil.width, 1);
+    expect(surfaces.print.height).toBeCloseTo(surfaces.foil.height, 1);
+  }
+
 }
 
 // A lifted card has a stable hit box. Native mouse moves just beyond each corner
@@ -307,46 +415,60 @@ for (const reducedMotion of ['no-preference', 'reduce']) {
       await lift(page, card, false);
       await faceOn(page, card);
       const box = await card.boundingBox();
-      let previous = await symmetryPaint(card);
-      const spectra = Object.fromEntries(Object.keys(previous.surfaces).map(layer => [layer, new Set()]));
-      const fronts = Object.fromEntries(Object.keys(previous.surfaces).map(layer => [layer, new Set()]));
+      const baseline = await symmetryPaint(card), corners = [];
+      symmetryConstruction(id, baseline);
       for (const [x, y] of [[0, 0], [1, 0], [1, 1], [0, 1]]) {
         await page.mouse.move(box.x + (x ? box.width + 2 : -2), box.y + (y ? box.height + 2 : -2));
         await idle(page);
-        const current = await symmetryPaint(card);
+        const current = await symmetryPaint(card); corners.push(current);
+        symmetryConstruction(id, current);
         for (const [layer, surface] of Object.entries(current.surfaces)) {
-          const label = `${id} ${layer} corner ${x},${y}`;
-          expect(surface.display, label).not.toBe('none');
-          unbrokenGradientCanvas(surface, label, current.fx, current.fy);
-          const spectralIndex = layer === 'subject' ? 0 : 1;
-          spectra[layer].add(surface.images[spectralIndex]);
-          if (layer !== 'subject') {
-            expect(surface.images[0], label).toContain(`material-${id}.webp`);
-            expect(surface.images[0], `${label} fixed material`).toBe(previous.surfaces[layer].images[0]);
-            expect(surface.positions, `${label} fixed canvas`).toEqual(previous.surfaces[layer].positions);
+          const label = `${id} ${layer} corner ${x},${y}`, initial = baseline.surfaces[layer];
+          expect(surface.display, label).not.toBe('none'); expect(surface.opacity, label).toBeGreaterThan(0);
+          unbrokenGradientCanvas(surface, label); projectedPhases(id, layer, surface, current.fx, current.fy);
+          expect(surface.positions, `${label} stationary canvas`).toEqual(initial.positions);
+          expect(surface.sizes, `${label} fixed grain scale`).toEqual(initial.sizes);
+          for (const [index, image] of surface.images.entries()) if (fixedImage(id, layer, image, index))
+            expect(image, `${label} stationary engraving/print ${index}`).toBe(initial.images[index]);
+          if (['foil', 'shine'].includes(layer)) {
+            if (!['sand-dollar', 'clam-triple'].includes(id) || layer === 'shine') expect(surface.images[0], label).toContain(`material-${id}.webp`);
             expect(surface.opacity, label).toBeGreaterThan(resting.surfaces[layer].opacity + .05);
-            if (surface.images[2]?.startsWith('repeating-')) fronts[layer].add(surface.images[2]);
           }
+          // Streamers' counter-comb has a travelling light mask, not a print mask.
+          // The protective parent plate and all material masks stay registered.
+          if (!(id === 'swirling-streamers' && layer === 'foilAfter'))
+            expect(maskState(surface, layer !== 'subject'), `${label} stationary protective mask`).toBe(maskState(initial, layer !== 'subject'));
+          if (layer === 'subject') expect(surface.transform, 'Golden sheen follows its cut-out').toBe(current.registration.image.transform);
+          if (layer === 'print') expect(paintState(surface), `${label} fixed ink`).toBe(paintState(initial));
         }
-        expect(current.surfaces.foil.mask, id).toContain(groundName(id));
-        expect(current.surfaces.shine.mask, id).toContain(portraitCards.includes(id) ? 'frame-full.webp' : 'frame-window.webp');
         const state = await values(card);
-        expect(state.mx, id).toBeCloseTo(x * 100, 1);
-        expect(state.my, id).toBeCloseTo(y * 100, 1);
+        expect(state.mx, id).toBeCloseTo(x * 100, 1); expect(state.my, id).toBeCloseTo(y * 100, 1);
         if (reducedMotion === 'reduce') {
-          expect(state.rx).toBe(0);
-          expect(angleDistance(state.ry, 0)).toBeLessThan(.1);
+          expect(state.rx).toBe(0); expect(angleDistance(state.ry, 0)).toBeLessThan(.1);
         } else {
           expect(Math.abs(state.rx)).toBeCloseTo(17, 1);
           expect(angleDistance(state.ry, x ? 17 : -17)).toBeLessThan(.1);
         }
-        previous = current;
       }
-      for (const [layer, samples] of Object.entries(spectra)) {
-        // Mayan's conic spectrum depends on horizontal light while its radial
-        // front also responds vertically; four corners need not yield four hues.
-        expect(samples.size, `${id} ${layer} moving spectrum`).toBeGreaterThan(1);
-        if (fronts[layer].size) expect(fronts[layer].size, `${id} ${layer} moving specular front`).toBeGreaterThan(1);
+      for (const [layer, surface] of Object.entries(baseline.surfaces)) {
+        for (const [index, image] of surface.images.entries()) {
+          if (fixedImage(id, layer, image, index)) continue;
+          expect(new Set(corners.map(paint => paint.surfaces[layer].images[index])).size,
+            `${id} ${layer} illumination ${index} must move`).toBeGreaterThan(1);
+        }
+      }
+      const reflected = paint => JSON.stringify(Object.entries(paint.surfaces).filter(([name]) => name !== 'print').map(([name, surface]) => [name, paintState(surface)]));
+      expect(reflected(corners[0]), `${id} horizontal light response`).not.toBe(reflected(corners[1]));
+      expect(reflected(corners[1]), `${id} vertical light response`).not.toBe(reflected(corners[2]));
+      if (paintEditions[id]) {
+        const subjectTransforms = corners.map(paint => paint.registration.image.transform);
+        if (reducedMotion === 'reduce') expect(new Set(subjectTransforms).size, 'reduced-motion cut-out stays still').toBe(1);
+        else expect(new Set(subjectTransforms).size, 'only the cut-out has subtle parallax').toBeGreaterThan(1);
+        for (const corner of corners) {
+          expect(corner.registration.image.mask).toBe(baseline.registration.image.mask);
+          expect(corner.registration.image.maskSize).toBe(baseline.registration.image.maskSize);
+          expect(corner.registration.image.maskComposite).toBe(baseline.registration.image.maskComposite);
+        }
       }
       await card.press('Escape');
       await backInSlot(page, card);
@@ -354,7 +476,7 @@ for (const reducedMotion of ['no-preference', 'reduce']) {
   });
 }
 
-for (const reducedMotion of ['no-preference', 'reduce']) for (const id of ['pentacle', 'thorn-rose', 'reuleaux-nebula']) {
+for (const reducedMotion of ['no-preference', 'reduce']) for (const id of ['sand-dollar', 'pentacle', 'clam-triple', 'thorn-rose', 'reuleaux-nebula']) {
   test(`${id} foil follows a wheel turn at a fixed pointer (${reducedMotion})`, async ({ page }) => {
     await page.emulateMedia({ reducedMotion });
     await openDeck(page, 'cards');
@@ -362,13 +484,24 @@ for (const reducedMotion of ['no-preference', 'reduce']) for (const id of ['pent
     await lift(page, card, false);
     await faceOn(page, card);
     const before = await card.evaluate(el => {
-      const read = () => ({
-        ry: parseFloat(el.style.getPropertyValue('--ry')),
-        tilt: parseFloat(el.style.getPropertyValue('--foil-tilt-x')),
-        mx: el.style.getPropertyValue('--mx'), my: el.style.getPropertyValue('--my'),
-        image: getComputedStyle(el.querySelector('.tcard__foil')).backgroundImage,
-        artTransform: getComputedStyle(el.querySelector('.tcard__art img')).transform,
-      });
+      const read = () => {
+        const foil = el.querySelector('.tcard__foil'), art = el.querySelector('.tcard__art');
+        const painted = (node, pseudo) => {
+          const style = getComputedStyle(node, pseudo);
+          return [style.backgroundImage, style.backgroundPosition, style.opacity, style.filter];
+        };
+        const fixedMask = node => { const style = getComputedStyle(node); return [style.maskImage || style.webkitMaskImage,
+          style.maskSize || style.webkitMaskSize, style.maskPosition || style.webkitMaskPosition, style.maskComposite || style.webkitMaskComposite, style.transform]; };
+        return {
+          ry: parseFloat(el.style.getPropertyValue('--ry')), tilt: parseFloat(el.style.getPropertyValue('--foil-tilt-x')),
+          mx: el.style.getPropertyValue('--mx'), my: el.style.getPropertyValue('--my'),
+          reflection: JSON.stringify([painted(foil), painted(foil, '::before'), painted(foil, '::after'),
+            painted(el.querySelector('.tcard__shine')), painted(el.querySelector('.tcard__panel'), '::before')]),
+          print: JSON.stringify(painted(art, '::before')),
+          plate: JSON.stringify(fixedMask(foil)), subjectMask: JSON.stringify(fixedMask(art.querySelector('img'))),
+          artTransform: getComputedStyle(art.querySelector('img')).transform,
+        };
+      };
       const audit = window.symmetryWheelAudit = { samples: [] };
       audit.observer = new MutationObserver(() => audit.samples.push(read()));
       audit.observer.observe(el, { attributes: true, attributeFilter: ['style'] });
@@ -387,13 +520,18 @@ for (const reducedMotion of ['no-preference', 'reduce']) for (const id of ['pent
       return window.symmetryWheelAudit.samples;
     });
     expect(samples.some(sample => Math.abs(sample.tilt - before.tilt) > .05)).toBe(true);
-    expect(samples.some(sample => sample.image !== before.image)).toBe(true);
+    expect(samples.some(sample => sample.reflection !== before.reflection), `${id} light responds to surface normal`).toBe(true);
+    expect(samples.every(sample => sample.plate === before.plate), `${id} protection mask stays fixed during wheel`).toBe(true);
     expect(samples.every(sample => sample.mx === before.mx && sample.my === before.my),
       'The reflection must change without a moving pointer/light coordinate').toBe(true);
-    if (id !== 'pentacle') {
+    if (!['sand-dollar', 'golden-flintstone', 'clam-triple'].includes(id)) {
       expect(before.artTransform, `${id} print starts registered to the mask`).toBe('none');
       expect(samples.every(sample => sample.artTransform === 'none'),
         `${id} printed artwork stays registered throughout the wheel turn`).toBe(true);
+    }
+    if (['sand-dollar', 'golden-flintstone', 'clam-triple'].includes(id)) {
+      expect(samples.every(sample => sample.print === before.print), `${id} printed splash stays fixed`).toBe(true);
+      expect(samples.every(sample => sample.subjectMask === before.subjectMask), `${id} cut-out and its mask remain registered`).toBe(true);
     }
     if (reducedMotion === 'reduce') {
       expect((await values(card)).rx).toBe(0);
@@ -416,16 +554,16 @@ test('all symmetry materials and protection masks decode and preserve the printe
     expect(geometry.art / geometry.panel).toBeGreaterThan(.9);
   }
   const files = symmetryCards.flatMap(([id]) => [`material-${id}.webp`, groundName(id)])
-    .concat(['frame-window.webp', 'frame-full.webp']);
+    .concat(['frame-window.webp', 'frame-full.webp', 'glitter.webp', 'crystal-shards.svg', 'glass-panes-a.svg', 'glass-panes-b.svg', ...Object.values(paintEditions).flatMap(({ print, mask, relief }) => [print, mask, ...(relief ? [relief] : [])])]);
   const assets = await page.evaluate(async files => Promise.all(files.map(async name => {
     const image = new Image();
     image.src = `assets/deck/foil/${name}`;
     try {
       await image.decode();
       const canvas = document.createElement('canvas');
-      canvas.width = image.naturalWidth; canvas.height = image.naturalHeight;
+      canvas.width = image.naturalWidth || 1200; canvas.height = image.naturalHeight || 900;
       const ctx = canvas.getContext('2d');
-      ctx.drawImage(image, 0, 0);
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
       const { width: w, height: h } = canvas;
       const pixels = ctx.getImageData(0, 0, w, h).data;
       let minAlpha = 255, maxAlpha = 0, minTone = 255, maxTone = 0;
@@ -470,8 +608,35 @@ test('all symmetry materials and protection masks decode and preserve the printe
     expect(mask.textAlpha, `${name} text protection`).toBeLessThanOrEqual(25);
     if (name === 'frame-window.webp') expect(mask.windowAlpha).toBe(0);
   }
+  for (const name of ['glass-panes-a.svg', 'glass-panes-b.svg', ...Object.values(paintEditions).map(print => print.mask)]) {
+    const asset = assets.find(asset => asset.name === name);
+    expect(asset.minAlpha, `${name} contains uncoated gaps`).toBe(0);
+    expect(asset.maxAlpha, `${name} contains reflective marks`).toBeGreaterThan(200);
+  }
+  expect(assets.find(asset => asset.name === 'glass-panes-a.svg').signature,
+    'The two glass groups must have different pane geometry').not.toBe(assets.find(asset => asset.name === 'glass-panes-b.svg').signature);
+  const paintMasks = await page.evaluate(async editions => Promise.all(editions.map(async ({ print, mask }) => {
+    const load = async name => { const image = new Image(); image.src = `assets/deck/foil/${name}`; await image.decode(); return image; };
+    const [ink, plate] = await Promise.all([load(print), load(mask)]);
+    const canvas = document.createElement('canvas'); canvas.width = 600; canvas.height = 450;
+    const context = canvas.getContext('2d');
+    const pixels = image => { context.clearRect(0, 0, 600, 450); context.drawImage(image, 0, 0, 600, 450); return context.getImageData(0, 0, 600, 450).data; };
+    const inkPixels = pixels(ink), platePixels = pixels(plate);
+    let covered = 0, outsideInk = 0;
+    for (let i = 3; i < platePixels.length; i += 4) {
+      if (platePixels[i] > 16) { covered++; if (inkPixels[i] < 4) outsideInk++; }
+    }
+    return { print, covered: covered / (600 * 450), outsideInk: outsideInk / (600 * 450) };
+  })), Object.values(paintEditions));
+  for (const result of paintMasks) {
+    expect(result.covered, `${result.print} has selective foil marks`).toBeGreaterThan(.01);
+    expect(result.covered, `${result.print} leaves unpainted gaps`).toBeLessThan(.95);
+    expect(result.outsideInk, `${result.print} foil is registered to ink`).toBeLessThan(.005);
+  }
+  expect(new Set(Object.values(paintEditions).map(({ print }) => assets.find(asset => asset.name === print).signature)).size,
+    'Ink wash, palette knife and brushburst must be distinct printed structures').toBe(3);
   await expect(page.locator('.tcard[data-foil="golden-flintstone"] .tcard__art img'))
-    .toHaveAttribute('src', /cut-golden-flintstone\.webp$/);
+    .toHaveAttribute('src', 'assets/deck/golden-flintstone.webp');
 });
 
 const bourkeCards = [
@@ -479,6 +644,21 @@ const bourkeCards = [
   ['reuleaux', '★'], ['reuleaux-lace', '★★'], ['reuleaux-nebula', '★★★'],
 ];
 const bourkePortraits = new Set(['thorn-crown', 'reuleaux-nebula']);
+const bourkeOptics = {
+  'thorn-rose': ['url', 'linear', 'linear'], 'thorn-crown': ['url', 'linear', 'linear'],
+  'thorn-tide': ['url', 'radial', 'radial', 'radial', 'radial', 'radial', 'linear'],
+  reuleaux: ['url', 'repeating-linear', 'linear'], 'reuleaux-lace': ['url', 'linear', 'linear'],
+  'reuleaux-nebula': ['radial', 'radial'],
+};
+const bourkeStock = new Set(['thorn-tide']);
+const bourkeNewMaterials = {
+  'thorn-crown': 'bourke-satin-thorn-crown.svg',
+  'reuleaux-lace': 'bourke-lattice-reuleaux-lace.svg',
+  'reuleaux-nebula': 'bourke-grooves-reuleaux-nebula.svg',
+};
+const bourkeMaterial = id => bourkeNewMaterials[id] || `bourke-material-${id}.webp`;
+const bourkeEngraving = id => id === 'thorn-crown' ? null : bourkeNewMaterials[id] || `bourke-etch-${id}.webp`;
+const bourkeLayers = id => ['foil', 'shine', 'before', ...(id === 'thorn-crown' ? [] : ['after']), ...(bourkeStock.has(id) ? ['stock'] : [])];
 
 for (const colorScheme of ['dark', 'light']) {
   test(`six Bourke editions load their own materials and respond to light in ${colorScheme}`, async ({ page }) => {
@@ -487,18 +667,32 @@ for (const colorScheme of ['dark', 'light']) {
     await openDeck(page, 'cards');
     await expect(page.locator('.tcard--bourke')).toHaveCount(6);
     await expect(page.locator('link[href$="/css/deck-bourke.css"]')).toHaveCount(1);
-    const files = bourkeCards.flatMap(([id]) => [
-      `bourke-material-${id}.webp`, `bourke-etch-${id}.webp`, `ground-${bourkePortraits.has(id) ? "full-" : ""}${id}.webp`,
-    ]);
-    const failures = await page.evaluate(async files => {
-      const result = await Promise.all(files.map(async file => {
-        const image = new Image(); image.src = `assets/deck/foil/${file}`;
-        try { await image.decode(); return image.naturalWidth > 0 ? null : file; }
-        catch { return file; }
-      }));
-      return result.filter(Boolean);
-    }, files);
-    expect(failures, 'Every distinct foil material, engraving and subject-protection mask must decode').toEqual([]);
+    const files = [...new Set(bourkeCards.flatMap(([id]) => [
+      bourkeMaterial(id), ...(bourkeEngraving(id) ? [bourkeEngraving(id)] : []), `ground-${bourkePortraits.has(id) ? "full-" : ""}${id}.webp`,
+    ]))];
+    const assets = await page.evaluate(async files => Promise.all(files.map(async file => {
+      const image = new Image(); image.src = `assets/deck/foil/${file}`;
+      try {
+        await image.decode();
+        if (!image.naturalWidth) return { file, failed: true };
+        if (!file.startsWith('ground-')) return { file };
+        const canvas = document.createElement('canvas'); canvas.width = image.naturalWidth; canvas.height = image.naturalHeight;
+        const context = canvas.getContext('2d'); context.drawImage(image, 0, 0);
+        const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+        let minAlpha = 255, maxAlpha = 0, lowerAlpha = 0;
+        for (let i = 3; i < pixels.length; i += 4) {
+          minAlpha = Math.min(minAlpha, pixels[i]); maxAlpha = Math.max(maxAlpha, pixels[i]);
+          if (Math.floor(i / 4 / canvas.width) >= canvas.height * .57) lowerAlpha = Math.max(lowerAlpha, pixels[i]);
+        }
+        return { file, minAlpha, maxAlpha, lowerAlpha };
+      } catch { return { file, failed: true }; }
+    })), files);
+    expect(assets.filter(asset => asset.failed), 'Every distinct material, engraving and protection mask decodes').toEqual([]);
+    for (const asset of assets.filter(asset => asset.file.startsWith('ground-'))) {
+      expect(asset.minAlpha, `${asset.file} protects orbit filaments`).toBe(0);
+      expect(asset.maxAlpha, `${asset.file} retains reflective stock`).toBeGreaterThan(150);
+      if (asset.file.startsWith('ground-full-')) expect(asset.lowerAlpha, `${asset.file} protects lower text`).toBeLessThanOrEqual(35);
+    }
     for (const [id, rarity] of bourkeCards) {
       const card = page.locator(`.tcard[data-foil="${id}"]`);
       await expect(card).toHaveAttribute('data-holo', 'bourke');
@@ -512,14 +706,21 @@ for (const colorScheme of ['dark', 'light']) {
       await lift(page, card, false);
       const box = await card.boundingBox();
       const paint = () => card.evaluate(el => {
+        const split = value => { const parts = []; let depth = 0, start = 0; for (let i = 0; i < value.length; i++) { if (value[i] === '(') depth++; if (value[i] === ')') depth--; if (value[i] === ',' && depth === 0) { parts.push(value.slice(start, i).trim()); start = i + 1; } } parts.push(value.slice(start).trim()); return parts; };
         const foil = el.querySelector('.tcard__foil'), image = el.querySelector('.tcard__art img');
         const foilStyle = getComputedStyle(foil), imageStyle = getComputedStyle(image);
         const surfaces = Object.fromEntries([
           ['foil', foil], ['shine', el.querySelector('.tcard__shine')],
-          ['before', foil, '::before'], ['after', foil, '::after'],
+          ['before', foil, '::before'], ['after', foil, '::after'], ['stock', el.querySelector('.tcard__panel'), '::before'],
         ].map(([name, element, pseudo]) => {
           const style = getComputedStyle(element, pseudo);
-          return [name, { image: style.backgroundImage, opacity: Number(style.opacity), display: style.display, content: style.content }];
+          return [name, { image: style.backgroundImage, images: split(style.backgroundImage),
+            positions: split(style.backgroundPosition), repeats: split(style.backgroundRepeat), sizes: split(style.backgroundSize),
+            width: parseFloat(style.width), height: parseFloat(style.height), transform: style.transform,
+            mask: style.maskImage || style.webkitMaskImage, maskSize: style.maskSize || style.webkitMaskSize,
+            maskPosition: style.maskPosition || style.webkitMaskPosition, maskRepeat: style.maskRepeat || style.webkitMaskRepeat,
+            maskComposite: style.maskComposite || style.webkitMaskComposite,
+            opacity: Number(style.opacity), display: style.display, content: style.content }];
         }));
         return { surfaces, registration: {
           artTransform: imageStyle.transform, foilTransform: foilStyle.transform,
@@ -534,16 +735,53 @@ for (const colorScheme of ['dark', 'light']) {
       for (const [x, y] of [[0, 0], [1, 0], [1, 1], [0, 1]]) {
         await page.mouse.move(box.x + (x ? box.width + 2 : -2), box.y + (y ? box.height + 2 : -2));
         const current = await paint();
-        for (const layer of ['foil', 'shine', 'before', 'after']) {
+        expect(gradientKinds(current.surfaces.foil.images), `${id} optical structure`).toEqual(bourkeOptics[id]);
+        const stock = current.surfaces.stock;
+        if (bourkeStock.has(id)) {
+          expect(stock.content).not.toMatch(/^(none|normal)$/);
+          expect(stock.mask).toContain(id === 'thorn-tide' ? 'frame-window.webp' : bourkeEngraving(id));
+          expect(intersection(stock.maskComposite)).toBe(true);
+        } else expect(stock.content, `${id} has uncoated stock`).toMatch(/^(none|normal)$/);
+        if (bourkeNewMaterials[id]) for (const surface of Object.values(current.surfaces)) {
+          expect(surface.image + surface.mask, `${id} must not reintroduce the removed stamped texture`)
+            .not.toMatch(new RegExp(`bourke-(?:material|etch)-${id}\\.webp`));
+        }
+        if (id === 'reuleaux-lace') {
+          expect(gradientKinds(current.surfaces.before.images), 'Lace has an angular front').toEqual(['linear']);
+          expect(gradientKinds(current.surfaces.after.images), 'Lace has an opposing angular front').toEqual(['linear']);
+        }
+        if (id === 'reuleaux-nebula') {
+          for (const layer of ['foil', 'before', 'after']) for (const image of current.surfaces[layer].images)
+            expect(image, 'Nebula diffraction shares the portrait object centre').toContain('at 50% 30.7%');
+        }
+        if (id === 'thorn-crown') {
+          expect(current.surfaces.after.display, 'Satin Crown has no hammered-cup pass').toBe('none');
+          expect(current.surfaces.after.content).toMatch(/^(none|normal)$/);
+        }
+        for (const layer of bourkeLayers(id)) {
           const surface = current.surfaces[layer], label = `${id} ${layer} at ${x},${y}`;
           expect(surface.display, label).not.toBe('none');
           expect(surface.opacity, label).toBeGreaterThan(0);
           expect(surface.image, label).toContain('gradient(');
+          unbrokenGradientCanvas(surface, label);
+          if (layer === 'foil' && id !== 'reuleaux-nebula') expect(surface.image).toContain(bourkeMaterial(id));
+          if (layer === 'foil') expect(surface.mask).toContain(`ground-${prefix}${id}.webp`);
+          if (layer === 'shine') expect(surface.mask).toContain(bourkePortraits.has(id) ? 'frame-full.webp' : 'frame-window.webp');
+          if (layer === 'before' || layer === 'after') {
+            if (bourkeEngraving(id)) expect(surface.mask).toContain(bourkeEngraving(id));
+            else expect(surface.mask, 'Crown satin uses the parent ground mask').toBe('none');
+          }
           if (layer === 'before' || layer === 'after') {
             expect(surface.content, `${label} must generate a painted pseudo-element`).not.toBe('none');
             expect(surface.content, `${label} must generate a painted pseudo-element`).not.toBe('normal');
           }
-          if (previous) expect(surface.image, `${label} reflects moving light`).not.toBe(previous.surfaces[layer].image);
+          if (previous) {
+            expect(surface.image, `${label} reflects moving light`).not.toBe(previous.surfaces[layer].image);
+            expect(maskState(surface), `${label} registered protection/engraving`).toBe(maskState(previous.surfaces[layer]));
+            expect(surface.positions, `${label} fixed material canvas`).toEqual(previous.surfaces[layer].positions);
+            for (const [index, image] of surface.images.entries()) if (image.startsWith('url('))
+              expect(image, `${label} fixed material image`).toBe(previous.surfaces[layer].images[index]);
+          }
         }
         const registration = current.registration;
         expect(registration.artTransform, `${id} stationary print`).toBe('none');

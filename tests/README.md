@@ -71,21 +71,39 @@ gesture sweep uses four representatives in every entry/engine combination: Cliff
 (classic foil), Chirikov (reverse holo), Logistic (beam) and Halvorsen (amazing). This covers
 the shared controller and the original foil families without repeating every texture in the
 regular gate. Four desktop checks lift all ten symmetry editions (21–30) in two groups,
-then move the native pointer to all four corners in normal and reduced motion. Artwork
-foil and card surface are sampled independently, along with Golden's subject sheen.
-They check material/mask references, a visible light response, changing spectral and
-specular gradient images, and a stationary material. Every gradient must cover its
-surface without tiling; repeated colour cycles must close without a colour jump. The
-declared phase dimensions are compared with actual layout, and the phase is checked
-against the former translation projected onto the gradient axis. This catches the
-large-angle image-tile seams without enlarging or freezing the light field. Mayan's
-conic spectrum and radial front are sampled separately. Separate wheel checks keep
-the pointer fixed and observe surface-normal and painted-background changes during the turn,
-with both normal and reduced motion. For a longer, separate
-Chromium/cards sweep, set `DECK_FULL_COLLECTION=1`
-and select that project/inspection test; it inspects all 36 cards. Run this separately
-from the whole regular matrix within the existing per-command VM budget.
-The six Bourke editions (31–36) are also checked in both themes: distinct material, engraving and protection assets must decode, the two portrait layouts must fill the card, printed rarities must match, and both artwork and stock reflections must respond at all four native pointer corners. Both foil pseudo-elements must generate visible, changing gradients, and stationary artwork must share the protection mask's cover/centre geometry. The fixed-pointer wheel checks now cover Thorn Rose and Reuleaux Nebula alongside Pentacle, in normal and reduced motion, including stationary print throughout the turn.
+then move the native pointer to all four corners in normal and reduced motion. The
+asserted optical constructions differ: laser combs, crystal planes, gold engraving,
+fixed crosshatching, separate glass panes, reverse stock and radial diffraction.
+Stationary image textures, lattice geometry and printed ink must stay fixed; every
+illumination field must change across the corner samples, and the combined reflection
+must respond to both axes. Every gradient must cover its surface without tiling, and
+repeated colour cycles must close without a colour jump. Fields that use a projected
+phase retain the independent geometry check against their actual layer bounds.
+
+Sand Dollar, Golden Flintstone and Clam Triple have three distinct printed paint
+structures. Their colour print remains stationary, selective foil masks align with
+that ink, and the cut-out and its mask move together. Reduced motion keeps the cut-out
+still. The fixed paint sits below the printed rules; frame and portrait masks retain
+their text-protection alpha limits. Golden's separate subject sheen is also checked.
+Asset checks decode the print, relief, glass, glitter and protection files, reject
+accidentally duplicate textures and compare paint-mask coverage with the printed ink.
+
+The six Bourke editions (31–36) are checked in both themes. Their declared materials,
+engraving and protection assets must decode, both portrait layouts must fill the card,
+and printed star ranks must match. Active reflection layers must respond at every
+native pointer corner, while material images and protective masks remain registered.
+Layer presence follows each finish: uncoated stock and absent decorative passes are
+asserted explicitly rather than requiring the same pseudo-elements on every card.
+Stationary artwork must share its ground mask's cover/centre geometry.
+
+Fixed-pointer wheel checks cover Sand Dollar, Pentacle, Clam Triple, Thorn Rose and
+Reuleaux Nebula in normal and reduced motion. They observe surface-normal and painted
+reflection changes without changing pointer coordinates, and preserve registration of
+the protective plate, printed ink and cut-out. For a longer, separate Chromium/cards
+sweep, set `DECK_FULL_COLLECTION=1` and select that project/inspection test; it inspects
+all 36 cards. Run this separately from the whole regular matrix within the existing
+per-command VM budget. Focused material or asset runs are diagnostics only: filtered
+passes do not replace the twelve-shard gate or clear a failure elsewhere in that gate.
 Each inspected card is lifted, tilted/lit, released
 without changing face, probed for trailing clicks, put back and checked against its slot.
 Halvorsen additionally covers explicit Flip and inspection of the back in each combination.
@@ -93,10 +111,10 @@ Halvorsen additionally covers explicit Flip and inspection of the back in each c
 | Check | Entry and engine coverage |
 |---|---|
 | Regular inspection | 4 original foil families per entry and touch engine; all 36 identities and eager/visible images checked on entry, each inspected artwork checked on lift |
-| Symmetry materials | All ten editions: artwork foil and card-surface pointer response, stationary material layer, ten material textures and ten background-protection masks decoded, material contrast and duplicate-file checks |
-| Symmetry corner continuity | All ten editions, four corners, normal/reduced motion: gradient coverage without image tiling, closed colour cycles, changing spectrum/front images, and phase geometry against actual layer bounds; Golden subject sheen included |
-| Bourke editions | Six identities and star ranks, two full-art layouts, all material/mask assets, pointer reflections in both themes and fixed-pointer wheel reflection in normal/reduced motion |
-| Symmetry protection and rotation | Both frame masks quiet text; the window-frame mask excludes the rectangular artwork; portrait ground masks protect lower text; fixed-pointer wheel reflection in normal and reduced motion |
+| Symmetry materials | Ten distinct constructions; material, glass, glitter, paint, relief and protection assets decoded; material contrast, duplicate-file and registered paint-mask checks |
+| Symmetry corner continuity | Ten editions, four corners, normal/reduced motion: fixed print/grooves, changing illumination, both-axis response, full gradient coverage, closed colour cycles and projected-phase geometry where used; Golden subject sheen included |
+| Bourke editions | Six optical constructions and star ranks, two full-art layouts, current material/mask assets, active versus uncoated layers, both-theme pointer reflections and fixed mask registration |
+| Protection and rotation | Both frame masks quiet text; portrait ground masks protect lower text; registered cut-outs/paint; five representative fixed-pointer wheel reflections in normal and reduced motion |
 | Full art and theme card | Desktop portrait artwork bounds; Clam Triple theme flip via button, keyboard, drag and wheel; touch Flip and theme persistence |
 | Extended inspection | Optional `DECK_FULL_COLLECTION=1`, Chromium/cards: all 36 gestures; run separately |
 | Synthetic cancel and capture loss; partial second-finger release | cards.html, both touch projects |

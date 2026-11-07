@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" preserveAspectRatio="none">
+  <!-- Original three-direction micro-etch. Fixed cuts, never a moving mesh. -->
+  <defs>
+    <pattern id="cuts" width="48" height="83.1384" patternUnits="userSpaceOnUse" patternTransform="rotate(25 600 450)">
+      <path d="M0 0H48M0 41.5692H48M0 83.1384H48M0 0 48 83.1384M-24 41.5692 0 83.1384M24 0 48 41.5692M48 0 0 83.1384M24 0 0 41.5692M48 41.5692 24 83.1384" fill="none" stroke="white" stroke-width=".8" opacity=".72"/>
+      <path d="M7 4H17M31 45.5692H41M21 12 27 22.3923M3 53.5692 9 63.9615M27 12 21 22.3923M45 53.5692 39 63.9615" fill="none" stroke="white" stroke-width="1.1" opacity=".42"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="900" fill="url(#cuts)"/>
+</svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1120" preserveAspectRatio="none">
+  <!-- Original complementary plate B. Fine clear joints keep panes optically separate. -->
+  <g fill="white" stroke="white" stroke-width="1.5" stroke-linejoin="round">
+    <path d="M261 1H529L469 166 222 203Z" opacity=".65"/>
+    <path d="M657 288 799 235V429L574 477Z" opacity=".92"/>
+    <path d="M1 556 158 618 182 823 1 902Z" opacity=".73"/>
+    <path d="M295 449 569 485 489 629Z" opacity=".95"/>
+    <path d="M493 637 669 758 418 852Z" opacity=".6"/>
+    <path d="M675 758 799 704V901Z" opacity=".89"/>
+    <path d="M188 827 413 858 574 1119H292Z" opacity=".82"/>
+  </g>
+</svg>

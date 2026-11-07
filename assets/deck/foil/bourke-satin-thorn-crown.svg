@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 896" preserveAspectRatio="none">
+  <!-- Original fixed microbrushing. No cups, circles, facets or large motifs. -->
+  <defs>
+    <pattern id="brush" width="96" height="21" patternUnits="userSpaceOnUse">
+      <rect width="96" height="21" fill="#77736a"/>
+      <path d="M0 1H96M0 8H96M0 16H96" fill="none" stroke="#a9a394" stroke-width=".65" opacity=".46"/>
+      <path d="M0 4H96M0 12H96M0 19H96" fill="none" stroke="#4d4a44" stroke-width=".7" opacity=".38"/>
+      <path d="M7 6H39M58 6H89M22 10H62M2 14H26M45 14H82M31 18H70" fill="none" stroke="#c5bdaa" stroke-width=".45" opacity=".29"/>
+    </pattern>
+  </defs>
+  <rect width="640" height="896" fill="url(#brush)"/>
+</svg>

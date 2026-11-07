@@ -28,7 +28,7 @@
 .tcard--mayan-bracelet .tcard__front { background: linear-gradient(130deg, #fff5db, #d5a477 24%, #6c4160 45%, #fce1c1 60%, #866b9a 82%, #fff2d7); }
 .tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__panel { padding-top: 3.4cqw; background: #111325; box-shadow: inset 0 0 0 .25cqw #ffffff4d; }
 .tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__panel > .tcard__art { position: absolute; inset: 0; z-index: 0; aspect-ratio: auto; padding: 0; border-radius: inherit; background: #111325; box-shadow: none; }
-.tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__art img { border-radius: 0; object-fit: cover; transform: translate(calc(var(--px, 0) * -.35cqw), calc(var(--py, 0) * -.3cqw)) scale(1.015); }
+.tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__art img { border-radius: 0; object-fit: cover; }
 .tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__art .tcard__foil { inset: 0; border-radius: 0; }
 .tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__art::after { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; background: linear-gradient(#07071699 0%, transparent 13%, transparent 35%, #08091b94 55%, #08091baf 100%); }
 .tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__panel > :not(.tcard__art) { position: relative; z-index: 2; }
@@ -46,7 +46,6 @@
 .tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__moves { flex: none; padding: 0 1.5cqw; }
 .tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__stats { padding: .8cqw 0; }
 .tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__foot { margin-top: 1.2cqw; }
-@media (prefers-reduced-motion: reduce) { .tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__art img { transform: scale(1.015); } }
 
 
 /* Symmetry collection: embossed material, moving diffraction, and specular light
@@ -327,11 +326,480 @@
   filter: brightness(1) contrast(1.35) saturate(1.6);
 }
 
+/* Separate optical constructions, not nine recolours of the same moving band.
+   Every engraving/plate is fixed. Only the illumination and spectral phase
+   respond to the existing pointer/rotation spring; all gradient canvases cover
+   their surface once, including at the extreme corners. */
+
+/* The printed orbit and its protection mask share exactly the same cover crop.
+   Golden retains its separate floating cut-out and matching moving mask. */
+:root .deck .tcard.tcard--symmetry:is(.tcard--swirling-streamers, .tcard--sand-dollar, .tcard--pentagon, .tcard--halloween, .tcard--chaotic-flower, .tcard--french-glass, .tcard--pentacle, .tcard--mayan-bracelet) .tcard__art img { transform: none; }
+
+/* 21 · Laser foil lives in the window. Two unequal vertical combs travel in
+   opposite directions through the spectrum; the surrounding stock is quiet. */
+:root .deck .tcard.tcard--symmetry.tcard--swirling-streamers .tcard__shine {
+  opacity: calc(.012 + var(--o, 0) * .13 * var(--incidence));
+  filter: saturate(.55) contrast(1.15);
+}
+:root .deck .tcard.tcard--symmetry.tcard--swirling-streamers .tcard__foil {
+  --beam-angle: 90deg;
+  --spectral-angle: 111deg;
+  background-image: var(--material),
+    repeating-linear-gradient(var(--spectral-angle), var(--spectral-colours)),
+    repeating-linear-gradient(90deg, #02040a calc(0cqw + var(--beam-phase)), #02040a calc(5.5cqw + var(--beam-phase)), #b9d2ea calc(7.8cqw + var(--beam-phase)), #16243a calc(8.6cqw + var(--beam-phase)), #e2eaff calc(9.3cqw + var(--beam-phase)), #02040a calc(11.2cqw + var(--beam-phase)), #02040a calc(26cqw + var(--beam-phase))),
+    radial-gradient(ellipse at var(--light-x) var(--light-y), #637489, #070b17 67%);
+  background-size: var(--material-size), var(--band-size), 100% 100%, 100% 100%;
+  background-blend-mode: soft-light, multiply, screen, normal;
+  opacity: calc(.018 + var(--o, 0) * .86 * var(--incidence));
+}
+:root .deck .tcard.tcard--symmetry.tcard--swirling-streamers .tcard__foil::after {
+  content: ""; display: block; position: absolute; inset: 0;
+  pointer-events: none;
+  --counter-phase: calc(var(--fx) * 13cqw + var(--fy) * 5cqw);
+  background: repeating-linear-gradient(90deg, transparent calc(0cqw + var(--counter-phase)), transparent calc(9cqw + var(--counter-phase)), #277cff55 calc(10cqw + var(--counter-phase)), #adebff calc(10.3cqw + var(--counter-phase)), transparent calc(11cqw + var(--counter-phase)), transparent calc(33cqw + var(--counter-phase))) center / 100% 100% no-repeat;
+  -webkit-mask: radial-gradient(ellipse at var(--light-x) var(--light-y), #000 0%, #000b 30%, transparent 75%) center / 100% 100% no-repeat;
+  mask: radial-gradient(ellipse at var(--light-x) var(--light-y), #000 0%, #000b 30%, transparent 75%) center / 100% 100% no-repeat;
+  mix-blend-mode: screen; opacity: .52;
+}
+
+/* 22 · Shell glitter: discrete fixed flakes, revealed by a local coloured spot,
+   instead of a continuous sheen. Its stronger reverse coating sits UNDER print. */
+:root .deck .tcard.tcard--symmetry.tcard--sand-dollar .tcard__shine {
+  opacity: calc(.012 + var(--o, 0) * .12 * var(--incidence));
+}
+:root .deck .tcard.tcard--symmetry.tcard--sand-dollar .tcard__foil {
+  background-image: var(--material),
+    conic-gradient(from calc(25deg + var(--fx) * 55deg - var(--fy) * 28deg) at 50% 72%, #ff4e9d, #ffd953, #40ffbd, #42a5ff, #c35dff, #ff4e9d),
+    radial-gradient(ellipse at var(--light-x) var(--light-y), #fff 0%, #c4cad2 18%, #171e30 46%, #02050d 73%);
+  background-size: var(--material-size), 100% 100%, 100% 100%;
+  background-blend-mode: soft-light, multiply, normal;
+  -webkit-mask: var(--ground) center / cover no-repeat, url('../assets/deck/foil/glitter.webp') 0 0 / 24cqw 24cqw repeat;
+  -webkit-mask-composite: source-in;
+  mask: var(--ground) center / cover no-repeat, url('../assets/deck/foil/glitter.webp') 0 0 / 24cqw 24cqw repeat;
+  mask-composite: intersect;
+  opacity: calc(.015 + var(--o, 0) * .74 * var(--incidence));
+}
+
+/* The two reverse editions share only their print-safe footprint. The shell
+   uses sparse flakes; Pentacle carries a continuous fivefold intaglio. */
+:root .deck .tcard.tcard--symmetry:is(.tcard--sand-dollar, .tcard--pentacle) {
+  --reverse-high: #f4f4e8; --reverse-mid: #647586; --reverse-low: #050917;
+}
+:root .deck .tcard.tcard--symmetry:is(.tcard--sand-dollar, .tcard--pentacle) .tcard__panel::before {
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  -webkit-mask: linear-gradient(transparent 9%, #000 16%),
+    url('../assets/deck/foil/frame-window.webp') -3.4cqw -3.4cqw / calc(100% + 6.8cqw) calc(100% + 6.8cqw) no-repeat,
+    linear-gradient(transparent 54%, #0009 61%, #0009 92%, transparent 99%);
+  -webkit-mask-composite: source-in, source-over;
+  mask: linear-gradient(transparent 9%, #000 16%),
+    url('../assets/deck/foil/frame-window.webp') -3.4cqw -3.4cqw / calc(100% + 6.8cqw) calc(100% + 6.8cqw) no-repeat,
+    linear-gradient(transparent 54%, #0009 61%, #0009 92%, transparent 99%);
+  mask-composite: intersect, add;
+  mix-blend-mode: var(--surface-blend);
+  filter: contrast(1.3) saturate(1.6);
+  opacity: calc(.025 + var(--o, 0) * .84 * var(--incidence));
+}
+:root .deck .tcard.tcard--symmetry.tcard--sand-dollar .tcard__panel::before {
+  background-image: var(--material),
+    conic-gradient(from calc(20deg + var(--fx) * 62deg - var(--fy) * 31deg) at 50% 64%, #ff4f9b, #ffd84b, #28e6b1, #5488ff, #ce4bff, #ff4f9b),
+    radial-gradient(ellipse at var(--light-x) var(--light-y), var(--reverse-high), var(--reverse-mid) 23%, var(--reverse-low) 55%);
+  background-blend-mode: soft-light, multiply, normal;
+  -webkit-mask: url('../assets/deck/foil/glitter.webp') 0 0 / 28cqw 28cqw repeat,
+    linear-gradient(transparent 9%, #000 16%),
+    url('../assets/deck/foil/frame-window.webp') -3.4cqw -3.4cqw / calc(100% + 6.8cqw) calc(100% + 6.8cqw) no-repeat,
+    linear-gradient(transparent 54%, #000b 61%, #000b 92%, transparent 99%);
+  -webkit-mask-composite: source-in, source-in, source-over;
+  mask: url('../assets/deck/foil/glitter.webp') 0 0 / 28cqw 28cqw repeat,
+    linear-gradient(transparent 9%, #000 16%),
+    url('../assets/deck/foil/frame-window.webp') -3.4cqw -3.4cqw / calc(100% + 6.8cqw) calc(100% + 6.8cqw) no-repeat,
+    linear-gradient(transparent 54%, #000b 61%, #000b 92%, transparent 99%);
+  mask-composite: intersect, intersect, add;
+}
+
+/* 23 · Cut crystal. Broad hard-edged triangular faces replace the common beam;
+   the fine original grain is subordinate to their different reflectances. */
+:root .deck .tcard.tcard--symmetry.tcard--pentagon :is(.tcard__foil, .tcard__shine) {
+  background-image: var(--material),
+    conic-gradient(from calc(38deg + var(--fx) * 47deg + var(--fy) * 29deg) at 47% 43%, #40dfff, #526dff, #d15dff, #ff7954, #e9f35b, #40dfff),
+    url('../assets/deck/foil/crystal-shards.svg'),
+    radial-gradient(ellipse at var(--light-x) var(--light-y), #e8f0ff, #778597 25%, #111726 65%);
+  background-size: var(--material-size), 100% 100%, 100% 100%, 100% 100%;
+  background-blend-mode: soft-light, multiply, multiply, normal;
+  filter: contrast(1.55) saturate(1.55);
+}
+
+/* 24 · Gold intaglio over the portrait: closely cut warm contour lines, with
+   a single raking light and deep brown troughs rather than rainbow laser bars. */
+:root .deck .tcard.tcard--symmetry.tcard--halloween :is(.tcard__foil, .tcard__shine) {
+  --spectral-angle: 118deg;
+  background-image: var(--material),
+    repeating-linear-gradient(var(--spectral-angle), #59300c calc(0% + var(--spectrum-phase)), #c48a29 calc(10% + var(--spectrum-phase)), #ffe7a1 calc(17% + var(--spectrum-phase)), #b78631 calc(22% + var(--spectrum-phase)), #59300c calc(34% + var(--spectrum-phase))),
+    radial-gradient(ellipse at var(--light-x) var(--light-y), #fff0b7 0%, #a58250 23%, #17111b 64%);
+  background-size: var(--material-size), var(--band-size), 100% 100%;
+  background-blend-mode: hard-light, multiply, normal;
+  filter: contrast(1.45) saturate(1.3);
+}
+:root .deck .tcard.tcard--symmetry.tcard--halloween .tcard__foil {
+  opacity: calc(.02 + var(--o, 0) * .8 * var(--incidence));
+}
+
+/* 25 · Crumpled foil: two broad off-axis lobes catch separate folded islands.
+   A slow angular colour shift replaces the last straight spectral bands. */
+:root .deck .tcard.tcard--symmetry.tcard--golden-flintstone :is(.tcard__foil, .tcard__shine) {
+  background-image: var(--material),
+    conic-gradient(from calc(28deg + var(--fx) * 43deg - var(--fy) * 26deg) at 36% 41%, #b75b40, #ffd659, #b6d16c, #43aeac, #9368c6, #e87a88, #b75b40),
+    radial-gradient(ellipse 30% 60% at var(--light-x) var(--light-y), #edcf87, #5f5965 43%, #050713 78%),
+    radial-gradient(ellipse 47% 23% at calc(50% - var(--fx) * 24%) calc(50% - var(--fy) * 21%), #b6b5ce, #080a18 73%);
+  background-size: var(--material-size), 100% 100%, 100% 100%, 100% 100%;
+  background-blend-mode: hard-light, multiply, screen, normal;
+  filter: contrast(1.4) saturate(1.45);
+}
+
+/* 26 · Radiant print. Two stationary diagonal cuts form a diamond lattice.
+   The moving spectrum and spot reveal the intersections without moving it. */
+:root .deck .tcard.tcard--symmetry.tcard--chaotic-flower :is(.tcard__foil, .tcard__shine) {
+  background-image: var(--material),
+    repeating-linear-gradient(var(--spectral-angle), var(--spectral-colours)),
+    repeating-linear-gradient(45deg, #040711 0cqw, #040711 1.8cqw, #c4d2e0 2.03cqw, #040711 2.25cqw, #040711 2.55cqw),
+    repeating-linear-gradient(135deg, #040711 0cqw, #040711 1.8cqw, #c4d2e0 2.03cqw, #040711 2.25cqw, #040711 2.55cqw),
+    radial-gradient(ellipse at var(--light-x) var(--light-y), #d7e3e1 0%, #687788 27%, #050917 70%);
+  background-size: var(--material-size), var(--band-size), 100% 100%, 100% 100%, 100% 100%;
+  background-blend-mode: soft-light, multiply, screen, multiply, normal;
+  filter: contrast(1.4) saturate(1.6);
+}
+
+/* 27 · Dichroic glass. Large fixed panes have two reflection directions, with
+   clear joints between them. The original fine mosaic stays underneath. */
+:root .deck .tcard.tcard--symmetry.tcard--french-glass :is(.tcard__foil, .tcard__shine) {
+  background-image: var(--material),
+    conic-gradient(from calc(30deg + var(--fx) * 38deg + var(--fy) * 21deg) at 51% 34%, #29bdc5, #5751e2, #e250a6, #e5b750, #29bdc5),
+    radial-gradient(ellipse at var(--light-x) var(--light-y), #77818e, #151d2e 46%, #050a14 82%);
+  background-size: var(--material-size), 100% 100%, 100% 100%;
+  background-blend-mode: soft-light, multiply, normal;
+}
+:root .deck .tcard.tcard--symmetry.tcard--french-glass .tcard__foil::before,
+:root .deck .tcard.tcard--symmetry.tcard--french-glass .tcard__foil::after {
+  content: ""; display: block; position: absolute; inset: 0;
+  pointer-events: none; background-size: 100% 100%; background-repeat: no-repeat;
+  background-position: center; mix-blend-mode: screen;
+}
+:root .deck .tcard.tcard--symmetry.tcard--french-glass .tcard__foil::before {
+  background-image: conic-gradient(from calc(80deg + var(--fx) * 69deg - var(--fy) * 39deg) at 42% 39%, #25eeb2, #38b9ff, #995bff, #e965c8, #25eeb2),
+    radial-gradient(ellipse at var(--light-x) var(--light-y), #fff, #b2b9c4 29%, #000 65%);
+  background-blend-mode: multiply;
+  -webkit-mask: url('../assets/deck/foil/glass-panes-a.svg') center / 100% 100% no-repeat;
+  mask: url('../assets/deck/foil/glass-panes-a.svg') center / 100% 100% no-repeat;
+  opacity: .78;
+}
+:root .deck .tcard.tcard--symmetry.tcard--french-glass .tcard__foil::after {
+  background-image: conic-gradient(from calc(215deg - var(--fx) * 57deg + var(--fy) * 31deg) at 57% 34%, #8c62ff, #f25aaf, #ffc34a, #37daca, #8c62ff),
+    radial-gradient(ellipse at calc(50% - var(--fx) * 28%) calc(45% - var(--fy) * 26%), #fff, #afb9c9 25%, #000 63%);
+  background-blend-mode: multiply;
+  -webkit-mask: url('../assets/deck/foil/glass-panes-b.svg') center / 100% 100% no-repeat;
+  mask: url('../assets/deck/foil/glass-panes-b.svg') center / 100% 100% no-repeat;
+  opacity: .84;
+}
+
+/* 28 · Reverse engraving. Fivefold cuts cover the stock under the words while
+   the image remains calm. This changes the coated area, not just the palette. */
+:root .deck .tcard.tcard--symmetry.tcard--pentacle .tcard__shine {
+  opacity: calc(.015 + var(--o, 0) * .17 * var(--incidence));
+}
+:root .deck .tcard.tcard--symmetry.tcard--pentacle .tcard__foil {
+  background-image: var(--material),
+    conic-gradient(from calc(40deg + var(--fx) * 38deg - var(--fy) * 26deg) at 50% 50%, #3eb8b7, #677cce, #ac72ae, #ceb36b, #3eb8b7),
+    radial-gradient(ellipse at var(--light-x) var(--light-y), #b9c5d0, #080d1b 66%);
+  background-size: var(--material-size), 100% 100%, 100% 100%;
+  background-blend-mode: soft-light, multiply, normal;
+  opacity: calc(.015 + var(--o, 0) * .23 * var(--incidence));
+}
+:root .deck .tcard.tcard--symmetry.tcard--pentacle .tcard__panel::before {
+  background-image: var(--material),
+    conic-gradient(from calc(125deg + var(--fx) * 58deg - var(--fy) * 35deg) at 50% 64%, #26e0e0, #5280ff, #c544ff, #ff659a, #f3d341, #38e38d, #26e0e0),
+    radial-gradient(ellipse at var(--light-x) var(--light-y), var(--reverse-high), var(--reverse-mid) 30%, var(--reverse-low) 72%);
+  background-blend-mode: hard-light, multiply, normal;
+}
+
+/* 29 · Compact-disc diffraction. A narrow circular front travels through the
+   concentric sevenfold grooves; the spectrum turns around the same fixed hub. */
+:root .deck .tcard.tcard--symmetry.tcard--mayan-bracelet .tcard__foil {
+  background-image: var(--material),
+    conic-gradient(from calc(15deg + var(--fx) * 65deg - var(--fy) * 32deg) at 50% 32%, #ff456e, #ffca38, #34ed9b, #447cff, #bb4eff, #ff456e),
+    repeating-radial-gradient(ellipse at 50% 32%, #030610 calc(-8% + var(--ring-phase)), #101e34 calc(1% + var(--ring-phase)), #c6dcf4 calc(2.4% + var(--ring-phase)), #22324c calc(3.5% + var(--ring-phase)), #030610 calc(6% + var(--ring-phase)), #030610 calc(17% + var(--ring-phase))),
+    radial-gradient(ellipse at var(--light-x) var(--light-y), #a2a9b1, #10131d 68%);
+  background-blend-mode: soft-light, multiply, screen, normal;
+  filter: contrast(1.45) saturate(1.65);
+}
+
 /* On pale stock, coloured reflections darken into the paper instead of screening it white. */
 :root[data-theme="light"] .deck .tcard.tcard--symmetry:not(:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet)) { --surface-strength: .42; --surface-brightness: 1.15; --surface-blend: multiply; --emboss-blend: soft-light; }
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) .deck .tcard.tcard--symmetry:not(:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet)) { --surface-strength: .42; --surface-brightness: 1.15; --surface-blend: multiply; --emboss-blend: soft-light; }
 }
+/* Reverse foil on light paper has no black illumination field. The ink stays
+   above this layer and the title/number strip remain outside the coating. */
+:root[data-theme="light"] .deck .tcard.tcard--symmetry:is(.tcard--sand-dollar, .tcard--pentacle) {
+  --reverse-high: #fff; --reverse-mid: #eee; --reverse-low: #aeb7c6;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .deck .tcard.tcard--symmetry:is(.tcard--sand-dollar, .tcard--pentacle) {
+    --reverse-high: #fff; --reverse-mid: #eee; --reverse-low: #aeb7c6;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   :root .deck .tcard.tcard--golden-flintstone .tcard__foil { -webkit-mask-position: center; mask-position: center; }
+}
+
+/* Solid metallic ink keeps small values legible over full-art compositing. */
+:root .deck .tcard:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__stats dd {
+  background: none;
+  color: var(--ink-value);
+  -webkit-text-fill-color: var(--ink-value);
+  filter: none;
+}
+
+/* Clam Triple: a fixed three-arm brushburst printed beyond the window, with
+   selective granular foil. The actual orbit is cut with the complement of its
+   existing histogram protection mask; the source artwork is unchanged. */
+:root .deck .tcard.tcard--clam-triple {
+  --clam-print: url('../assets/deck/foil/print-clam-burst.svg');
+  --clam-burst: url('../assets/deck/foil/mask-clam-burst.svg');
+}
+:root .deck .tcard.tcard--clam-triple .tcard__panel::before { display: none; }
+:root .deck .tcard.tcard--clam-triple .tcard__panel::after { opacity: calc(.03 + var(--o, 0) * .16); }
+:root .deck .tcard.tcard--clam-triple .tcard__front::before { opacity: .055; }
+:root .deck .tcard.tcard--clam-triple .tcard__shine {
+  opacity: calc(var(--o, 0) * .13);
+  filter: grayscale(1);
+}
+:root .deck .tcard.tcard--clam-triple .tcard__art {
+  overflow: visible;
+  background: none;
+  box-shadow: none;
+  z-index: 1;
+}
+:root .deck .tcard.tcard--clam-triple .tcard__art::before,
+:root .deck .tcard.tcard--clam-triple .tcard__art .tcard__foil {
+  position: absolute;
+  inset: -5cqw -5.5cqw -7cqw;
+  border-radius: 0;
+  pointer-events: none;
+}
+:root .deck .tcard.tcard--clam-triple .tcard__art::before {
+  content: "";
+  z-index: 0;
+  background: var(--clam-print) center / 100% 100% no-repeat;
+  opacity: .94;
+}
+:root .deck .tcard.tcard--clam-triple .tcard__art::after {
+  content: "";
+  position: absolute;
+  inset: .8cqw;
+  z-index: 2;
+  pointer-events: none;
+  border: .35cqw solid #c8e3da91;
+  border-radius: .9cqw;
+  box-shadow: 0 .2cqw .6cqw #031b2855;
+}
+:root .deck .tcard.tcard--clam-triple .tcard__art img {
+  position: absolute;
+  inset: .8cqw;
+  z-index: 3;
+  width: calc(100% - 1.6cqw);
+  height: calc(100% - 1.6cqw);
+  border-radius: 0;
+  background: none;
+  object-fit: cover;
+  -webkit-mask: linear-gradient(#000, #000), var(--ground) center / cover no-repeat;
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000, #000), var(--ground) center / cover no-repeat;
+  mask-composite: exclude;
+  transform: translate(calc(var(--px, 0) * .55cqw), calc(var(--py, 0) * .45cqw)) scale(1.19);
+}
+:root .deck .tcard.tcard--clam-triple .tcard__art .tcard__foil {
+  z-index: 1;
+  display: block;
+  background-image:
+    radial-gradient(ellipse at var(--light-x) var(--light-y), #fff5cc 0%, #7be6fc 17%, #bb49ed 36%, #0a1220 66%),
+    repeating-conic-gradient(from calc(var(--fx) * 16deg) at 50% 50%, #ff407c 0deg, #ffdc42 45deg, #43e8cd 90deg, #546dff 135deg, #ff407c 180deg);
+  background-size: 100% 100%;
+  background-position: center;
+  background-blend-mode: hard-light;
+  -webkit-mask: var(--clam-burst) center / 100% 100% no-repeat, url('../assets/deck/foil/glitter.webp') 0 0 / 16cqw 16cqw repeat;
+  -webkit-mask-composite: source-in;
+  mask: var(--clam-burst) center / 100% 100% no-repeat, url('../assets/deck/foil/glitter.webp') 0 0 / 16cqw 16cqw repeat;
+  mask-composite: intersect;
+  mix-blend-mode: color-dodge;
+  filter: contrast(1.2) saturate(1.25);
+  opacity: calc(.12 + var(--o, 0) * .78 * var(--incidence));
+  transform: none;
+}
+:root .deck .tcard.tcard--clam-triple .tcard__theme-badge { z-index: 4; }
+@media (prefers-reduced-motion: reduce) {
+  :root .deck .tcard.tcard--clam-triple .tcard__art img { transform: scale(1.19); }
+}
+
+/* Append to deck-symmetry.css after the individual material families.
+   Original liquid-ink and palette-knife prints, generated with
+   assets/deck/generate_paint_finishes.py. This changes no card IDs or equations.
+   Paint and relief stay on the stock; only light and the cut-out respond. */
+:root .deck .tcard.tcard--symmetry.tcard--sand-dollar {
+  --ink-print: url('../assets/deck/foil/print-sand-ink.svg');
+  --ink-plate: url('../assets/deck/foil/mask-sand-ink.svg');
+  --ink-relief: url('../assets/deck/foil/relief-sand-ink.svg');
+}
+:root .deck .tcard.tcard--symmetry.tcard--golden-flintstone {
+  --ground: url('../assets/deck/foil/ground-golden-flintstone.webp');
+  --knife-print: url('../assets/deck/foil/print-golden-brush.svg');
+  --knife-plate: url('../assets/deck/foil/mask-golden-brush.svg');
+  --knife-relief: url('../assets/deck/foil/relief-golden-brush.svg');
+}
+
+/* Let the two actual prints carry the colour; keep the surrounding card stock
+   and small lower stamps quiet in either room theme. The rules remain above art. */
+:root .deck .tcard.tcard--symmetry:is(.tcard--sand-dollar, .tcard--golden-flintstone) .tcard__panel::before { display: none; }
+:root .deck .tcard.tcard--symmetry:is(.tcard--sand-dollar, .tcard--golden-flintstone) .tcard__panel::after { opacity: calc(.03 + var(--o, 0) * .18); }
+:root .deck .tcard.tcard--symmetry:is(.tcard--sand-dollar, .tcard--golden-flintstone) .tcard__front::before { opacity: .055; }
+:root .deck .tcard.tcard--symmetry:is(.tcard--sand-dollar, .tcard--golden-flintstone) .tcard__shine {
+  opacity: calc(var(--o, 0) * .13);
+  filter: grayscale(1) contrast(1.15);
+}
+:root .deck .tcard.tcard--symmetry:is(.tcard--sand-dollar, .tcard--golden-flintstone) .tcard__art {
+  overflow: visible;
+  background: none;
+  box-shadow: none;
+  z-index: 1;
+}
+:root .deck .tcard.tcard--symmetry:is(.tcard--sand-dollar, .tcard--golden-flintstone) .tcard__art::before,
+:root .deck .tcard.tcard--symmetry:is(.tcard--sand-dollar, .tcard--golden-flintstone) .tcard__art .tcard__foil {
+  position: absolute;
+  inset: -5cqw -5.5cqw -7cqw;
+  border-radius: 0;
+  pointer-events: none;
+}
+:root .deck .tcard.tcard--symmetry:is(.tcard--sand-dollar, .tcard--golden-flintstone) .tcard__art::before {
+  content: "";
+  z-index: 0;
+  background-position: center;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  opacity: .96;
+}
+:root .deck .tcard.tcard--symmetry:is(.tcard--sand-dollar, .tcard--golden-flintstone) .tcard__art .tcard__foil {
+  /* The 86.8 × 52.08cqw window plus the print's fixed outward bleed. */
+  --paint-width: 97.8cqw;
+  --paint-height: 64.08cqw;
+  z-index: 1;
+  display: block;
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  transform: none;
+  -webkit-mask-composite: source-over;
+  mask-composite: add;
+}
+
+/* 22 · Pooled ink. The exact histogram-ground complement isolates the original
+   source image; mask and artwork share one cover crop and one transform. */
+:root .deck .tcard.tcard--symmetry.tcard--sand-dollar .tcard__art::before { background-image: var(--ink-print); }
+:root .deck .tcard.tcard--symmetry.tcard--sand-dollar .tcard__art::after {
+  content: "";
+  position: absolute;
+  inset: .8cqw;
+  z-index: 2;
+  pointer-events: none;
+  border: .28cqw solid #b4deeb80;
+  border-radius: .9cqw;
+  box-shadow: 0 .18cqw .5cqw #172f544d;
+}
+:root .deck .tcard.tcard--symmetry.tcard--sand-dollar .tcard__art img {
+  position: absolute;
+  inset: .8cqw;
+  z-index: 3;
+  width: calc(100% - 1.6cqw);
+  height: calc(100% - 1.6cqw);
+  border-radius: 0;
+  background: none;
+  object-fit: cover;
+  -webkit-mask: linear-gradient(#000, #000), var(--ground) center / cover no-repeat;
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000, #000), var(--ground) center / cover no-repeat;
+  mask-composite: exclude;
+  transform: translate(calc(var(--px, 0) * .45cqw), calc(var(--py, 0) * .35cqw)) scale(1.14);
+}
+:root .deck .tcard.tcard--symmetry.tcard--sand-dollar .tcard__art .tcard__foil {
+  /* The low-alpha wet sheen is local; the two passes below supply sharp dots
+     and elongated wet ridges, not a full rectangular rainbow coating. */
+  background-image: radial-gradient(ellipse at var(--light-x) var(--light-y), #71f1e926, #405fdd08 28%, transparent 56%);
+  -webkit-mask: var(--ink-plate) center / 100% 100% no-repeat;
+  mask: var(--ink-plate) center / 100% 100% no-repeat;
+  mix-blend-mode: screen;
+  filter: contrast(1.15) saturate(1.3);
+  opacity: calc(.07 + var(--o, 0) * .82 * var(--incidence));
+}
+:root .deck .tcard.tcard--symmetry.tcard--sand-dollar .tcard__foil::before,
+:root .deck .tcard.tcard--symmetry.tcard--sand-dollar .tcard__foil::after {
+  content: ""; display: block; position: absolute; inset: 0;
+  pointer-events: none;
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  mix-blend-mode: screen;
+}
+:root .deck .tcard.tcard--symmetry.tcard--sand-dollar .tcard__foil::before {
+  background-image: conic-gradient(from calc(35deg + var(--fx) * 57deg - var(--fy) * 31deg) at 42% 61%, #2df2c9, #4689ff, #cc6eff, #f3b9e7, #2df2c9),
+    radial-gradient(ellipse at var(--light-x) var(--light-y), #fff, #cbd0dd 19%, #141c32 42%, #000 68%);
+  background-blend-mode: multiply;
+  -webkit-mask: url('../assets/deck/foil/glitter.webp') 0 0 / 24cqw 24cqw repeat;
+  mask: url('../assets/deck/foil/glitter.webp') 0 0 / 24cqw 24cqw repeat;
+  opacity: .92;
+}
+:root .deck .tcard.tcard--symmetry.tcard--sand-dollar .tcard__foil::after {
+  --wet-front: calc(50% + var(--fx) * 25% - var(--fy) * 18%);
+  background-image: linear-gradient(128deg, transparent calc(var(--wet-front) - 28%), #67cec741 calc(var(--wet-front) - 12%), #c9fff0 var(--wet-front), #b49deb66 calc(var(--wet-front) + 10%), transparent calc(var(--wet-front) + 27%));
+  -webkit-mask: var(--ink-relief) center / 100% 100% no-repeat;
+  mask: var(--ink-relief) center / 100% 100% no-repeat;
+  opacity: .76;
+}
+
+/* 25 · Dry palette knife. An opaque copy of the mathematical print is cut by
+   its orbit mask: bright strokes behind it cannot wash out its fine folds. */
+:root .deck .tcard.tcard--symmetry.tcard--golden-flintstone .tcard__art::before { background-image: var(--knife-print); }
+:root .deck .tcard.tcard--symmetry.tcard--golden-flintstone .tcard__art img {
+  z-index: 3;
+  -webkit-mask: linear-gradient(#000, #000), var(--ground) center / 100% 100% no-repeat;
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000, #000), var(--ground) center / 100% 100% no-repeat;
+  mask-composite: exclude;
+  filter: saturate(1.16) contrast(1.07);
+}
+:root .deck .tcard.tcard--symmetry.tcard--golden-flintstone .tcard__art::after { z-index: 4; }
+:root .deck .tcard.tcard--symmetry.tcard--golden-flintstone .tcard__art .tcard__foil {
+  background-image: var(--material),
+    conic-gradient(from calc(32deg + var(--fx) * 41deg - var(--fy) * 27deg) at 37% 48%, #e19b25, #ffe38c, #d66a3b, #5ec5b0, #a86a9e, #e19b25),
+    radial-gradient(ellipse at var(--light-x) var(--light-y), #ecdbac, #786553 27%, #14101b 64%);
+  background-blend-mode: hard-light, multiply, normal;
+  -webkit-mask: var(--knife-plate) center / 100% 100% no-repeat;
+  mask: var(--knife-plate) center / 100% 100% no-repeat;
+  mix-blend-mode: screen;
+  filter: contrast(1.3) saturate(1.35);
+  opacity: calc(.07 + var(--o, 0) * .7 * var(--incidence));
+}
+:root .deck .tcard.tcard--symmetry.tcard--golden-flintstone .tcard__foil::before {
+  content: ""; display: block; position: absolute; inset: 0;
+  pointer-events: none;
+  --knife-front: calc(50% - var(--fx) * 24% + var(--fy) * 18%);
+  background-image: linear-gradient(62deg, transparent calc(var(--knife-front) - 19%), #b28b3e44 calc(var(--knife-front) - 7%), #ffe9b2 var(--knife-front), #e7c18399 calc(var(--knife-front) + 5%), transparent calc(var(--knife-front) + 18%));
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  -webkit-mask: var(--knife-relief) center / 100% 100% no-repeat;
+  mask: var(--knife-relief) center / 100% 100% no-repeat;
+  mix-blend-mode: screen;
+  opacity: .92;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root .deck .tcard.tcard--symmetry.tcard--sand-dollar .tcard__art img { transform: scale(1.14); }
 }

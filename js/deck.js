@@ -213,6 +213,8 @@ const ICONS = [
 for (const [id, name, m, lambda, alpha, beta, gamma, omega, symbol, ability, description, alt, accent, panel] of ICONS) {
   CARDS.push({
     id, name, symmetry: true, stage: "Symmetric map", dim: 2, symbol, rarity: id === "golden-flintstone" ? "★★★" : "◆",
+    // Keep Golden's printed density opaque; CSS cuts its exact orbit silhouette.
+    artwork: id === "golden-flintstone" ? [id, 1200, 900] : undefined,
     credit: "after Field &amp; Golubitsky", ability,
     style: `--eq: .83; --name-size: 4.4cqw; --accent: ${accent}; --panel: ${panel}; --frame: linear-gradient(140deg, color-mix(in srgb, ${accent}, white 45%), ${accent} 32%, #fff 52%, ${accent} 78%, color-mix(in srgb, ${accent}, white 35%))`,
     eq: [[X("z"), "(<i>λ</i> + <i>α</i>|<i>z</i><sub>n</sub>|² + <i>iω</i> + <i>β</i> Re(<i>z</i><sub>n</sub><sup>m</sup>)) <i>z</i><sub>n</sub>"], ["", "+ <i>γ</i> <i class=\"ol\">z</i><sub>n</sub><sup>m−1</sup>"]],
