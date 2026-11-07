@@ -62,15 +62,18 @@
   --reverse-power: 0;
 }
 :root .deck .tcard.tcard--thorn-tide {
-  --material: url('../assets/deck/foil/bourke-material-thorn-tide.webp');
-  --polished: url('../assets/deck/foil/bourke-etch-thorn-tide.webp');
+  --material: url('../assets/deck/foil/material-pentacle.webp');
+  --polished: none;
   --ground: url('../assets/deck/foil/ground-thorn-tide.webp');
   --foil-axis: 26deg; --beam-axis: 152deg;
   --tone-a: #88bcb5; --tone-b: #dac8c1; --tone-c: #829bc7;
   --prism-a: #0ae6b0; --prism-b: #ffc536; --prism-c: #409cff; --prism-d: #df46ed;
   --ring: #a5cabf, #d7b8c9, #acbedb, #a5cabf;
-  --foil-power: .82;
-  --reverse-power: .64;
+  --foil-power: .29;
+  --frame-power: .11;
+  --light-frame-power: .085;
+  --reverse-power: .89;
+  --reverse-high: #f4f4e8; --reverse-mid: #647586; --reverse-low: #050917;
 }
 :root .deck .tcard.tcard--reuleaux {
   --material: url('../assets/deck/foil/bourke-material-reuleaux.webp');
@@ -207,9 +210,9 @@
    every tilt; the card itself and its illumination still respond normally. */
 :root .deck .tcard.tcard--bourke .tcard__art img { transform: none; }
 
-/* Only the reverse opal and the two full-art plates extend beyond the window.
-   The other three have uncoated stock, with the small achromatic reflection
-   from .tcard__shine. Each extended plate defines its own light below. */
+/* Tide's reverse engraving extends beyond the window. The other five have
+   uncoated stock, with the small achromatic reflection from .tcard__shine.
+   Each extended plate defines its own light below. */
 :root .deck .tcard.tcard--bourke .tcard__panel::before {
   content: none;
   position: absolute;
@@ -288,41 +291,34 @@
 :root .deck .tcard.tcard--thorn-crown .tcard__shine { opacity: calc(.012 + var(--o, 0) * .045 * var(--facing)); }
 :root .deck .tcard.tcard--thorn-crown .tcard__front::before { opacity: .06; }
 
-/* 3 · Reverse opal mosaic. Large fixed nacre fields change hue independently
-   under light, rather than sharing a travelling linear spectrum. The existing
-   irregular panes supply their borders and different grain directions. */
-:root .deck .tcard.tcard--thorn-tide .tcard__foil,
-:root .deck .tcard.tcard--thorn-tide .tcard__panel::before {
-  --opal-fields:
-    radial-gradient(ellipse 62% 43% at 13% 18%, hsl(calc(155 + var(--bx) * 35 + var(--by) * 20) 70% 64%) 56%, transparent 72%),
-    radial-gradient(ellipse 53% 62% at 89% 27%, hsl(calc(282 + var(--bx) * 29 - var(--by) * 27) 68% 70%) 55%, transparent 68%),
-    radial-gradient(ellipse 66% 48% at 82% 89%, hsl(calc(42 - var(--bx) * 23 + var(--by) * 24) 86% 68%) 55%, transparent 71%),
-    radial-gradient(ellipse 62% 56% at 12% 82%, hsl(calc(211 - var(--bx) * 31 - var(--by) * 18) 78% 65%) 55%, transparent 70%),
-    linear-gradient(hsl(calc(177 + var(--bx) * 26 + var(--by) * 19) 62% 66%), hsl(calc(245 - var(--bx) * 21 + var(--by) * 23) 62% 64%));
-}
+/* 3 · Reverse engraving, transferred from Pentacle. Fivefold cuts and a richer
+   moving spectrum sit mainly on the lower stock beneath the print. The quiet
+   window and Tide's original ground mask keep the fine fractal in front. */
 :root .deck .tcard.tcard--thorn-tide .tcard__foil {
   background-image: var(--material),
-    radial-gradient(ellipse at var(--lx) var(--ly), #ffffffb0, #ffffff12 32%, #0008 70%),
-    var(--opal-fields);
-  background-size: var(--plate-size), 100% 100%;
-  background-blend-mode: hard-light, soft-light, normal, normal, normal, normal, normal;
-  filter: contrast(1.3) saturate(1.35);
+    conic-gradient(from calc(40deg + var(--bx) * 38deg - var(--by) * 26deg) at 50% 50%, #18d7d3, #4e73f2, #ce56d4, #f2c746, #18d7d3),
+    radial-gradient(ellipse at var(--lx) var(--ly), #d3dee8, #080d1b 66%);
+  background-size: var(--plate-size), 100% 100%, 100% 100%;
+  background-blend-mode: soft-light, multiply, normal;
+  filter: contrast(1.35) saturate(1.8);
 }
-:root .deck .tcard.tcard--thorn-tide .tcard__foil::before {
-  background-image: radial-gradient(ellipse at var(--lx) var(--ly), #f0f4e8 0%, #d2ddd999 18%, transparent 47%);
-}
+:root .deck .tcard.tcard--thorn-tide .tcard__foil::before,
 :root .deck .tcard.tcard--thorn-tide .tcard__foil::after {
-  background-image: var(--opal-fields);
-  background-blend-mode: normal;
-  opacity: .72;
+  content: none;
+  display: none;
+  background-image: none;
+  -webkit-mask: none;
+  mask: none;
 }
 :root .deck .tcard.tcard--thorn-tide .tcard__panel::before {
   content: "";
   background-image: var(--material),
-    radial-gradient(ellipse at var(--lx) var(--ly), #fff9, #fff0 32%, #0004 70%),
-    var(--opal-fields);
-  background-blend-mode: hard-light, soft-light, normal, normal, normal, normal, normal;
+    conic-gradient(from calc(125deg + var(--bx) * 58deg - var(--by) * 35deg) at 50% 64%, #16eeee, #426bff, #cc32ff, #ff498d, #ffe02d, #20ed85, #16eeee),
+    radial-gradient(ellipse at var(--lx) var(--ly), var(--reverse-high), var(--reverse-mid) 30%, var(--reverse-low) 72%);
+  background-blend-mode: hard-light, multiply, normal;
+  filter: contrast(1.3) saturate(1.8);
 }
+:root .deck .tcard.tcard--thorn-tide .tcard__front::before { opacity: .10; }
 
 /* 4 · Cut crystal. Sharp triangular bevels meet two differently angled narrow
    reflection fronts; flat interiors are much darker than their polished edges. */
@@ -475,21 +471,15 @@
   }
 }
 
-/* Only Tide has coloured reverse stock. Keep the same large opal fields on
-   light paper, with a transparent white glint instead of dark shading. */
-:root[data-theme="light"] .deck .tcard.tcard--thorn-tide .tcard__panel::before {
-  background-image: var(--material),
-    radial-gradient(ellipse at var(--lx) var(--ly), #ffffffb8, #fff0 48%),
-    var(--opal-fields);
-  background-blend-mode: soft-light, normal, normal, normal, normal, normal, normal;
-  filter: saturate(1.5);
+/* Reverse engraving on pale stock uses a light field instead of a dark veil.
+   Its richer spectral ink remains beneath the text and outside the window. */
+:root[data-theme="light"] .deck .tcard.tcard--bourke.tcard--thorn-tide {
+  --reverse-power: .86;
+  --reverse-high: #fff; --reverse-mid: #eee; --reverse-low: #aeb7c6;
 }
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) .deck .tcard.tcard--thorn-tide .tcard__panel::before {
-    background-image: var(--material),
-      radial-gradient(ellipse at var(--lx) var(--ly), #ffffffb8, #fff0 48%),
-      var(--opal-fields);
-    background-blend-mode: soft-light, normal, normal, normal, normal, normal, normal;
-    filter: saturate(1.5);
+  :root:not([data-theme="dark"]) .deck .tcard.tcard--bourke.tcard--thorn-tide {
+    --reverse-power: .86;
+    --reverse-high: #fff; --reverse-mid: #eee; --reverse-low: #aeb7c6;
   }
 }

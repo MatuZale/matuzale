@@ -94,7 +94,7 @@
 .tcard--golden-flintstone { --material: url('../assets/deck/foil/material-golden-flintstone.webp'); --ground: url('../assets/deck/foil/art-golden-flintstone.webp'); --ornament: url('../assets/deck/foil/icon-golden-flintstone.webp'); }
 .tcard--chaotic-flower { --material: url('../assets/deck/foil/material-chaotic-flower.webp'); --ground: url('../assets/deck/foil/ground-chaotic-flower.webp'); --ornament: url('../assets/deck/foil/icon-chaotic-flower.webp'); }
 .tcard--french-glass { --material: url('../assets/deck/foil/material-french-glass.webp'); --ground: url('../assets/deck/foil/ground-french-glass.webp'); --ornament: url('../assets/deck/foil/icon-french-glass.webp'); }
-.tcard--pentacle { --material: url('../assets/deck/foil/material-pentacle.webp'); --ground: url('../assets/deck/foil/ground-pentacle.webp'); --ornament: url('../assets/deck/foil/icon-pentacle.webp'); }
+.tcard--pentacle { --material: url('../assets/deck/foil/bourke-material-thorn-tide.webp'); --ground: url('../assets/deck/foil/ground-pentacle.webp'); --ornament: url('../assets/deck/foil/icon-pentacle.webp'); }
 .tcard--mayan-bracelet { --material: url('../assets/deck/foil/material-mayan-bracelet.webp'); --ground: url('../assets/deck/foil/ground-mayan-bracelet.webp'); --ornament: url('../assets/deck/foil/icon-mayan-bracelet.webp'); }
 .tcard--clam-triple { --material: url('../assets/deck/foil/material-clam-triple.webp'); --ground: url('../assets/deck/foil/ground-clam-triple.webp'); --ornament: url('../assets/deck/foil/icon-clam-triple.webp'); }
 
@@ -283,13 +283,11 @@
 :root .deck .tcard.tcard--golden-flintstone .tcard__art::after {
   --paint-width: 97.98cqw;
   --paint-height: 73.485cqw;
-  --spectral-angle: 118deg;
-  --spectrum-scale-x: 3;
-  --spectrum-scale-y: 3;
-  opacity: calc(var(--o, 0) * .16);
-  background: repeating-linear-gradient(var(--spectral-angle), var(--spectral-colours)) center / var(--band-size) no-repeat;
-  filter: saturate(.85);
-  mix-blend-mode: soft-light;
+  --gold-front: calc(50% + var(--fx) * 28% + var(--fy) * 17%);
+  opacity: calc(var(--o, 0) * .38 * var(--incidence));
+  background: linear-gradient(118deg, transparent calc(var(--gold-front) - 11%), #f4bd6266 calc(var(--gold-front) - 4%), #fff0cc var(--gold-front), #64e5d88c calc(var(--gold-front) + 4%), transparent calc(var(--gold-front) + 11%)) center / 100% 100% no-repeat;
+  filter: saturate(1.3);
+  mix-blend-mode: screen;
 }
 :root .deck .tcard.tcard--golden-flintstone .tcard__foil {
   -webkit-mask: var(--ground) calc(50% + var(--px, 0) * .9cqw) calc(50% + var(--py, 0) * .7cqw) / calc(100% * var(--zoom)) auto no-repeat;
@@ -381,7 +379,7 @@
 }
 
 /* The two reverse editions share only their print-safe footprint. The shell
-   uses sparse flakes; Pentacle carries a continuous fivefold intaglio. */
+   uses sparse flakes; Pentacle carries the opal plate transferred from Tide. */
 :root .deck .tcard.tcard--symmetry:is(.tcard--sand-dollar, .tcard--pentacle) {
   --reverse-high: #f4f4e8; --reverse-mid: #647586; --reverse-low: #050917;
 }
@@ -420,29 +418,52 @@
 
 /* 23 · Cut crystal. Broad hard-edged triangular faces replace the common beam;
    the fine original grain is subordinate to their different reflectances. */
+:root .deck .tcard.tcard--symmetry.tcard--pentagon { --art-strength: .86; }
 :root .deck .tcard.tcard--symmetry.tcard--pentagon :is(.tcard__foil, .tcard__shine) {
   background-image: var(--material),
     conic-gradient(from calc(38deg + var(--fx) * 47deg + var(--fy) * 29deg) at 47% 43%, #40dfff, #526dff, #d15dff, #ff7954, #e9f35b, #40dfff),
     url('../assets/deck/foil/crystal-shards.svg'),
-    radial-gradient(ellipse at var(--light-x) var(--light-y), #e8f0ff, #778597 25%, #111726 65%);
+    radial-gradient(ellipse at var(--light-x) var(--light-y), #fff9ed, #b6cce6 30%, #314061 65%);
   background-size: var(--material-size), 100% 100%, 100% 100%, 100% 100%;
   background-blend-mode: soft-light, multiply, multiply, normal;
-  filter: contrast(1.55) saturate(1.55);
+  filter: brightness(1.2) contrast(1.25) saturate(1.8);
+}
+:root .deck .tcard.tcard--symmetry.tcard--pentagon .tcard__foil::before {
+  content: ""; display: block; position: absolute; inset: 0;
+  pointer-events: none;
+  --facet-front: calc(50% + var(--fx) * 28% - var(--fy) * 21%);
+  background-image: url('../assets/deck/foil/crystal-shards.svg'),
+    linear-gradient(125deg, #000 calc(var(--facet-front) - 13%), #34c9ff calc(var(--facet-front) - 5%), #fff1d1 var(--facet-front), #ba5dff calc(var(--facet-front) + 5%), #000 calc(var(--facet-front) + 13%));
+  background-size: 100% 100%; background-position: center; background-repeat: no-repeat;
+  background-blend-mode: multiply; mix-blend-mode: screen; opacity: .72;
 }
 
-/* 24 · Gold intaglio over the portrait: closely cut warm contour lines, with
-   a single raking light and deep brown troughs rather than rainbow laser bars. */
+/* 24 · Gold intaglio over the portrait. Mint and violet diffraction distinguish
+   the raking light on its fine contours from the warm printed lantern. */
 :root .deck .tcard.tcard--symmetry.tcard--halloween :is(.tcard__foil, .tcard__shine) {
   --spectral-angle: 118deg;
   background-image: var(--material),
-    repeating-linear-gradient(var(--spectral-angle), #59300c calc(0% + var(--spectrum-phase)), #c48a29 calc(10% + var(--spectrum-phase)), #ffe7a1 calc(17% + var(--spectrum-phase)), #b78631 calc(22% + var(--spectrum-phase)), #59300c calc(34% + var(--spectrum-phase))),
-    radial-gradient(ellipse at var(--light-x) var(--light-y), #fff0b7 0%, #a58250 23%, #17111b 64%);
+    repeating-linear-gradient(var(--spectral-angle), #40211c calc(0% + var(--spectrum-phase)), #ef9f32 calc(9% + var(--spectrum-phase)), #ffefb5 calc(13% + var(--spectrum-phase)), #35fff2 calc(17% + var(--spectrum-phase)), #8b72ff calc(23% + var(--spectrum-phase)), #e5a64b calc(29% + var(--spectrum-phase)), #40211c calc(34% + var(--spectrum-phase))),
+    radial-gradient(ellipse at var(--light-x) var(--light-y), #fff0b7 0%, #d1ad75 26%, #34243c 64%);
   background-size: var(--material-size), var(--band-size), 100% 100%;
   background-blend-mode: hard-light, multiply, normal;
-  filter: contrast(1.45) saturate(1.3);
+  filter: brightness(1.12) contrast(1.25) saturate(1.75);
 }
 :root .deck .tcard.tcard--symmetry.tcard--halloween .tcard__foil {
   opacity: calc(.02 + var(--o, 0) * .8 * var(--incidence));
+}
+/* A thin grazing reflection catches the portrait itself. Its inverse ground
+   mask follows the original object; the lower text panel stays outside it. */
+:root .deck .tcard.tcard--symmetry.tcard--halloween .tcard__art::before {
+  content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  --intaglio-front: calc(50% + var(--fx) * 26% - var(--fy) * 19%);
+  background: linear-gradient(118deg, transparent calc(var(--intaglio-front) - 12%), #d2a6ff99 calc(var(--intaglio-front) - 4%), #cafff3 var(--intaglio-front), #43e3ffc7 calc(var(--intaglio-front) + 4%), transparent calc(var(--intaglio-front) + 12%)) center / 100% 100% no-repeat;
+  -webkit-mask: linear-gradient(transparent 9%, #000 15%, #000 40%, transparent 54%), var(--ground) center / cover no-repeat;
+  -webkit-mask-composite: source-out;
+  mask: linear-gradient(transparent 9%, #000 15%, #000 40%, transparent 54%), var(--ground) center / cover no-repeat;
+  mask-composite: subtract;
+  mix-blend-mode: screen;
+  opacity: calc(var(--o, 0) * .48 * var(--incidence));
 }
 
 /* 25 · Crumpled foil: two broad off-axis lobes catch separate folded islands.
@@ -502,24 +523,77 @@
   opacity: .84;
 }
 
-/* 28 · Reverse engraving. Fivefold cuts cover the stock under the words while
-   the image remains calm. This changes the coated area, not just the palette. */
+/* 28 · Reverse opal, transferred from Thorn Tide. The fixed nacre fields change
+   colour independently; Pentacle's own ground still protects its orbit. The
+   opal plate also catches light under the lower print, never over the words. */
+:root .deck .tcard.tcard--symmetry.tcard--pentacle .tcard__foil,
+:root .deck .tcard.tcard--symmetry.tcard--pentacle .tcard__panel::before {
+  --opal-fields:
+    radial-gradient(ellipse 62% 43% at 13% 18%, hsl(calc(155 + var(--fx) * 35 + var(--fy) * 20) 70% 64%) 56%, transparent 72%),
+    radial-gradient(ellipse 53% 62% at 89% 27%, hsl(calc(282 + var(--fx) * 29 - var(--fy) * 27) 68% 70%) 55%, transparent 68%),
+    radial-gradient(ellipse 66% 48% at 82% 89%, hsl(calc(42 - var(--fx) * 23 + var(--fy) * 24) 86% 68%) 55%, transparent 71%),
+    radial-gradient(ellipse 62% 56% at 12% 82%, hsl(calc(211 - var(--fx) * 31 - var(--fy) * 18) 78% 65%) 55%, transparent 70%),
+    linear-gradient(hsl(calc(177 + var(--fx) * 26 + var(--fy) * 19) 62% 66%), hsl(calc(245 - var(--fx) * 21 + var(--fy) * 23) 62% 64%));
+}
 :root .deck .tcard.tcard--symmetry.tcard--pentacle .tcard__shine {
-  opacity: calc(.015 + var(--o, 0) * .17 * var(--incidence));
+  background-image: var(--material),
+    linear-gradient(152deg, #141414 calc(20% - var(--fx) * 27% + var(--fy) * 24%), #c1c1c1 calc(50% - var(--fx) * 27% + var(--fy) * 24%), #202020 calc(80% - var(--fx) * 27% + var(--fy) * 24%));
+  background-size: 100% 100%;
+  background-blend-mode: soft-light, normal;
+  mix-blend-mode: soft-light;
+  filter: grayscale(1);
+  opacity: calc(.015 + var(--o, 0) * .16 * var(--incidence));
 }
 :root .deck .tcard.tcard--symmetry.tcard--pentacle .tcard__foil {
   background-image: var(--material),
-    conic-gradient(from calc(40deg + var(--fx) * 38deg - var(--fy) * 26deg) at 50% 50%, #3eb8b7, #677cce, #ac72ae, #ceb36b, #3eb8b7),
-    radial-gradient(ellipse at var(--light-x) var(--light-y), #b9c5d0, #080d1b 66%);
-  background-size: var(--material-size), 100% 100%, 100% 100%;
-  background-blend-mode: soft-light, multiply, normal;
-  opacity: calc(.015 + var(--o, 0) * .23 * var(--incidence));
+    radial-gradient(ellipse at var(--light-x) var(--light-y), #ffffffb0, #ffffff12 32%, #0008 70%),
+    var(--opal-fields);
+  background-size: var(--material-size), 100% 100%;
+  background-blend-mode: hard-light, soft-light, normal, normal, normal, normal, normal;
+  filter: contrast(1.3) saturate(1.35);
+  opacity: calc(.025 + var(--o, 0) * .78 * var(--incidence));
+}
+:root .deck .tcard.tcard--symmetry.tcard--pentacle .tcard__foil::before,
+:root .deck .tcard.tcard--symmetry.tcard--pentacle .tcard__foil::after {
+  content: ""; display: block; position: absolute; inset: 0;
+  pointer-events: none; background-size: 100% 100%; background-repeat: no-repeat;
+  background-position: center;
+  -webkit-mask: url('../assets/deck/foil/bourke-etch-thorn-tide.webp') center / 100% auto no-repeat;
+  mask: url('../assets/deck/foil/bourke-etch-thorn-tide.webp') center / 100% auto no-repeat;
+  mix-blend-mode: screen;
+}
+:root .deck .tcard.tcard--symmetry.tcard--pentacle .tcard__foil::before {
+  background-image: radial-gradient(ellipse at var(--light-x) var(--light-y), #f0f4e8 0%, #d2ddd999 18%, transparent 47%);
+  opacity: .58;
+}
+:root .deck .tcard.tcard--symmetry.tcard--pentacle .tcard__foil::after {
+  background-image: var(--opal-fields);
+  background-blend-mode: normal;
+  opacity: .72;
 }
 :root .deck .tcard.tcard--symmetry.tcard--pentacle .tcard__panel::before {
   background-image: var(--material),
-    conic-gradient(from calc(125deg + var(--fx) * 58deg - var(--fy) * 35deg) at 50% 64%, #26e0e0, #5280ff, #c544ff, #ff659a, #f3d341, #38e38d, #26e0e0),
-    radial-gradient(ellipse at var(--light-x) var(--light-y), var(--reverse-high), var(--reverse-mid) 30%, var(--reverse-low) 72%);
-  background-blend-mode: hard-light, multiply, normal;
+    radial-gradient(ellipse at var(--light-x) var(--light-y), #fff9, #fff0 32%, #0004 70%),
+    var(--opal-fields);
+  background-blend-mode: hard-light, soft-light, normal, normal, normal, normal, normal;
+  filter: saturate(1.35);
+  opacity: calc(.025 + var(--o, 0) * .64 * var(--incidence));
+}
+:root[data-theme="light"] .deck .tcard.tcard--symmetry.tcard--pentacle .tcard__panel::before {
+  background-image: var(--material),
+    radial-gradient(ellipse at var(--light-x) var(--light-y), #ffffffb8, #fff0 48%),
+    var(--opal-fields);
+  background-blend-mode: soft-light, normal, normal, normal, normal, normal, normal;
+  filter: saturate(1.5);
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .deck .tcard.tcard--symmetry.tcard--pentacle .tcard__panel::before {
+    background-image: var(--material),
+      radial-gradient(ellipse at var(--light-x) var(--light-y), #ffffffb8, #fff0 48%),
+      var(--opal-fields);
+    background-blend-mode: soft-light, normal, normal, normal, normal, normal, normal;
+    filter: saturate(1.5);
+  }
 }
 
 /* 29 · Compact-disc diffraction. A narrow circular front travels through the
@@ -785,7 +859,7 @@
   mask: var(--knife-plate) center / 100% 100% no-repeat;
   mix-blend-mode: screen;
   filter: contrast(1.3) saturate(1.35);
-  opacity: calc(.07 + var(--o, 0) * .7 * var(--incidence));
+  opacity: calc(.07 + var(--o, 0) * .82 * var(--incidence));
 }
 :root .deck .tcard.tcard--symmetry.tcard--golden-flintstone .tcard__foil::before {
   content: ""; display: block; position: absolute; inset: 0;

@@ -192,6 +192,7 @@ const symmetryCards = [
 ];
 const portraitCards = ['halloween', 'french-glass', 'mayan-bracelet'];
 const groundName = id => `ground-${id}.webp`;
+const symmetryMaterial = id => id === 'pentacle' ? 'bourke-material-thorn-tide.webp' : `material-${id}.webp`;
 
 // Optical roles are explicit: fixed engraving/print may stay still, while each
 // declared illumination field must respond. These shapes distinguish a comb,
@@ -205,7 +206,7 @@ const symmetryOptics = {
   'golden-flintstone': ['url', 'conic', 'radial'],
   'chaotic-flower': ['url', 'repeating-linear', 'repeating-linear', 'repeating-linear', 'radial'],
   'french-glass': ['url', 'conic', 'radial'],
-  pentacle: ['url', 'conic', 'radial'],
+  pentacle: ['url', 'radial', 'radial', 'radial', 'radial', 'radial', 'linear'],
   'mayan-bracelet': ['url', 'conic', 'repeating-radial', 'radial'],
   'clam-triple': ['radial', 'repeating-conic'],
 };
@@ -217,7 +218,7 @@ const paintEditions = {
 };
 const gradientKinds = images => images.map(image => image.startsWith('url(') ? 'url' : image.match(/^([a-z-]+)-gradient\(/)?.[1] || image);
 const paintState = surface => JSON.stringify([surface.images, surface.positions, surface.opacity, surface.filter]);
-const maskState = (surface, includeTransform = true) => JSON.stringify([surface.mask, surface.maskSize, surface.maskPosition, surface.maskRepeat, surface.maskComposite, includeTransform ? surface.transform : null]);
+const maskState = (surface, includeTransform = true) => JSON.stringify([surface.mask, surface.maskSize, surface.maskPosition, surface.maskRepeat, surface.maskComposite, surface.clipPath, includeTransform ? surface.transform : null]);
 const intersection = value => /intersect|source-in/.test(value);
 
 async function symmetryPaint(card) {
@@ -247,7 +248,7 @@ async function symmetryPaint(card) {
         mask: style.maskImage && style.maskImage !== 'none' ? style.maskImage : style.webkitMaskImage,
         maskSize: style.maskSize || style.webkitMaskSize, maskPosition: style.maskPosition || style.webkitMaskPosition,
         maskRepeat: style.maskRepeat || style.webkitMaskRepeat, maskComposite: style.maskComposite || style.webkitMaskComposite,
-        display: style.display, content: style.content, opacity: Number(style.opacity),
+        display: style.display, content: style.content, opacity: Number(style.opacity), clipPath: style.clipPath,
         transform: style.transform, filter: style.filter,
         width: parseFloat(style.width), height: parseFloat(style.height),
         paintWidth: parseFloat(resolved.width), paintHeight: parseFloat(resolved.height),
@@ -265,6 +266,7 @@ async function symmetryPaint(card) {
         if (surface.display !== 'none' && !['none', 'normal'].includes(surface.content)) result[name] = surface;
       }
       if (el.dataset.foil === 'golden-flintstone') result.subject = read(art, '::after');
+      if (el.dataset.foil === 'halloween') result.intaglio = read(art, '::before');
       if (['sand-dollar', 'golden-flintstone', 'clam-triple'].includes(el.dataset.foil)) result.print = read(art, '::before');
       if (el.dataset.foil === 'pentacle') result.stock = read(el.querySelector('.tcard__panel'), '::before');
       const value = key => parseFloat(el.style.getPropertyValue(key)), imageStyle = getComputedStyle(image);
@@ -306,9 +308,9 @@ function unbrokenGradientCanvas(surface, label) {
 function projectedPhases(id, layer, surface, fx, fy) {
   // Only these fields still use the original translated-plane projection.
   // Conic/radial fields and the fixed crosshatch have independent geometry.
-  const legacyShine = ['swirling-streamers', 'sand-dollar', 'pentacle', 'mayan-bracelet', 'clam-triple'].includes(id) && layer === 'shine';
+  const legacyShine = ['swirling-streamers', 'sand-dollar', 'mayan-bracelet', 'clam-triple'].includes(id) && layer === 'shine';
   const spectrum = legacyShine || ['halloween', 'chaotic-flower'].includes(id) && ['foil', 'shine'].includes(layer)
-    || id === 'swirling-streamers' && layer === 'foil' || layer === 'subject';
+    || id === 'swirling-streamers' && layer === 'foil';
   const beam = legacyShine || id === 'swirling-streamers' && layer === 'foil';
   if (!spectrum && !beam) return;
   expect(Math.abs(surface.paintWidth - surface.width), `${id} ${layer} phase width`).toBeLessThan(.35);
@@ -353,12 +355,45 @@ function symmetryConstruction(id, paint) {
     expect(surfaces.foilBefore.maskRepeat).toBe('repeat');
     expect(surfaces.foilAfter.mask).toContain('relief-sand-ink.svg');
   }
-  if (id === 'golden-flintstone') expect(surfaces.foilBefore.mask).toContain('relief-golden-brush.svg');
+  if (id === 'golden-flintstone') {
+    expect(surfaces.foilBefore.mask).toContain('relief-golden-brush.svg');
+    expect(gradientKinds(surfaces.subject.images), 'Golden has a single travelling subject glint').toEqual(['linear']);
+  }
   if (reverseSymmetry.has(id)) {
     expect(surfaces.stock.mask).toContain('frame-window.webp');
     expect(intersection(surfaces.stock.maskComposite)).toBe(true);
   }
-  if (id === 'pentagon') expect(surfaces.foil.images.join(',')).toContain('crystal-shards.svg');
+  if (id === 'pentacle') {
+    expect(gradientKinds(surfaces.shine.images), 'Opal stock has an achromatic frame glint').toEqual(['url', 'linear']);
+    expect(gradientKinds(surfaces.foilBefore.images), 'Opal has a local moving glint').toEqual(['radial']);
+    expect(gradientKinds(surfaces.foilAfter.images), 'Opal has separate nacre fields').toEqual(['radial', 'radial', 'radial', 'radial', 'linear']);
+    for (const layer of ['foilBefore', 'foilAfter']) {
+      expect(surfaces[layer].mask, 'Transferred opal keeps its registered engraving').toContain('bourke-etch-thorn-tide.webp');
+      expect(surfaces[layer].maskRepeat).toBe('no-repeat');
+    }
+  }
+  if (id === 'pentagon') {
+    expect(surfaces.foil.images.join(',')).toContain('crystal-shards.svg');
+    expect(gradientKinds(surfaces.foilBefore.images), 'Crystal facets catch a travelling light front').toEqual(['url', 'linear']);
+    expect(surfaces.foilBefore.images[0]).toContain('crystal-shards.svg');
+  }
+  if (id === 'halloween') {
+    const glint = surfaces.intaglio;
+    expect(gradientKinds(glint.images), 'Intaglio catches a thin travelling reflection').toEqual(['linear']);
+    expect(glint.mask, 'Intaglio stays on its original subject').toContain(groundName(id));
+    expect(glint.maskComposite).toMatch(/subtract|source-out/);
+    expect(glint.maskSize.split(',').at(-1).trim()).toBe('cover');
+    expect(glint.maskPosition.split(',').at(-1).trim()).toBe('50% 50%');
+    expect(glint.maskRepeat.split(',').at(-1).trim()).toBe('no-repeat');
+    const fade = glint.mask.split('), url(')[0];
+    const stops = [...fade.matchAll(/(rgba?\([^)]*\))\s+([\d.]+)%/g)];
+    expect(stops.length, 'The portrait reflection has a soft protected boundary').toBeGreaterThanOrEqual(4);
+    expect(stops.at(-1)[1], 'The glint fades completely before the lower rules').toMatch(/^rgba\(0,\s*0,\s*0,\s*0\)$/);
+    expect(Number(stops.at(-1)[2]), 'The lower text remains outside the subject glint').toBeLessThanOrEqual(57);
+    expect(glint.clipPath, 'The reflection has no hard clipping edge').toBe('none');
+    expect(glint.width).toBeCloseTo(surfaces.foil.width, 1);
+    expect(glint.height).toBeCloseTo(surfaces.foil.height, 1);
+  }
   if (id === 'chaotic-flower') {
     expect(surfaces.foil.images[2]).toMatch(/^repeating-linear-gradient\(45deg,/);
     expect(surfaces.foil.images[3]).toMatch(/^repeating-linear-gradient\(135deg,/);
@@ -431,7 +466,7 @@ for (const reducedMotion of ['no-preference', 'reduce']) {
           for (const [index, image] of surface.images.entries()) if (fixedImage(id, layer, image, index))
             expect(image, `${label} stationary engraving/print ${index}`).toBe(initial.images[index]);
           if (['foil', 'shine'].includes(layer)) {
-            if (!['sand-dollar', 'clam-triple'].includes(id) || layer === 'shine') expect(surface.images[0], label).toContain(`material-${id}.webp`);
+            if (!['sand-dollar', 'clam-triple'].includes(id) || layer === 'shine') expect(surface.images[0], label).toContain(symmetryMaterial(id));
             expect(surface.opacity, label).toBeGreaterThan(resting.surfaces[layer].opacity + .05);
           }
           // Streamers' counter-comb has a travelling light mask, not a print mask.
@@ -553,8 +588,9 @@ test('all symmetry materials and protection masks decode and preserve the printe
     }));
     expect(geometry.art / geometry.panel).toBeGreaterThan(.9);
   }
-  const files = symmetryCards.flatMap(([id]) => [`material-${id}.webp`, groundName(id)])
-    .concat(['frame-window.webp', 'frame-full.webp', 'glitter.webp', 'crystal-shards.svg', 'glass-panes-a.svg', 'glass-panes-b.svg', ...Object.values(paintEditions).flatMap(({ print, mask, relief }) => [print, mask, ...(relief ? [relief] : [])])]);
+  const materialNames = symmetryCards.map(([id]) => symmetryMaterial(id));
+  const files = symmetryCards.flatMap(([id]) => [symmetryMaterial(id), groundName(id)])
+    .concat(['frame-window.webp', 'frame-full.webp', 'glitter.webp', 'crystal-shards.svg', 'glass-panes-a.svg', 'glass-panes-b.svg', 'bourke-etch-thorn-tide.webp', ...Object.values(paintEditions).flatMap(({ print, mask, relief }) => [print, mask, ...(relief ? [relief] : [])])]);
   const assets = await page.evaluate(async files => Promise.all(files.map(async name => {
     const image = new Image();
     image.src = `assets/deck/foil/${name}`;
@@ -589,7 +625,7 @@ test('all symmetry materials and protection masks decode and preserve the printe
     } catch { return { name, failed: true }; }
   })), files);
   expect(assets.filter(asset => asset.failed)).toEqual([]);
-  const materials = assets.filter(asset => asset.name.startsWith('material-'));
+  const materials = assets.filter(asset => materialNames.includes(asset.name));
   for (const material of materials) {
     expect(material.w, material.name).toBeGreaterThan(0);
     expect(material.h, material.name).toBeGreaterThan(0);
@@ -646,19 +682,20 @@ const bourkeCards = [
 const bourkePortraits = new Set(['thorn-crown', 'reuleaux-nebula']);
 const bourkeOptics = {
   'thorn-rose': ['url', 'linear', 'linear'], 'thorn-crown': ['url', 'linear', 'linear'],
-  'thorn-tide': ['url', 'radial', 'radial', 'radial', 'radial', 'radial', 'linear'],
+  'thorn-tide': ['url', 'conic', 'radial'],
   reuleaux: ['url', 'repeating-linear', 'linear'], 'reuleaux-lace': ['url', 'linear', 'linear'],
   'reuleaux-nebula': ['radial', 'radial'],
 };
 const bourkeStock = new Set(['thorn-tide']);
 const bourkeNewMaterials = {
   'thorn-crown': 'bourke-satin-thorn-crown.svg',
+  'thorn-tide': 'material-pentacle.webp',
   'reuleaux-lace': 'bourke-lattice-reuleaux-lace.svg',
   'reuleaux-nebula': 'bourke-grooves-reuleaux-nebula.svg',
 };
 const bourkeMaterial = id => bourkeNewMaterials[id] || `bourke-material-${id}.webp`;
-const bourkeEngraving = id => id === 'thorn-crown' ? null : bourkeNewMaterials[id] || `bourke-etch-${id}.webp`;
-const bourkeLayers = id => ['foil', 'shine', 'before', ...(id === 'thorn-crown' ? [] : ['after']), ...(bourkeStock.has(id) ? ['stock'] : [])];
+const bourkeEngraving = id => ['thorn-crown', 'thorn-tide'].includes(id) ? null : bourkeNewMaterials[id] || `bourke-etch-${id}.webp`;
+const bourkeLayers = id => ['foil', 'shine', ...(id === 'thorn-tide' ? [] : ['before']), ...(['thorn-crown', 'thorn-tide'].includes(id) ? [] : ['after']), ...(bourkeStock.has(id) ? ['stock'] : [])];
 
 for (const colorScheme of ['dark', 'light']) {
   test(`six Bourke editions load their own materials and respond to light in ${colorScheme}`, async ({ page }) => {
@@ -757,6 +794,17 @@ for (const colorScheme of ['dark', 'light']) {
         if (id === 'thorn-crown') {
           expect(current.surfaces.after.display, 'Satin Crown has no hammered-cup pass').toBe('none');
           expect(current.surfaces.after.content).toMatch(/^(none|normal)$/);
+        }
+        if (id === 'thorn-tide') {
+          expect(gradientKinds(stock.images), 'Reverse engraving is carried by the stock').toEqual(['url', 'conic', 'radial']);
+          expect(stock.image).toContain('material-pentacle.webp');
+          for (const layer of ['before', 'after']) {
+            const surface = current.surfaces[layer];
+            expect(surface.display, 'Tide has no opal pass over its fine orbit').toBe('none');
+            expect(surface.content).toMatch(/^(none|normal)$/);
+            expect(surface.image).toBe('none');
+            expect(surface.mask).toBe('none');
+          }
         }
         for (const layer of bourkeLayers(id)) {
           const surface = current.surfaces[layer], label = `${id} ${layer} at ${x},${y}`;

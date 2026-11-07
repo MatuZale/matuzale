@@ -73,7 +73,10 @@ the shared controller and the original foil families without repeating every tex
 regular gate. Four desktop checks lift all ten symmetry editions (21–30) in two groups,
 then move the native pointer to all four corners in normal and reduced motion. The
 asserted optical constructions differ: laser combs, crystal planes, gold engraving,
-fixed crosshatching, separate glass panes, reverse stock and radial diffraction.
+fixed crosshatching, separate glass panes, reverse opal stock and radial diffraction.
+Pentacle carries the opal material and engraved nacre fields formerly used on Thorn
+Tide, while retaining its own artwork-protection mask. The active material assets
+are checked by their bindings, so swapping a finish never swaps the protected subject.
 Stationary image textures, lattice geometry and printed ink must stay fixed; every
 illumination field must change across the corner samples, and the combined reflection
 must respond to both axes. Every gradient must cover its surface without tiling, and
@@ -85,6 +88,9 @@ structures. Their colour print remains stationary, selective foil masks align wi
 that ink, and the cut-out and its mask move together. Reduced motion keeps the cut-out
 still. The fixed paint sits below the printed rules; frame and portrait masks retain
 their text-protection alpha limits. Golden's separate subject sheen is also checked.
+Pentagon's crystal glint and Halloween's subject reflection follow the same corner
+checks; Halloween's soft fading mask subtracts its own ground and keeps the lower
+rules outside the light, without a hard clipping edge.
 Asset checks decode the print, relief, glass, glitter and protection files, reject
 accidentally duplicate textures and compare paint-mask coverage with the printed ink.
 
@@ -95,6 +101,9 @@ native pointer corner, while material images and protective masks remain registe
 Layer presence follows each finish: uncoated stock and absent decorative passes are
 asserted explicitly rather than requiring the same pseudo-elements on every card.
 Stationary artwork must share its ground mask's cover/centre geometry.
+Thorn Tide carries the transferred fivefold reverse engraving, with a quiet image
+window and both former opal overlays explicitly absent. Its own ground mask remains
+registered to the original fractal; the lower stock carries the richer spectrum.
 
 Fixed-pointer wheel checks cover Sand Dollar, Pentacle, Clam Triple, Thorn Rose and
 Reuleaux Nebula in normal and reduced motion. They observe surface-normal and painted
