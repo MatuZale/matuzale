@@ -11,7 +11,7 @@
   --facing: calc(.22 + var(--foil-facing, 1) * .78);
   --foil-axis: 118deg;
   --beam-axis: 64deg;
-  --foil-power: .65;
+  --foil-power: .75;
   --frame-power: .19;
   --frame-blend: soft-light;
   --frame-mask: url('../assets/deck/foil/frame-window.webp');
@@ -19,6 +19,16 @@
   --tone-a: #81c4d0;
   --tone-b: #e4d3aa;
   --tone-c: #ad92cf;
+  --prism-a: #ed79b0;
+  --prism-b: #f6c76c;
+  --prism-c: #69d9d0;
+  --prism-d: #9b87ee;
+  --reverse-power: .82;
+  --reverse-blend: screen;
+  --reverse-mask: url('../assets/deck/foil/frame-window.webp');
+  --reverse-header: linear-gradient(#000, #000);
+  --reverse-inset: -3.4cqw;
+  --reverse-size: calc(100% + 6.8cqw) calc(100% + 6.8cqw);
   --ring-o: .33;
   --holo-a: #d9b8bd;
   --holo-b: #b1d9d4;
@@ -34,6 +44,7 @@
   --ground: url('../assets/deck/foil/ground-thorn-rose.webp');
   --foil-axis: 145deg; --beam-axis: 74deg;
   --tone-a: #b78bb8; --tone-b: #eec8be; --tone-c: #9accc8;
+  --prism-a: #ed79b0; --prism-b: #f6bf8a; --prism-c: #76dace; --prism-d: #9a88ef;
   --ring: #a0c4c2, #d8adb8, #eadac0, #a0c4c2;
 }
 :root .deck .tcard.tcard--thorn-crown {
@@ -42,8 +53,9 @@
   --ground: url('../assets/deck/foil/ground-full-thorn-crown.webp');
   --foil-axis: 30deg; --beam-axis: 128deg;
   --tone-a: #8a7054; --tone-b: #f1d28c; --tone-c: #c79a62;
+  --prism-a: #e3a83e; --prism-b: #ffe8a1; --prism-c: #73d0b0; --prism-d: #aa85d0;
   --ring: #a7864d, #fff0bd, #c8a66e, #a7864d;
-  --foil-power: .72;
+  --foil-power: .8;
 }
 :root .deck .tcard.tcard--thorn-tide {
   --material: url('../assets/deck/foil/bourke-material-thorn-tide.webp');
@@ -51,6 +63,7 @@
   --ground: url('../assets/deck/foil/ground-thorn-tide.webp');
   --foil-axis: 26deg; --beam-axis: 152deg;
   --tone-a: #88bcb5; --tone-b: #dac8c1; --tone-c: #829bc7;
+  --prism-a: #60dbc0; --prism-b: #f1c67a; --prism-c: #90bcff; --prism-d: #cf86d3;
   --ring: #a5cabf, #d7b8c9, #acbedb, #a5cabf;
 }
 :root .deck .tcard.tcard--reuleaux {
@@ -59,6 +72,7 @@
   --ground: url('../assets/deck/foil/ground-reuleaux.webp');
   --foil-axis: 62deg; --beam-axis: 122deg;
   --tone-a: #8aaccf; --tone-b: #cfc0ea; --tone-c: #debda0;
+  --prism-a: #8d8bff; --prism-b: #e88fbf; --prism-c: #f4ca6c; --prism-d: #77d4e6;
   --ring: #abbada, #dac4ed, #e1cbab, #abbada;
 }
 :root .deck .tcard.tcard--reuleaux-lace {
@@ -67,6 +81,7 @@
   --ground: url('../assets/deck/foil/ground-reuleaux-lace.webp');
   --foil-axis: 164deg; --beam-axis: 38deg;
   --tone-a: #6faeac; --tone-b: #e6d9b7; --tone-c: #a8b8cc;
+  --prism-a: #5fd5c0; --prism-b: #ffe4a1; --prism-c: #82bff1; --prism-d: #b290e0;
   --ring: #87bfb2, #e8d5a4, #b7cadc, #87bfb2;
 }
 :root .deck .tcard.tcard--reuleaux-nebula {
@@ -75,6 +90,7 @@
   --ground: url('../assets/deck/foil/ground-full-reuleaux-nebula.webp');
   --foil-axis: 78deg; --beam-axis: 138deg;
   --tone-a: #b8a0dc; --tone-b: #e7c58f; --tone-c: #8cced1;
+  --prism-a: #ed8dc9; --prism-b: #f5ca78; --prism-c: #6bd9e7; --prism-d: #9b93ff;
   --ring: #849cd8, #d8b3e5, #f3d8aa, #849cd8;
   --foil-power: .97;
 }
@@ -82,7 +98,8 @@
 /* A continuous light field: gradient stops change instead of translating a
    tiled rectangular image. Even a full corner tilt cannot expose a tile seam. */
 :root .deck .tcard.tcard--bourke .tcard__foil,
-:root .deck .tcard.tcard--bourke .tcard__shine {
+:root .deck .tcard.tcard--bourke .tcard__shine,
+:root .deck .tcard.tcard--bourke .tcard__panel::before {
   --band: calc(50% + var(--bx) * 29% + var(--by) * 19%);
   --beam: calc(50% - var(--bx) * 27% + var(--by) * 24%);
   display: block;
@@ -95,14 +112,15 @@
 }
 :root .deck .tcard.tcard--bourke .tcard__foil {
   background-image: var(--material),
-    linear-gradient(var(--foil-axis), #0b0d19 calc(var(--band) - 35%), var(--tone-a) calc(var(--band) - 15%), var(--tone-b) var(--band), var(--tone-c) calc(var(--band) + 15%), #090b14 calc(var(--band) + 35%)),
-    radial-gradient(ellipse at var(--lx) var(--ly), #89919d, #242839 31%, #080b15 64%);
-  background-size: var(--plate-size), 100% 100%, 100% 100%;
-  background-blend-mode: soft-light, color, normal;
+    var(--diffraction),
+    repeating-linear-gradient(var(--beam-axis), #050713 calc(var(--beam) - 24%), #101629 calc(var(--beam) - 12%), #777c86 calc(var(--beam) - 7%), #202839 calc(var(--beam) - 3%), #050713 var(--beam), #050713 calc(var(--beam) + 12%)),
+    radial-gradient(ellipse at var(--lx) var(--ly), #626a7a, #242839 31%, #080b15 64%);
+  background-size: var(--plate-size), 100% 100%, 100% 100%, 100% 100%;
+  background-blend-mode: soft-light, color, screen, normal;
   -webkit-mask: var(--ground) center / cover no-repeat;
   mask: var(--ground) center / cover no-repeat;
   mix-blend-mode: screen;
-  filter: brightness(.82) saturate(.92);
+  filter: brightness(.82) saturate(1.2);
   opacity: calc(.025 + var(--o, 0) * var(--foil-power) * var(--facing));
 }
 /* A bright, thin front catches just the polished cuts. Its fixed alpha mask
@@ -126,9 +144,24 @@
   background-image: linear-gradient(var(--beam-axis), transparent calc(var(--beam) - 23%), #d8e3ee70 calc(var(--beam) - 8%), #fff6e9 var(--beam), #b6d5e577 calc(var(--beam) + 8%), transparent calc(var(--beam) + 23%));
   opacity: .95;
 }
+:root .deck .tcard.tcard--bourke .tcard__foil,
+:root .deck .tcard.tcard--bourke .tcard__foil::after,
+:root .deck .tcard.tcard--bourke .tcard__panel::before {
+  /* Colour belongs to the polished relief, separate from its white specular
+     crest. Opposing light and spectrum phases reveal a changing foil colour,
+     rather than making a uniformly brighter varnish. */
+  --diffraction: repeating-linear-gradient(var(--foil-axis),
+    var(--prism-a) calc(var(--band) - 35%),
+    var(--prism-b) calc(var(--band) - 17.5%),
+    var(--prism-c) var(--band),
+    var(--prism-d) calc(var(--band) + 17.5%),
+    var(--prism-a) calc(var(--band) + 35%));
+}
 :root .deck .tcard.tcard--bourke .tcard__foil::after {
-  background-image: radial-gradient(ellipse at calc(50% - var(--bx) * 30%) calc(50% - var(--by) * 22%), var(--tone-c), transparent 48%);
-  opacity: .3;
+  background-image: var(--diffraction),
+    radial-gradient(ellipse at calc(50% - var(--bx) * 30%) calc(50% - var(--by) * 22%), #fff, #a0a0a0 29%, #000 62%);
+  background-blend-mode: multiply;
+  opacity: .72;
 }
 
 /* Stock outside the picture is quiet and achromatic. Its own metal engraving
@@ -161,14 +194,46 @@
    every tilt; the card itself and its illumination still respond normally. */
 :root .deck .tcard.tcard--bourke .tcard__art img { transform: none; }
 
+/* Colour occupies the slopes and facets of the material as well as its thin
+   polished crests, giving reverse foil its recognisable coloured fields.
+   This layer sits behind the print. The window stays cut out; a softly raised
+   lower mask makes the texture legible beneath the rules rather than erasing
+   92% of it with the old quiet-text mask. Full-art editions only use that lower
+   field. Light paper takes coloured reflected ink, never a white screen veil. */
+:root .deck .tcard.tcard--bourke .tcard__panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  pointer-events: none;
+  background-image: var(--material), var(--diffraction),
+    radial-gradient(ellipse at var(--lx) var(--ly), #a5a5a5 0%, #747474 24%, #343434 57%, #111 85%);
+  background-size: 100% 100%;
+  background-blend-mode: soft-light, color, normal;
+  -webkit-mask: var(--reverse-header),
+    var(--reverse-mask) var(--reverse-inset) var(--reverse-inset) / var(--reverse-size) no-repeat,
+    linear-gradient(transparent 54%, #0009 61%, #0009 93%, transparent 100%);
+  -webkit-mask-composite: source-in, source-over;
+  mask: var(--reverse-header),
+    var(--reverse-mask) var(--reverse-inset) var(--reverse-inset) / var(--reverse-size) no-repeat,
+    linear-gradient(transparent 54%, #0009 61%, #0009 93%, transparent 100%);
+  mask-composite: intersect, add;
+  mix-blend-mode: var(--reverse-blend);
+  filter: saturate(1.3) contrast(1.12);
+  opacity: calc(.025 + var(--o, 0) * var(--reverse-power) * var(--facing));
+}
+:root .deck .tcard.tcard--bourke .tcard__panel > :not(.tcard__art) { z-index: 2; }
+
 /* 1 · Silk. Long curved cuts light up in narrow satin ribbons; the subsidiary
    front runs against the main front, rather than moving the material itself. */
 :root .deck .tcard.tcard--thorn-rose .tcard__foil::before {
   background-image: linear-gradient(var(--beam-axis), transparent calc(var(--beam) - 14%), #b3d9d253 calc(var(--beam) - 5%), #fff1ed var(--beam), #dbb7d15c calc(var(--beam) + 5%), transparent calc(var(--beam) + 14%));
 }
 :root .deck .tcard.tcard--thorn-rose .tcard__foil::after {
-  background-image: linear-gradient(147deg, transparent calc(var(--band) - 13%), #c2c4ed99 var(--band), transparent calc(var(--band) + 13%));
-  opacity: .46;
+  background-image: var(--diffraction),
+    linear-gradient(147deg, #000 calc(var(--band) - 22%), #fff var(--band), #000 calc(var(--band) + 22%));
+  opacity: .78;
 }
 
 /* 2 · Hammered gold. Rounded cups and isolated embossed stars, lit with a
@@ -184,8 +249,9 @@
   background-image: linear-gradient(128deg, transparent calc(var(--beam) - 27%), #b8934c70 calc(var(--beam) - 10%), #fff0bb var(--beam), #c9a26d77 calc(var(--beam) + 10%), transparent calc(var(--beam) + 27%));
 }
 :root .deck .tcard.tcard--thorn-crown .tcard__foil::after {
-  background-image: radial-gradient(ellipse at calc(50% - var(--bx) * 35%) calc(50% - var(--by) * 28%), #ffe0a5, transparent 35%);
-  opacity: .52;
+  background-image: var(--diffraction),
+    radial-gradient(ellipse at calc(50% - var(--bx) * 35%) calc(50% - var(--by) * 28%), #fff, #b9b9b9 21%, #000 49%);
+  opacity: .78;
 }
 
 /* 3 · Opal mosaic. Quiet panes have independent engraved grain directions;
@@ -208,7 +274,7 @@
     linear-gradient(62deg, transparent calc(var(--band) - 9%), #f4dfbbcc var(--band), transparent calc(var(--band) + 9%));
   background-blend-mode: screen;
 }
-:root .deck .tcard.tcard--reuleaux .tcard__foil::after { opacity: .18; }
+:root .deck .tcard.tcard--reuleaux .tcard__foil::after { opacity: .7; }
 
 /* 5 · Intaglio lace. The dense threefold engraving stays fixed while a thin
    radial wave of light travels across it, like silver guilloché under a lamp. */
@@ -217,8 +283,9 @@
   background-image: radial-gradient(ellipse at 50% 48%, transparent calc(var(--ring-radius) - 13%), #a6d7c275 calc(var(--ring-radius) - 4%), #fff2cb var(--ring-radius), #bad6e27a calc(var(--ring-radius) + 4%), transparent calc(var(--ring-radius) + 13%));
 }
 :root .deck .tcard.tcard--reuleaux-lace .tcard__foil::after {
-  background-image: linear-gradient(38deg, transparent calc(var(--beam) - 12%), #bee0d5cc var(--beam), transparent calc(var(--beam) + 12%));
-  opacity: .48;
+  background-image: var(--diffraction),
+    linear-gradient(38deg, #000 calc(var(--beam) - 21%), #fff var(--beam), #000 calc(var(--beam) + 21%));
+  opacity: .76;
 }
 
 /* 6 · Cosmos. Sparse sharp stars, crescent-edged metal disks and tiny flecks
@@ -235,8 +302,9 @@
   opacity: 1;
 }
 :root .deck .tcard.tcard--reuleaux-nebula .tcard__foil::after {
-  background-image: radial-gradient(ellipse at calc(50% - var(--bx) * 42%) calc(50% - var(--by) * 31%), #ceeaff, #aec3ffcc 22%, transparent 48%);
-  opacity: .9;
+  background-image: var(--diffraction),
+    radial-gradient(ellipse at calc(50% - var(--bx) * 42%) calc(50% - var(--by) * 31%), #fff, #c5c5c5 26%, #000 58%);
+  opacity: .96;
 }
 
 /* A pair of full-art rarities use separately composed portrait renders. The
@@ -250,6 +318,9 @@
   --frame-mask: url('../assets/deck/foil/frame-full.webp');
   --frame-power: .1;
   --plate-size: 100% 100%;
+  --reverse-mask: linear-gradient(transparent, transparent);
+  --reverse-inset: 0px;
+  --reverse-size: 100% 100%;
 }
 :root .deck .tcard.tcard--bourke:is(.tcard--thorn-crown, .tcard--reuleaux-nebula) .tcard__front { padding: 1.55cqw; }
 :root .deck .tcard.tcard--bourke:is(.tcard--thorn-crown, .tcard--reuleaux-nebula) .tcard__front::after { padding: 1.55cqw; }
@@ -290,6 +361,8 @@
 }
 :root[data-theme="light"] .deck .tcard.tcard--bourke:not(:is(.tcard--thorn-crown, .tcard--reuleaux-nebula)) {
   --frame-power: .13;
+  --reverse-power: .58; --reverse-blend: multiply;
+  --reverse-header: linear-gradient(transparent 10%, #000 17%);
   /* Light paper needs dark metallic ink throughout the reflection sweep. */
   --holo-a: #673c58; --holo-b: #2f626a; --holo-c: #6d5931; --holo-d: #4f4a6f;
   --rarity-low: #735426; --rarity-high: #9d7129;
@@ -297,6 +370,8 @@
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) .deck .tcard.tcard--bourke:not(:is(.tcard--thorn-crown, .tcard--reuleaux-nebula)) {
     --frame-power: .13;
+    --reverse-power: .58; --reverse-blend: multiply;
+    --reverse-header: linear-gradient(transparent 10%, #000 17%);
     --holo-a: #673c58; --holo-b: #2f626a; --holo-c: #6d5931; --holo-d: #4f4a6f;
     --rarity-low: #735426; --rarity-high: #9d7129;
   }

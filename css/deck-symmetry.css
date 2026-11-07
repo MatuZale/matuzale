@@ -69,9 +69,9 @@
   --surface-mask: url('../assets/deck/foil/frame-window.webp');
   --surface-blend: soft-light;
   --surface-brightness: .9;
-  --surface-strength: .24;
-  --art-strength: .42;
-  --ring-o: .26;
+  --surface-strength: .27;
+  --art-strength: .48;
+  --ring-o: .29;
   --emboss-blend: screen;
   --paint-mask: url('../assets/deck/foil/impasto-ribbons.svg');
   --spectrum-colour-1: #ee456a;
@@ -258,7 +258,7 @@
 :root .deck .tcard.tcard--pentacle { --beam-angle: 18deg; --spectral-angle: 126deg; --beam-scale-x: 2.8; --beam-scale-y: 1.9; --spectrum-scale-x: 2.6; --spectrum-scale-y: 3; }
 :root .deck .tcard.tcard--mayan-bracelet { --beam-angle: 157deg; --spectral-angle: 67deg; --spectrum-scale-x: 3.2; --spectrum-scale-y: 2.4; }
 :root .deck .tcard.tcard--clam-triple {
-  --beam-angle: 44deg; --spectral-angle: 125deg; --beam-scale-x: 3.6; --beam-scale-y: 2.4; --spectrum-scale-x: 2.5; --spectrum-scale-y: 3.4; --art-strength: .34;
+  --beam-angle: 44deg; --spectral-angle: 125deg; --beam-scale-x: 3.6; --beam-scale-y: 2.4; --spectrum-scale-x: 2.5; --spectrum-scale-y: 3.4; --art-strength: .39;
   --spectrum-colour-1: #59b9ac; --spectrum-colour-2: #6ba4dc; --spectrum-colour-3: #ab82cd; --spectrum-colour-4: #e6a3b5; --spectrum-colour-5: #e6cf83; --spectrum-colour-6: #59b9ac; --spectrum-colour-7: #59b9ac;
   --spectrum-stop-2: 7%; --spectrum-stop-3: 14%; --spectrum-stop-4: 21%; --spectrum-stop-5: 28%; --spectrum-stop-6: 35%; --spectrum-stop-7: 35%;
 }
@@ -269,7 +269,7 @@
   --surface-mask: url('../assets/deck/foil/frame-full.webp');
 }
 :root .deck .tcard.tcard--symmetry:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__shine {
-  opacity: calc(var(--o, 0) * .1);
+  opacity: calc(var(--o, 0) * .115);
 }
 :root .deck .tcard.tcard--symmetry:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__foil {
   --material-size: 100% 100%;
@@ -287,7 +287,7 @@
   --spectral-angle: 118deg;
   --spectrum-scale-x: 3;
   --spectrum-scale-y: 3;
-  opacity: calc(var(--o, 0) * .14);
+  opacity: calc(var(--o, 0) * .16);
   background: repeating-linear-gradient(var(--spectral-angle), var(--spectral-colours)) center / var(--band-size) no-repeat;
   filter: saturate(.85);
   mix-blend-mode: soft-light;
@@ -328,9 +328,9 @@
 }
 
 /* Pale stock takes a shallow silver impression; no coloured hard-light veil. */
-:root[data-theme="light"] .deck .tcard.tcard--symmetry:not(:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet)) { --surface-strength: .16; --surface-brightness: .95; --emboss-blend: soft-light; }
+:root[data-theme="light"] .deck .tcard.tcard--symmetry:not(:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet)) { --surface-strength: .18; --surface-brightness: .95; --emboss-blend: soft-light; }
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) .deck .tcard.tcard--symmetry:not(:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet)) { --surface-strength: .16; --surface-brightness: .95; --emboss-blend: soft-light; }
+  :root:not([data-theme="dark"]) .deck .tcard.tcard--symmetry:not(:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet)) { --surface-strength: .18; --surface-brightness: .95; --emboss-blend: soft-light; }
 }
 @media (prefers-reduced-motion: reduce) {
   :root .deck .tcard.tcard--golden-flintstone .tcard__foil { -webkit-mask-position: center; mask-position: center; }

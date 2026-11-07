@@ -7,7 +7,7 @@
 // Decoration only (the horizon is aria-hidden); never with reduced motion. Loaded by script.js when About
 // is first in sight.
 
-const MEAN = 200, REST = 60, TAPE_MEAN = 180, TAPE_DURATION = 12000, STARS = 46;
+const MEAN = 200, REST = 60, TAPE_MEAN = 180, TAPE_DURATION = 12000, TAPE_FADE = 2600, STARS = 46;
 const rand = (a, b) => a + Math.random() * (b - a);
 const tapePaused = () => document.documentElement.classList.contains("is-tape-paused");
 // The sunset sequence must wait for tape time, not wall time, or it would run
@@ -15,7 +15,7 @@ const tapePaused = () => document.documentElement.classList.contains("is-tape-pa
 function tapeTimeout(callback, duration) {
   let remaining = duration, started = 0, id = 0, done = false;
   const cancel = () => { done = true; clearTimeout(id); document.removeEventListener("tape-pause-change", sync); };
-  const finish = () => { cancel(); callback(); };
+  const finish = () => { if (done) return; cancel(); callback(); };
   function sync() {
     if (id) { clearTimeout(id); id = 0; remaining -= performance.now() - started; }
     if (!done && !tapePaused()) { started = performance.now(); id = setTimeout(finish, Math.max(0, remaining)); }
@@ -28,6 +28,8 @@ const wait = ms => new Promise(done => tapeTimeout(done, ms));
 
 export function startNightfall(horizon) {
   const sky = horizon.querySelector(".horizon__sky"), sun = horizon.querySelector(".horizon__sun");
+  const floor = horizon.querySelector(".horizon__floor");
+  const aboutParagraphs = horizon.parentElement.querySelectorAll(".about__text > p:not(.kicker)");
   const prompt = document.querySelector(".about-terminal__prompt");
   const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
   let visible = false, busy = false, restUntil = 0, tapeRestUntil = 0, tapeTimer = null, moon, stars, meteor, landscape;
@@ -37,6 +39,9 @@ export function startNightfall(horizon) {
   // the scenery without painting a new landscape on every frame.
   function buildTapeLandscape() {
     if (landscape) return;
+    // Keep both directions alive on separate planes; CSS crossfades their
+    // opacities without restarting the ordinary grid's transform animation.
+    floor.append(Object.assign(document.createElement("span"), { className: "horizon__grid horizon__grid--travel" }));
     landscape = Object.assign(document.createElement("div"), { className: "horizon__landscape" });
     const mountains = `<path class="horizon__terrain-fill" d="M0 200V148L70 116 127 142 217 44 285 101 339 68 418 143 489 116 557 149 639 74 702 111 776 26 859 117 924 85 1007 146 1092 92 1162 131 1200 148V200Z"/>
       <path class="horizon__ridge" d="M0 148L70 116 127 142 217 44 285 101 339 68 418 143 489 116 557 149 639 74 702 111 776 26 859 117 924 85 1007 146 1092 92 1162 131 1200 148"/>
@@ -51,19 +56,37 @@ export function startNightfall(horizon) {
       landscape.append(layer);
     }
     horizon.append(landscape);
+    // Commit the newly inserted scenery's transparent state before adding the
+    // active class, or its first paint can skip the entrance transition.
+    void landscape.offsetWidth;
   }
 
-  function endTapeSun() {
+  function finishTapeSun(immediate = false) {
     if (!tapeTimer) return;
     tapeTimer();
     tapeTimer = null;
-    horizon.classList.remove("is-tape-sun");
+    if (immediate) horizon.classList.add("is-tape-sun-reset");
+    horizon.classList.remove("is-tape-sun", "is-tape-sun-running");
+    if (immediate) {
+      // Reset hidden/reduced-motion scenes atomically, including any CSS
+      // transition held by tape pause. No deferred callback can restart them.
+      void horizon.offsetWidth;
+      horizon.classList.remove("is-tape-sun-reset");
+    }
     tapeRestUntil = performance.now() + REST * 1000;
+  }
+  function endTapeSun() {
+    if (!tapeTimer) return;
+    tapeTimer();
+    horizon.classList.remove("is-tape-sun");
+    // Leave the scenery moving and keep nightfall/retrigger locked out until
+    // the sun, landscape and sideways grid have all faded back to the baseline.
+    tapeTimer = tapeTimeout(finishTapeSun, TAPE_FADE);
   }
   function tapeSun() {
     if (!visible || busy || tapeTimer || document.hidden || motion.matches || tapePaused()) return false;
     buildTapeLandscape();
-    horizon.classList.add("is-tape-sun");
+    horizon.classList.add("is-tape-sun-running", "is-tape-sun");
     tapeTimer = tapeTimeout(endTapeSun, TAPE_DURATION);
     return true;
   }
@@ -153,12 +176,16 @@ export function startNightfall(horizon) {
   horizon.nightfall = nightfall;
 
   // CSS keyframes are held by the shared tape rule. Hold Web Animations and
-  // the sunset's CSS transitions here too, including a partly risen sun.
+  // the sunset's CSS transitions here too, including a partly risen sun and
+  // the prose contrast that follows it. Other About elements keep their own lifecycle.
   // Only resume animations we suspended, not ones held for other reasons.
   let heldAnimations = [];
   document.addEventListener("tape-pause-change", () => {
     if (tapePaused()) {
-      heldAnimations = horizon.getAnimations({ subtree: true }).filter(a => !(typeof CSSAnimation !== "undefined" && a instanceof CSSAnimation) && a.playState === "running");
+      heldAnimations = [
+        ...horizon.getAnimations({ subtree: true }),
+        ...Array.from(aboutParagraphs).flatMap(paragraph => paragraph.getAnimations()),
+      ].filter(a => !(typeof CSSAnimation !== "undefined" && a instanceof CSSAnimation) && a.playState === "running");
       heldAnimations.forEach(a => a.pause());
     } else {
       heldAnimations.forEach(a => { if (a.playState === "paused") a.play(); });
@@ -166,9 +193,9 @@ export function startNightfall(horizon) {
     }
   });
 
-  new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; if (!visible) endTapeSun(); }).observe(horizon);
-  motion.addEventListener("change", () => { if (motion.matches) endTapeSun(); });
-  document.addEventListener("visibilitychange", () => { if (document.hidden) endTapeSun(); });
+  new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; if (!visible) finishTapeSun(true); }).observe(horizon);
+  motion.addEventListener("change", () => { if (motion.matches) finishTapeSun(true); });
+  document.addEventListener("visibilitychange", () => { if (document.hidden) finishTapeSun(true); });
   setInterval(() => {
     if (!visible || busy || tapeTimer || document.hidden || motion.matches || tapePaused()) return;
     if (performance.now() >= restUntil && Math.random() < 1 - Math.exp(-1 / MEAN)) nightfall();

@@ -448,26 +448,27 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
   -webkit-mask: linear-gradient(#000 24%, #0000 24% 25.5%, #000 25.5% 31%, #0000 31% 33.5%, #000 33.5% 38%, #0000 38% 41.5%, #000 41.5% 44.5%, #0000 44.5% 49%, #000 49% 53%, #0000 53% 59%, #000 59% 63%, #0000 63% 70%, #000 70% 74%, #0000 74% 82%, #000 82% 86%, #0000 86% 95%, #000 95%);
   mask: linear-gradient(#000 24%, #0000 24% 25.5%, #000 25.5% 31%, #0000 31% 33.5%, #000 33.5% 38%, #0000 38% 41.5%, #000 41.5% 44.5%, #0000 44.5% 49%, #000 49% 53%, #0000 53% 59%, #000 59% 63%, #0000 63% 70%, #000 70% 74%, #0000 74% 82%, #000 82% 86%, #0000 86% 95%, #000 95%);
 }
-/* Occasionally the horizon becomes a travelling VHS sunset. The quieter
-   everyday view keeps driving forward; this scene passes from right to left. */
-.horizon__sky { transition: opacity 1.8s ease; }
-.horizon__sun { translate: 0 0; transition: translate 2.2s cubic-bezier(.22, .7, .3, 1); }
+/* A slow dissolve into the sideways sunset. Both grid directions keep their
+   own phase, and the landscape keeps moving until the dissolve has finished. */
+.horizon__sky { transition: opacity 2.6s ease-in-out; }
+.horizon__sun { translate: 0 0; transition: translate 2.6s cubic-bezier(.4, 0, .2, 1); }
 .horizon__sun::after {
   content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0;
   background: linear-gradient(to bottom, #ffe092 0%, #ffbf35 18%, #ff763d 35%, #ed466d 53%, #bb51ce 70%, #8264e6 88%);
-  transition: opacity 1.8s ease;
+  transition: opacity 2.6s ease-in-out;
 }
 .horizon.is-tape-sun .horizon__sky { opacity: .65; }
 .horizon.is-tape-sun .horizon__sun { translate: 0 -32%; }
 .horizon.is-tape-sun .horizon__sun::after { opacity: 1; }
 /* Lift just the lettering off the bright sunset. The page-coloured edge is
    dark in the night palette and light on paper; the scene stays luminous. */
+.horizon.is-tape-sun-running ~ .about .about__text > p:not(.kicker) {
+  transition: opacity .7s ease var(--d, 0ms), transform .7s ease var(--d, 0ms),
+    color 2.6s ease-in-out, text-shadow 2.6s ease-in-out;
+}
 .horizon.is-tape-sun ~ .about .about__text > p:not(.kicker) {
   color: var(--text);
   text-shadow: 0 1px 1px var(--bg), 0 0 3px var(--bg), 0 0 7px var(--bg);
-}
-.horizon.is-tape-sun ~ .about .about__text > p:not(.kicker) a {
-  color: inherit; text-decoration: underline; text-underline-offset: .15em;
 }
 .horizon.is-idle .horizon__sun::after { transition: none; }
 @media (prefers-reduced-motion: reduce) { .horizon__sun, .horizon__sun::after { transition: none; } }
@@ -482,10 +483,17 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
     linear-gradient(90deg, var(--horizon-line) 1.5px, transparent 1.5px) 0 0 / 56px 100%,
     linear-gradient(var(--horizon-line) 1.5px, transparent 1.5px) 0 0 / 100% 56px;
   animation: horizon-drive 3.4s linear infinite;
+  transition: opacity 2.6s ease-in-out;
 }
+.horizon__grid--travel {
+  --horizon-line: #ba71cf; opacity: 0;
+  animation: horizon-travel 2.8s linear infinite paused;
+}
+.horizon.is-tape-sun .horizon__grid:not(.horizon__grid--travel) { opacity: 0; }
+.horizon.is-tape-sun .horizon__grid--travel { opacity: 1; }
+.horizon.is-tape-sun-running:not(.is-idle) .horizon__grid--travel { animation-play-state: running; }
 .horizon.is-idle .horizon__grid { animation-play-state: paused; }
-.horizon.is-tape-sun .horizon__grid { animation-name: horizon-travel; animation-duration: 2.8s; }
-.horizon.is-tape-sun .horizon__floor { opacity: .55; --horizon-line: #ba71cf; }
+.horizon.is-tape-sun .horizon__floor { opacity: .55; }
 /* The plane drives one square towards the reader and starts over. Moving it, not its background, keeps
    it a picture the compositor slides: a moving background repainted a plane three screens wide every
    frame, which without a GPU took several CPU cores. */
@@ -497,7 +505,7 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
    on paper as well as on the dark page, without covering the About copy. */
 .horizon__landscape {
   position: absolute; inset: auto 0 var(--floor); height: clamp(110px, 15vw, 200px);
-  overflow: hidden; opacity: 0; transition: opacity 1.8s ease;
+  overflow: hidden; opacity: 0; transition: opacity 2.6s ease-in-out;
   --terrain-fill: color-mix(in srgb, var(--bg) 88%, #9169c3);
   --terrain-ridge: #bf7ac8; --terrain-mesh: #8d74b5;
   --city-fill: color-mix(in srgb, var(--bg) 94%, #8171ad);
@@ -521,7 +529,7 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
 .horizon__city-fill { fill: var(--city-fill); }
 .horizon__city-rim { fill: none; stroke: var(--city-rim); stroke-width: .9; opacity: .7; }
 .horizon__windows { fill: none; stroke: var(--city-window); stroke-width: 1.4; opacity: .75; }
-.horizon.is-tape-sun:not(.is-idle) .horizon__landscape-layer { animation-play-state: running; }
+.horizon.is-tape-sun-running:not(.is-idle) .horizon__landscape-layer { animation-play-state: running; }
 @keyframes horizon-scenery { to { transform: translateX(-50%); } }
 :root[data-theme="light"] .horizon.is-tape-sun .horizon__sky { opacity: .5; }
 :root[data-theme="light"] .horizon__landscape { --terrain-ridge: #a35b9f; --terrain-mesh: #9975b8; --city-rim: #98597c; --city-window: #b56b37; }
@@ -538,9 +546,14 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
   .horizon__landscape-layer--near { animation-duration: 48s; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .horizon__sky, .horizon__landscape { transition: none; }
+  .horizon__sky, .horizon__landscape, .horizon__grid, .about__text > p:not(.kicker) { transition: none; }
   .horizon__landscape-layer { animation: none; }
 }
+/* Leaving About, hiding the tab or enabling reduced motion settles every
+   layer immediately, including transitions held by the global tape pause. */
+.horizon.is-tape-sun-reset :is(.horizon__sky, .horizon__sun, .horizon__floor, .horizon__grid, .horizon__landscape),
+.horizon.is-tape-sun-reset .horizon__sun::after,
+.horizon.is-tape-sun-reset ~ .about .about__text > p:not(.kicker) { transition: none; }
 /* Nightfall, now and then (nightfall.js): night on the grid, pixel stars, a crescent moon striped like the
    sun, and a shooting star, in the horizon's own palette. */
 .horizon { --moon: color-mix(in srgb, var(--accent-3) 45%, #f2f6ff); --star: #eef3ff; }
@@ -548,7 +561,7 @@ h2 em { font-style: normal; background: var(--grad); -webkit-background-clip: te
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) .horizon { --moon: color-mix(in srgb, var(--accent-3) 70%, var(--accent-2)); --star: var(--accent-2); }
 }
-.horizon__floor { transition: filter 2.2s, opacity 1.8s; }
+.horizon__floor { transition: filter 2.2s, opacity 2.6s ease-in-out; }
 .horizon.is-idle .horizon__sky, .horizon.is-idle .horizon__floor { transition: none; }
 .horizon.is-night .horizon__sky { opacity: .462; }
 :root[data-theme="light"] .horizon.is-night .horizon__sky { opacity: .35; }

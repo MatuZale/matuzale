@@ -18,7 +18,7 @@
   terminal.append(display);
   let visible = false, rolled = false, timer = 0, active = false, count = 0, wait = 0, message = '';
   const paused = () => root.classList.contains('is-tape-paused');
-  const horizonBusy = () => horizon.classList.contains('is-night') || horizon.classList.contains('is-tape-sun') ||
+  const horizonBusy = () => horizon.classList.contains('is-night') || horizon.classList.contains('is-tape-sun-running') ||
     Boolean(sun?.getAnimations().some(a => a.playState === 'running' &&
       !(typeof CSSAnimation !== 'undefined' && a instanceof CSSAnimation) &&
       !(typeof CSSTransition !== 'undefined' && a instanceof CSSTransition)));
