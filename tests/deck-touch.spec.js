@@ -38,7 +38,7 @@ for (const entry of ['cards', 'home']) {
     expect(new Set(ids).size).toBe(36);
     const inspected = fullCollection
       ? ids : ['clifford', 'chirikov', 'logistic', 'halvorsen'];
-    info.annotations.push({ type: 'coverage', description: `Inspected cards: ${inspected.join(', ')}. All 36 identities and images checked on entry.` });
+    info.annotations.push({ type: 'coverage', description: `Inspected cards: ${inspected.join(', ')}. All 36 identities and eager/visible images checked on entry; each inspected artwork checked on lift.` });
     const seenHolo = new Set();
     for (const id of inspected) {
       await test.step(id, async () => {

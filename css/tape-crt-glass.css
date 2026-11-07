@@ -240,7 +240,11 @@
   .tape-player__close { font-size: .57rem; }
   .tape-player__power { width: 40px; height: 40px; }
 }
-@media (max-width: 380px) { .tape-player__tv::after { aspect-ratio: 1 / 1.86; } }
+@media (max-width: 380px) {
+  /* The tube reaches its 600px minimum at these widths. Size its glass
+     independently so WebKit cannot transfer that height into a wider box. */
+  .tape-player__tv::after { aspect-ratio: auto; height: 600px; }
+}
 @media (max-width: 680px) {
   html.tv-controls-on-screen .footer-tape__transport,
   html.tv-controls-on-screen .back-top { visibility: hidden; pointer-events: none; }

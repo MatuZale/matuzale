@@ -363,7 +363,7 @@ function cardMarkup(card, index) {
                 ${energy}
               </div>
               <div class="tcard__art">
-                <img src="assets/deck/${file}.webp" alt="${card.alt}" width="${width}" height="${height}" decoding="async" draggable="false" />
+                <img src="assets/deck/${file}.webp" alt="${card.alt}" width="${width}" height="${height}" loading="${index < 8 ? "eager" : "lazy"}" decoding="async" draggable="false" />
                 <span class="tcard__foil" aria-hidden="true"></span>
                 ${HOLO[card.id] === "amazing" ? `<span class="tcard__glitter" aria-hidden="true"></span>` : ""}
                 ${card.id === "clam-triple" ? `<span class="tcard__theme-badge" aria-hidden="true">↻ LIGHT / DARK</span>` : ""}
@@ -387,16 +387,32 @@ function cardMarkup(card, index) {
     </li>`;
 }
 
+let stylesPromise;
 function loadStyles() {
-  return Promise.all(["../css/deck.css", "../css/deck-room.css", "../css/deck-symmetry.css", "../css/deck-bourke.css"].map(path => {
+  if (stylesPromise) return stylesPromise;
+  stylesPromise = Promise.all(["../css/deck.css", "../css/deck-room.css", "../css/deck-symmetry.css", "../css/deck-bourke.css"].map(path => {
     const href = new URL(path, import.meta.url).href;
-    if (document.querySelector(`link[href="${href}"]`)) return Promise.resolve();
-    return new Promise(resolve => {
-      const link = Object.assign(document.createElement("link"), { rel: "stylesheet", href });
-      link.onload = link.onerror = () => resolve();
-      document.head.append(link);
+    const existing = [...document.querySelectorAll('link[rel="stylesheet"]')].find(link => link.href === href);
+    if (existing?.sheet) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      const link = existing || Object.assign(document.createElement("link"), { rel: "stylesheet", href });
+      const cleanup = () => {
+        link.removeEventListener("load", loaded);
+        link.removeEventListener("error", failed);
+      };
+      const loaded = () => { cleanup(); resolve(); };
+      const failed = () => {
+        cleanup();
+        // An unsuccessful link must not count as a loaded stylesheet on retry.
+        link.remove();
+        reject(new Error(`Could not load collection stylesheet: ${href}`));
+      };
+      link.addEventListener("load", loaded, { once: true });
+      link.addEventListener("error", failed, { once: true });
+      if (!existing) document.head.append(link);
     });
-  }));
+  })).catch(error => { stylesPromise = undefined; throw error; });
+  return stylesPromise;
 }
 
 export async function createDeck() {
@@ -583,6 +599,9 @@ export async function createDeck() {
     }
     function place() { stage(); }
     function lift(input) {
+      // Keyboard selection can lift a card before scrolling near its image.
+      // Promote that one request while keeping the rest of the archive lazy.
+      el.querySelector('.tcard__art img').loading = "eager";
       const flying = el.classList.contains("is-staged");
       returning = false;
       el.parentElement.classList.remove("is-returning");

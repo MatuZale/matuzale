@@ -61,7 +61,12 @@ an explicit WebKit native-input skip remains visible and is documented below.
   individual functional runs more practical. Production CSS, assets
   and effects are unchanged.
 
-Every collection opening checks all 36 unique card IDs and all 36 loaded images. The
+Every collection opening checks all 36 unique card IDs and loaded eager/visible images.
+The first eight artworks load immediately; later ones load near the viewport or on lift.
+A separate desktop case checks that the distant last image is not requested on entry,
+that keyboard inspection promotes it, and that all 36 source images decode. A retry case
+interrupts a stylesheet request, checks that no unstyled dialog opens, and successfully
+reopens the collection after the next request. The
 gesture sweep uses four representatives in every entry/engine combination: Clifford
 (classic foil), Chirikov (reverse holo), Logistic (beam) and Halvorsen (amazing). This covers
 the shared controller and the original foil families without repeating every texture in the
@@ -87,7 +92,7 @@ Halvorsen additionally covers explicit Flip and inspection of the back in each c
 
 | Check | Entry and engine coverage |
 |---|---|
-| Regular inspection | 4 original foil families per entry and touch engine; all 36 identities/images checked each time |
+| Regular inspection | 4 original foil families per entry and touch engine; all 36 identities and eager/visible images checked on entry, each inspected artwork checked on lift |
 | Symmetry materials | All ten editions: artwork foil and card-surface pointer response, stationary material layer, ten material textures and ten background-protection masks decoded, material contrast and duplicate-file checks |
 | Symmetry corner continuity | All ten editions, four corners, normal/reduced motion: gradient coverage without image tiling, closed colour cycles, changing spectrum/front images, and phase geometry against actual layer bounds; Golden subject sheen included |
 | Bourke editions | Six identities and star ranks, two full-art layouts, all material/mask assets, pointer reflections in both themes and fixed-pointer wheel reflection in normal/reduced motion |

@@ -146,8 +146,12 @@ export async function openDeck(page, entry, touch = false) {
   await dealt(page);
   await expect(page.locator('.tcard__art img')).toHaveCount(36);
   await expect.poll(() => page.locator('.tcard__art img').evaluateAll(images =>
-    images.filter(img => !img.complete || !img.naturalWidth).map(img => img.currentSrc || img.src),
-  ), { message: 'Every card image must load; the failing URLs are listed below' }).toEqual([]);
+    images.filter(img => {
+      const box = img.getBoundingClientRect();
+      const visible = box.bottom > 0 && box.top < innerHeight && box.right > 0 && box.left < innerWidth;
+      return (img.loading === 'eager' || visible) && (!img.complete || !img.naturalWidth);
+    }).map(img => img.currentSrc || img.src),
+  ), { message: 'Eager and visible card images must load; off-screen artwork stays lazy' }).toEqual([]);
 }
 
 export async function lift(page, card, touch = true) {
@@ -164,6 +168,9 @@ export async function lift(page, card, touch = true) {
   if (touch) await card.tap();
   else await card.click();
   await expect(card).toHaveClass(/is-active/);
+  await expect(card.locator('.tcard__art img')).toHaveAttribute('loading', 'eager');
+  await expect.poll(() => card.locator('.tcard__art img').evaluate(img => img.complete && img.naturalWidth > 0),
+    { message: 'The lifted card artwork must load' }).toBe(true);
   await idle(page);
   if (touch) {
     // Preserve native tap coverage, including WebKit's touch down/up -> mouse click.

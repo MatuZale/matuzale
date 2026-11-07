@@ -43,11 +43,13 @@ test('cabinet keeps its controls outside the tube on desktop and phone', async (
       const screen = tv.querySelector('.tape-player__screen').getBoundingClientRect();
       const controls = tv.querySelector('.tape-player__controls').getBoundingClientRect();
       const glass = getComputedStyle(tv, '::after');
-      return { screen: { right: screen.right, bottom: screen.bottom, width: screen.width },
-        controls: { left: controls.left, top: controls.top }, glassWidth: parseFloat(glass.width),
+      return { screen: { right: screen.right, bottom: screen.bottom, width: screen.width, height: screen.height },
+        controls: { left: controls.left, top: controls.top },
+        glassWidth: parseFloat(glass.width), glassHeight: parseFloat(glass.height),
         overflow: document.documentElement.scrollWidth - innerWidth };
     });
     expect(Math.abs(geometry.glassWidth - geometry.screen.width)).toBeLessThan(2);
+    expect(Math.abs(geometry.glassHeight - geometry.screen.height)).toBeLessThan(2);
     expect(geometry.overflow).toBe(0);
     if (width > 1000) expect(geometry.controls.left).toBeGreaterThan(geometry.screen.right);
     else expect(geometry.controls.top).toBeGreaterThan(geometry.screen.bottom);

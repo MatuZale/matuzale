@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('the VHS sun only appears while About is visible and motion is enabled', async ({ page }) => {
+test('About scenes stop when hidden or reduced motion is enabled', async ({ page }) => {
   await page.goto('/');
   await page.locator('#about').scrollIntoViewIfNeeded();
   const horizon = page.locator('.horizon');
@@ -11,6 +11,23 @@ test('the VHS sun only appears while About is visible and motion is enabled', as
   }).toBe(true);
   await page.locator('#contact').scrollIntoViewIfNeeded();
   await expect(horizon).not.toHaveClass(/is-tape-sun/);
+
+  const runningNightAnimations = () => horizon.evaluate(el => el.getAnimations({ subtree: true }).filter(a =>
+    !(a instanceof CSSAnimation) && !(a instanceof CSSTransition) &&
+    (a.playState === 'running' || a.playState === 'paused')).length);
+  for (const reason of ['offscreen', 'reduced motion']) {
+    await page.locator('#about').scrollIntoViewIfNeeded();
+    await expect.poll(async () => {
+      await horizon.evaluate(el => { el.nightfall(); });
+      return runningNightAnimations();
+    }).toBeGreaterThan(0);
+    if (reason === 'offscreen') await page.locator('#contact').scrollIntoViewIfNeeded();
+    else await page.emulateMedia({ reducedMotion: 'reduce' });
+    await expect.poll(runningNightAnimations).toBe(0);
+    await expect(horizon).not.toHaveClass(/is-night/);
+    await expect(horizon.locator('.horizon__stars')).toBeHidden();
+    expect((await page.locator('.about-terminal__typed').allTextContents()).every(text => text === '')).toBe(true);
+  }
 
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.locator('#about').scrollIntoViewIfNeeded();

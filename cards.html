@@ -48,9 +48,21 @@
     import { createDeck } from "./js/deck.js";
 
     const opener = document.querySelector("[data-deck-open]");
-    const deck = await createDeck();
-    opener.addEventListener("click", () => deck.open(opener));
-    deck.open(opener);
+    let deck;
+    async function openDeck() {
+      opener.setAttribute("aria-busy", "true");
+      try {
+        deck ??= createDeck();
+        (await deck).open(opener);
+      } catch (error) {
+        deck = undefined;
+        console.error(error);
+      } finally {
+        opener.removeAttribute("aria-busy");
+      }
+    }
+    opener.addEventListener("click", openDeck);
+    openDeck();
   </script>
 </body>
 </html>

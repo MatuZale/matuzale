@@ -24,7 +24,13 @@ function tapeTimeout(callback, duration) {
   sync();
   return cancel;
 }
-const wait = ms => new Promise(done => tapeTimeout(done, ms));
+const wait = (ms, signal) => new Promise(done => {
+  const finish = completed => { signal.removeEventListener("abort", abort); done(completed); };
+  const cancel = tapeTimeout(() => finish(true), ms);
+  const abort = () => { cancel(); finish(false); };
+  signal.addEventListener("abort", abort, { once: true });
+  if (signal.aborted) abort();
+});
 
 export function startNightfall(horizon) {
   const sky = horizon.querySelector(".horizon__sky"), sun = horizon.querySelector(".horizon__sun");
@@ -32,7 +38,7 @@ export function startNightfall(horizon) {
   const aboutParagraphs = horizon.parentElement.querySelectorAll(".about__text > p:not(.kicker)");
   const prompt = document.querySelector(".about-terminal__prompt");
   const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  let visible = false, busy = false, restUntil = 0, tapeRestUntil = 0, tapeTimer = null, moon, stars, meteor, landscape;
+  let visible = false, busy = false, restUntil = 0, tapeRestUntil = 0, tapeTimer = null, nightSession = null, moon, stars, meteor, landscape;
 
   // A short sideways journey, like looking out of a train at dusk. The SVGs are
   // built only on first use; two copies of each tile let the compositor loop
@@ -97,6 +103,8 @@ export function startNightfall(horizon) {
     moon = Object.assign(document.createElement("span"), { className: "horizon__moon" });
     meteor = Object.assign(document.createElement("span"), { className: "horizon__meteor" });
     stars = Object.assign(document.createElement("span"), { className: "horizon__stars" });
+    // Opacity alone leaves all 46 twinkle animations running between nights.
+    stars.hidden = true;
     for (let i = 0; i < STARS; i++) {
       const star = document.createElement("i");
       if (Math.random() < .25) star.className = "is-big";
@@ -108,70 +116,108 @@ export function startNightfall(horizon) {
 
   // The terminal's prompt types a command, and later takes it back.
   let typed;
-  async function type(text, pause = 85) {
+  async function type(text, signal, pause = 85) {
     if (!prompt || document.documentElement.classList.contains("is-binary")) return;
     typed ??= prompt.insertBefore(Object.assign(document.createElement("span"), { className: "about-terminal__typed" }), prompt.querySelector(".about-terminal__cursor"));
-    for (const ch of text) { typed.textContent += ch; await wait(pause * rand(.6, 1.4)); }
+    for (const ch of text) {
+      if (signal.aborted) return;
+      typed.textContent += ch;
+      if (!await wait(pause * rand(.6, 1.4), signal)) return;
+    }
   }
-  async function erase() {
-    while (typed?.textContent) { typed.textContent = typed.textContent.slice(0, -1); await wait(40); }
+  async function erase(signal) {
+    while (typed?.textContent && !signal.aborted) {
+      typed.textContent = typed.textContent.slice(0, -1);
+      if (!await wait(40, signal)) return;
+    }
+  }
+  function finishNightfall(immediate = false) {
+    const session = nightSession;
+    if (!session) return;
+    nightSession = null;
+    session.controller.abort();
+    session.animations.forEach(animation => animation.cancel());
+    if (immediate) horizon.classList.add("is-tape-sun-reset");
+    horizon.classList.remove("is-night");
+    if (stars) stars.hidden = true;
+    if (typed) typed.textContent = "";
+    if (immediate) {
+      void horizon.offsetWidth;
+      horizon.classList.remove("is-tape-sun-reset");
+    }
+    restUntil = performance.now() + REST * 1000;
+    busy = false;
   }
 
   async function nightfall() {
-    if (busy || tapeTimer || motion.matches || tapePaused()) return;
+    if (!visible || document.hidden || busy || tapeTimer || motion.matches || tapePaused()) return;
     busy = true;
-    build();
-    const h = sun.offsetHeight, rise = Math.min(sky.clientHeight * .42, h * 1.1);
-    const down = y => `translateY(${(y * h).toFixed(1)}px)`, dusk = "hue-rotate(-14deg) saturate(1.35)";
+    const session = { controller: new AbortController(), animations: [] };
+    nightSession = session;
+    const { signal } = session.controller;
+    const animate = (element, frames, options) => {
+      const animation = element.animate(frames, options);
+      session.animations.push(animation);
+      return animation;
+    };
+    try {
+      build();
+      const h = sun.offsetHeight, rise = Math.min(sky.clientHeight * .42, h * 1.1);
+      const down = y => `translateY(${(y * h).toFixed(1)}px)`, dusk = "hue-rotate(-14deg) saturate(1.35)";
 
-    // Down it goes; up again for a peek; and under.
-    const set = sun.animate([
-      { transform: down(0), filter: "none", easing: "cubic-bezier(.45, 0, .8, .6)" },
-      { transform: down(.52), filter: dusk, offset: .62, easing: "cubic-bezier(.2, .8, .4, 1)" },
-      { transform: down(.38), filter: dusk, offset: .74 },
-      { transform: down(.38), filter: dusk, offset: .84, easing: "cubic-bezier(.6, 0, 1, .6)" },
-      { transform: down(.6), filter: dusk, opacity: 1, offset: .9 },
-      { transform: down(.6), filter: dusk, opacity: .3 },
-    ], { duration: 4200, fill: "forwards" });
-    await wait(3400);
-    horizon.classList.add("is-night");
-    type("sleep 8");
-    await wait(400);
+      // Down it goes; up again for a peek; and under.
+      animate(sun, [
+        { transform: down(0), filter: "none", easing: "cubic-bezier(.45, 0, .8, .6)" },
+        { transform: down(.52), filter: dusk, offset: .62, easing: "cubic-bezier(.2, .8, .4, 1)" },
+        { transform: down(.38), filter: dusk, offset: .74 },
+        { transform: down(.38), filter: dusk, offset: .84, easing: "cubic-bezier(.6, 0, 1, .6)" },
+        { transform: down(.6), filter: dusk, opacity: 1, offset: .9 },
+        { transform: down(.6), filter: dusk, opacity: .3 },
+      ], { duration: 4200, fill: "forwards" });
+      if (!await wait(3400, signal)) return;
+      stars.hidden = false;
+      void stars.offsetWidth;
+      horizon.classList.add("is-night");
+      type("sleep 8", signal);
+      if (!await wait(400, signal)) return;
 
-    // The moon rises to the right of where the sun went down, drifting a little towards it.
-    const up = moon.animate([
-      { transform: "translate(0, 110%)" },
-      { transform: `translate(-6%, ${-rise}px)` },
-    ], { duration: 3000, easing: "cubic-bezier(.2, .7, .3, 1)", fill: "forwards" });
-    await wait(3400);
-    meteor.animate([
-      { transform: "translate(0, 0) rotate(-19deg)", opacity: 0 },
-      { transform: `translate(${-rise * .35}px, ${rise * .12}px) rotate(-19deg)`, opacity: 1, offset: .25 },
-      { transform: `translate(${-rise * 1.4}px, ${rise * .48}px) rotate(-19deg)`, opacity: 0 },
-    ], { duration: 900, easing: "cubic-bezier(.3, 0, .7, 1)" });
-    await wait(3300);
+      // The moon rises to the right of where the sun went down, drifting a little towards it.
+      animate(moon, [
+        { transform: "translate(0, 110%)" },
+        { transform: `translate(-6%, ${-rise}px)` },
+      ], { duration: 3000, easing: "cubic-bezier(.2, .7, .3, 1)", fill: "forwards" });
+      if (!await wait(3400, signal)) return;
+      animate(meteor, [
+        { transform: "translate(0, 0) rotate(-19deg)", opacity: 0 },
+        { transform: `translate(${-rise * .35}px, ${rise * .12}px) rotate(-19deg)`, opacity: 1, offset: .25 },
+        { transform: `translate(${-rise * 1.4}px, ${rise * .48}px) rotate(-19deg)`, opacity: 0 },
+      ], { duration: 900, easing: "cubic-bezier(.3, 0, .7, 1)" });
+      if (!await wait(3300, signal)) return;
 
-    // Morning: the moon sets, the stars go, and the sun is back, overshooting a little and settling.
-    const below = moon.animate([
-      { transform: `translate(-6%, ${-rise}px)` },
-      { transform: "translate(-12%, 110%)" },
-    ], { duration: 2200, easing: "cubic-bezier(.5, 0, .8, .5)", fill: "forwards" });
-    await wait(1300);
-    horizon.classList.remove("is-night");
-    await wait(400);
-    erase();
-    await wait(400);
-    const back = sun.animate([
-      { transform: down(.6), filter: dusk, opacity: .3, easing: "cubic-bezier(.2, .9, .3, 1)" },
-      { transform: down(-.07), filter: "none", opacity: 1, offset: .55, easing: "ease-in-out" },
-      { transform: down(.025), offset: .72, easing: "ease-in-out" },
-      { transform: down(-.01), offset: .86, easing: "ease-in-out" },
-      { transform: down(0), filter: "none", opacity: 1 },
-    ], { duration: 2600, fill: "forwards" });
-    await back.finished;
-    [set, back, up, below].forEach(a => a.cancel());
-    restUntil = performance.now() + REST * 1000;
-    busy = false;
+      // Morning: the moon sets, the stars go, and the sun is back, overshooting a little and settling.
+      animate(moon, [
+        { transform: `translate(-6%, ${-rise}px)` },
+        { transform: "translate(-12%, 110%)" },
+      ], { duration: 2200, easing: "cubic-bezier(.5, 0, .8, .5)", fill: "forwards" });
+      if (!await wait(1300, signal)) return;
+      horizon.classList.remove("is-night");
+      if (!await wait(400, signal)) return;
+      erase(signal);
+      if (!await wait(400, signal)) return;
+      const back = animate(sun, [
+        { transform: down(.6), filter: dusk, opacity: .3, easing: "cubic-bezier(.2, .9, .3, 1)" },
+        { transform: down(-.07), filter: "none", opacity: 1, offset: .55, easing: "ease-in-out" },
+        { transform: down(.025), offset: .72, easing: "ease-in-out" },
+        { transform: down(-.01), offset: .86, easing: "ease-in-out" },
+        { transform: down(0), filter: "none", opacity: 1 },
+      ], { duration: 2600, fill: "forwards" });
+      await back.finished;
+    } catch (error) {
+      if (!signal.aborted) throw error;
+    } finally {
+      // A cancelled sequence may settle after a new one has already started.
+      if (nightSession === session) finishNightfall();
+    }
   }
   horizon.nightfall = nightfall;
 
@@ -193,9 +239,10 @@ export function startNightfall(horizon) {
     }
   });
 
-  new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; if (!visible) finishTapeSun(true); }).observe(horizon);
-  motion.addEventListener("change", () => { if (motion.matches) finishTapeSun(true); });
-  document.addEventListener("visibilitychange", () => { if (document.hidden) finishTapeSun(true); });
+  const cancelScenes = () => { finishTapeSun(true); finishNightfall(true); };
+  new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; if (!visible) cancelScenes(); }).observe(horizon);
+  motion.addEventListener("change", () => { if (motion.matches) cancelScenes(); });
+  document.addEventListener("visibilitychange", () => { if (document.hidden) cancelScenes(); });
   setInterval(() => {
     if (!visible || busy || tapeTimer || document.hidden || motion.matches || tapePaused()) return;
     if (performance.now() >= restUntil && Math.random() < 1 - Math.exp(-1 / MEAN)) nightfall();

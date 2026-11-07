@@ -10,6 +10,69 @@ async function faceOn(page, card) {
   return values(card);
 }
 
+test('distant artwork waits for inspection and all 36 source images decode', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 640 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const requested = new Set();
+  page.on('request', request => requested.add(request.url()));
+  await openDeck(page, 'cards');
+  const images = await page.locator('.tcard__art img').evaluateAll(items =>
+    items.map(img => ({ src: img.src, loading: img.loading,
+      width: Number(img.getAttribute('width')), height: Number(img.getAttribute('height')) })),
+  );
+  expect(images).toHaveLength(36);
+  expect(images.every(img => img.width > 0 && img.height > 0), 'Every image reserves its intrinsic aspect ratio').toBe(true);
+  expect(images.slice(0, 8).every(img => img.loading === 'eager')).toBe(true);
+  expect(images.slice(8).every(img => img.loading === 'lazy')).toBe(true);
+  expect(requested.has(images.at(-1).src), 'The last card is far below the initial viewport').toBe(false);
+
+  // Native Enter, after focus without scrolling, exercises promotion even
+  // when an image has not crossed the browser's lazy-loading threshold.
+  const last = page.locator('.tcard').last();
+  await last.evaluate(el => el.focus({ preventScroll: true }));
+  await page.keyboard.press('Enter');
+  await expect(last).toHaveClass(/is-active/);
+  await expect(last.locator('img')).toHaveAttribute('loading', 'eager');
+  await expect.poll(() => last.locator('img').evaluate(img => img.complete && img.naturalWidth > 0)).toBe(true);
+
+  // Keep full asset coverage without forcing every DOM image to load each
+  // time a gesture test opens the collection.
+  const failures = await page.evaluate(async sources => Promise.all(sources.map(async src => {
+    const image = new Image();
+    image.src = src;
+    try { await image.decode(); return image.naturalWidth && image.naturalHeight ? null : src; }
+    catch { return src; }
+  })), images.map(img => img.src));
+  expect(failures.filter(Boolean), 'Every one of the 36 artworks must decode').toEqual([]);
+});
+
+for (const entry of ['cards', 'home']) test(`${entry}: a failed collection stylesheet can be retried without an unstyled dialog`, async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  let attempts = 0;
+  await page.route('**/css/deck-bourke.css', route => ++attempts === 1 ? route.abort('failed') : route.continue());
+  const opener = page.locator('[data-deck-open]');
+  await page.goto(entry === 'cards' ? '/cards.html' : '/index.html?lang=en');
+  if (entry === 'home') {
+    await page.locator('#project-shelf #art').click();
+    await opener.click();
+  }
+  await expect.poll(() => attempts).toBe(1);
+  await expect(opener).not.toHaveAttribute('aria-busy', 'true');
+  await expect(page.locator('.deck')).toHaveCount(0);
+  await expect(page.locator('link[href$="/css/deck-bourke.css"]')).toHaveCount(0);
+  await opener.click();
+  await expect(page.locator('.deck')).toBeVisible();
+  expect(attempts).toBe(2);
+  expect(await page.evaluate(() => [...document.querySelectorAll('link[rel="stylesheet"]')]
+    .filter(link => /\/css\/deck(?:-room|-symmetry|-bourke)?\.css$/.test(link.href))
+    .map(link => Boolean(link.sheet)),
+  )).toEqual([true, true, true, true]);
+  await page.locator('.deck__close').click();
+  await opener.click();
+  await expect(page.locator('.deck')).toBeVisible();
+  expect(attempts).toBe(2);
+});
+
 for (const entry of ['cards', 'home']) {
   // Both engines exercise all mouse/keyboard actions: wide standalone and narrow inline entry.
   for (const width of [entry === 'cards' ? 1280 : 390]) {
