@@ -7,7 +7,7 @@
 // Decoration only (the horizon is aria-hidden); never with reduced motion. Loaded by script.js when About
 // is first in sight.
 
-const MEAN = 200, REST = 60, TAPE_MEAN = 180, TAPE_DURATION = 8000, STARS = 46;
+const MEAN = 200, REST = 60, TAPE_MEAN = 180, TAPE_DURATION = 12000, STARS = 46;
 const rand = (a, b) => a + Math.random() * (b - a);
 const tapePaused = () => document.documentElement.classList.contains("is-tape-paused");
 // The sunset sequence must wait for tape time, not wall time, or it would run
@@ -30,7 +30,28 @@ export function startNightfall(horizon) {
   const sky = horizon.querySelector(".horizon__sky"), sun = horizon.querySelector(".horizon__sun");
   const prompt = document.querySelector(".about-terminal__prompt");
   const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  let visible = false, busy = false, restUntil = 0, tapeRestUntil = 0, tapeTimer = null, moon, stars, meteor;
+  let visible = false, busy = false, restUntil = 0, tapeRestUntil = 0, tapeTimer = null, moon, stars, meteor, landscape;
+
+  // A short sideways journey, like looking out of a train at dusk. The SVGs are
+  // built only on first use; two copies of each tile let the compositor loop
+  // the scenery without painting a new landscape on every frame.
+  function buildTapeLandscape() {
+    if (landscape) return;
+    landscape = Object.assign(document.createElement("div"), { className: "horizon__landscape" });
+    const mountains = `<path class="horizon__terrain-fill" d="M0 200V148L70 116 127 142 217 44 285 101 339 68 418 143 489 116 557 149 639 74 702 111 776 26 859 117 924 85 1007 146 1092 92 1162 131 1200 148V200Z"/>
+      <path class="horizon__ridge" d="M0 148L70 116 127 142 217 44 285 101 339 68 418 143 489 116 557 149 639 74 702 111 776 26 859 117 924 85 1007 146 1092 92 1162 131 1200 148"/>
+      <path class="horizon__mesh" d="M70 116L101 200M127 142L217 44 242 200M217 44L166 171 285 101 315 200M339 68L320 155 418 143 449 200M489 116L465 176 557 149 588 200M639 74L607 167 702 111 720 200M776 26L738 167 859 117 883 200M776 26L822 156 924 85 948 200M1007 146L1092 92 1110 200M1092 92L1057 172 1162 131 1186 200M0 179L101 171 166 171 242 158 320 155 391 176 465 176 535 182 607 167 677 171 738 167 822 156 883 170 948 170 1057 172 1110 174 1200 181"/>`;
+    const skyline = `<path class="horizon__city-fill" d="M0 200V173H49V153H75V164H101V128H116V117H122V128H139V171H171V146H199V178H231V162H248V111H273V102H282V111H304V165H335V147H359V173H398V153H427V181H468V163H495V133H529V173H560V152H589V177H624V143H650V98H657V86H663V98H684V161H710V139H736V172H770V157H793V124H820V114H829V124H847V171H880V148H908V179H943V158H969V137H997V170H1030V153H1058V178H1084V143H1108V123H1132V143H1152V173H1200V200Z"/>
+      <path class="horizon__city-rim" d="M0 173H49V153H75V164H101V128H116V117H122V128H139V171H171V146H199V178H231V162H248V111H273V102H282V111H304V165H335V147H359V173H398V153H427V181H468V163H495V133H529V173H560V152H589V177H624V143H650V98H657V86H663V98H684V161H710V139H736V172H770V157H793V124H820V114H829V124H847V171H880V148H908V179H943V158H969V137H997V170H1030V153H1058V178H1084V143H1108V123H1132V143H1152V173H1200"/>
+      <path class="horizon__windows" d="M109 141H114M126 151H131M109 159H114M256 122H261M287 122H292M256 139H261M272 148H277M287 156H292M503 145H508M516 153H521M658 111H663M672 126H677M658 143H663M801 137H806M832 137H837M816 151H821M801 160H806M977 149H982M985 161H990M1116 138H1121M1116 155H1121"/>`;
+    for (const [depth, drawing] of [["far", mountains], ["near", skyline]]) {
+      const layer = Object.assign(document.createElement("div"), { className: `horizon__landscape-layer horizon__landscape-layer--${depth}` });
+      const tile = `<svg viewBox="0 0 1200 200" preserveAspectRatio="none" aria-hidden="true" focusable="false">${drawing}</svg>`;
+      layer.innerHTML = tile + tile;
+      landscape.append(layer);
+    }
+    horizon.append(landscape);
+  }
 
   function endTapeSun() {
     if (!tapeTimer) return;
@@ -41,6 +62,7 @@ export function startNightfall(horizon) {
   }
   function tapeSun() {
     if (!visible || busy || tapeTimer || document.hidden || motion.matches || tapePaused()) return false;
+    buildTapeLandscape();
     horizon.classList.add("is-tape-sun");
     tapeTimer = tapeTimeout(endTapeSun, TAPE_DURATION);
     return true;
@@ -130,12 +152,13 @@ export function startNightfall(horizon) {
   }
   horizon.nightfall = nightfall;
 
-  // The sunset and moon use Web Animations rather than CSS. Keep only the
-  // ones we actually suspended, so animations paused for other reasons stay put.
+  // CSS keyframes are held by the shared tape rule. Hold Web Animations and
+  // the sunset's CSS transitions here too, including a partly risen sun.
+  // Only resume animations we suspended, not ones held for other reasons.
   let heldAnimations = [];
   document.addEventListener("tape-pause-change", () => {
     if (tapePaused()) {
-      heldAnimations = horizon.getAnimations({ subtree: true }).filter(a => !(typeof CSSAnimation !== "undefined" && a instanceof CSSAnimation) && !(typeof CSSTransition !== "undefined" && a instanceof CSSTransition) && a.playState === "running");
+      heldAnimations = horizon.getAnimations({ subtree: true }).filter(a => !(typeof CSSAnimation !== "undefined" && a instanceof CSSAnimation) && a.playState === "running");
       heldAnimations.forEach(a => a.pause());
     } else {
       heldAnimations.forEach(a => { if (a.playState === "paused") a.play(); });

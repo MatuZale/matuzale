@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 782" preserveAspectRatio="none">
+  <!-- Original rounded palette-knife dabs, with thin separated dry edges. -->
+  <defs>
+    <linearGradient id="left"><stop stop-color="white"/><stop offset=".6" stop-color="white" stop-opacity=".6"/><stop offset="1" stop-color="white" stop-opacity="0"/></linearGradient>
+    <linearGradient id="right"><stop stop-color="white" stop-opacity="0"/><stop offset=".4" stop-color="white" stop-opacity=".6"/><stop offset="1" stop-color="white"/></linearGradient>
+  </defs>
+  <g fill="url(#left)">
+    <path d="M0 425C26 413 56 429 66 452 77 476 58 487 39 471 46 489 37 501 25 490 10 477 12 458 0 457Z"/>
+    <path d="M0 545C17 525 47 535 57 554 73 583 50 600 31 577 39 597 28 608 16 595L0 573Z"/>
+    <path d="M0 651C23 648 52 659 66 684 81 712 59 724 42 703 51 723 33 727 21 709L0 687Z"/>
+    <path d="M29 747C51 730 82 735 96 759L76 764 60 758 65 768 42 765Z"/>
+  </g>
+  <g fill="url(#right)">
+    <path d="M560 459C534 441 506 451 498 473 488 501 510 507 526 489 516 511 532 519 545 501L560 494Z"/>
+    <path d="M560 567C540 555 519 570 508 589 492 613 511 629 530 607 519 630 539 640 551 621L560 611Z"/>
+    <path d="M560 692C534 677 511 688 494 714 483 731 501 746 524 722 515 745 536 753 550 734L560 735Z"/>
+  </g>
+  <g fill="none" stroke="white" stroke-opacity=".42" stroke-width="1.1">
+    <path d="M0 432C31 422 45 446 56 468M0 551C32 537 39 572 52 586M0 662C28 652 45 684 56 704M560 466C535 452 518 474 506 492M560 576C536 566 526 599 514 614M560 701C537 685 516 713 504 732"/>
+  </g>
+  <g fill="white" opacity=".5"><ellipse cx="22" cy="516" rx="3" ry="6"/><ellipse cx="538" cy="545" rx="2" ry="5"/><ellipse cx="26" cy="630" rx="2" ry="4"/><ellipse cx="541" cy="663" rx="3" ry="6"/></g>
+</svg>

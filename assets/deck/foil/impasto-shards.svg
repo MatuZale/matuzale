@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 782" preserveAspectRatio="none">
+  <!-- Original broken knife strokes. No external art or expensive SVG filters. -->
+  <defs>
+    <linearGradient id="left"><stop stop-color="white"/><stop offset=".6" stop-color="white" stop-opacity=".6"/><stop offset="1" stop-color="white" stop-opacity="0"/></linearGradient>
+    <linearGradient id="right"><stop stop-color="white" stop-opacity="0"/><stop offset=".4" stop-color="white" stop-opacity=".6"/><stop offset="1" stop-color="white"/></linearGradient>
+  </defs>
+  <g fill="url(#left)">
+    <path d="M0 415 48 426 77 451 71 455 88 475 75 477 42 456 52 472 23 461 0 445Z"/>
+    <path d="M0 532 25 521 60 544 87 576 75 578 57 563 66 580 41 571 17 550 0 552Z"/>
+    <path d="M0 646 37 635 59 664 84 691 71 696 51 677 60 696 30 682 19 668 0 672Z"/>
+    <path d="M13 740 54 730 94 749 113 762 96 765 78 757 84 768 45 763Z"/>
+  </g>
+  <g fill="url(#right)">
+    <path d="M560 455 530 447 499 476 478 497 488 502 515 482 503 503 537 485 560 487Z"/>
+    <path d="M560 565 529 558 504 582 483 613 494 616 517 597 505 619 534 604 560 608Z"/>
+    <path d="M560 693 530 680 498 709 472 735 485 741 511 722 500 741 532 728 560 735Z"/>
+  </g>
+  <g fill="none" stroke="white" stroke-opacity=".4" stroke-width="1.1">
+    <path d="M0 425 40 435 69 462M0 540 23 534 74 569M0 655 32 646 71 686M30 746 55 741 94 758M560 466 534 457 492 496M560 574 535 571 494 609M560 702 534 692 489 731"/>
+  </g>
+</svg>

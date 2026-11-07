@@ -67,10 +67,13 @@
   --beam-scale-y: 2.4;
   --material-size: 100% 100%;
   --surface-mask: url('../assets/deck/foil/frame-window.webp');
-  --surface-blend: color-dodge;
-  --surface-brightness: .72;
-  --surface-strength: .76;
-  --art-strength: .85;
+  --surface-blend: soft-light;
+  --surface-brightness: .9;
+  --surface-strength: .24;
+  --art-strength: .42;
+  --ring-o: .26;
+  --emboss-blend: screen;
+  --paint-mask: url('../assets/deck/foil/impasto-ribbons.svg');
   --spectrum-colour-1: #ee456a;
   --spectrum-colour-2: #f6b94f;
   --spectrum-colour-3: #acec75;
@@ -85,20 +88,18 @@
   --spectrum-stop-6: 30%;
   --spectrum-stop-7: 36%;
 }
-.tcard--swirling-streamers { --material: url('../assets/deck/foil/material-swirling-streamers.webp'); --ground: url('../assets/deck/foil/ground-swirling-streamers.webp'); }
-.tcard--sand-dollar { --material: url('../assets/deck/foil/material-sand-dollar.webp'); --ground: url('../assets/deck/foil/ground-sand-dollar.webp'); }
-.tcard--pentagon { --material: url('../assets/deck/foil/material-pentagon.webp'); --ground: url('../assets/deck/foil/ground-pentagon.webp'); }
-.tcard--halloween { --material: url('../assets/deck/foil/material-halloween.webp'); --ground: url('../assets/deck/foil/ground-halloween.webp'); }
-.tcard--golden-flintstone { --material: url('../assets/deck/foil/material-golden-flintstone.webp'); --ground: url('../assets/deck/foil/art-golden-flintstone.webp'); }
-.tcard--chaotic-flower { --material: url('../assets/deck/foil/material-chaotic-flower.webp'); --ground: url('../assets/deck/foil/ground-chaotic-flower.webp'); }
-.tcard--french-glass { --material: url('../assets/deck/foil/material-french-glass.webp'); --ground: url('../assets/deck/foil/ground-french-glass.webp'); }
-.tcard--pentacle { --material: url('../assets/deck/foil/material-pentacle.webp'); --ground: url('../assets/deck/foil/ground-pentacle.webp'); }
-.tcard--mayan-bracelet { --material: url('../assets/deck/foil/material-mayan-bracelet.webp'); --ground: url('../assets/deck/foil/ground-mayan-bracelet.webp'); }
-.tcard--clam-triple { --material: url('../assets/deck/foil/material-clam-triple.webp'); --ground: url('../assets/deck/foil/ground-clam-triple.webp'); }
+.tcard--swirling-streamers { --material: url('../assets/deck/foil/material-swirling-streamers.webp'); --ground: url('../assets/deck/foil/ground-swirling-streamers.webp'); --ornament: url('../assets/deck/foil/icon-swirling-streamers.webp'); }
+.tcard--sand-dollar { --material: url('../assets/deck/foil/material-sand-dollar.webp'); --ground: url('../assets/deck/foil/ground-sand-dollar.webp'); --ornament: url('../assets/deck/foil/icon-sand-dollar.webp'); }
+.tcard--pentagon { --material: url('../assets/deck/foil/material-pentagon.webp'); --ground: url('../assets/deck/foil/ground-pentagon.webp'); --ornament: url('../assets/deck/foil/icon-pentagon.webp'); }
+.tcard--halloween { --material: url('../assets/deck/foil/material-halloween.webp'); --ground: url('../assets/deck/foil/ground-halloween.webp'); --ornament: url('../assets/deck/foil/icon-halloween.webp'); }
+.tcard--golden-flintstone { --material: url('../assets/deck/foil/material-golden-flintstone.webp'); --ground: url('../assets/deck/foil/art-golden-flintstone.webp'); --ornament: url('../assets/deck/foil/icon-golden-flintstone.webp'); }
+.tcard--chaotic-flower { --material: url('../assets/deck/foil/material-chaotic-flower.webp'); --ground: url('../assets/deck/foil/ground-chaotic-flower.webp'); --ornament: url('../assets/deck/foil/icon-chaotic-flower.webp'); }
+.tcard--french-glass { --material: url('../assets/deck/foil/material-french-glass.webp'); --ground: url('../assets/deck/foil/ground-french-glass.webp'); --ornament: url('../assets/deck/foil/icon-french-glass.webp'); }
+.tcard--pentacle { --material: url('../assets/deck/foil/material-pentacle.webp'); --ground: url('../assets/deck/foil/ground-pentacle.webp'); --ornament: url('../assets/deck/foil/icon-pentacle.webp'); }
+.tcard--mayan-bracelet { --material: url('../assets/deck/foil/material-mayan-bracelet.webp'); --ground: url('../assets/deck/foil/ground-mayan-bracelet.webp'); --ornament: url('../assets/deck/foil/icon-mayan-bracelet.webp'); }
+.tcard--clam-triple { --material: url('../assets/deck/foil/material-clam-triple.webp'); --ground: url('../assets/deck/foil/ground-clam-triple.webp'); --ornament: url('../assets/deck/foil/icon-clam-triple.webp'); }
 
-/* Two painted surfaces replace the generic rarity overlays. */
-:root .deck .tcard.tcard--symmetry .tcard__panel::before,
-:root .deck .tcard.tcard--symmetry .tcard__panel::after,
+/* The dedicated material surfaces replace the generic rarity overlays. */
 :root .deck .tcard.tcard--symmetry .tcard__shine::before,
 :root .deck .tcard.tcard--symmetry .tcard__shine::after,
 :root .deck .tcard.tcard--symmetry .tcard__foil::before,
@@ -146,7 +147,7 @@
   background-position: center;
   background-repeat: no-repeat;
   background-blend-mode: soft-light, color, screen, normal;
-  filter: brightness(var(--surface-brightness)) contrast(1.65) saturate(1.45);
+  filter: brightness(var(--surface-brightness)) contrast(1.18) saturate(.85);
   mix-blend-mode: var(--surface-blend);
   transform: none;
   clip-path: none;
@@ -154,17 +155,19 @@
   mask-composite: add;
 }
 :root .deck .tcard.tcard--symmetry .tcard__shine {
-  opacity: calc(.035 + var(--o, 0) * var(--surface-strength) * var(--incidence));
+  opacity: calc(.018 + var(--o, 0) * var(--surface-strength) * var(--incidence));
+  /* The lower stock catches silver light, not a rainbow wash. */
+  filter: grayscale(1) brightness(var(--surface-brightness)) contrast(1.12);
   -webkit-mask: var(--surface-mask) center / 100% 100% no-repeat;
   mask: var(--surface-mask) center / 100% 100% no-repeat;
 }
 :root .deck .tcard.tcard--symmetry .tcard__foil {
-  opacity: calc(.055 + var(--o, 0) * var(--art-strength) * var(--incidence));
+  opacity: calc(.025 + var(--o, 0) * var(--art-strength) * var(--incidence));
   -webkit-mask: var(--ground) center / cover no-repeat;
   mask: var(--ground) center / cover no-repeat;
-  mix-blend-mode: color-dodge;
+  mix-blend-mode: screen;
   --material-size: 100% auto;
-  --surface-brightness: .8;
+  --surface-brightness: .72;
   /* Window: 86.8cqw wide at 16/9.6, minus its 0.8cqw rim on each side. */
   --paint-width: 85.2cqw;
   --paint-height: 50.48cqw;
@@ -172,14 +175,61 @@
 /* Gloss is narrow and translucent. It never paints a grey veil over the art. */
 :root .deck .tcard.tcard--symmetry .tcard__front > .tcard__glare {
   background: radial-gradient(ellipse at var(--light-x) var(--light-y), #fff1d94d 0%, #c7d9ff17 16%, transparent 42%);
-  opacity: calc(var(--o, 0) * .36 * var(--incidence));
+  opacity: calc(var(--o, 0) * .24 * var(--incidence));
   mix-blend-mode: screen;
 }
 :root .deck .tcard.tcard--symmetry .tcard__front::before {
   background: var(--material) center / 100% 100%;
   mix-blend-mode: soft-light;
-  opacity: .22;
+  opacity: .12;
 }
+
+/* Raised, brushed varnish below the foil. The irregular islands and each
+   card's fine material stay fixed; only the raking light crosses their ridges.
+   The mask keeps the middle of the rules clear, with dry edges at the margins. */
+:root .deck .tcard.tcard--symmetry .tcard__panel::before,
+:root .deck .tcard.tcard--symmetry .tcard__panel::after {
+  content: "";
+  display: block;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+}
+:root .deck .tcard.tcard--symmetry .tcard__panel > :not(.tcard__art) {
+  /* These are flex items: z-index alone puts printed content above varnish,
+     without changing positioning or the containing block of descendants. */
+  z-index: 2;
+}
+:root .deck .tcard.tcard--symmetry .tcard__panel::before {
+  background-image: var(--material),
+    radial-gradient(ellipse at var(--light-x) var(--light-y), #fff 0%, #9c9c9c 24%, #272727 48%, #080808 76%);
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-blend-mode: hard-light;
+  -webkit-mask: var(--paint-mask) center / 100% 100% no-repeat;
+  mask: var(--paint-mask) center / 100% 100% no-repeat;
+  mix-blend-mode: var(--emboss-blend);
+  filter: grayscale(1) contrast(1.25);
+  opacity: calc(.025 + var(--o, 0) * .24 * var(--incidence));
+}
+/* Tiny monochrome stamps share the original per-card engraving. Restrict
+   them to the lower stock, and let their already attenuated alpha protect text. */
+:root .deck .tcard.tcard--symmetry .tcard__panel::after {
+  background: linear-gradient(calc(118deg + var(--fx) * 24deg), #151515 20%, #b8b8b8 42%, #fff 49%, #777 57%, #171717 78%);
+  -webkit-mask: var(--ornament) center / 100% 100% no-repeat,
+    linear-gradient(transparent 52%, #000 65%, #000 93%, transparent 99%);
+  -webkit-mask-composite: source-in;
+  mask: var(--ornament) center / 100% 100% no-repeat,
+    linear-gradient(transparent 52%, #000 65%, #000 93%, transparent 99%);
+  mask-composite: intersect;
+  mix-blend-mode: var(--emboss-blend);
+  opacity: calc(.045 + var(--o, 0) * .3 * var(--incidence));
+}
+:root .deck .tcard.tcard--symmetry:is(.tcard--sand-dollar, .tcard--halloween, .tcard--chaotic-flower, .tcard--mayan-bracelet) { --paint-mask: url('../assets/deck/foil/impasto-petals.svg'); }
+:root .deck .tcard.tcard--symmetry:is(.tcard--pentagon, .tcard--golden-flintstone, .tcard--french-glass, .tcard--pentacle) { --paint-mask: url('../assets/deck/foil/impasto-shards.svg'); }
 
 /* Each plate has a different grain direction, spectral cadence and reflection. */
 :root .deck .tcard.tcard--swirling-streamers { --beam-angle: 66deg; --spectral-angle: 158deg; --beam-scale-x: 3; --beam-scale-y: 2.1; --spectrum-scale-x: 2.3; --spectrum-scale-y: 3.3; }
@@ -190,7 +240,7 @@
 }
 :root .deck .tcard.tcard--pentagon { --beam-angle: 144deg; --spectral-angle: 36deg; --beam-scale-x: 1.8; --beam-scale-y: 2.1; --spectrum-scale-x: 2.3; --spectrum-scale-y: 2.3; }
 :root .deck .tcard.tcard--halloween {
-  --beam-angle: 72deg; --spectral-angle: 18deg; --surface-strength: .68;
+  --beam-angle: 72deg; --spectral-angle: 18deg;
   --spectrum-colour-1: #ed9844; --spectrum-colour-2: #f0ce70; --spectrum-colour-3: #df6279; --spectrum-colour-4: #a55acd; --spectrum-colour-5: #59bdc8; --spectrum-colour-6: #ed9844; --spectrum-colour-7: #ed9844;
   --spectrum-stop-2: 5%; --spectrum-stop-3: 11%; --spectrum-stop-4: 17%; --spectrum-stop-5: 24%; --spectrum-stop-6: 32%; --spectrum-stop-7: 32%;
 }
@@ -206,9 +256,9 @@
   --spectrum-stop-2: 6%; --spectrum-stop-3: 12%; --spectrum-stop-4: 18%; --spectrum-stop-5: 24%; --spectrum-stop-6: 31%; --spectrum-stop-7: 31%;
 }
 :root .deck .tcard.tcard--pentacle { --beam-angle: 18deg; --spectral-angle: 126deg; --beam-scale-x: 2.8; --beam-scale-y: 1.9; --spectrum-scale-x: 2.6; --spectrum-scale-y: 3; }
-:root .deck .tcard.tcard--mayan-bracelet { --beam-angle: 157deg; --spectral-angle: 67deg; --surface-strength: .7; --spectrum-scale-x: 3.2; --spectrum-scale-y: 2.4; }
+:root .deck .tcard.tcard--mayan-bracelet { --beam-angle: 157deg; --spectral-angle: 67deg; --spectrum-scale-x: 3.2; --spectrum-scale-y: 2.4; }
 :root .deck .tcard.tcard--clam-triple {
-  --beam-angle: 44deg; --spectral-angle: 125deg; --beam-scale-x: 3.6; --beam-scale-y: 2.4; --spectrum-scale-x: 2.5; --spectrum-scale-y: 3.4; --art-strength: .7;
+  --beam-angle: 44deg; --spectral-angle: 125deg; --beam-scale-x: 3.6; --beam-scale-y: 2.4; --spectrum-scale-x: 2.5; --spectrum-scale-y: 3.4; --art-strength: .34;
   --spectrum-colour-1: #59b9ac; --spectrum-colour-2: #6ba4dc; --spectrum-colour-3: #ab82cd; --spectrum-colour-4: #e6a3b5; --spectrum-colour-5: #e6cf83; --spectrum-colour-6: #59b9ac; --spectrum-colour-7: #59b9ac;
   --spectrum-stop-2: 7%; --spectrum-stop-3: 14%; --spectrum-stop-4: 21%; --spectrum-stop-5: 28%; --spectrum-stop-6: 35%; --spectrum-stop-7: 35%;
 }
@@ -219,7 +269,7 @@
   --surface-mask: url('../assets/deck/foil/frame-full.webp');
 }
 :root .deck .tcard.tcard--symmetry:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__shine {
-  opacity: calc(var(--o, 0) * .18);
+  opacity: calc(var(--o, 0) * .1);
 }
 :root .deck .tcard.tcard--symmetry:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet) .tcard__foil {
   --material-size: 100% 100%;
@@ -237,9 +287,9 @@
   --spectral-angle: 118deg;
   --spectrum-scale-x: 3;
   --spectrum-scale-y: 3;
-  opacity: calc(var(--o, 0) * .24);
+  opacity: calc(var(--o, 0) * .14);
   background: repeating-linear-gradient(var(--spectral-angle), var(--spectral-colours)) center / var(--band-size) no-repeat;
-  filter: saturate(1.25);
+  filter: saturate(.85);
   mix-blend-mode: soft-light;
 }
 :root .deck .tcard.tcard--golden-flintstone .tcard__foil {
@@ -258,11 +308,12 @@
     radial-gradient(ellipse at var(--light-x) var(--light-y), #e4d9bc 0%, #94949f 19%, #343848 42%, #0a0b16 78%);
   background-size: var(--material-size), var(--band-size), 100% 100%;
   background-blend-mode: hard-light, color, normal;
-  filter: brightness(.83) contrast(1.45) saturate(1.3);
+  filter: brightness(.75) contrast(1.2) saturate(.85);
 }
+:root .deck .tcard.tcard--golden-flintstone .tcard__shine { filter: grayscale(1) brightness(.9) contrast(1.12); }
 :root .deck .tcard.tcard--golden-flintstone .tcard__foil {
   mix-blend-mode: screen;
-  filter: brightness(1.1) contrast(1.5) saturate(1.65);
+  filter: brightness(.85) contrast(1.2) saturate(.9);
 }
 /* A round diffraction front travels through Mayan's fixed sevenfold grooves. */
 :root .deck .tcard.tcard--mayan-bracelet .tcard__foil {
@@ -273,14 +324,13 @@
     radial-gradient(ellipse at var(--light-x) var(--light-y), #a2a9b1, #10131d 68%);
   background-size: 100% 100%;
   background-position: center;
-  filter: brightness(.7) contrast(1.55) saturate(1.35);
+  filter: brightness(.66) contrast(1.2) saturate(.85);
 }
 
-/* Pale stock takes a coloured reflected shadow and a separate gentle gloss.
-   The dark illustration foil keeps its colour-dodge optics in either theme. */
-:root[data-theme="light"] .deck .tcard.tcard--symmetry:not(:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet)) { --surface-blend: hard-light; --surface-strength: .52; --surface-brightness: .95; }
+/* Pale stock takes a shallow silver impression; no coloured hard-light veil. */
+:root[data-theme="light"] .deck .tcard.tcard--symmetry:not(:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet)) { --surface-strength: .16; --surface-brightness: .95; --emboss-blend: soft-light; }
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) .deck .tcard.tcard--symmetry:not(:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet)) { --surface-blend: hard-light; --surface-strength: .52; --surface-brightness: .95; }
+  :root:not([data-theme="dark"]) .deck .tcard.tcard--symmetry:not(:is(.tcard--halloween, .tcard--french-glass, .tcard--mayan-bracelet)) { --surface-strength: .16; --surface-brightness: .95; --emboss-blend: soft-light; }
 }
 @media (prefers-reduced-motion: reduce) {
   :root .deck .tcard.tcard--golden-flintstone .tcard__foil { -webkit-mask-position: center; mask-position: center; }

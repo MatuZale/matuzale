@@ -38,6 +38,10 @@
 .project-tape--physics .project-tape__brand, .project-tape--physics .project-tape__format { color:#292537; }
 .project-tape--quantum { --case:#403750; --label:#e8e2ed; --stripe:#ac8ad5; }
 .project-tape--quantum .project-tape__bands { background: repeating-linear-gradient(45deg,#ac8ad5 0 3px,#51446d 3px 6px); }
+.project-tape--ww { --case:#b5ccc3; --label:#e7e7d7; --ink:#173e3d; --case-ink:#214643; --stripe:#d4ad67; }
+.project-tape--ww .project-tape__bands { background: linear-gradient(#d4ad67 0 30%, #467f79 30% 65%, #173e3d 65%); }
+.project-tape--ww .project-tape__label { border-top: 4px solid #d4ad67; }
+:root[data-theme="dark"] .project-tape--ww { --case:#153b3a; --label:#315b55; --ink:#f0ebd9; --case-ink:#e8e8d5; }
 .tape-dialog { width: min(820px, calc(100% - 2rem)); max-height: min(90dvh, 950px); padding: 0; color: var(--text); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 24px 90px #000b; }
 .tape-dialog::backdrop { background: #080610d9; }
 .tape-dialog__top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .8rem 1.3rem; background: #1b1823; color: #f6e9df; font: .7rem var(--font-mono); letter-spacing: .08em; }

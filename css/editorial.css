@@ -143,23 +143,6 @@
 @media (prefers-reduced-motion: reduce) { .about__photo::after { transition: none; } }
 .about__text { padding-top: clamp(0rem, 2vw, 2rem); }
 .about__text > p:not(.kicker) { max-width: 59ch; line-height: 1.8; }
-.horizon { opacity: .7; }
-/* Let the rare tape colours and night sky read through the page without making
-   the perspective grid compete with the copy. */
-.horizon__sky { transition: opacity 1.8s ease; }
-.horizon.is-tape-sun .horizon__sky, .horizon.is-night .horizon__sky { opacity: .66; }
-:root[data-theme="light"] .horizon.is-tape-sun .horizon__sky,
-:root[data-theme="light"] .horizon.is-night .horizon__sky { opacity: .5; }
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) .horizon.is-tape-sun .horizon__sky,
-  :root:not([data-theme="dark"]) .horizon.is-night .horizon__sky { opacity: .5; }
-}
-@media (prefers-reduced-motion: reduce) { .horizon__sky { transition: none; } }
-@media (max-width: 800px) {
-  /* Lift the horizon above the workplace card on the stacked layout. */
-  .horizon { --floor: clamp(300px, 90vw, 360px); }
-  .horizon__moon { left: calc(100% - var(--sun) * .3 - 1.5rem); }
-}
 .about-terminal { box-shadow: none; }
 .about-terminal__bar { position: relative; }
 .about-terminal__bar::after { content: ""; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: var(--tape-stripes); opacity: .65; }

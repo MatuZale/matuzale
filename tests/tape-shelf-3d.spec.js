@@ -6,7 +6,7 @@ for (const width of [1024, 1280]) {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/?lang=en');
     const shelf = page.locator('#project-shelf');
-    for (const key of ['bentos', 'kodlab', 'agent', 'art', 'cold', 'finance', 'cloud', 'sound', 'nbody', 'physics', 'quantum']) {
+    for (const key of ['bentos', 'kodlab', 'agent', 'art', 'cold', 'finance', 'cloud', 'sound', 'nbody', 'physics', 'quantum', 'ww']) {
       await shelf.locator(`.project-tape--${key}`).evaluate(el => el.click());
       const geometry = await shelf.locator('.tape-showcase.is-open').evaluate(scene => {
         const frontElement = scene.querySelector('.tape-showcase__front');
@@ -205,7 +205,7 @@ for (const width of [375, 760, 800, 1023]) {
     await expect(tape).toHaveAttribute('aria-expanded', 'true');
     await expect(page.locator('#tape-player-screen')).toHaveAttribute('data-project', 'agent');
     await expect(shelf.locator('.tape-shelf__showcase')).toBeHidden();
-    await expect(shelf.locator('.project-tape')).toHaveCount(11);
+    await expect(shelf.locator('.project-tape')).toHaveCount(12);
     expect(Math.abs(await page.evaluate(() => scrollY) - scrollBefore)).toBeLessThanOrEqual(1);
     expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBe(0);
   });

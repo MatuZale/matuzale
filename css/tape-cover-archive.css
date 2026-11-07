@@ -1,3 +1,18 @@
+/* WW: an illustrated document-processing room on deep teal stock. The sleeve
+   is fictional; no private interface, records or business identifiers appear. */
+.tape-cover.tape-cover--ww { --sleeve-paper: #102d2d; --sleeve-ink: #f4e7ca; }
+.tape-showcase__front:has(> .tape-cover--ww) { --edge-stock: #102d2d; }
+.tape-cover--ww .tape-cover__art {
+  inset: 0;
+  background: url('../assets/tape-ww-cover.webp') center / cover no-repeat;
+}
+.tape-cover--ww .tape-cover__art::before,
+.tape-cover--ww .tape-cover__art::after { content: none; }
+.tape-cover--ww .tape-cover__brand { width: 80%; border-bottom-color: #d4ad67; font-size: 9px; }
+.tape-cover--ww .tape-cover__title { font-size: 43px; letter-spacing: -.07em; color: #f2d39a; }
+.tape-cover--ww .tape-cover__subtitle { font-size: 7px; letter-spacing: .1em; }
+.tape-cover--ww .tape-cover__foot { border-top-color: #d4ad67aa; text-shadow: 0 1px 3px #061c1c; }
+
 /* Full-bleed print artwork: four different visual languages, composed for the
    entire sleeve. Artwork stays decorative; the real title remains in the DOM. */
 .tape-cover--bentos .tape-cover__art,

@@ -28,20 +28,22 @@
     ['PENDULUM', 'Pendulum wave sounds', 'sound', 'T-120', 'SOUND / CANVAS'],
     ['N-BODY', 'Gravity simulation in 3D', 'nbody', 'T-120', 'GRAVITY SIMULATION'],
     ['PHYSICS LAB', 'Interactive physics demos', 'physics', 'T-120', 'INTERACTIVE SCIENCE'],
-    ['QUANTUM', 'Quantum research code', 'quantum', 'T-120', 'RESEARCH ARCHIVE']
+    ['QUANTUM', 'Quantum research code', 'quantum', 'T-120', 'RESEARCH ARCHIVE'],
+    ['WW', 'Document workflow automation', 'ww', 'T-120', 'DOCUMENT FLOW']
   ];
   const summaries = {
-    bentos: 'Sensors, satellite data and models in a water-quality platform for the Gulf of Gdańsk. I build the data pipelines and dashboards.',
-    kodlab: 'A personal web and CS learning lab with a roadmap, browser exercises, tests and progress tracking. PL / EN.',
-    agent: 'A self-hosted dashboard to queue AI coding tasks, follow live activity and review changes in isolated Git worktrees.',
-    art: 'Chaotic maps, neon density plots and animations built with Python and Numba. The page background runs the same maths live.',
-    cold: 'An MCP server for local cold-chain sensor analysis: threshold breaches, anomalies and journey segments. Published on PyPI.',
-    finance: 'Cleans Polish bank CSVs, categorises transactions with JSON rules and charts spending in a CLI and Streamlit app.',
-    cloud: 'An AWS data pipeline for student performance, with ML, exploratory analysis and a check for feature leakage.',
-    sound: 'A browser simulation of a pendulum wave playing a bell synthesiser and chord pad under a starry sky.',
-    nbody: '3D gravity in C++20: a leapfrog integrator, orbital camera and energy tracking.',
-    physics: 'Interactive browser demos for public events: a quantum lab and a genetic algorithm solving the travelling-salesman problem.',
-    quantum: 'Research tools: an SDP-based decomposability test and a Young–Yamanouchi basis generator for quantum information.'
+    bentos: 'A water-quality platform for the Gulf of Gdańsk, bringing together sensors, satellite observations and predictive models. I build the software that turns these different sources into data people can explore.',
+    kodlab: 'A personal web and CS learning lab with a roadmap, browser exercises, tests and progress tracking. Each part puts the code next to the idea, with room to practise independently.',
+    agent: 'A self-hosted dashboard for coding with AI agents: queue tasks, follow live activity and inspect the resulting changes. Each task has its own Git worktree, keeping parallel work separate and reviewable.',
+    art: 'Chaotic maps become neon density plots and 1080p60 animations, computed in Python with Numba. Tiny changes to an equation produce whole families of shapes; the page background runs the same maths live.',
+    cold: 'An MCP server that lets AI assistants analyse cold-chain sensor data locally. It finds threshold breaches and anomalies, and splits journeys into segments so the measurements can be read in context.',
+    finance: 'A tool for turning Polish bank exports into a readable picture of spending. It cleans CSV files, assigns transactions to categories with editable JSON rules and presents the results as charts.',
+    cloud: 'A student-performance dataset followed through an AWS pipeline, exploratory analysis and a gradient-boosting model. The project also checks feature leakage: whether a prediction is using information it should not have.',
+    sound: 'A pendulum wave you can both watch and hear. The moving pendulums drive a bell synthesiser and a chord pad, turning their changing alignment into visible polyrhythms under a starry sky.',
+    nbody: 'A 3D gravity simulator built in C++20 and OpenGL. Bodies follow a symplectic leapfrog integrator, while an orbital camera makes it possible to inspect the motion from different viewpoints.',
+    physics: 'Browser demos made for public science events: a small quantum lab and a genetic algorithm tackling the travelling-salesman problem. Visitors can explore abstract ideas through experiments and changing visual results.',
+    quantum: 'Two research tools from my PhD: an SDP test for decomposable positive maps and a Young–Yamanouchi basis generator. They turn parts of quantum-information theory into calculations that can be reproduced.',
+    ww: 'A private tool that turns incoming messages and PDF documents into organised records. It connects the inbox, document parsing and a shared spreadsheet, reducing the repeated work of copying information between them.'
   };
   const articles = [...cards.querySelectorAll('article.card')];
   if (articles.length !== covers.length) return;

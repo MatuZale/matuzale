@@ -310,6 +310,7 @@
               <p data-i18n="bentosCard.text">A system in development that brings in-situ sensors, satellite data and predictive modelling
                 together in a public water-quality platform for the Gulf of Gdańsk.
                 I build the software side: data pipelines and dashboards.</p>
+              <p class="tape-detail" data-i18n="bentosCard.detail">The dashboard turns large satellite exports into map layers, timelines and point charts. Its public demo shows satellite and model data; buoy readings are still simulated.</p>
               <div class="card__links">
                 <a data-i18n="bentosCard.story" href="#bentos">Read the story →</a>
                 <a data-i18n="bentosCard.demo" href="https://embeddedsystems-do.github.io/bentos-satbaltyk-dashboard/" target="_blank" rel="noopener">Dashboard demo ↗</a>
@@ -357,7 +358,7 @@
                 <span data-i18n="tapes.private" class="badge">Personal project · Private repository</span>
                 <h3>Kodlab</h3>
                 <p data-i18n="kodlab.text">A personal learning lab for web development and computer science: a roadmap, browser-based coding exercises, tests and practice designed to build independence.</p>
-                <p data-i18n="kodlab.detail">Built with HTML, CSS and JavaScript, with an in-browser editor and progress tracking. Available in Polish and English.</p>
+                <p class="tape-detail" data-i18n="kodlab.detail">Built with HTML, CSS and JavaScript, with an in-browser editor and progress tracking. Available in Polish and English.</p>
                 <figure class="tape-preview"><img src="assets/kodlab-en-light.png" data-kodlab-preview alt="Kodlab learning dashboard in a fresh session" data-i18n-attr="alt:kodlab.alt" loading="lazy" width="1440" height="900" /><figcaption data-i18n="kodlab.caption">Kodlab · a fresh learning dashboard</figcaption></figure>
               </div>
             </article>
@@ -368,7 +369,7 @@
                 <span data-i18n="tapes.private" class="badge">Personal project · Private repository</span>
                 <h3>Agent Control</h3>
                 <p data-i18n="agent.text">A self-hosted dashboard for managing coding tasks with AI agents: queue work, follow live activity and review changes before deciding what to keep.</p>
-                <p data-i18n="agent.detail">Built with React, TypeScript, Fastify and SQLite. Tasks run in isolated Git worktrees, with a review workflow and human approval.</p>
+                <p class="tape-detail" data-i18n="agent.detail">React and TypeScript on the front, Fastify and SQLite behind it. A review and approval step keeps the final decision with the person running the task.</p>
               </div>
             </article>
           </div>
@@ -384,6 +385,7 @@
                 <h3 data-i18n="art.title">Strange attractors &amp; fractals</h3>
                 <p data-i18n="art.text">Chaotic maps sped up with Numba, rendered as density histograms in custom neon colormaps and
                   animated into 1080p60 videos. The background at the top of this page runs the same maths live in your browser.</p>
+                <p class="tape-detail" data-i18n="art.detail">The collection pairs thirty renders with their equations and parameters. Open a card, move the light across its foil and flip it to see the maths.</p>
                 <div class="card__links">
                   <a href="https://github.com/MatuZale/color_recursive_maps" target="_blank" rel="noopener" data-i18n="common.code">Code ↗</a>
                   <a href="https://www.instagram.com/mathuzaleh/" target="_blank" rel="noopener">Instagram ↗</a>
@@ -402,6 +404,7 @@
                 <h3>coldchain-mcp</h3>
                 <p data-i18n="coldchain.text">An MCP server that lets AI assistants analyse cold-chain sensor data locally, finding threshold
                   breaches and anomalies and splitting journeys into segments. Published on PyPI.</p>
+                <p class="tape-detail" data-i18n="coldchain.detail">Written in Python and published on PyPI. The assistant can ask analysis tools about the readings while the data processing stays on the local machine.</p>
                 <div class="card__links">
                   <a href="https://github.com/MatuZale/coldchain-mcp" target="_blank" rel="noopener" data-i18n="common.code">Code ↗</a>
                 </div>
@@ -418,6 +421,7 @@
                 <h3>Personal Finance Analyzer</h3>
                 <p data-i18n="finance.text">Cleans up Polish bank CSV exports (odd encodings, <code>1 234,56 zł</code>), sorts
                   transactions into categories with JSON rules and charts spending in a CLI and a Streamlit app.</p>
+                <p class="tape-detail" data-i18n="finance.detail">The less glamorous work matters here: unusual encodings, Polish number formats and inconsistent exports. Python handles the preparation; a CLI and Streamlit provide two ways to explore.</p>
                 <div class="card__links">
                   <a href="https://github.com/MatuZale/personal-finance-analyzer" target="_blank" rel="noopener" data-i18n="common.code">Code ↗</a>
                 </div>
@@ -434,6 +438,7 @@
                 <h3 data-i18n="aws.title">Student-performance data pipeline</h3>
                 <p data-i18n="aws.text">S3 → Lambda → Glue → Athena → Metabase, all scripted with boto3, followed by a
                   gradient-boosting model, PCA/t-SNE/HDBSCAN analysis and a careful look at feature leakage.</p>
+                <p class="tape-detail" data-i18n="aws.detail">S3, Lambda, Glue, Athena and Metabase form the data path, scripted with boto3. PCA, t-SNE and HDBSCAN offer different ways to inspect the same dataset.</p>
               </div>
             </article>
           </div>
@@ -447,6 +452,7 @@
                 <h3>Pendulum Wave Chimes</h3>
                 <p data-i18n="pendulum.text">A small browser toy in a single file. A pendulum-wave simulation plays a bell synthesiser and
                   a chord pad under a starry canvas: polyrhythm you can watch.</p>
+                <p class="tape-detail" data-i18n="pendulum.detail">Canvas draws the scene and Web Audio generates the sound in the browser. The whole experiment fits in one HTML file.</p>
                 <div class="card__links">
                   <a href="https://github.com/MatuZale/pendulum-wave-chimes" target="_blank" rel="noopener" data-i18n="common.code">Code ↗</a>
                 </div>
@@ -463,6 +469,7 @@
                 <h3 data-i18n="nbody.title">N-body simulator</h3>
                 <p data-i18n="nbody.text">3D gravity in C++20 with a symplectic leapfrog integrator, an orbital camera and energy
                   tracking to keep the numerics honest. Next stop: molecular dynamics.</p>
+                <p class="tape-detail" data-i18n="nbody.detail">Energy tracking is part of the simulation, not just the picture: it helps check how the numerical method behaves over time. Next stop: molecular dynamics.</p>
                 <div class="card__links">
                   <a href="https://github.com/MatuZale/Projekt-n-bodies" target="_blank" rel="noopener" data-i18n="common.code">Code ↗</a>
                 </div>
@@ -480,6 +487,7 @@
                 <p data-i18n="outreach.text">Browser demos made for Centrum Nauki Experyment and public events: a quantum lab
                   (double slit, photoelectric effect, Planck's constant from LEDs, BB84 key exchange)
                   and a genetic algorithm that tackles the travelling-salesman problem.</p>
+                <p class="tape-detail" data-i18n="outreach.detail">The lab covers the double slit, photoelectric effect, Planck's constant from LEDs and BB84 key exchange. Built in HTML and JavaScript for hands-on exploration.</p>
               </div>
             </article>
           </div>
@@ -494,10 +502,22 @@
                 <p data-i18n="phd.text">An SDP-based test for the decomposability of positive maps, and a generator of the
                   Young–Yamanouchi basis for Schur–Weyl decompositions. Both are building blocks for studying
                   entanglement, teleportation and symmetric quantum channels.</p>
+                <p class="tape-detail" data-i18n="phd.detail">Written in MATLAB and Sage for work on entanglement, teleportation and symmetric quantum channels. The diagram shows the Young-diagram structure behind the basis construction.</p>
                 <div class="card__links">
                   <a data-i18n="phd.link" href="https://github.com/MatuZale/Test-decomposability-of-positive-maps" target="_blank" rel="noopener">Decomposability test ↗</a>
                   <a href="https://github.com/MatuZale/Young-Yamanouchi-basis" target="_blank" rel="noopener">Young–Yamanouchi ↗</a>
                 </div>
+              </div>
+            </article>
+          </div>
+          <!-- Private workflow: only a general description is public. -->
+          <div class="project-slot reveal" data-holo>
+            <article class="card card--m card--holo" data-tape="ww">
+              <div class="card__body">
+                <span data-i18n="ww.badge" class="badge">Private project · Python</span>
+                <h3 data-i18n="ww.title">WW · Document workflow</h3>
+                <p data-i18n="ww.text">A private tool that turns incoming messages and PDF documents into organised records. It connects the inbox, document parsing and a shared spreadsheet, reducing the repeated work of copying information between them.</p>
+                <p class="tape-detail" data-i18n="ww.detail">A small web panel brings together processing controls and recent activity. The project stays private; this is a general view of the workflow.</p>
               </div>
             </article>
           </div>

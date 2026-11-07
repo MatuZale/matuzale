@@ -80,10 +80,54 @@
   .tape-player__screen .card__links { gap: .5rem .8rem; }
   .tape-player__screen .tape-preview img,
   .tape-player__screen .tape-art-preview img { max-height: 110px; }
+  /* A thumbnail alongside the heading leaves the full tube width for prose. */
+  .tape-player__screen .card__body:has(.tape-preview, .tape-art-preview) {
+    grid-template-columns: minmax(0, 1fr) 76px;
+    column-gap: .65rem;
+  }
+  .tape-player__screen .card__body:has(.tape-preview, .tape-art-preview) > :is(.badge, h3) { grid-column: 1; }
+  .tape-player__screen .card__body:has(.tape-preview, .tape-art-preview) > :is(p, .card__links) { grid-column: 1 / -1; }
+  .tape-player__screen .card__body > :is(.tape-preview, .tape-art-preview) {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+    margin: 0;
+  }
+  .tape-player__screen .tape-preview img,
+  .tape-player__screen .tape-art-preview img { max-height: 76px; }
+  .tape-player__screen .tape-preview figcaption { font-size: .52rem; line-height: 1.25; }
+}
+@media (max-width: 480px) {
+  /* Long project names need the whole width of the smallest tubes. Keep the
+     artwork as a small preview next to the badge, above the heading. */
+  .tape-player__screen .card__body:has(.tape-preview, .tape-art-preview) { grid-template-columns: minmax(0, 1fr) 44px; }
+  .tape-player__screen .card__body:has(.tape-preview, .tape-art-preview) > h3 { grid-column: 1 / -1; }
+  .tape-player__screen .card__body > :is(.tape-preview, .tape-art-preview) { grid-row: 1; }
+  .tape-player__screen .tape-preview img,
+  .tape-player__screen .tape-art-preview img { max-height: 44px; }
+  .tape-player__screen .tape-image-open { min-width: 44px; min-height: 44px; display: grid; place-items: center; }
+  .tape-player__screen .tape-image-open__hint { right: 0; bottom: 0; padding: .15rem .25rem; font-size: 0; }
+  .tape-player__screen .tape-image-open__hint::after { content: '↗'; font: 600 .75rem/1 var(--font-mono); }
+  .tape-player__screen .tape-preview figcaption {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
 }
 @media (max-width: 380px) {
-  .tape-player__screen { aspect-ratio: 1 / 1.86; }
+  .tape-player__screen { aspect-ratio: 1 / 1.86; min-height: 600px; }
+  .tape-player__tv::after { min-height: 600px; }
 }
-/* Keep the full card descriptions for the fallback; the screen uses concise copy. */
-.tape-player__screen .card__body > p:not(.tape-summary) { display: none; }
+/* Programme notes give each project a short introduction and a useful second
+   paragraph. The longer original introduction remains available in the fallback. */
+.tape-player__screen .card__body > p:not(.tape-summary, .tape-detail) { display: none; }
+.tape-player__screen .tape-detail {
+  padding-top: .65rem;
+  border-top: 1px solid #b8d3e533;
+  color: #c3d3df;
+}
 .tape-player__screen .tape-summary[hidden] { display: none; }
