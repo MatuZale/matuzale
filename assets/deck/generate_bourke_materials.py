@@ -83,7 +83,9 @@ def opal_mosaic():
     phase = 26*(x*np.cos(orientation)+y*np.sin(orientation))+.7*np.sin(4*y)
     seam = np.exp(-((np.sqrt(second)-np.sqrt(first))/.008)**2)
     crest = np.maximum(ridge(phase,14)*.6,seam*.48)
-    material = 53+35*np.sin(identity*3.1)+65*ridge(phase,4)+26*seam
+    # Nacre changes direction from cell to cell, but no cell is uncoated.
+    # A reflective floor keeps dark panes responsive after compositing.
+    material = 83+17*np.sin(identity*3.1)+72*ridge(phase,4)+26*seam
     return material,crest
 
 

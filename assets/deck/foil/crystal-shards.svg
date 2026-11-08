@@ -1,21 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1120" preserveAspectRatio="none">
-  <!-- Original fixed cut-crystal planes. Values encode facet response, not illumination. -->
-  <rect width="800" height="1120" fill="#171b25"/>
+  <!-- Original fixed cut-crystal planes. Values encode facet response, not illumination. Every face retains a reflective floor. -->
+  <rect width="800" height="1120" fill="#53565d"/>
   <g stroke="#c8d3e3" stroke-width="1.7" stroke-linejoin="round">
-    <path d="M0 0H282L161 183Z" fill="#d8dce0"/><path d="M0 0 161 183 0 341Z" fill="#414952"/>
-    <path d="M282 0 161 183 438 242Z" fill="#676f79"/><path d="M282 0H614L438 242Z" fill="#adb6c0"/>
-    <path d="M614 0 438 242 705 149Z" fill="#343d4b"/><path d="M614 0H800V327L705 149Z" fill="#9ca8b5"/>
-    <path d="M0 341 161 183 268 454Z" fill="#b9c2c8"/><path d="M161 183 438 242 268 454Z" fill="#252c38"/>
-    <path d="M438 242 705 149 591 477Z" fill="#d0d7df"/><path d="M705 149 800 327 591 477Z" fill="#5f6879"/>
-    <path d="M268 454 438 242 591 477Z" fill="#848e9a"/>
-    <path d="M0 341 268 454 83 666Z" fill="#474f5c"/><path d="M0 341 83 666 0 824Z" fill="#c0c7cf"/>
-    <path d="M268 454 591 477 381 683Z" fill="#d1d7db"/><path d="M268 454 381 683 83 666Z" fill="#747f90"/>
-    <path d="M591 477 800 327V690Z" fill="#a8b2be"/><path d="M591 477 800 690 562 809Z" fill="#2e3744"/>
-    <path d="M591 477 562 809 381 683Z" fill="#697384"/>
-    <path d="M0 824 83 666 264 925Z" fill="#8793a2"/><path d="M83 666 381 683 264 925Z" fill="#343e4b"/>
-    <path d="M381 683 562 809 264 925Z" fill="#c9d2dc"/><path d="M562 809 800 690V989Z" fill="#d7dce1"/>
-    <path d="M562 809 800 989 492 1120Z" fill="#5e6876"/><path d="M264 925 562 809 492 1120Z" fill="#919ca9"/>
-    <path d="M0 824 264 925 0 1120Z" fill="#d2d8df"/><path d="M0 1120 264 925 492 1120Z" fill="#3c4654"/>
-    <path d="M492 1120 800 989V1120Z" fill="#bbc4ce"/>
+    <path d="M0 0H282L161 183Z" fill="#e0e3e6"/><path d="M0 0 161 183 0 341Z" fill="#71777e"/>
+    <path d="M282 0 161 183 438 242Z" fill="#8d939a"/><path d="M282 0H614L438 242Z" fill="#c0c7ce"/>
+    <path d="M614 0 438 242 705 149Z" fill="#686f79"/><path d="M614 0H800V327L705 149Z" fill="#b4bdc6"/>
+    <path d="M0 341 161 183 268 454Z" fill="#c9d0d4"/><path d="M161 183 438 242 268 454Z" fill="#5d626b"/>
+    <path d="M438 242 705 149 591 477Z" fill="#dadfe5"/><path d="M705 149 800 327 591 477Z" fill="#878e9a"/>
+    <path d="M268 454 438 242 591 477Z" fill="#a2aab2"/>
+    <path d="M0 341 268 454 83 666Z" fill="#767c85"/><path d="M0 341 83 666 0 824Z" fill="#ced3d9"/>
+    <path d="M268 454 591 477 381 683Z" fill="#dbdfe2"/><path d="M268 454 381 683 83 666Z" fill="#979fab"/>
+    <path d="M591 477 800 327V690Z" fill="#bdc4cd"/><path d="M591 477 800 690 562 809Z" fill="#646a74"/>
+    <path d="M591 477 562 809 381 683Z" fill="#8f96a2"/>
+    <path d="M0 824 83 666 264 925Z" fill="#a5adb8"/><path d="M83 666 381 683 264 925Z" fill="#686f79"/>
+    <path d="M381 683 562 809 264 925Z" fill="#d5dbe3"/><path d="M562 809 800 690V989Z" fill="#dfe3e6"/>
+    <path d="M562 809 800 989 492 1120Z" fill="#878e98"/><path d="M264 925 562 809 492 1120Z" fill="#acb4bd"/>
+    <path d="M0 824 264 925 0 1120Z" fill="#dbe0e5"/><path d="M0 1120 264 925 492 1120Z" fill="#6e757f"/>
+    <path d="M492 1120 800 989V1120Z" fill="#cbd1d8"/>
   </g>
 </svg>

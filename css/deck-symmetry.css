@@ -335,6 +335,12 @@
 
 /* 21 · Laser foil lives in the window. Two unequal vertical combs travel in
    opposite directions through the spectrum; the surrounding stock is quiet. */
+:root .deck .tcard.tcard--symmetry.tcard--swirling-streamers {
+  /* Optical travel is about one third of the original gain. Keep the actual
+     card's spring/tilt unchanged; only the light crossing its grooves slows. */
+  --fx: calc(var(--px, 0) * .24 + var(--foil-tilt-x, 0) * .28);
+  --fy: calc(var(--py, 0) * .24 - var(--foil-tilt-y, 0) * .28);
+}
 :root .deck .tcard.tcard--symmetry.tcard--swirling-streamers .tcard__shine {
   opacity: calc(.012 + var(--o, 0) * .13 * var(--incidence));
   filter: saturate(.55) contrast(1.15);
@@ -426,7 +432,7 @@
     radial-gradient(ellipse at var(--light-x) var(--light-y), #fff9ed, #b6cce6 30%, #314061 65%);
   background-size: var(--material-size), 100% 100%, 100% 100%, 100% 100%;
   background-blend-mode: soft-light, multiply, multiply, normal;
-  filter: brightness(1.2) contrast(1.25) saturate(1.8);
+  filter: brightness(1.14) contrast(1.08) saturate(1.7);
 }
 :root .deck .tcard.tcard--symmetry.tcard--pentagon .tcard__foil::before {
   content: ""; display: block; position: absolute; inset: 0;
@@ -550,7 +556,7 @@
     var(--opal-fields);
   background-size: var(--material-size), 100% 100%;
   background-blend-mode: hard-light, soft-light, normal, normal, normal, normal, normal;
-  filter: contrast(1.3) saturate(1.35);
+  filter: contrast(1.08) saturate(1.5);
   opacity: calc(.025 + var(--o, 0) * .78 * var(--incidence));
 }
 :root .deck .tcard.tcard--symmetry.tcard--pentacle .tcard__foil::before,
@@ -576,7 +582,7 @@
     radial-gradient(ellipse at var(--light-x) var(--light-y), #fff9, #fff0 32%, #0004 70%),
     var(--opal-fields);
   background-blend-mode: hard-light, soft-light, normal, normal, normal, normal, normal;
-  filter: saturate(1.35);
+  filter: saturate(1.5);
   opacity: calc(.025 + var(--o, 0) * .64 * var(--incidence));
 }
 :root[data-theme="light"] .deck .tcard.tcard--symmetry.tcard--pentacle .tcard__panel::before {
@@ -723,12 +729,14 @@
   --ink-print: url('../assets/deck/foil/print-sand-ink.svg');
   --ink-plate: url('../assets/deck/foil/mask-sand-ink.svg');
   --ink-relief: url('../assets/deck/foil/relief-sand-ink.svg');
+  --shell-etch: url('../assets/deck/foil/etch-sand-shell.svg');
 }
 :root .deck .tcard.tcard--symmetry.tcard--golden-flintstone {
   --ground: url('../assets/deck/foil/ground-golden-flintstone.webp');
   --knife-print: url('../assets/deck/foil/print-golden-brush.svg');
   --knife-plate: url('../assets/deck/foil/mask-golden-brush.svg');
   --knife-relief: url('../assets/deck/foil/relief-golden-brush.svg');
+  --knife-etch: url('../assets/deck/foil/etch-golden-brush.svg');
 }
 
 /* Let the two actual prints carry the colour; keep the surrounding card stock
@@ -804,14 +812,20 @@
   transform: translate(calc(var(--px, 0) * .45cqw), calc(var(--py, 0) * .35cqw)) scale(1.14);
 }
 :root .deck .tcard.tcard--symmetry.tcard--sand-dollar .tcard__art .tcard__foil {
-  /* The low-alpha wet sheen is local; the two passes below supply sharp dots
-     and elongated wet ridges, not a full rectangular rainbow coating. */
-  background-image: radial-gradient(ellipse at var(--light-x) var(--light-y), #71f1e926, #405fdd08 28%, transparent 56%);
+  /* Continuous engraved foil follows the ink's silhouette. Separate coloured
+     diffraction, fine relief and a broad light lobe keep the surface readable
+     even between the polished crests, as on a textured rare trading card. */
+  --shell-phase: calc(var(--fx) * 12% - var(--fy) * 9%);
+  background-image: var(--material),
+    repeating-linear-gradient(124deg, #ed6caa calc(0% + var(--shell-phase)), #f6cf69 calc(18% + var(--shell-phase)), #5ce2c2 calc(36% + var(--shell-phase)), #5a92ee calc(54% + var(--shell-phase)), #bc70e2 calc(72% + var(--shell-phase)), #ed6caa calc(90% + var(--shell-phase))),
+    radial-gradient(ellipse at var(--light-x) var(--light-y), #e6edf1 0%, #7b8596 30%, #243347 62%, #101b2d 90%);
+  background-size: 100% 160%, 100% 100%, 100% 100%;
+  background-blend-mode: soft-light, multiply, normal;
   -webkit-mask: var(--ink-plate) center / 100% 100% no-repeat;
   mask: var(--ink-plate) center / 100% 100% no-repeat;
   mix-blend-mode: screen;
-  filter: contrast(1.15) saturate(1.3);
-  opacity: calc(.07 + var(--o, 0) * .82 * var(--incidence));
+  filter: contrast(1.12) saturate(1.45);
+  opacity: calc(.10 + var(--o, 0) * .86 * var(--incidence));
 }
 :root .deck .tcard.tcard--symmetry.tcard--sand-dollar .tcard__foil::before,
 :root .deck .tcard.tcard--symmetry.tcard--sand-dollar .tcard__foil::after {
@@ -823,12 +837,12 @@
   mix-blend-mode: screen;
 }
 :root .deck .tcard.tcard--symmetry.tcard--sand-dollar .tcard__foil::before {
-  background-image: conic-gradient(from calc(35deg + var(--fx) * 57deg - var(--fy) * 31deg) at 42% 61%, #2df2c9, #4689ff, #cc6eff, #f3b9e7, #2df2c9),
-    radial-gradient(ellipse at var(--light-x) var(--light-y), #fff, #cbd0dd 19%, #141c32 42%, #000 68%);
+  background-image: conic-gradient(from calc(35deg + var(--fx) * 24deg - var(--fy) * 16deg) at 50% 50%, #f080bc, #6adff0, #9c86f7, #ffe2a0, #f080bc),
+    radial-gradient(ellipse at var(--light-x) var(--light-y), #fff, #cbd0dd 24%, #35425a 55%, #121b31 86%);
   background-blend-mode: multiply;
-  -webkit-mask: url('../assets/deck/foil/glitter.webp') 0 0 / 24cqw 24cqw repeat;
-  mask: url('../assets/deck/foil/glitter.webp') 0 0 / 24cqw 24cqw repeat;
-  opacity: .92;
+  -webkit-mask: var(--shell-etch) center / 100% 100% no-repeat;
+  mask: var(--shell-etch) center / 100% 100% no-repeat;
+  opacity: .88;
 }
 :root .deck .tcard.tcard--symmetry.tcard--sand-dollar .tcard__foil::after {
   --wet-front: calc(50% + var(--fx) * 25% - var(--fy) * 18%);
@@ -838,8 +852,29 @@
   opacity: .76;
 }
 
-/* 25 · Dry palette knife. An opaque copy of the mathematical print is cut by
-   its orbit mask: bright strokes behind it cannot wash out its fine folds. */
+/* The shell's lower stock is also foil, with quieter engraved contours below
+   the printed rules. The registered frame alpha attenuates text automatically. */
+:root .deck .tcard.tcard--symmetry.tcard--sand-dollar .tcard__panel::before {
+  display: block;
+  background-image: var(--material),
+    conic-gradient(from calc(22deg + var(--fx) * 25deg - var(--fy) * 19deg) at 50% 65%, #ef89bd, #e7c65e, #52cdb8, #6e92e3, #b787db, #ef89bd),
+    radial-gradient(ellipse at var(--light-x) var(--light-y), var(--reverse-high), var(--reverse-mid) 35%, var(--reverse-low) 82%);
+  background-blend-mode: soft-light, multiply, normal;
+  -webkit-mask: url('../assets/deck/foil/frame-window.webp') -3.4cqw -3.4cqw / calc(100% + 6.8cqw) calc(100% + 6.8cqw) no-repeat;
+  mask: url('../assets/deck/foil/frame-window.webp') -3.4cqw -3.4cqw / calc(100% + 6.8cqw) calc(100% + 6.8cqw) no-repeat;
+  filter: contrast(1.08) saturate(1.4);
+  opacity: calc(.045 + var(--o, 0) * .48 * var(--incidence));
+}
+
+/* 25 · Dry palette knife. Paint stays behind the metadata strip; the actual
+   cut-out escapes that plane. Removing this one local stacking context lets
+   its opaque orbit and registered sheen pass in front of the strip, while
+   the title, ability and rules keep their own higher, readable print plane. */
+:root .deck .tcard.tcard--symmetry.tcard--golden-flintstone .tcard__art {
+  isolation: auto;
+  z-index: auto;
+}
+:root .deck .tcard.tcard--symmetry.tcard--golden-flintstone .tcard__panel > :not(.tcard__art):not(.tcard__strip) { z-index: 5; }
 :root .deck .tcard.tcard--symmetry.tcard--golden-flintstone .tcard__art::before { background-image: var(--knife-print); }
 :root .deck .tcard.tcard--symmetry.tcard--golden-flintstone .tcard__art img {
   z-index: 3;
@@ -852,14 +887,14 @@
 :root .deck .tcard.tcard--symmetry.tcard--golden-flintstone .tcard__art::after { z-index: 4; }
 :root .deck .tcard.tcard--symmetry.tcard--golden-flintstone .tcard__art .tcard__foil {
   background-image: var(--material),
-    conic-gradient(from calc(32deg + var(--fx) * 41deg - var(--fy) * 27deg) at 37% 48%, #e19b25, #ffe38c, #d66a3b, #5ec5b0, #a86a9e, #e19b25),
-    radial-gradient(ellipse at var(--light-x) var(--light-y), #ecdbac, #786553 27%, #14101b 64%);
+    conic-gradient(from calc(32deg + var(--fx) * 34deg - var(--fy) * 24deg) at 37% 48%, #f4a52b, #ffdf62, #f16c55, #33d8bc, #a36cf0, #f4a52b),
+    radial-gradient(ellipse at var(--light-x) var(--light-y), #ffe3a7, #897164 31%, #17101e 74%);
   background-blend-mode: hard-light, multiply, normal;
   -webkit-mask: var(--knife-plate) center / 100% 100% no-repeat;
   mask: var(--knife-plate) center / 100% 100% no-repeat;
   mix-blend-mode: screen;
-  filter: contrast(1.3) saturate(1.35);
-  opacity: calc(.07 + var(--o, 0) * .82 * var(--incidence));
+  filter: contrast(1.35) saturate(1.6);
+  opacity: calc(.07 + var(--o, 0) * .9 * var(--incidence));
 }
 :root .deck .tcard.tcard--symmetry.tcard--golden-flintstone .tcard__foil::before {
   content: ""; display: block; position: absolute; inset: 0;
@@ -873,6 +908,25 @@
   mask: var(--knife-relief) center / 100% 100% no-repeat;
   mix-blend-mode: screen;
   opacity: .92;
+}
+/* Fine bristle cuts are a separate physical plate, precisely inside the
+   unchanged orange strokes and their dry gaps. The raking colour reveals many
+   narrow ridges instead of tinting the whole print with a smooth gold wash. */
+:root .deck .tcard.tcard--symmetry.tcard--golden-flintstone .tcard__foil::after {
+  content: ""; display: block; position: absolute; inset: 0;
+  pointer-events: none;
+  --knife-spectrum: calc(50% + var(--fx) * 23% - var(--fy) * 18%);
+  background-image:
+    repeating-linear-gradient(112deg, #ff5793 calc(var(--knife-spectrum) - 40%), #ffd75e calc(var(--knife-spectrum) - 24%), #65f1cc calc(var(--knife-spectrum) - 8%), #7fa3ff calc(var(--knife-spectrum) + 8%), #c987ff calc(var(--knife-spectrum) + 24%), #ff5793 calc(var(--knife-spectrum) + 40%)),
+    radial-gradient(ellipse at var(--light-x) var(--light-y), #fff, #aaa 36%, #17101e 82%);
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-blend-mode: multiply;
+  -webkit-mask: var(--knife-etch) center / 100% 100% no-repeat;
+  mask: var(--knife-etch) center / 100% 100% no-repeat;
+  mix-blend-mode: screen;
+  opacity: .98;
 }
 @media (prefers-reduced-motion: reduce) {
   :root .deck .tcard.tcard--symmetry.tcard--sand-dollar .tcard__art img { transform: scale(1.14); }

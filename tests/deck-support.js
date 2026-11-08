@@ -1,25 +1,16 @@
 import { test as base, expect } from '@playwright/test';
 
 export { expect };
-const clockedPages = new WeakSet();
 export const test = base.extend({
-  page: async ({ page, context, baseURL, browserName }, use, info) => {
+  page: async ({ page, context, baseURL }, use, info) => {
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
     await context.route('**/*', route => {
       const url = new URL(route.request().url());
       return url.origin === baseURL ? route.continue() : route.abort('blockedbyclient');
     });
-    if (browserName === 'webkit') {
-      // Install before navigation and the observer. Keep automatic clock progression
-      // for native input/actionability; runFor below delivers every JS RAF/timer when
-      // settling springs. CSS animations and compositor timing are NOT mocked.
-      await page.clock.install();
-      clockedPages.add(page);
-      info.annotations.push({ type: 'clock', description: 'WebKit: Playwright Clock.runFor advances every JS RAF/timer for settlement; CSS motion and native input remain enabled. This does not measure presented frames or device performance.' });
-    }
     await page.addInitScript(() => {
-      // Observe only deck-owned RAFs; forward to the current scheduler (Clock in WebKit).
+      // Observe only deck-owned RAFs; forward to the native engine scheduler.
       // The home page has unrelated continuous effects, so a global RAF count is misleading.
       const request = window.requestAnimationFrame.bind(window);
       const cancel = window.cancelAnimationFrame.bind(window);
@@ -89,18 +80,7 @@ export const test = base.extend({
 });
 
 export async function idle(page) {
-  if (clockedPages.has(page)) {
-    // Bound virtual time as well as the test's real timeout. runFor (not fastForward)
-    // executes every scheduled frame: an endless RAF still fails after 600 frames.
-    for (let elapsed = 0; elapsed < 9_600; elapsed += 160) {
-      if (await page.evaluate(() => window.deckAudit.pending.size === 0)) return;
-      await page.clock.runFor(160);
-    }
-    expect(await page.evaluate(() => [...window.deckAudit.origins.values()]),
-      'Deck must stop scheduling RAF within 600 virtual frames').toEqual([]);
-    return;
-  }
-  // Chromium retains real engine frame scheduling, including its native touch stream.
+  // Both engines retain real frame scheduling and the same settlement deadline.
   await page.waitForFunction(() => window.deckAudit.pending.size === 0, undefined, {
     polling: 'raf', timeout: 20_000,
   });
@@ -208,16 +188,7 @@ async function stableFace(page, card) {
       window.deckAudit.stability.set(el, { box, frames });
       return frames >= 3;
     };
-    if (clockedPages.has(page)) {
-      // Read real layout on successive virtual frames, without changing CSS motion.
-      // Actionability below still uses the engine and can fail on actual instability.
-      await expect.poll(async () => {
-        await page.clock.runFor(16);
-        return page.evaluate(settled, handle);
-      }, { message: 'Rendered face geometry must settle across consecutive frames' }).toBe(true);
-    } else {
-      await page.waitForFunction(settled, handle, { polling: 'raf', timeout: 20_000 });
-    }
+    await page.waitForFunction(settled, handle, { polling: 'raf', timeout: 20_000 });
   } finally { await handle?.dispose(); }
 }
 
@@ -316,8 +287,7 @@ export async function touchDriver(page, browserName, card, testInfo) {
         x = fromX + dx * step / 6; y = fromY + dy * step / 6;
         if (native) await send('touchMove', [point()]);
         else await inject(card, 'pointermove', id, x, y);
-        if (clockedPages.has(page)) await page.clock.runFor(16);
-        else await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)));
+        await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)));
       }
     },
     async end() {

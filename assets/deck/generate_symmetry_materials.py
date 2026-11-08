@@ -64,7 +64,9 @@ def pentagon(x, y):
     orientation = np.sin(iu*2.13 + iv*1.74)
     micro = (x*(24+orientation*3) + y*(15-orientation*8))
     # Broad facet planes remain visible under a glancing highlight.
-    value = 26 + 65*facet + 18*np.cos(iu*1.7 + iv*2.3)
+    # Every crystal plane needs a reflective floor. The former 8/255 valleys
+    # vanished after the shader's facet multiplication and contrast.
+    value = 64 + 58*facet + 12*np.cos(iu*1.7 + iv*2.3)
     value += 108*ridge(micro, 7)
     edges = np.minimum(np.minimum(fu, 1-fu), np.minimum(fv, 1-fv))
     diagonal = np.abs(fu+fv-1)*.707

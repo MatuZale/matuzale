@@ -32,7 +32,9 @@ test('touch Flip switches the theme only when Clam Triple turns', async ({ page 
 for (const entry of ['cards', 'home']) {
   test(`${entry}: foil inspection without spinning or dropping (four foil families; optional full collection)`, async ({ page, browserName }, info) => {
     const fullCollection = process.env.DECK_FULL_COLLECTION === '1' && entry === 'cards' && browserName === 'chromium';
-    test.setTimeout(fullCollection ? 540_000 : 120_000);
+    // The WebKit sequence includes all four cards and the hybrid-input regression.
+    // Its aggregate budget does not extend any 20-second action or settlement check.
+    test.setTimeout(fullCollection ? 540_000 : browserName === 'webkit' ? 300_000 : 120_000);
     await openDeck(page, entry, true);
     const ids = await page.locator('.tcard').evaluateAll(cards => cards.map(card => card.dataset.foil));
     expect(new Set(ids).size).toBe(36);

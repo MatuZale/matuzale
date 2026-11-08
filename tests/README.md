@@ -1,6 +1,6 @@
 # Deck browser checks
 
-Run `npm run test` for the JavaScript checks. `npm run test:mobile` selects all four
+Run `npm run test` for the JavaScript checks. `xvfb-run --auto-servernum npm run test:mobile` selects all four
 Playwright projects through the prepared Agent Control offline VM, including the two
 desktop projects. Do not install dependencies or launch Playwright on the host Mac.
 The manifests are exact copies of the supplied cache inputs.
@@ -22,20 +22,34 @@ separate device profiling.
 Each VM run has a **600-second budget**, on 2 CPUs with software rendering. Playwright's
 global timeout is 570 seconds, reserving 30 seconds for startup and reporting; individual
 test timeouts do not extend this budget. One worker avoids competing software renderers.
-The browser suite now exceeds one VM run's budget, so run all twelve shards sequentially
-against the same unchanged source snapshot:
+The browser suite now exceeds one VM run's budget, so run all 187 shards sequentially
+against the same unchanged source snapshot. The inventory contains 373 cases across
+four projects. Each shard contains at most two cases. Verify that the two 300-second
+WebKit four-family scenarios occupy different shards; every other regular case has
+a ceiling of at most 180 seconds, so the largest combined allowance is 480 seconds.
+This fits the unchanged 570-second suite budget:
 
 ```sh
-npx playwright test --fully-parallel --workers=1 --shard=1/12 --reporter=dot
-# Repeat with 2/12 through 12/12, each in a separate offline VM run.
+xvfb-run --auto-servernum npx playwright test --fully-parallel --workers=1 --shard=1/187 --reporter=dot
+# Repeat with 2/187 through 187/187, each in a separate offline VM run.
 ```
 
 `--fully-parallel` makes Playwright partition individual tests instead of entire files;
 `--workers=1` still executes only one at a time. Do not use test filters for this gate.
-Record the exit code, pass count and skips for every shard. All twelve must complete
+Record the exit code, pass count and skips for every shard. All 187 must complete
 successfully; a failure, timeout, missing shard or source change makes the aggregate red.
 Rerun the complete matrix after making a fix. This preserves all projects and assertions;
 an explicit WebKit native-input skip remains visible and is documented below.
+
+Both WebKit projects use a headed browser on the prepared VM's existing Xvfb display;
+Chromium keeps its default headless mode. A bounded comparison of the unchanged Clam
+Triple native-tap test reproduced a headless actionability timeout with a stable card,
+a visible and focused page, and only one native RAF callback in 20 seconds. Native
+timers also stalled for about 17 seconds. The same test passed with Xvfb and headed
+WebKit, including a second run without diagnostic instrumentation. This changes the
+runner's display environment, preserving product CSS, input actionability, assertions,
+and VM resources. Both engines now use native RAF scheduling, as described below.
+This does not measure device FPS or physical iOS performance. Use the installed Xvfb; do not install browser dependencies on the host.
 
 - Chromium touch uses CDP engine touch sequences for inspection, scrolling, cancellation
   and multiple fingers. These are browser engine inputs, not measurements on a physical phone.
@@ -72,8 +86,12 @@ gesture sweep uses four representatives in every entry/engine combination: Cliff
 the shared controller and the original foil families without repeating every texture in the
 regular gate. Four desktop checks lift all ten symmetry editions (21–30) in two groups,
 then move the native pointer to all four corners in normal and reduced motion. The
-asserted optical constructions differ: laser combs, crystal planes, gold engraving,
-fixed crosshatching, separate glass panes, reverse opal stock and radial diffraction.
+asserted optical constructions differ: slower laser combs, engraved shell foil,
+crystal planes, gold engraving, fixed crosshatching, separate glass panes,
+reverse opal stock and radial diffraction. A separate finite-difference CSS
+check verifies that Streamers keeps less than half the normal optical response
+to small pointer and surface-normal changes on both axes. Its card tilt and the
+controller's full input range remain covered by the ordinary gesture checks.
 Pentacle carries the opal material and engraved nacre fields formerly used on Thorn
 Tide, while retaining its own artwork-protection mask. The active material assets
 are checked by their bindings, so swapping a finish never swaps the protected subject.
@@ -87,20 +105,32 @@ Sand Dollar, Golden Flintstone and Clam Triple have three distinct printed paint
 structures. Their colour print remains stationary, selective foil masks align with
 that ink, and the cut-out and its mask move together. Reduced motion keeps the cut-out
 still. The fixed paint sits below the printed rules; frame and portrait masks retain
-their text-protection alpha limits. Golden's separate subject sheen is also checked.
+their text-protection alpha limits. Golden's separate subject sheen and engraved diffraction are also checked. Its
+cut-out and sheen sit above the number strip, while the rules remain above both;
+the art container must not create an intervening stacking context.
 Pentagon's crystal glint and Halloween's subject reflection follow the same corner
 checks; Halloween's soft fading mask subtracts its own ground and keeps the lower
 rules outside the light, without a hard clipping edge.
-Asset checks decode the print, relief, glass, glitter and protection files, reject
+Sand Dollar's continuous shell foil and polished shell crests replace its former
+isolated glitter. The ink print and its coating share one silhouette; a separate
+registered frame mask carries quieter engraving below the rules.
+Asset checks decode the print, relief, glass, shell, glitter and protection files, reject
 accidentally duplicate textures and compare paint-mask coverage with the printed ink.
 
 The six Bourke editions (31–36) are checked in both themes. Their declared materials,
 engraving and protection assets must decode, both portrait layouts must fill the card,
 and printed star ranks must match. Active reflection layers must respond at every
-native pointer corner, while material images and protective masks remain registered.
+native pointer corner. Reuleaux Lace uses a curved woven engraving with separate
+material and polished-crest assets, plus a coating beneath the lower print.
+Secret Rare Gold on Thorn Crown deliberately moves two micrograin plates in
+opposite directions. Their complementary radial light masks move together;
+the original artwork and the main text-protection fade remain fixed. Tests check
+this bounded exception explicitly, including the opposing grain offsets and
+matching mask centres, while other material images and masks stay registered.
 Layer presence follows each finish: uncoated stock and absent decorative passes are
 asserted explicitly rather than requiring the same pseudo-elements on every card.
-Stationary artwork must share its ground mask's cover/centre geometry.
+Stationary artwork shares its ground mask's cover/centre geometry, except Crown's
+full-surface gold coating, which uses the fixed text-protection fade instead.
 Thorn Tide carries the transferred fivefold reverse engraving, with a quiet image
 window and both former opal overlays explicitly absent. Its own ground mask remains
 registered to the original fractal; the lower stock carries the richer spectrum.
@@ -112,7 +142,7 @@ the protective plate, printed ink and cut-out. For a longer, separate Chromium/c
 sweep, set `DECK_FULL_COLLECTION=1` and select that project/inspection test; it inspects
 all 36 cards. Run this separately from the whole regular matrix within the existing
 per-command VM budget. Focused material or asset runs are diagnostics only: filtered
-passes do not replace the twelve-shard gate or clear a failure elsewhere in that gate.
+passes do not replace the 187-shard gate or clear a failure elsewhere in that gate.
 Each inspected card is lifted, tilted/lit, released
 without changing face, probed for trailing clicks, put back and checked against its slot.
 Halvorsen additionally covers explicit Flip and inspection of the back in each combination.
@@ -148,15 +178,22 @@ visual inspection.
 Assertions observe computed CSS values, transforms, active state, slot geometry, capture,
 image loading and control hit testing. A forwarding RAF observer counts calls originating
 in `deck.js`; unrelated home-page animations are excluded from this count, not disabled.
-Chromium retains real engine frame scheduling. WebKit installs Playwright Clock before
-navigation; it runs normally during actions, and `Clock.runFor` delivers each scheduled JS
-RAF/timer in 160 ms batches while waiting for springs. Settlement must stop scheduling RAF
-within 9.6 seconds of explicit virtual advancement (600 frames), or fail. This is not
-`fastForward`: intermediate spring states and callbacks are not skipped. Spring parameters
-are unchanged. CSS animations and transitions retain their real engine timeline and must
-finish separately. Layout is checked over consecutive frames before and after lift.
-No effects are disabled; there are no fixed sleeps, forced clicks or retries. Clock-driven
-CSS samples are computed states, not evidence that the compositor presented each frame.
+Both engines retain native RAF scheduling; the deck fixture does not install a simulated
+clock. Settlement must stop scheduling deck-owned RAF within the unchanged 20-second
+native wait. Gesture steps yield to actual engine frames, and layout must remain stable
+across consecutive frames before and after lift. Spring parameters are unchanged. CSS
+animations and transitions retain their engine timeline and must finish separately.
+No effects are disabled; there are no fixed sleeps, forced clicks or retries. Computed
+CSS samples are not evidence that the compositor presented each sampled state.
+The two WebKit four-family touch scenarios have a 300-second aggregate budget; Chromium
+keeps 120 seconds. A complete native WebKit diagnostic took 223.7 seconds while every
+20-second inner check passed. The previous 120-second aggregate cut off the third card,
+and separate VM runs showed substantial timing variation. The larger outer allowance
+covers the complete same-page sequence, including Clifford's hybrid mouse relift and
+Halvorsen's reverse-face inspection, with margin for that variation. It does not extend
+actionability, assertion or individual settlement deadlines, and does not split the
+scenario into independent cases.
+
 This is a lifecycle check, not a real-time performance or FPS benchmark. Browser errors fail
 the test. A complete successful gate is required before accepting the result.
 
@@ -166,8 +203,9 @@ turn fails. The click may be labelled `mouse` by WebKit; the original press must
 the action. WebKit/cards also checks that a subsequent native mouse click selects the mouse
 flourish and can put the card back. This catches a stale touch source on hybrid input.
 
-The entrance check excludes the decorative infinite deck backdrop animation. All other
-animations, including `deck-in`, `deal` and transitions, must still finish.
+The ASCII infinity backdrop is static in both motion preferences. Its desktop and
+portrait glyph assets must decode, follow theme colour and remain noninteractive.
+Entrance animations, including `deck-in`, `deal` and transitions, must still finish.
 Off-screen fixture cards are positioned with DOM `scrollIntoView` (instant, programmatic),
 then their real face geometry is checked. The subsequent native tap/click targets the stable
 hit surface with normal Playwright actionability checks, including stability and hit testing.
@@ -189,7 +227,7 @@ explicit WebKit native multi-touch skip remains visible. A partial or timed-out 
 
 The independent WebKit diagnostic found trusted touch down/up followed by a mouse-labelled
 click. The controller therefore uses the original physical press to choose touch inspection;
-raw lift-angle assertions reject even a complete accidental 360-degree turn. Clock-driven
+raw lift-angle assertions reject even a complete accidental 360-degree turn. Native
 settlement and the functional DPR setting address test synchronisation/render cost only.
 They do not establish real-device smoothness, VoiceOver usability or physical Safari behaviour.
 

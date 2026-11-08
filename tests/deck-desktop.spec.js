@@ -167,22 +167,39 @@ for (const entry of ['cards', 'home']) {
   });
 }
 
-test('the abstract deck background follows the theme and respects reduced motion', async ({ page }) => {
+test('the ASCII infinity background follows the theme and stays still at both sizes', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' });
   await openDeck(page, 'cards');
   const deck = page.locator('.deck');
   const background = () => deck.evaluate(el => {
     const style = getComputedStyle(el, '::before');
     return { content: style.content, image: style.backgroundImage, animation: style.animationName,
-      pointerEvents: style.pointerEvents };
+      repeat: style.backgroundRepeat, size: style.backgroundSize, filter: style.filter, opacity: style.opacity,
+      pointerEvents: style.pointerEvents, userSelect: style.userSelect, transform: style.transform };
   });
   const dark = await background();
-  expect(dark.content).toContain('@@');
+  expect(dark.content).toBe('""');
+  expect(dark.image).toContain('room-infinity-ascii.svg');
+  expect(dark.repeat).toBe('no-repeat');
+  expect(dark.size).toBe('contain');
   expect(dark.pointerEvents).toBe('none');
+  expect(dark.userSelect).toBe('none');
   expect(dark.animation).toBe('none');
+  expect(dark.transform).toBe('none');
   await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'light'));
   const light = await background();
-  expect(light.image).not.toBe(dark.image);
+  expect(light.image).toBe(dark.image);
+  expect(light.filter).not.toBe(dark.filter);
+  expect(light.opacity).not.toBe(dark.opacity);
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  expect((await background()).animation, 'Static artwork has no idle animation loop').toBe('none');
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect((await background()).image).toContain('room-infinity-ascii-mobile.svg');
+  const decoded = await page.evaluate(async () => Promise.all(['room-infinity-ascii.svg', 'room-infinity-ascii-mobile.svg'].map(async name => {
+    const image = new Image(); image.src = `assets/deck/${name}`;
+    await image.decode(); return image.naturalWidth > 0 && image.naturalHeight > 0;
+  })));
+  expect(decoded).toEqual([true, true]);
 });
 
 const symmetryCards = [
@@ -200,7 +217,7 @@ const symmetryMaterial = id => id === 'pentacle' ? 'bourke-material-thorn-tide.w
 // snapshotting their exact colours or requiring one shared shader stack.
 const symmetryOptics = {
   'swirling-streamers': ['url', 'repeating-linear', 'repeating-linear', 'radial'],
-  'sand-dollar': ['radial'],
+  'sand-dollar': ['url', 'repeating-linear', 'radial'],
   pentagon: ['url', 'conic', 'url', 'radial'],
   halloween: ['url', 'repeating-linear', 'radial'],
   'golden-flintstone': ['url', 'conic', 'radial'],
@@ -268,13 +285,21 @@ async function symmetryPaint(card) {
       if (el.dataset.foil === 'golden-flintstone') result.subject = read(art, '::after');
       if (el.dataset.foil === 'halloween') result.intaglio = read(art, '::before');
       if (['sand-dollar', 'golden-flintstone', 'clam-triple'].includes(el.dataset.foil)) result.print = read(art, '::before');
-      if (el.dataset.foil === 'pentacle') result.stock = read(el.querySelector('.tcard__panel'), '::before');
-      const value = key => parseFloat(el.style.getPropertyValue(key)), imageStyle = getComputedStyle(image);
-      return { surfaces: result, fx: value('--px') * .65 + value('--foil-tilt-x') * .8,
-        fy: value('--py') * .65 - value('--foil-tilt-y') * .8,
+      if (['sand-dollar', 'pentacle'].includes(el.dataset.foil)) result.stock = read(el.querySelector('.tcard__panel'), '::before');
+      const imageStyle = getComputedStyle(image);
+      // Resolve the card's actual optical coordinates independently of the
+      // pointer/tilt controller. Streamers intentionally has a gentler gain.
+      probe.style.left = 'calc(var(--fx) * 100px)';
+      probe.style.top = 'calc(var(--fy) * 100px)';
+      const coordinates = getComputedStyle(probe);
+      return { surfaces: result, fx: parseFloat(coordinates.left) / 100,
+        fy: parseFloat(coordinates.top) / 100,
         registration: { image: read(image), artFit: imageStyle.objectFit, artPosition: imageStyle.objectPosition,
           imageWidth: image.clientWidth, imageHeight: image.clientHeight, foilWidth: foil.clientWidth, foilHeight: foil.clientHeight,
-          artZ: Number(getComputedStyle(art).zIndex),
+          artZ: getComputedStyle(art).zIndex, artIsolation: getComputedStyle(art).isolation,
+          imageZ: Number(imageStyle.zIndex), subjectZ: Number(getComputedStyle(art, '::after').zIndex),
+          stripZ: Number(getComputedStyle(el.querySelector('.tcard__strip')).zIndex),
+          rulesZ: [...el.querySelector('.tcard__panel').children].filter(child => child !== art && !child.classList.contains('tcard__strip')).map(child => Number(getComputedStyle(child).zIndex)),
           textZ: [...el.querySelector('.tcard__panel').children].filter(child => child !== art).map(child => Number(getComputedStyle(child).zIndex)),
           stockDisplay: getComputedStyle(el.querySelector('.tcard__panel'), '::before').display },
       };
@@ -304,6 +329,44 @@ function unbrokenGradientCanvas(surface, label) {
     }
   }
 }
+
+test('Streamers attenuates small pointer and surface-normal changes without losing either axis', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await openDeck(page, 'cards');
+  // Inspect the CSS response in isolated clones, so the existing controller
+  // remains untouched. The gesture sweep separately checks full pointer/tilt.
+  const samples = await page.evaluate(() => {
+    const measure = id => {
+      const source = document.querySelector(`.tcard[data-foil="${id}"]`);
+      const card = source.cloneNode(true);
+      card.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none;width:360px';
+      card.setAttribute('aria-hidden', 'true');
+      source.parentNode.append(card);
+      const probe = document.createElement('i');
+      probe.style.cssText = 'position:absolute;left:calc(var(--fx)*100px);top:calc(var(--fy)*100px)';
+      card.append(probe);
+      try {
+        const read = changes => {
+          for (const key of ['--px', '--py', '--foil-tilt-x', '--foil-tilt-y']) card.style.setProperty(key, '0');
+          for (const [key, value] of Object.entries(changes)) card.style.setProperty(key, value);
+          const style = getComputedStyle(probe);
+          return [parseFloat(style.left) / 100, parseFloat(style.top) / 100];
+        };
+        return [read({}), read({ '--px': '.1' }), read({ '--py': '.1' }),
+          read({ '--foil-tilt-x': '.1' }), read({ '--foil-tilt-y': '-.1' })];
+      } finally { card.remove(); }
+    };
+    return { calm: measure('swirling-streamers'), reference: measure('pentagon') };
+  });
+  for (const [sample, axis] of [[1, 0], [2, 1], [3, 0], [4, 1]]) {
+    const travel = samples.calm[sample][axis] - samples.calm[0][axis];
+    const reference = samples.reference[sample][axis] - samples.reference[0][axis];
+    expect(travel, 'Small movements still move the optical field').toBeGreaterThan(0);
+    expect(travel / reference, 'Streamers keeps between a quarter and half of the usual sensitivity').toBeGreaterThan(.25);
+    expect(travel / reference).toBeLessThan(.5);
+    expect(samples.calm[sample][1 - axis], 'Each pure-axis input leaves the other optical coordinate still').toBeCloseTo(samples.calm[0][1 - axis], 4);
+  }
+});
 
 function projectedPhases(id, layer, surface, fx, fy) {
   // Only these fields still use the original translated-plane projection.
@@ -351,12 +414,19 @@ function symmetryConstruction(id, paint) {
     expect(surfaces.foilAfter.maskRepeat).toBe('no-repeat');
   }
   if (id === 'sand-dollar') {
-    expect(surfaces.foilBefore.mask).toContain('glitter.webp');
-    expect(surfaces.foilBefore.maskRepeat).toBe('repeat');
+    expect(surfaces.foilBefore.mask).toContain('etch-sand-shell.svg');
+    expect(surfaces.foilBefore.maskRepeat).toBe('no-repeat');
     expect(surfaces.foilAfter.mask).toContain('relief-sand-ink.svg');
+    expect(gradientKinds(surfaces.stock.images), 'Shell engraving continues beneath the lower print').toEqual(['url', 'conic', 'radial']);
+    expect(surfaces.stock.mask).toContain('frame-window.webp');
+    expect(surfaces.stock.maskRepeat).toBe('no-repeat');
+    for (const surface of Object.values(surfaces)) expect(surface.mask, 'Shell has a continuous engraved coating instead of isolated glitter').not.toContain('glitter.webp');
   }
   if (id === 'golden-flintstone') {
     expect(surfaces.foilBefore.mask).toContain('relief-golden-brush.svg');
+    expect(surfaces.foilAfter.mask).toContain('etch-golden-brush.svg');
+    expect(surfaces.foilAfter.maskRepeat).toBe('no-repeat');
+    expect(gradientKinds(surfaces.foilAfter.images), 'Golden separates engraved diffraction from its paint relief').toEqual(['repeating-linear', 'radial']);
     expect(gradientKinds(surfaces.subject.images), 'Golden has a single travelling subject glint').toEqual(['linear']);
   }
   if (reverseSymmetry.has(id)) {
@@ -408,8 +478,14 @@ function symmetryConstruction(id, paint) {
     expect(surfaces.print.images[0]).toContain(print.print);
     expect(surfaces.print.transform).toBe('none');
     expect(surfaces.foil.mask).toContain(print.mask);
-    expect(registration.stockDisplay, `${id} keeps the stock quiet`).toBe('none');
-    expect(registration.textZ.every(z => z > registration.artZ), `${id} printed rules stay above paint`).toBe(true);
+    expect(registration.stockDisplay, `${id} stock coating follows its printed edition`).toBe(id === 'sand-dollar' ? 'block' : 'none');
+    if (id === 'golden-flintstone') {
+      expect(registration.artZ, 'Golden art does not trap its cut-out below the strip').toBe('auto');
+      expect(registration.artIsolation).toBe('auto');
+      expect(registration.imageZ, 'Golden orbit floats over the strip').toBeGreaterThan(registration.stripZ);
+      expect(registration.subjectZ, 'Golden sheen stays above its orbit').toBeGreaterThan(registration.imageZ);
+      expect(registration.rulesZ.every(z => z > registration.subjectZ), 'Golden rules remain above its cut-out and sheen').toBe(true);
+    } else expect(registration.textZ.every(z => z > Number(registration.artZ)), `${id} printed rules stay above paint`).toBe(true);
     if (id === 'clam-triple') {
       expect(surfaces.foil.mask).toContain('glitter.webp');
       expect(intersection(surfaces.foil.maskComposite)).toBe(true);
@@ -466,7 +542,7 @@ for (const reducedMotion of ['no-preference', 'reduce']) {
           for (const [index, image] of surface.images.entries()) if (fixedImage(id, layer, image, index))
             expect(image, `${label} stationary engraving/print ${index}`).toBe(initial.images[index]);
           if (['foil', 'shine'].includes(layer)) {
-            if (!['sand-dollar', 'clam-triple'].includes(id) || layer === 'shine') expect(surface.images[0], label).toContain(symmetryMaterial(id));
+            if (id !== 'clam-triple' || layer === 'shine') expect(surface.images[0], label).toContain(symmetryMaterial(id));
             expect(surface.opacity, label).toBeGreaterThan(resting.surfaces[layer].opacity + .05);
           }
           // Streamers' counter-comb has a travelling light mask, not a print mask.
@@ -590,7 +666,7 @@ test('all symmetry materials and protection masks decode and preserve the printe
   }
   const materialNames = symmetryCards.map(([id]) => symmetryMaterial(id));
   const files = symmetryCards.flatMap(([id]) => [symmetryMaterial(id), groundName(id)])
-    .concat(['frame-window.webp', 'frame-full.webp', 'glitter.webp', 'crystal-shards.svg', 'glass-panes-a.svg', 'glass-panes-b.svg', 'bourke-etch-thorn-tide.webp', ...Object.values(paintEditions).flatMap(({ print, mask, relief }) => [print, mask, ...(relief ? [relief] : [])])]);
+    .concat(['frame-window.webp', 'frame-full.webp', 'glitter.webp', 'etch-sand-shell.svg', 'etch-golden-brush.svg', 'crystal-shards.svg', 'glass-panes-a.svg', 'glass-panes-b.svg', 'bourke-etch-thorn-tide.webp', ...Object.values(paintEditions).flatMap(({ print, mask, relief }) => [print, mask, ...(relief ? [relief] : [])])]);
   const assets = await page.evaluate(async files => Promise.all(files.map(async name => {
     const image = new Image();
     image.src = `assets/deck/foil/${name}`;
@@ -681,21 +757,22 @@ const bourkeCards = [
 ];
 const bourkePortraits = new Set(['thorn-crown', 'reuleaux-nebula']);
 const bourkeOptics = {
-  'thorn-rose': ['url', 'linear', 'linear'], 'thorn-crown': ['url', 'linear', 'linear'],
+  'thorn-rose': ['url', 'linear', 'linear'], 'thorn-crown': ['linear', 'radial'],
   'thorn-tide': ['url', 'conic', 'radial'],
-  reuleaux: ['url', 'repeating-linear', 'linear'], 'reuleaux-lace': ['url', 'linear', 'linear'],
+  reuleaux: ['url', 'repeating-linear', 'linear'], 'reuleaux-lace': ['url', 'conic', 'radial'],
   'reuleaux-nebula': ['radial', 'radial'],
 };
-const bourkeStock = new Set(['thorn-tide']);
+const bourkeStock = new Set(['thorn-tide', 'reuleaux-lace']);
 const bourkeNewMaterials = {
-  'thorn-crown': 'bourke-satin-thorn-crown.svg',
+  'thorn-crown': null,
   'thorn-tide': 'material-pentacle.webp',
-  'reuleaux-lace': 'bourke-lattice-reuleaux-lace.svg',
+  'reuleaux-lace': 'bourke-lace-weave-relief.svg',
   'reuleaux-nebula': 'bourke-grooves-reuleaux-nebula.svg',
 };
-const bourkeMaterial = id => bourkeNewMaterials[id] || `bourke-material-${id}.webp`;
-const bourkeEngraving = id => ['thorn-crown', 'thorn-tide'].includes(id) ? null : bourkeNewMaterials[id] || `bourke-etch-${id}.webp`;
-const bourkeLayers = id => ['foil', 'shine', ...(id === 'thorn-tide' ? [] : ['before']), ...(['thorn-crown', 'thorn-tide'].includes(id) ? [] : ['after']), ...(bourkeStock.has(id) ? ['stock'] : [])];
+const bourkeMaterial = id => Object.hasOwn(bourkeNewMaterials, id) ? bourkeNewMaterials[id] : `bourke-material-${id}.webp`;
+const bourkeCuts = { 'reuleaux-lace': 'bourke-lace-weave-cuts.svg' };
+const bourkeEngraving = id => ['thorn-crown', 'thorn-tide'].includes(id) ? null : bourkeCuts[id] || bourkeNewMaterials[id] || `bourke-etch-${id}.webp`;
+const bourkeLayers = id => ['foil', 'shine', ...(id === 'thorn-tide' ? [] : ['before', 'after']), ...(bourkeStock.has(id) ? ['stock'] : [])];
 
 for (const colorScheme of ['dark', 'light']) {
   test(`six Bourke editions load their own materials and respond to light in ${colorScheme}`, async ({ page }) => {
@@ -706,7 +783,7 @@ for (const colorScheme of ['dark', 'light']) {
     await expect(page.locator('link[href$="/css/deck-bourke.css"]')).toHaveCount(1);
     const files = [...new Set(bourkeCards.flatMap(([id]) => [
       bourkeMaterial(id), ...(bourkeEngraving(id) ? [bourkeEngraving(id)] : []), `ground-${bourkePortraits.has(id) ? "full-" : ""}${id}.webp`,
-    ]))];
+    ].filter(Boolean)).concat('glitter.webp'))];
     const assets = await page.evaluate(async files => Promise.all(files.map(async file => {
       const image = new Image(); image.src = `assets/deck/foil/${file}`;
       try {
@@ -749,6 +826,7 @@ for (const colorScheme of ['dark', 'light']) {
         const surfaces = Object.fromEntries([
           ['foil', foil], ['shine', el.querySelector('.tcard__shine')],
           ['before', foil, '::before'], ['after', foil, '::after'], ['stock', el.querySelector('.tcard__panel'), '::before'],
+          ['subject', el.querySelector('.tcard__art'), '::before'],
         ].map(([name, element, pseudo]) => {
           const style = getComputedStyle(element, pseudo);
           return [name, { image: style.backgroundImage, images: split(style.backgroundImage),
@@ -757,7 +835,7 @@ for (const colorScheme of ['dark', 'light']) {
             mask: style.maskImage || style.webkitMaskImage, maskSize: style.maskSize || style.webkitMaskSize,
             maskPosition: style.maskPosition || style.webkitMaskPosition, maskRepeat: style.maskRepeat || style.webkitMaskRepeat,
             maskComposite: style.maskComposite || style.webkitMaskComposite,
-            opacity: Number(style.opacity), display: style.display, content: style.content }];
+            opacity: Number(style.opacity), blend: style.mixBlendMode, display: style.display, content: style.content }];
         }));
         return { surfaces, registration: {
           artTransform: imageStyle.transform, foilTransform: foilStyle.transform,
@@ -776,7 +854,7 @@ for (const colorScheme of ['dark', 'light']) {
         const stock = current.surfaces.stock;
         if (bourkeStock.has(id)) {
           expect(stock.content).not.toMatch(/^(none|normal)$/);
-          expect(stock.mask).toContain(id === 'thorn-tide' ? 'frame-window.webp' : bourkeEngraving(id));
+          expect(stock.mask).toContain('frame-window.webp');
           expect(intersection(stock.maskComposite)).toBe(true);
         } else expect(stock.content, `${id} has uncoated stock`).toMatch(/^(none|normal)$/);
         if (bourkeNewMaterials[id]) for (const surface of Object.values(current.surfaces)) {
@@ -784,16 +862,46 @@ for (const colorScheme of ['dark', 'light']) {
             .not.toMatch(new RegExp(`bourke-(?:material|etch)-${id}\\.webp`));
         }
         if (id === 'reuleaux-lace') {
-          expect(gradientKinds(current.surfaces.before.images), 'Lace has an angular front').toEqual(['linear']);
-          expect(gradientKinds(current.surfaces.after.images), 'Lace has an opposing angular front').toEqual(['linear']);
+          expect(gradientKinds(current.surfaces.before.images), `${id} has a local engraved glint`).toEqual(['radial']);
+          expect(gradientKinds(current.surfaces.after.images), `${id} has separate diffraction on the cuts`).toEqual(['conic', 'radial']);
+          for (const layer of ['before', 'after']) {
+            expect(current.surfaces[layer].mask).toContain(bourkeCuts[id]);
+            expect(current.surfaces[layer].maskRepeat).toBe('no-repeat');
+          }
+        }
+        if (id === 'reuleaux-lace') {
+          expect(gradientKinds(stock.images), 'Lace carries its woven engraving beneath the lower print').toEqual(['url', 'conic', 'radial']);
+          expect(stock.image).toContain(bourkeMaterial(id));
         }
         if (id === 'reuleaux-nebula') {
           for (const layer of ['foil', 'before', 'after']) for (const image of current.surfaces[layer].images)
             expect(image, 'Nebula diffraction shares the portrait object centre').toContain('at 50% 30.7%');
         }
         if (id === 'thorn-crown') {
-          expect(current.surfaces.after.display, 'Satin Crown has no hammered-cup pass').toBe('none');
-          expect(current.surfaces.after.content).toMatch(/^(none|normal)$/);
+          const { foil, before, after, subject } = current.surfaces;
+          expect(foil.blend, 'Secret Rare Gold uses metallic colour dodge').toBe('color-dodge');
+          expect(gradientKinds(before.images), 'Gold has two grain plates and metallic illumination').toEqual(['url', 'url', 'conic', 'radial']);
+          expect(before.images.slice(0, 2).every(image => image.includes('glitter.webp'))).toBe(true);
+          expect(before.repeats).toEqual(['repeat', 'repeat', 'no-repeat', 'no-repeat']);
+          expect(gradientKinds(after.images), 'The local smooth foil complements the glitter').toEqual(['linear', 'radial']);
+          expect(subject.content, 'Gold uses the original illustration without an added engraved subject pass').toMatch(/^(none|normal)$/);
+          const offsets = before.positions.slice(0, 2).map(position => [...position.matchAll(/([+-]?)\s*([\d.]+)px/g)].map(match => Number(match[2]) * (match[1] === '-' ? -1 : 1)));
+          expect(offsets.every(pair => pair.length === 2), 'Each micrograin plate has two resolved travel offsets').toBe(true);
+          for (const axis of [0, 1]) expect(offsets[0][axis] + offsets[1][axis], 'The two grain plates travel in opposite directions').toBeCloseTo(0, 3);
+          for (const layer of [before, after]) expect(layer.mask).toContain('radial-gradient(');
+          expect(before.mask.split(', rgb')[0], 'Complementary masks share one light centre').toBe(after.mask.split(', rgb')[0]);
+          for (const [surface, clearFirst] of [[before, true], [after, false]]) {
+            const stops = [...surface.mask.matchAll(/(rgba?\([^)]*\))\s+([\d.]+)%/g)];
+            expect(stops.map(stop => Number(stop[2]))).toEqual([16, 58]);
+            const transparent = colour => colour.replaceAll(' ', '') === 'rgba(0,0,0,0)';
+            expect(transparent(stops[0][1])).toBe(clearFirst);
+            expect(transparent(stops[1][1])).toBe(!clearFirst);
+          }
+          const fade = foil.mask;
+          const stops = [...fade.matchAll(/(rgba?\([^)]*\))\s+([\d.]+)%/g)];
+          expect(stops.length, 'Crown has a fixed feathered protection plate').toBeGreaterThanOrEqual(4);
+          expect(stops.at(-1)[1], 'Crown light fades before the lower rules').toMatch(/^rgba\(0,\s*0,\s*0,\s*0\)$/);
+          expect(Number(stops.at(-1)[2])).toBeLessThanOrEqual(62);
         }
         if (id === 'thorn-tide') {
           expect(gradientKinds(stock.images), 'Reverse engraving is carried by the stock').toEqual(['url', 'conic', 'radial']);
@@ -812,12 +920,12 @@ for (const colorScheme of ['dark', 'light']) {
           expect(surface.opacity, label).toBeGreaterThan(0);
           expect(surface.image, label).toContain('gradient(');
           unbrokenGradientCanvas(surface, label);
-          if (layer === 'foil' && id !== 'reuleaux-nebula') expect(surface.image).toContain(bourkeMaterial(id));
-          if (layer === 'foil') expect(surface.mask).toContain(`ground-${prefix}${id}.webp`);
+          if (layer === 'foil' && bourkeMaterial(id) && id !== 'reuleaux-nebula') expect(surface.image).toContain(bourkeMaterial(id));
+          if (layer === 'foil' && id !== 'thorn-crown') expect(surface.mask).toContain(`ground-${prefix}${id}.webp`);
           if (layer === 'shine') expect(surface.mask).toContain(bourkePortraits.has(id) ? 'frame-full.webp' : 'frame-window.webp');
           if (layer === 'before' || layer === 'after') {
             if (bourkeEngraving(id)) expect(surface.mask).toContain(bourkeEngraving(id));
-            else expect(surface.mask, 'Crown satin uses the parent ground mask').toBe('none');
+            else expect(surface.mask, 'Gold exchanges smooth foil and grain at the light').toContain('radial-gradient(');
           }
           if (layer === 'before' || layer === 'after') {
             expect(surface.content, `${label} must generate a painted pseudo-element`).not.toBe('none');
@@ -825,8 +933,17 @@ for (const colorScheme of ['dark', 'light']) {
           }
           if (previous) {
             expect(surface.image, `${label} reflects moving light`).not.toBe(previous.surfaces[layer].image);
-            expect(maskState(surface), `${label} registered protection/engraving`).toBe(maskState(previous.surfaces[layer]));
-            expect(surface.positions, `${label} fixed material canvas`).toEqual(previous.surfaces[layer].positions);
+            const movingGoldLight = id === 'thorn-crown' && ['before', 'after'].includes(layer);
+            if (movingGoldLight) {
+              expect(surface.mask, `${label} light mask follows the pointer`).not.toBe(previous.surfaces[layer].mask);
+              expect(surface.maskSize).toBe(previous.surfaces[layer].maskSize);
+              expect(surface.maskRepeat).toBe(previous.surfaces[layer].maskRepeat);
+              expect(surface.transform).toBe(previous.surfaces[layer].transform);
+            } else expect(maskState(surface), `${label} registered protection/engraving`).toBe(maskState(previous.surfaces[layer]));
+            if (id === 'thorn-crown' && layer === 'before') {
+              expect(surface.positions.slice(0, 2), 'Gold micrograin moves independently of the print').not.toEqual(previous.surfaces[layer].positions.slice(0, 2));
+              expect(surface.positions.slice(2), 'Gold illumination keeps a fixed full canvas').toEqual(previous.surfaces[layer].positions.slice(2));
+            } else expect(surface.positions, `${label} fixed material canvas`).toEqual(previous.surfaces[layer].positions);
             for (const [index, image] of surface.images.entries()) if (image.startsWith('url('))
               expect(image, `${label} fixed material image`).toBe(previous.surfaces[layer].images[index]);
           }
@@ -835,9 +952,9 @@ for (const colorScheme of ['dark', 'light']) {
         expect(registration.artTransform, `${id} stationary print`).toBe('none');
         expect(registration.foilTransform, `${id} stationary protection mask`).toBe('none');
         expect(registration.artFit).toBe('cover');
-        expect(registration.maskSize).toBe('cover');
+        expect(registration.maskSize).toBe(id === 'thorn-crown' ? 'auto' : 'cover');
         expect(registration.artPosition).toBe('50% 50%');
-        expect(registration.maskPosition).toBe('50% 50%');
+        expect(registration.maskPosition).toBe(id === 'thorn-crown' ? '0% 0%' : '50% 50%');
         expect(Math.abs(registration.imageWidth - registration.foilWidth), `${id} mask/print width`).toBeLessThanOrEqual(1);
         expect(Math.abs(registration.imageHeight - registration.foilHeight), `${id} mask/print height`).toBeLessThanOrEqual(1);
         previous = current;

@@ -1,66 +1,32 @@
-/* A still field of type, following the portfolio's character-wave seams.
-   One composited layer stays below the cards; the glyphs do not take input. */
+/* A still nebula made from tiny, individually positioned terminal glyphs.
+   The faint infinity flow, turbulent filaments and starlight are baked by
+   assets/deck/generate_room_ascii.py. No canvas, timers or animation. */
 .deck::before {
-  content:
-    "                                                                                                                            \A"
-    "                                                                                                                            \A"
-    "                                                                                                                            \A"
-    "                                                                                                                            \A"
-    "                                                                                 ..                                         \A"
-    "                                                                         .......::::......................                  \A"
-    "                                                                     ....::-----===--------:::::::::::::::.........         \A"
-    "                                                                  ...::--==+++********++++++=========----------::::....     \A"
-    "                            ...............                     ..::-=++**###############**********++++++++++====---:::...  \A"
-    ".....                  .....::::--------:::....              ...:-=++*########****************************++++++++===--::...\A"
-    "::::.......      ......:::---====++++++====--::...         ..::-=+*######**+++============++++++++++++++++==============--::\A"
-    "-----:::::::..:::::::--===++++++++*******++++=--::...   ...:-=+*#####**+==---:::::::::::::::-----------------------========-\A"
-    "--================++++*********++++++++++*****++==-::::::--=+*####**+=--::......................................::::---=====\A"
-    ":-==+++******####%%%%%%%%###**++==========++******+++===++*##%##*+=--:....                                    .....:::-===+=\A"
-    ":--=++*###%%@@@@@@@@@@@@%%%##**++===------==++*##%%%%%@@@@@@%#*+=-::...                                        ....::---===-\A"
-    ":--==+**##%%%@@@@@@@@@%%%%####****+++=======++*#%@@@@@@@@@@@%*+=-::.........                                 ...:::--------:\A"
-    ":---===+++********************#####***********##%@@@@@@@@@@@#*+==--::::::::...........                    ...:::---==---::..\A"
-    "::::--------------------====+++****############%%%@@@@@@@@%%#***+++======-------::::::.........    .......:::--====--::.... \A"
-    ".......................::::::---==+++*****#######**********************+++++++++====----::::::......:::::---=====--::...    \A"
-    ".......                 .......::::---====+++++===----:::--===++++****************++++++====-----------========--::...      \A"
-    "                               .......::::::::::::.........:::---=====++++++++++++******++++++++====+++++====-::...         \A"
-    "                                      ............         .....::::::---------======+++++++++++++++++====--::...           \A"
-    "                                                                .............:::::::-----============---:::...              \A"
-    "                                                                             ..........:::::::----:::::....                 \A"
-    "                                                                                       ................                     \A"
-    "                                                                                                                            \A"
-    "                                                                                                                            \A"
-    "                                                                                                                            \A"
-    "                                                                                                                            \A";
+  content: "";
   position: fixed;
   z-index: 0;
-  inset: auto;
-  left: 50%;
-  top: 52%;
-  width: max-content;
+  inset: 0;
+  width: auto;
   height: auto;
   margin: 0;
   pointer-events: none;
   user-select: none;
-  white-space: pre;
-  font: 600 clamp(9px, .9vw, 14px)/1.3 var(--font-mono);
-  letter-spacing: .025em;
-  color: transparent;
-  background: linear-gradient(105deg, #8e77d8, #c879e3 37%, #75cdd2 75%, #94c6e3);
-  -webkit-background-clip: text;
-  background-clip: text;
-  opacity: .43;
-  transform: translate3d(-50%, -50%, 0);
-  animation: deck-ambient 32s ease-in-out infinite alternate;
+  background: url('../assets/deck/room-infinity-ascii.svg') center / contain no-repeat;
+  opacity: .78;
+  filter: none;
+  transform: none;
+  animation: none;
 }
-:root[data-theme="light"] .deck::before { opacity: .31; background-image: linear-gradient(105deg, #5c37a0, #a43d8e 37%, #167c89 75%, #3a668c); }
+/* Keep the fine characters crisp around an inspected card, above the blur
+   veil but below its raised slot (6), tools (7) and close control (8). */
+.deck.has-active::before { z-index: 5; opacity: .52; }
+/* On pale paper the ice-white cores become darker blue-grey ink. */
+:root[data-theme="light"] .deck::before { opacity: .44; filter: brightness(.55) saturate(.8); }
+:root[data-theme="light"] .deck.has-active::before { opacity: .30; }
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) .deck::before { opacity: .31; background-image: linear-gradient(105deg, #5c37a0, #a43d8e 37%, #167c89 75%, #3a668c); }
+  :root:not([data-theme="dark"]) .deck::before { opacity: .44; filter: brightness(.55) saturate(.8); }
+  :root:not([data-theme="dark"]) .deck.has-active::before { opacity: .30; }
 }
-.deck:not([open])::before, .deck.has-active::before { animation-play-state: paused; }
-@keyframes deck-ambient {
-  from { transform: translate3d(-51%, -51%, 0); }
-  to { transform: translate3d(-49%, -49%, 0); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .deck::before { animation: none; }
+@media (max-aspect-ratio: 3/4) {
+  .deck::before { background-image: url('../assets/deck/room-infinity-ascii-mobile.svg'); }
 }
